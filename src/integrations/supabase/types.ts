@@ -325,6 +325,44 @@ export type Database = {
           },
         ]
       }
+      shared_media: {
+        Row: {
+          caption: string | null
+          couple_id: string
+          created_at: string
+          file_path: string
+          file_type: string
+          id: string
+          uploaded_by: string
+        }
+        Insert: {
+          caption?: string | null
+          couple_id: string
+          created_at?: string
+          file_path: string
+          file_type: string
+          id?: string
+          uploaded_by: string
+        }
+        Update: {
+          caption?: string | null
+          couple_id?: string
+          created_at?: string
+          file_path?: string
+          file_type?: string
+          id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_media_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

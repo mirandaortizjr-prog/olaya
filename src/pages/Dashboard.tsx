@@ -17,6 +17,7 @@ import { MoodTracker } from "@/components/MoodTracker";
 import { LoveNotes } from "@/components/LoveNotes";
 import { MemoryCalendar } from "@/components/MemoryCalendar";
 import { CravingBoard } from "@/components/CravingBoard";
+import { MediaSharing } from "@/components/MediaSharing";
 import { requestNotificationPermission, showQuickMessageNotification } from "@/utils/notifications";
 import {
   Heart, 
@@ -622,6 +623,11 @@ const Dashboard = () => {
                     partnerName={coupleData.partner.full_name}
                   />
                   <CravingBoard 
+                    coupleId={coupleData.coupleId} 
+                    userId={user.id}
+                    partnerName={coupleData.partner.full_name}
+                  />
+                  <MediaSharing 
                     coupleId={coupleData.coupleId} 
                     userId={user.id}
                     partnerName={coupleData.partner.full_name}
