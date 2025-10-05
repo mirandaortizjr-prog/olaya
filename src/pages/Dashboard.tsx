@@ -83,16 +83,33 @@ const Dashboard = () => {
         // Get partner info
         const { data: members, error: membersError } = await supabase
           .from("couple_members")
-          .select("user_id, profiles(full_name, email)")
+          .select("user_id")
           .eq("couple_id", membership.couple_id)
           .neq("user_id", userId);
 
         if (membersError) throw membersError;
 
+        let partnerProfile = null;
+        if (members && members.length > 0) {
+          const partnerId = members[0].user_id;
+          const { data: profile, error: profileError } = await supabase
+            .from("profiles")
+            .select("full_name, email")
+            .eq("id", partnerId)
+            .maybeSingle();
+
+          if (!profileError && profile) {
+            partnerProfile = {
+              user_id: partnerId,
+              profiles: profile
+            };
+          }
+        }
+
         setCoupleData({
           coupleId: membership.couple_id,
           inviteCode: membership.couples.invite_code,
-          partner: members?.[0] || null,
+          partner: partnerProfile,
         });
       }
     } catch (error: any) {
