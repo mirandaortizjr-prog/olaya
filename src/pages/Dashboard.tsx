@@ -19,6 +19,18 @@ import {
   UserCircle
 } from "lucide-react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
 interface CoupleData {
   coupleId: string;
   inviteCode: string;
@@ -273,6 +285,31 @@ const Dashboard = () => {
     }
   };
 
+  const leaveCouple = async () => {
+    if (!user) return;
+    try {
+      const { error } = await supabase
+        .from("couple_members")
+        .delete()
+        .eq("user_id", user.id);
+      if (error) throw error;
+
+      setCoupleData(null);
+      setInviteCode("");
+
+      toast({
+        title: "Left sanctuary",
+        description: "You can now join your partner's code.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/");
@@ -423,6 +460,28 @@ const Dashboard = () => {
                     <Button onClick={shareInvite} variant="outline" size="icon">
                       <Share2 className="w-4 h-4" />
                     </Button>
+                  </div>
+
+                  <div className="mt-6 flex justify-end">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive">
+                          Leave Sanctuary
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Leave this sanctuary?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will remove your connection to this sanctuary. You can rejoin later with an invite code.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={leaveCouple}>Leave</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
               </Card>
