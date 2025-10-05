@@ -306,9 +306,15 @@ Looking forward to connecting with you! ❤️`;
                 </div>
                 <div>
                   <h2 className="text-2xl font-semibold mb-2">{t("createYourSpace")}</h2>
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground mb-4">
                     {t("createSpaceDesc")}
                   </p>
+                  <div className="text-left space-y-2 text-sm text-muted-foreground bg-muted/50 p-4 rounded-lg">
+                    <p className="font-semibold text-foreground mb-2">How it works:</p>
+                    <p>1. Create your sanctuary</p>
+                    <p>2. Share invite link with your partner</p>
+                    <p>3. They sign up and join instantly</p>
+                  </div>
                 </div>
                 <Button onClick={createCouple} className="w-full">
                   <Heart className="w-4 h-4 mr-2" />
@@ -324,9 +330,15 @@ Looking forward to connecting with you! ❤️`;
                 </div>
                 <div>
                   <h2 className="text-2xl font-semibold mb-2">{t("joinYourPartner")}</h2>
-                  <p className="text-muted-foreground">
+                  <p className="text-muted-foreground mb-4">
                     {t("joinPartnerDesc")}
                   </p>
+                  <div className="text-left space-y-2 text-sm text-muted-foreground bg-muted/50 p-4 rounded-lg">
+                    <p className="font-semibold text-foreground mb-2">How to join:</p>
+                    <p>1. Get invite link or code from partner</p>
+                    <p>2. Enter the 8-character code below</p>
+                    <p>3. Click join to connect instantly</p>
+                  </div>
                 </div>
                 <div className="w-full space-y-4">
                   <div className="space-y-2">
