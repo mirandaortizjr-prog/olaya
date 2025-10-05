@@ -9,7 +9,9 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { 
+import { QuickActions } from "@/components/QuickActions";
+import { RecentMessages } from "@/components/RecentMessages";
+import {
   Heart, 
   LogOut, 
   Users,
@@ -505,15 +507,16 @@ const Dashboard = () => {
                 </div>
               </Card>
 
-              {/* Features Coming Soon */}
-              {coupleData.partner && (
-                <Card className="p-8">
-                  <h3 className="text-2xl font-bold mb-6">Your Sacred Tools</h3>
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Heart className="w-16 h-16 mx-auto mb-4 text-primary/30" />
-                    <p className="text-lg">Love notes, daily check-ins, and more features coming soon!</p>
-                  </div>
-                </Card>
+              {/* Quick Actions & Messages */}
+              {coupleData.partner && user && (
+                <div className="space-y-6">
+                  <QuickActions coupleId={coupleData.coupleId} userId={user.id} />
+                  <RecentMessages 
+                    coupleId={coupleData.coupleId} 
+                    userId={user.id} 
+                    partnerName={coupleData.partner.full_name}
+                  />
+                </div>
               )}
             </div>
           )}
