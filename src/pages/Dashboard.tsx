@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { toast as sonnerToast } from "sonner";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { QuickActions } from "@/components/QuickActions";
 import { RecentMessages } from "@/components/RecentMessages";
 import { DailyNotes } from "@/components/DailyNotes";
@@ -69,6 +71,8 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [coupleData, setCoupleData] = useState<CoupleData | null>(null);
   const [inviteCode, setInviteCode] = useState("");
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [showProfileSettings, setShowProfileSettings] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t, language } = useLanguage();
@@ -141,6 +145,7 @@ const Dashboard = () => {
     
     if (session?.user) {
       await fetchCoupleData(session.user.id);
+      await fetchUserProfile(session.user.id);
     }
     
     setLoading(false);
@@ -224,6 +229,21 @@ const Dashboard = () => {
       });
     } catch (error: any) {
       console.error("Error fetching couple data:", error);
+    }
+  };
+
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) throw error;
+      setUserProfile(data);
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
     }
   };
 
@@ -494,9 +514,22 @@ const Dashboard = () => {
         <nav className="border-b border-border/50 bg-card/80 backdrop-blur sticky top-0 z-50">
           <div className="container mx-auto px-4 py-4">
             <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold bg-gradient-romantic bg-clip-text text-transparent">
-                {t("yourSanctuary")}
-              </h1>
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setShowProfileSettings(!showProfileSettings)}
+                  className="focus:outline-none hover:opacity-80 transition-opacity"
+                >
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={userProfile?.avatar_url || undefined} alt={userProfile?.full_name || user?.email} />
+                    <AvatarFallback className="bg-primary/10 text-primary">
+                      {userProfile?.full_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+                <h1 className="text-2xl font-bold bg-gradient-romantic bg-clip-text text-transparent">
+                  {t("yourSanctuary")}
+                </h1>
+              </div>
               <div className="flex gap-2 items-center">
                 <LanguageSwitcher />
                 <Button variant="outline" size="sm" onClick={handleSignOut}>
@@ -509,6 +542,31 @@ const Dashboard = () => {
         </nav>
 
         <main className="container mx-auto px-4 py-8">
+          {showProfileSettings && user && (
+            <Card className="max-w-md mx-auto mb-6">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold">Profile Settings</h3>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setShowProfileSettings(false)}
+                  >
+                    Close
+                  </Button>
+                </div>
+                <ProfilePictureUpload
+                  userId={user.id}
+                  currentAvatarUrl={userProfile?.avatar_url}
+                  userName={userProfile?.full_name || user?.email}
+                  onUploadComplete={(url) => {
+                    setUserProfile({ ...userProfile, avatar_url: url });
+                  }}
+                />
+              </div>
+            </Card>
+          )}
+          
           {!coupleData ? (
             // Not in a couple - show create/join options
             <div className="max-w-4xl mx-auto">
