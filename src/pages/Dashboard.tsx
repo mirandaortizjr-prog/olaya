@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Card } from "@/components/ui/card";
@@ -23,8 +23,15 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t, language } = useLanguage();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
+    // Check for invite code in URL
+    const codeFromUrl = searchParams.get('code');
+    if (codeFromUrl) {
+      setInviteCode(codeFromUrl.toUpperCase());
+    }
+    
     checkUser();
     
     // Request notification permission when user logs in
@@ -42,7 +49,7 @@ const Dashboard = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, searchParams]);
 
   const checkUser = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -214,12 +221,17 @@ const Dashboard = () => {
   const shareInvite = async () => {
     if (!coupleData?.inviteCode) return;
     
+    const inviteUrl = `${window.location.origin}/dashboard?code=${coupleData.inviteCode}`;
     const shareText = `💕 Join me in our couples sanctuary!
 
+Click this link to join:
+${inviteUrl}
+
+Or manually:
 1. Visit: ${window.location.origin}/dashboard
 2. Create an account or sign in
 3. Click "Join Your Partner"
-4. Enter this code: ${coupleData.inviteCode}
+4. Enter code: ${coupleData.inviteCode}
 
 Looking forward to connecting with you! ❤️`;
     
@@ -228,20 +240,21 @@ Looking forward to connecting with you! ❤️`;
         await navigator.share({
           title: 'Join Our Sanctuary 💕',
           text: shareText,
+          url: inviteUrl,
         });
       } catch (err) {
         // User cancelled or share failed, fallback to copy
         navigator.clipboard.writeText(shareText);
         toast({
           title: t("copied"),
-          description: "Invite message copied to clipboard",
+          description: "Invite link copied to clipboard",
         });
       }
     } else {
       navigator.clipboard.writeText(shareText);
       toast({
         title: t("copied"),
-        description: "Invite message copied to clipboard",
+        description: "Invite link copied to clipboard",
       });
     }
   };
