@@ -12,6 +12,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { QuickActions } from "@/components/QuickActions";
 import { RecentMessages } from "@/components/RecentMessages";
+import { DailyNotes } from "@/components/DailyNotes";
 import { requestNotificationPermission, showQuickMessageNotification } from "@/utils/notifications";
 import {
   Heart, 
@@ -612,6 +613,11 @@ const Dashboard = () => {
               {coupleData.partner && user && (
                 <div className="space-y-6">
                   <QuickActions coupleId={coupleData.coupleId} userId={user.id} />
+                  <DailyNotes 
+                    coupleId={coupleData.coupleId} 
+                    userId={user.id}
+                    partnerName={coupleData.partner.full_name}
+                  />
                   <RecentMessages 
                     coupleId={coupleData.coupleId} 
                     userId={user.id} 
