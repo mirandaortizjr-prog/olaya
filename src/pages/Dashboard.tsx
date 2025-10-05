@@ -25,7 +25,7 @@ import { LoveLanguageSelector } from "@/components/LoveLanguageSelector";
 import { PostsFeed } from "@/components/PostsFeed";
 import { CalmingTools } from "@/components/CalmingTools";
 import { useSubscription } from "@/hooks/useSubscription";
-import { requestNotificationPermission, showQuickMessageNotification } from "@/utils/notifications";
+import { requestNotificationPermission, showQuickMessageNotification, subscribeToPushNotifications } from "@/utils/notifications";
 import {
   Heart, 
   LogOut, 
@@ -83,7 +83,14 @@ const Dashboard = () => {
     }
 
     checkAuth();
-    requestNotificationPermission();
+    requestNotificationPermission().then(async (hasPermission) => {
+      if (hasPermission) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.id) {
+          subscribeToPushNotifications(session.user.id);
+        }
+      }
+    });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);

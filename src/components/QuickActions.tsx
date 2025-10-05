@@ -38,6 +38,34 @@ export const QuickActions = ({ coupleId, userId }: QuickActionsProps) => {
 
       if (error) throw error;
 
+      // Get partner's user_id to send push notification
+      const { data: members } = await supabase
+        .from('couple_members')
+        .select('user_id')
+        .eq('couple_id', coupleId)
+        .neq('user_id', userId)
+        .single();
+
+      if (members) {
+        // Send push notification to partner
+        const messageLabels: Record<string, { en: string; es: string }> = {
+          wink: { en: 'sent you a wink 😉', es: 'te envió un guiño 😉' },
+          kiss: { en: 'sent you a kiss 💋', es: 'te envió un beso 💋' },
+          love: { en: 'said I love you 💕', es: 'dijo te amo 💕' },
+          want: { en: 'said I want you 🔥', es: 'dijo te deseo 🔥' },
+          hot: { en: "said you're hot 🌟", es: 'dijo estás ardiente 🌟' },
+          thinking: { en: 'is thinking of you 💭', es: 'está pensando en ti 💭' },
+        };
+
+        await supabase.functions.invoke('send-push-notification', {
+          body: {
+            userId: members.user_id,
+            title: 'UsTwo',
+            body: messageLabels[messageType]?.[language] || messageLabels.wink[language],
+          },
+        });
+      }
+
       toast({
         title: language === 'en' ? 'Sent!' : '¡Enviado!',
         description: language === 'en' 
