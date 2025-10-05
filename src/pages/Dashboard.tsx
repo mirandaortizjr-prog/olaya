@@ -209,13 +209,22 @@ const Dashboard = () => {
     }
 
     try {
-      const { data: couple, error: coupleError } = await supabase
-        .from("couples")
-        .select("id")
-        .eq("invite_code", inviteCode.toUpperCase())
-        .maybeSingle();
+      // Use RPC to bypass RLS for looking up a couple by invite code
+      const { data: coupleId, error: rpcError } = await supabase.rpc(
+        "find_couple_by_invite_code",
+        { code: inviteCode.toUpperCase() }
+      );
 
-      if (coupleError || !couple) {
+      if (rpcError) {
+        toast({
+          title: "Error",
+          description: rpcError.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!coupleId) {
         toast({
           title: "Invalid Code",
           description: "Please check the invite code and try again",
@@ -226,7 +235,7 @@ const Dashboard = () => {
 
       const { error: memberError } = await supabase
         .from("couple_members")
-        .insert({ couple_id: couple.id, user_id: user.id });
+        .insert({ couple_id: coupleId as string, user_id: user.id });
 
       if (memberError) {
         if (memberError.code === '23505') {
