@@ -176,13 +176,11 @@ const Dashboard = () => {
     if (!user || !inviteCode) return;
 
     try {
-      const { data: couple, error: coupleError } = await supabase
-        .from("couples")
-        .select("id")
-        .eq("invite_code", inviteCode.toUpperCase())
-        .single();
+      // Use the secure RPC function to find the couple
+      const { data: coupleId, error: rpcError } = await supabase
+        .rpc("find_couple_by_invite_code", { code: inviteCode.toUpperCase() });
 
-      if (coupleError || !couple) {
+      if (rpcError || !coupleId) {
         toast({
           title: t("invalidCode"),
           description: t("invalidCodeDesc"),
@@ -195,7 +193,7 @@ const Dashboard = () => {
       const { data: existingMembership, error: existingError } = await supabase
         .from("couple_members")
         .select("id")
-        .eq("couple_id", couple.id)
+        .eq("couple_id", coupleId)
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -204,7 +202,7 @@ const Dashboard = () => {
       if (!existingMembership) {
         const { error: memberError } = await supabase
           .from("couple_members")
-          .insert({ couple_id: couple.id, user_id: user.id });
+          .insert({ couple_id: coupleId, user_id: user.id });
 
         if (memberError) throw memberError;
       }
