@@ -270,6 +270,12 @@ Looking forward to connecting with you! ❤️`;
             {t("yourSanctuary")}
           </h1>
           <div className="flex gap-2">
+            {coupleData && (
+              <Button onClick={shareInvite} variant="default">
+                <Share2 className="w-4 h-4 mr-2" />
+                Send Invite
+              </Button>
+            )}
             <LanguageSwitcher />
             <Button variant="outline" onClick={handleSignOut}>
               <LogOut className="w-4 h-4 mr-2" />
