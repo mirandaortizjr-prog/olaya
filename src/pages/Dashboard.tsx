@@ -85,10 +85,7 @@ const Dashboard = () => {
     checkAuth();
     requestNotificationPermission().then(async (hasPermission) => {
       if (hasPermission) {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user?.id) {
-          subscribeToPushNotifications(session.user.id);
-        }
+        subscribeToPushNotifications();
       }
     });
 
