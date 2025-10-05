@@ -5,6 +5,8 @@ import { User } from "@supabase/supabase-js";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Heart, Link2, LogOut, Copy, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +19,7 @@ const Dashboard = () => {
   const [partnerName, setPartnerName] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   useEffect(() => {
     checkUser();
@@ -100,12 +103,12 @@ const Dashboard = () => {
       await fetchCoupleData(user.id);
       
       toast({
-        title: "Sanctuary Created!",
-        description: "Share your invite code with your partner.",
+        title: t("sanctuaryCreated"),
+        description: t("shareInviteCode"),
       });
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("error"),
         description: error.message,
         variant: "destructive",
       });
@@ -133,8 +136,8 @@ const Dashboard = () => {
 
       if (coupleError || !couple) {
         toast({
-          title: "Invalid Code",
-          description: "The invite code you entered is not valid.",
+          title: t("invalidCode"),
+          description: t("invalidCodeDesc"),
           variant: "destructive",
         });
         return;
@@ -150,12 +153,12 @@ const Dashboard = () => {
       setInviteCode("");
       
       toast({
-        title: "Connected!",
-        description: "You've successfully joined your partner's sanctuary.",
+        title: t("connected"),
+        description: t("connectedDesc"),
       });
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: t("error"),
         description: error.message,
         variant: "destructive",
       });
@@ -166,8 +169,8 @@ const Dashboard = () => {
     if (coupleData?.inviteCode) {
       navigator.clipboard.writeText(coupleData.inviteCode);
       toast({
-        title: "Copied!",
-        description: "Invite code copied to clipboard.",
+        title: t("copied"),
+        description: t("copiedDesc"),
       });
     }
   };
@@ -182,7 +185,7 @@ const Dashboard = () => {
       <div className="min-h-screen bg-gradient-warm flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 rounded-full bg-gradient-romantic animate-pulse mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading your sanctuary...</p>
+          <p className="text-muted-foreground">{t("loadingSanctuary")}</p>
         </div>
       </div>
     );
@@ -193,12 +196,15 @@ const Dashboard = () => {
       <div className="container mx-auto max-w-4xl py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold bg-gradient-romantic bg-clip-text text-transparent">
-            Your Sanctuary
+            {t("yourSanctuary")}
           </h1>
-          <Button variant="outline" onClick={handleSignOut}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign Out
-          </Button>
+          <div className="flex gap-2">
+            <LanguageSwitcher />
+            <Button variant="outline" onClick={handleSignOut}>
+              <LogOut className="w-4 h-4 mr-2" />
+              {t("signOut")}
+            </Button>
+          </div>
         </div>
 
         {!coupleData ? (
@@ -209,14 +215,14 @@ const Dashboard = () => {
                   <Heart className="w-8 h-8 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-semibold mb-2">Create Your Space</h2>
+                  <h2 className="text-2xl font-semibold mb-2">{t("createYourSpace")}</h2>
                   <p className="text-muted-foreground">
-                    Start a new sanctuary and invite your partner
+                    {t("createSpaceDesc")}
                   </p>
                 </div>
                 <Button onClick={createCouple} className="w-full">
                   <Heart className="w-4 h-4 mr-2" />
-                  Create Sanctuary
+                  {t("createSanctuaryBtn")}
                 </Button>
               </div>
             </Card>
@@ -227,17 +233,17 @@ const Dashboard = () => {
                   <Link2 className="w-8 h-8 text-secondary" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-semibold mb-2">Join Your Partner</h2>
+                  <h2 className="text-2xl font-semibold mb-2">{t("joinYourPartner")}</h2>
                   <p className="text-muted-foreground">
-                    Enter the invite code from your partner
+                    {t("joinPartnerDesc")}
                   </p>
                 </div>
                 <div className="w-full space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="inviteCode">Invite Code</Label>
+                    <Label htmlFor="inviteCode">{t("inviteCode")}</Label>
                     <Input
                       id="inviteCode"
-                      placeholder="XXXX-XXXX"
+                      placeholder={t("inviteCodePlaceholder")}
                       value={inviteCode}
                       onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                       maxLength={8}
@@ -245,7 +251,7 @@ const Dashboard = () => {
                   </div>
                   <Button onClick={joinCouple} className="w-full" disabled={!inviteCode}>
                     <Link2 className="w-4 h-4 mr-2" />
-                    Join Sanctuary
+                    {t("joinSanctuaryBtn")}
                   </Button>
                 </div>
               </div>
@@ -260,11 +266,11 @@ const Dashboard = () => {
                     <Users className="w-6 h-6 text-primary-foreground" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-semibold">Your Sanctuary</h2>
+                    <h2 className="text-2xl font-semibold">{t("yourSanctuary")}</h2>
                     <p className="text-muted-foreground text-sm">
                       {coupleData.partner 
-                        ? `Connected with ${coupleData.partner.profiles?.full_name || coupleData.partner.profiles?.email}`
-                        : "Waiting for your partner to join"}
+                        ? `${t("connectedWith")} ${coupleData.partner.profiles?.full_name || coupleData.partner.profiles?.email}`
+                        : t("waitingForPartner")}
                     </p>
                   </div>
                 </div>
@@ -272,7 +278,7 @@ const Dashboard = () => {
 
               <div className="bg-card/50 rounded-lg p-6 border-2 border-dashed border-primary/20">
                 <Label className="text-sm text-muted-foreground mb-2 block">
-                  Share this code with your partner
+                  {t("shareThisCode")}
                 </Label>
                 <div className="flex gap-2">
                   <Input
@@ -290,16 +296,16 @@ const Dashboard = () => {
             {coupleData.partner && (
               <div className="grid md:grid-cols-3 gap-4">
                 <Card className="p-6 hover:shadow-soft transition-shadow cursor-pointer">
-                  <h3 className="font-semibold mb-2">Daily Notes</h3>
-                  <p className="text-sm text-muted-foreground">Morning whispers & reflections</p>
+                  <h3 className="font-semibold mb-2">{t("dailyNotes")}</h3>
+                  <p className="text-sm text-muted-foreground">{t("dailyNotesDesc")}</p>
                 </Card>
                 <Card className="p-6 hover:shadow-soft transition-shadow cursor-pointer">
-                  <h3 className="font-semibold mb-2">Love Notes</h3>
-                  <p className="text-sm text-muted-foreground">Share your affections</p>
+                  <h3 className="font-semibold mb-2">{t("loveNotes")}</h3>
+                  <p className="text-sm text-muted-foreground">{t("loveNotesDesc")}</p>
                 </Card>
                 <Card className="p-6 hover:shadow-soft transition-shadow cursor-pointer">
-                  <h3 className="font-semibold mb-2">Memories</h3>
-                  <p className="text-sm text-muted-foreground">Calendar & special dates</p>
+                  <h3 className="font-semibold mb-2">{t("memories")}</h3>
+                  <p className="text-sm text-muted-foreground">{t("memoriesDesc")}</p>
                 </Card>
               </div>
             )}

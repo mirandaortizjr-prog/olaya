@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Heart, Mail, Chrome } from "lucide-react";
 
 const Auth = () => {
@@ -16,6 +18,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   useEffect(() => {
     // Check if user is already logged in
@@ -55,8 +58,8 @@ const Auth = () => {
         if (error) throw error;
 
         toast({
-          title: "Welcome to UsTwo!",
-          description: "Your account has been created successfully.",
+          title: t("welcomeToUsTwo"),
+          description: t("accountCreated"),
         });
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -67,13 +70,13 @@ const Auth = () => {
         if (error) throw error;
 
         toast({
-          title: "Welcome back!",
-          description: "You've been signed in successfully.",
+          title: t("welcomeBackTitle"),
+          description: t("signedInSuccess"),
         });
       }
     } catch (error: any) {
       toast({
-        title: "Authentication Error",
+        title: t("authError"),
         description: error.message,
         variant: "destructive",
       });
@@ -95,7 +98,7 @@ const Auth = () => {
       if (error) throw error;
     } catch (error: any) {
       toast({
-        title: "Authentication Error",
+        title: t("authError"),
         description: error.message,
         variant: "destructive",
       });
@@ -105,6 +108,9 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-gradient-warm flex items-center justify-center p-4">
+      <div className="absolute top-4 right-4">
+        <LanguageSwitcher />
+      </div>
       <Card className="w-full max-w-md p-8 shadow-glow border-2">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
@@ -113,21 +119,21 @@ const Auth = () => {
             </div>
           </div>
           <h1 className="text-3xl font-bold bg-gradient-romantic bg-clip-text text-transparent mb-2">
-            UsTwo
+            {t("authTitle")}
           </h1>
           <p className="text-muted-foreground">
-            {isSignUp ? "Create your sanctuary" : "Welcome back"}
+            {isSignUp ? t("createSanctuary") : t("welcomeBack")}
           </p>
         </div>
 
         <form onSubmit={handleEmailAuth} className="space-y-4">
           {isSignUp && (
             <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
+              <Label htmlFor="fullName">{t("fullName")}</Label>
               <Input
                 id="fullName"
                 type="text"
-                placeholder="Enter your name"
+                placeholder={t("enterName")}
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required={isSignUp}
@@ -136,11 +142,11 @@ const Auth = () => {
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("email")}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t("emailPlaceholder")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -148,11 +154,11 @@ const Auth = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t("password")}</Label>
             <Input
               id="password"
               type="password"
-              placeholder="••••••••"
+              placeholder={t("passwordPlaceholder")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -166,7 +172,7 @@ const Auth = () => {
             disabled={loading}
           >
             <Mail className="w-4 h-4 mr-2" />
-            {isSignUp ? "Sign Up" : "Sign In"}
+            {isSignUp ? t("signUp") : t("signIn")}
           </Button>
         </form>
 
@@ -175,7 +181,7 @@ const Auth = () => {
             <div className="w-full border-t border-border" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-card text-muted-foreground">Or continue with</span>
+            <span className="px-2 bg-card text-muted-foreground">{t("orContinueWith")}</span>
           </div>
         </div>
 
@@ -186,7 +192,7 @@ const Auth = () => {
           disabled={loading}
         >
           <Chrome className="w-4 h-4 mr-2" />
-          Google
+          {t("google")}
         </Button>
 
         <div className="mt-6 text-center">
@@ -196,8 +202,8 @@ const Auth = () => {
             className="text-sm text-primary hover:underline"
           >
             {isSignUp
-              ? "Already have an account? Sign in"
-              : "Don't have an account? Sign up"}
+              ? t("alreadyHaveAccount")
+              : t("dontHaveAccount")}
           </button>
         </div>
       </Card>

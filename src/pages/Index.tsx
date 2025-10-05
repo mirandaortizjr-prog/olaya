@@ -1,9 +1,13 @@
 import { Heart, MessageCircle, Calendar, Smile, Sparkles, BookHeart, Check } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/contexts/LanguageContext";
 import heroImage from "@/assets/hero-image.jpg";
 
 const Index = () => {
+  const { t } = useLanguage();
+  
   const features = [
     {
       icon: MessageCircle,
@@ -78,21 +82,24 @@ const Index = () => {
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-romantic opacity-30" />
+        <div className="absolute top-4 right-4 z-10">
+          <LanguageSwitcher />
+        </div>
         <div className="relative container mx-auto px-4 py-20">
           <div className="flex flex-col lg:flex-row items-center gap-12">
             <div className="flex-1 text-center lg:text-left space-y-6">
               <h1 className="text-5xl lg:text-7xl font-bold bg-gradient-romantic bg-clip-text text-transparent">
-                UsTwo
+                {t("indexTitle")}
               </h1>
               <p className="text-xl lg:text-2xl text-muted-foreground max-w-lg">
-                Your sacred space for connection, intimacy, and love
+                {t("indexSubtitle")}
               </p>
               <div className="flex gap-4 justify-center lg:justify-start">
                 <Button size="lg" className="shadow-glow" onClick={() => window.location.href = '/auth'}>
-                  Start Free
+                  {t("getStarted")}
                 </Button>
                 <Button size="lg" variant="outline" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
-                  View Pricing
+                  {t("viewPricing")}
                 </Button>
               </div>
             </div>
