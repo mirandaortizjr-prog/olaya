@@ -68,10 +68,10 @@ const Dashboard = () => {
 
   const fetchCoupleData = async (userId: string) => {
     try {
-      // Check if user is part of a couple
+      // Get latest membership for the user (no FK embedding)
       const { data: membership, error: memberError } = await supabase
         .from("couple_members")
-        .select("couple_id, couples(id, invite_code)")
+        .select("couple_id")
         .eq("user_id", userId)
         .order("joined_at", { ascending: false })
         .limit(1)
@@ -79,39 +79,51 @@ const Dashboard = () => {
 
       if (memberError) throw memberError;
 
-      if (membership) {
-        // Get partner info
-        const { data: members, error: membersError } = await supabase
-          .from("couple_members")
-          .select("user_id")
-          .eq("couple_id", membership.couple_id)
-          .neq("user_id", userId);
-
-        if (membersError) throw membersError;
-
-        let partnerProfile = null;
-        if (members && members.length > 0) {
-          const partnerId = members[0].user_id;
-          const { data: profile, error: profileError } = await supabase
-            .from("profiles")
-            .select("full_name, email")
-            .eq("id", partnerId)
-            .maybeSingle();
-
-          if (!profileError && profile) {
-            partnerProfile = {
-              user_id: partnerId,
-              profiles: profile
-            };
-          }
-        }
-
-        setCoupleData({
-          coupleId: membership.couple_id,
-          inviteCode: membership.couples.invite_code,
-          partner: partnerProfile,
-        });
+      if (!membership) {
+        setCoupleData(null);
+        return;
       }
+
+      // Fetch couple data directly using the id
+      const { data: coupleRow, error: coupleRowError } = await supabase
+        .from("couples")
+        .select("invite_code")
+        .eq("id", membership.couple_id)
+        .maybeSingle();
+
+      if (coupleRowError) throw coupleRowError;
+
+      // Get partner info
+      const { data: members, error: membersError } = await supabase
+        .from("couple_members")
+        .select("user_id")
+        .eq("couple_id", membership.couple_id)
+        .neq("user_id", userId);
+
+      if (membersError) throw membersError;
+
+      let partnerProfile = null;
+      if (members && members.length > 0) {
+        const partnerId = members[0].user_id as string;
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("full_name, email")
+          .eq("id", partnerId)
+          .maybeSingle();
+
+        if (!profileError && profile) {
+          partnerProfile = {
+            user_id: partnerId,
+            profiles: profile,
+          };
+        }
+      }
+
+      setCoupleData({
+        coupleId: membership.couple_id,
+        inviteCode: coupleRow?.invite_code,
+        partner: partnerProfile,
+      });
     } catch (error: any) {
       console.error("Error fetching couple data:", error);
     }
@@ -147,6 +159,28 @@ const Dashboard = () => {
         .insert({ invite_code: code });
 
       if (coupleError) throw coupleError;
+
+      // Ensure the creator is a member even if the DB trigger didn't run
+      const { data: newCoupleId, error: rpcErr } = await supabase
+        .rpc("find_couple_by_invite_code", { code });
+
+      if (!rpcErr && newCoupleId) {
+        const { data: hasMembership, error: hasMembershipErr } = await supabase
+          .from("couple_members")
+          .select("id")
+          .eq("couple_id", newCoupleId)
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (!hasMembership && !hasMembershipErr) {
+          const { error: addMemberErr } = await supabase
+            .from("couple_members")
+            .insert({ couple_id: newCoupleId, user_id: user.id });
+          if (addMemberErr) console.warn("Failed to add creator as member:", addMemberErr);
+        }
+      } else if (rpcErr) {
+        console.warn("RPC find_couple_by_invite_code failed:", rpcErr);
+      }
 
       await fetchCoupleData(user.id);
       
