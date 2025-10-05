@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { QuickActions } from "@/components/QuickActions";
 import { RecentMessages } from "@/components/RecentMessages";
+import { requestNotificationPermission } from "@/utils/notifications";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Heart, Link2, LogOut, Copy, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -21,10 +22,18 @@ const Dashboard = () => {
   const [partnerName, setPartnerName] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     checkUser();
+    
+    // Request notification permission when user logs in
+    requestNotificationPermission().then((granted) => {
+      if (granted) {
+        console.log('Notification permission granted');
+      }
+    });
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (!session) {
@@ -299,7 +308,11 @@ const Dashboard = () => {
               <div className="space-y-6">
                 <QuickActions coupleId={coupleData.coupleId} userId={user.id} />
                 
-                <RecentMessages coupleId={coupleData.coupleId} userId={user.id} />
+                <RecentMessages 
+                  coupleId={coupleData.coupleId} 
+                  userId={user.id}
+                  partnerName={coupleData.partner?.profiles?.full_name || coupleData.partner?.profiles?.email}
+                />
                 
                 <div className="grid md:grid-cols-3 gap-4">
                   <Card className="p-6 hover:shadow-soft transition-shadow cursor-pointer">

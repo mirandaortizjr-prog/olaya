@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { showQuickMessageNotification } from "@/utils/notifications";
 import { Eye, Heart, Flame, Sparkles, Mail, Brain } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
@@ -9,6 +10,7 @@ import { es } from "date-fns/locale";
 interface RecentMessagesProps {
   coupleId: string;
   userId: string;
+  partnerName?: string;
 }
 
 const messageIcons = {
@@ -29,7 +31,7 @@ const messageLabels = {
   thinking: { en: 'is thinking of you', es: 'está pensando en ti' },
 };
 
-export const RecentMessages = ({ coupleId, userId }: RecentMessagesProps) => {
+export const RecentMessages = ({ coupleId, userId, partnerName }: RecentMessagesProps) => {
   const [messages, setMessages] = useState<any[]>([]);
   const { language } = useLanguage();
 
@@ -47,7 +49,17 @@ export const RecentMessages = ({ coupleId, userId }: RecentMessagesProps) => {
           filter: `couple_id=eq.${coupleId}`,
         },
         (payload) => {
-          setMessages((current) => [payload.new, ...current].slice(0, 5));
+          const newMessage = payload.new;
+          setMessages((current) => [newMessage, ...current].slice(0, 5));
+          
+          // Show notification if message is from partner
+          if (newMessage.sender_id !== userId) {
+            showQuickMessageNotification(
+              newMessage.message_type,
+              partnerName,
+              language
+            );
+          }
         }
       )
       .subscribe();
