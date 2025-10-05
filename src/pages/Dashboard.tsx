@@ -91,6 +91,8 @@ const Dashboard = () => {
 
   const fetchCoupleData = async (userId: string) => {
     try {
+      console.log("Fetching couple data for user:", userId);
+      
       // Get user's couple membership
       const { data: membership, error: memberError } = await supabase
         .from("couple_members")
@@ -99,6 +101,8 @@ const Dashboard = () => {
         .order("joined_at", { ascending: false })
         .limit(1)
         .maybeSingle();
+
+      console.log("Membership data:", membership, "Error:", memberError);
 
       if (memberError) throw memberError;
 
@@ -114,6 +118,8 @@ const Dashboard = () => {
         .eq("id", membership.couple_id)
         .maybeSingle();
 
+      console.log("Couple data:", couple, "Error:", coupleError);
+
       if (coupleError) throw coupleError;
 
       // Get partner info
@@ -123,16 +129,22 @@ const Dashboard = () => {
         .eq("couple_id", membership.couple_id)
         .neq("user_id", userId);
 
+      console.log("Members data:", members, "Error:", membersError);
+
       if (membersError) throw membersError;
 
       let partnerProfile = null;
       if (members && members.length > 0) {
         const partnerId = members[0].user_id;
+        console.log("Fetching partner profile for:", partnerId);
+        
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("full_name, email")
           .eq("id", partnerId)
           .maybeSingle();
+
+        console.log("Partner profile:", profile, "Error:", profileError);
 
         if (!profileError && profile) {
           partnerProfile = {
@@ -142,6 +154,8 @@ const Dashboard = () => {
           };
         }
       }
+
+      console.log("Setting couple data with partner:", partnerProfile);
 
       setCoupleData({
         coupleId: membership.couple_id,
