@@ -91,6 +91,38 @@ export type Database = {
         }
         Relationships: []
       }
+      quick_messages: {
+        Row: {
+          couple_id: string
+          created_at: string
+          id: string
+          message_type: string
+          sender_id: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          id?: string
+          message_type: string
+          sender_id: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          id?: string
+          message_type?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quick_messages_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

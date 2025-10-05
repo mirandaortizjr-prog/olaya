@@ -6,6 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { QuickActions } from "@/components/QuickActions";
+import { RecentMessages } from "@/components/RecentMessages";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Heart, Link2, LogOut, Copy, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -294,19 +296,25 @@ const Dashboard = () => {
             </Card>
 
             {coupleData.partner && (
-              <div className="grid md:grid-cols-3 gap-4">
-                <Card className="p-6 hover:shadow-soft transition-shadow cursor-pointer">
-                  <h3 className="font-semibold mb-2">{t("dailyNotes")}</h3>
-                  <p className="text-sm text-muted-foreground">{t("dailyNotesDesc")}</p>
-                </Card>
-                <Card className="p-6 hover:shadow-soft transition-shadow cursor-pointer">
-                  <h3 className="font-semibold mb-2">{t("loveNotes")}</h3>
-                  <p className="text-sm text-muted-foreground">{t("loveNotesDesc")}</p>
-                </Card>
-                <Card className="p-6 hover:shadow-soft transition-shadow cursor-pointer">
-                  <h3 className="font-semibold mb-2">{t("memories")}</h3>
-                  <p className="text-sm text-muted-foreground">{t("memoriesDesc")}</p>
-                </Card>
+              <div className="space-y-6">
+                <QuickActions coupleId={coupleData.coupleId} userId={user.id} />
+                
+                <RecentMessages coupleId={coupleData.coupleId} userId={user.id} />
+                
+                <div className="grid md:grid-cols-3 gap-4">
+                  <Card className="p-6 hover:shadow-soft transition-shadow cursor-pointer">
+                    <h3 className="font-semibold mb-2">{t("dailyNotes")}</h3>
+                    <p className="text-sm text-muted-foreground">{t("dailyNotesDesc")}</p>
+                  </Card>
+                  <Card className="p-6 hover:shadow-soft transition-shadow cursor-pointer">
+                    <h3 className="font-semibold mb-2">{t("loveNotes")}</h3>
+                    <p className="text-sm text-muted-foreground">{t("loveNotesDesc")}</p>
+                  </Card>
+                  <Card className="p-6 hover:shadow-soft transition-shadow cursor-pointer">
+                    <h3 className="font-semibold mb-2">{t("memories")}</h3>
+                    <p className="text-sm text-muted-foreground">{t("memoriesDesc")}</p>
+                  </Card>
+                </div>
               </div>
             )}
           </div>
