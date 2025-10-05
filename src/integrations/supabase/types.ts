@@ -143,6 +143,75 @@ export type Database = {
           },
         ]
       }
+      desire_vault: {
+        Row: {
+          category: string
+          couple_id: string
+          created_at: string
+          description: string | null
+          fulfilled: boolean | null
+          fulfilled_at: string | null
+          id: string
+          is_private: boolean | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          couple_id: string
+          created_at?: string
+          description?: string | null
+          fulfilled?: boolean | null
+          fulfilled_at?: string | null
+          id?: string
+          is_private?: boolean | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          couple_id?: string
+          created_at?: string
+          description?: string | null
+          fulfilled?: boolean | null
+          fulfilled_at?: string | null
+          id?: string
+          is_private?: boolean | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      love_languages: {
+        Row: {
+          created_at: string
+          id: string
+          primary_language: string
+          secondary_language: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          primary_language: string
+          secondary_language?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          primary_language?: string
+          secondary_language?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       love_notes: {
         Row: {
           content: string
@@ -266,6 +335,39 @@ export type Database = {
           },
         ]
       }
+      posts: {
+        Row: {
+          author_id: string
+          content: string
+          couple_id: string
+          created_at: string
+          id: string
+          likes: Json | null
+          media_urls: Json | null
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          couple_id: string
+          created_at?: string
+          id?: string
+          likes?: Json | null
+          media_urls?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          couple_id?: string
+          created_at?: string
+          id?: string
+          likes?: Json | null
+          media_urls?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -325,6 +427,78 @@ export type Database = {
           },
         ]
       }
+      relationship_timeline: {
+        Row: {
+          couple_id: string
+          created_at: string
+          created_by: string
+          description: string | null
+          event_date: string
+          event_type: string
+          id: string
+          photos: Json | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          event_date: string
+          event_type: string
+          id?: string
+          photos?: Json | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          event_date?: string
+          event_type?: string
+          id?: string
+          photos?: Json | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      shared_journal: {
+        Row: {
+          author_id: string
+          content: string
+          couple_id: string
+          created_at: string
+          id: string
+          mood: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          couple_id: string
+          created_at?: string
+          id?: string
+          mood?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          couple_id?: string
+          created_at?: string
+          id?: string
+          mood?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       shared_media: {
         Row: {
           caption: string | null
@@ -362,6 +536,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          id: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_price_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          id?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_price_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {
