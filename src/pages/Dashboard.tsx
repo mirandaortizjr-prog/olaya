@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { toast as sonnerToast } from "sonner";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { QuickActions } from "@/components/QuickActions";
 import { RecentMessages } from "@/components/RecentMessages";
+import { requestNotificationPermission, showQuickMessageNotification } from "@/utils/notifications";
 import {
   Heart, 
   LogOut, 
@@ -18,7 +20,12 @@ import {
   Link2,
   Copy,
   Share2,
-  UserCircle
+  UserCircle,
+  Eye,
+  Flame,
+  Sparkles,
+  Mail,
+  Brain
 } from "lucide-react";
 
 import {
@@ -61,6 +68,7 @@ const Dashboard = () => {
     }
 
     checkAuth();
+    requestNotificationPermission();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
@@ -73,6 +81,41 @@ const Dashboard = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate, searchParams]);
+
+  // Realtime subscription for quick messages
+  useEffect(() => {
+    if (!coupleData?.coupleId || !user?.id) return;
+
+    const { language } = useLanguage();
+    const channel = supabase
+      .channel('quick_messages_channel')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'quick_messages',
+          filter: `couple_id=eq.${coupleData.coupleId}`,
+        },
+        (payload) => {
+          const message = payload.new as any;
+          // Only show notification if it's from partner (not from self)
+          if (message.sender_id !== user.id) {
+            showQuickMessageToast(message.message_type);
+            showQuickMessageNotification(
+              message.message_type,
+              coupleData.partner?.full_name,
+              language
+            );
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [coupleData?.coupleId, user?.id, coupleData?.partner?.full_name]);
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -332,6 +375,69 @@ const Dashboard = () => {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/");
+  };
+
+  const showQuickMessageToast = (messageType: string) => {
+    const { language } = useLanguage();
+    
+    const messageConfig = {
+      wink: { 
+        icon: Eye, 
+        label: language === 'en' ? 'Wink' : 'Guiño',
+        emoji: '😉',
+        className: 'from-purple-500 to-pink-500'
+      },
+      kiss: { 
+        icon: Heart, 
+        label: language === 'en' ? 'Kiss' : 'Beso',
+        emoji: '💋',
+        className: 'from-red-500 to-pink-500'
+      },
+      love: { 
+        icon: Mail, 
+        label: language === 'en' ? 'I Love You' : 'Te Amo',
+        emoji: '💕',
+        className: 'from-pink-500 to-rose-500'
+      },
+      want: { 
+        icon: Flame, 
+        label: language === 'en' ? 'I Want You' : 'Te Deseo',
+        emoji: '🔥',
+        className: 'from-orange-500 to-red-500'
+      },
+      hot: { 
+        icon: Sparkles, 
+        label: language === 'en' ? "You're Hot" : 'Estás Ardiente',
+        emoji: '🌟',
+        className: 'from-amber-500 to-orange-500'
+      },
+      thinking: { 
+        icon: Brain, 
+        label: language === 'en' ? "Thinking of You" : 'Pensando en Ti',
+        emoji: '💭',
+        className: 'from-blue-500 to-purple-500'
+      },
+    };
+
+    const config = messageConfig[messageType as keyof typeof messageConfig] || messageConfig.wink;
+    const Icon = config.icon;
+    const partnerName = coupleData?.partner?.full_name || (language === 'en' ? 'Your partner' : 'Tu pareja');
+
+    sonnerToast(
+      <div className="flex items-center gap-3">
+        <div className={`p-3 rounded-full bg-gradient-to-br ${config.className} animate-bounce`}>
+          <Icon className="w-6 h-6 text-white" />
+        </div>
+        <div>
+          <p className="font-semibold">{partnerName}</p>
+          <p className="text-sm opacity-90">{config.label} {config.emoji}</p>
+        </div>
+      </div>,
+      {
+        duration: 4000,
+        className: 'bg-card border-2 border-primary/20',
+      }
+    );
   };
 
   if (loading) {
