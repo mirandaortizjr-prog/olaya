@@ -57,7 +57,7 @@ const Dashboard = () => {
   const [inviteCode, setInviteCode] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -86,7 +86,6 @@ const Dashboard = () => {
   useEffect(() => {
     if (!coupleData?.coupleId || !user?.id) return;
 
-    const { language } = useLanguage();
     const channel = supabase
       .channel('quick_messages_channel')
       .on(
@@ -115,7 +114,7 @@ const Dashboard = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [coupleData?.coupleId, user?.id, coupleData?.partner?.full_name]);
+  }, [coupleData?.coupleId, user?.id, coupleData?.partner?.full_name, language]);
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -378,8 +377,6 @@ const Dashboard = () => {
   };
 
   const showQuickMessageToast = (messageType: string) => {
-    const { language } = useLanguage();
-    
     const messageConfig = {
       wink: { 
         icon: Eye, 
