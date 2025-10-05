@@ -10,7 +10,7 @@ import { QuickActions } from "@/components/QuickActions";
 import { RecentMessages } from "@/components/RecentMessages";
 import { requestNotificationPermission } from "@/utils/notifications";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Heart, Link2, LogOut, Copy, Users } from "lucide-react";
+import { Heart, Link2, LogOut, Copy, Users, Share2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -211,6 +211,34 @@ const Dashboard = () => {
     }
   };
 
+  const shareInvite = async () => {
+    if (!coupleData?.inviteCode) return;
+    
+    const shareText = `Join our sanctuary! Use this code: ${coupleData.inviteCode}\n\nOr visit: ${window.location.origin}/dashboard`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Join Our Sanctuary',
+          text: shareText,
+        });
+      } catch (err) {
+        // User cancelled or share failed, fallback to copy
+        navigator.clipboard.writeText(shareText);
+        toast({
+          title: t("copied"),
+          description: "Invite message copied to clipboard",
+        });
+      }
+    } else {
+      navigator.clipboard.writeText(shareText);
+      toast({
+        title: t("copied"),
+        description: "Invite message copied to clipboard",
+      });
+    }
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/");
@@ -316,16 +344,20 @@ const Dashboard = () => {
                 <Label className="text-sm text-muted-foreground mb-2 block">
                   {t("shareThisCode")}
                 </Label>
-                <div className="flex gap-2">
+                <div className="flex gap-2 mb-3">
                   <Input
                     value={coupleData.inviteCode}
                     readOnly
                     className="font-mono text-lg font-semibold"
                   />
-                  <Button onClick={copyInviteCode} variant="outline">
+                  <Button onClick={copyInviteCode} variant="outline" size="icon">
                     <Copy className="w-4 h-4" />
                   </Button>
                 </div>
+                <Button onClick={shareInvite} className="w-full" variant="default">
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Share Invite Link
+                </Button>
               </div>
             </Card>
 
