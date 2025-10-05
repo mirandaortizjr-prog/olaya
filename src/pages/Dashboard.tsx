@@ -198,6 +198,16 @@ const Dashboard = () => {
   const joinCouple = async () => {
     if (!user || !inviteCode) return;
 
+    // Check if user is already in a couple
+    if (coupleData) {
+      toast({
+        title: "Already in a sanctuary",
+        description: "Please leave your current sanctuary first using the 'Leave Sanctuary' button below.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { data: couple, error: coupleError } = await supabase
         .from("couples")
