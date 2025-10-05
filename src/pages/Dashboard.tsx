@@ -15,6 +15,7 @@ import { RecentMessages } from "@/components/RecentMessages";
 import { DailyNotes } from "@/components/DailyNotes";
 import { MoodTracker } from "@/components/MoodTracker";
 import { LoveNotes } from "@/components/LoveNotes";
+import { MemoryCalendar } from "@/components/MemoryCalendar";
 import { requestNotificationPermission, showQuickMessageNotification } from "@/utils/notifications";
 import {
   Heart, 
@@ -619,12 +620,17 @@ const Dashboard = () => {
                     userId={user.id}
                     partnerName={coupleData.partner.full_name}
                   />
-                  <QuickActions coupleId={coupleData.coupleId} userId={user.id} />
+                  <MemoryCalendar 
+                    coupleId={coupleData.coupleId} 
+                    userId={user.id}
+                    partnerName={coupleData.partner.full_name}
+                  />
                   <LoveNotes 
                     coupleId={coupleData.coupleId} 
                     userId={user.id}
                     partnerName={coupleData.partner.full_name}
                   />
+                  <QuickActions coupleId={coupleData.coupleId} userId={user.id} />
                   <DailyNotes 
                     coupleId={coupleData.coupleId} 
                     userId={user.id}

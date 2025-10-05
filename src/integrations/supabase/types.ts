@@ -140,6 +140,53 @@ export type Database = {
           },
         ]
       }
+      memory_calendar: {
+        Row: {
+          couple_id: string
+          created_at: string
+          created_by: string
+          date: string
+          event_type: string
+          id: string
+          notes: string | null
+          recurring: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          created_by: string
+          date: string
+          event_type: string
+          id?: string
+          notes?: string | null
+          recurring?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          date?: string
+          event_type?: string
+          id?: string
+          notes?: string | null
+          recurring?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memory_calendar_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mood_tracker: {
         Row: {
           couple_id: string
