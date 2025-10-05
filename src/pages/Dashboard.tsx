@@ -172,16 +172,31 @@ const Dashboard = () => {
         return;
       }
 
-      // Fetch couple data
+      // Fetch couple data (without invite_code for security)
       const { data: couple, error: coupleError } = await supabase
         .from("couples")
-        .select("invite_code")
+        .select("id, created_by")
         .eq("id", membership.couple_id)
         .maybeSingle();
 
       console.log("Couple data:", couple, "Error:", coupleError);
 
       if (coupleError) throw coupleError;
+
+      // Fetch invite code securely (only if user is the creator)
+      let inviteCode = "";
+      if (couple?.created_by === userId) {
+        const { data: inviteData, error: inviteError } = await supabase.rpc(
+          "get_couple_invite_code",
+          { couple_uuid: membership.couple_id }
+        );
+
+        console.log("Invite code data:", inviteData, "Error:", inviteError);
+
+        if (!inviteError && Array.isArray(inviteData) && inviteData.length > 0) {
+          inviteCode = inviteData[0].invite_code || "";
+        }
+      }
 
       // Get partner profile via RPC (bypasses RLS on couple_members)
       const { data: partner, error: partnerError } = await supabase.rpc(
@@ -204,7 +219,7 @@ const Dashboard = () => {
 
       setCoupleData({
         coupleId: membership.couple_id,
-        inviteCode: couple?.invite_code || "",
+        inviteCode: inviteCode,
         partner: partnerProfile,
       });
     } catch (error: any) {

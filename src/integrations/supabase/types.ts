@@ -46,6 +46,7 @@ export type Database = {
       couples: {
         Row: {
           created_at: string
+          created_by: string | null
           id: string
           invite_code: string
           invite_code_expires_at: string | null
@@ -54,6 +55,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           id?: string
           invite_code: string
           invite_code_expires_at?: string | null
@@ -62,6 +64,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           id?: string
           invite_code?: string
           invite_code_expires_at?: string | null
@@ -650,6 +653,14 @@ export type Database = {
       generate_invite_code: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_couple_invite_code: {
+        Args: { couple_uuid: string }
+        Returns: {
+          expires_at: string
+          invite_code: string
+          is_used: boolean
+        }[]
       }
       get_own_email: {
         Args: Record<PropertyKey, never>
