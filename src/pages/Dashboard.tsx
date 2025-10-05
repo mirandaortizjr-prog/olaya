@@ -248,6 +248,9 @@ const Dashboard = () => {
         title: t("connected"),
         description: t("connectedDesc"),
       });
+      
+      // Redirect to dashboard to show the connected state
+      window.location.href = "/dashboard";
     } catch (error: any) {
       toast({
         title: t("error"),
