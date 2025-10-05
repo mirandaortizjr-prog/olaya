@@ -1,51 +1,275 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { 
   Heart, 
   LogOut, 
-  MessageCircle, 
-  Calendar, 
-  Smile, 
-  Sparkles, 
-  BookHeart,
   Users,
-  Star
+  Link2,
+  Copy,
+  Share2,
+  UserCircle
 } from "lucide-react";
+
+interface CoupleData {
+  coupleId: string;
+  inviteCode: string;
+  partner: {
+    user_id: string;
+    full_name: string;
+    email: string;
+  } | null;
+}
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [coupleData, setCoupleData] = useState<CoupleData | null>(null);
+  const [inviteCode, setInviteCode] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
+    // Check for invite code in URL
+    const codeFromUrl = searchParams.get('code');
+    if (codeFromUrl) {
+      setInviteCode(codeFromUrl.toUpperCase());
+    }
+
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (!session) {
         navigate("/auth");
+      } else {
+        fetchCoupleData(session.user.id);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, searchParams]);
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     setUser(session?.user ?? null);
+    
+    if (session?.user) {
+      await fetchCoupleData(session.user.id);
+    }
+    
     setLoading(false);
     
     if (!session) {
       navigate("/auth");
+    }
+  };
+
+  const fetchCoupleData = async (userId: string) => {
+    try {
+      // Get user's couple membership
+      const { data: membership, error: memberError } = await supabase
+        .from("couple_members")
+        .select("couple_id")
+        .eq("user_id", userId)
+        .order("joined_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (memberError) throw memberError;
+
+      if (!membership) {
+        setCoupleData(null);
+        return;
+      }
+
+      // Fetch couple data
+      const { data: couple, error: coupleError } = await supabase
+        .from("couples")
+        .select("invite_code")
+        .eq("id", membership.couple_id)
+        .maybeSingle();
+
+      if (coupleError) throw coupleError;
+
+      // Get partner info
+      const { data: members, error: membersError } = await supabase
+        .from("couple_members")
+        .select("user_id")
+        .eq("couple_id", membership.couple_id)
+        .neq("user_id", userId);
+
+      if (membersError) throw membersError;
+
+      let partnerProfile = null;
+      if (members && members.length > 0) {
+        const partnerId = members[0].user_id;
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("full_name, email")
+          .eq("id", partnerId)
+          .maybeSingle();
+
+        if (!profileError && profile) {
+          partnerProfile = {
+            user_id: partnerId,
+            full_name: profile.full_name || profile.email,
+            email: profile.email,
+          };
+        }
+      }
+
+      setCoupleData({
+        coupleId: membership.couple_id,
+        inviteCode: couple?.invite_code || "",
+        partner: partnerProfile,
+      });
+    } catch (error: any) {
+      console.error("Error fetching couple data:", error);
+    }
+  };
+
+  const generateInviteCode = () => {
+    const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let result = '';
+    for (let i = 0; i < 8; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+  };
+
+  const createCouple = async () => {
+    if (!user) return;
+    
+    try {
+      const code = generateInviteCode();
+      
+      const { data: newCouple, error: coupleError } = await supabase
+        .from("couples")
+        .insert({ invite_code: code })
+        .select()
+        .single();
+
+      if (coupleError) throw coupleError;
+
+      const { error: memberError } = await supabase
+        .from("couple_members")
+        .insert({ couple_id: newCouple.id, user_id: user.id });
+
+      if (memberError) throw memberError;
+
+      await fetchCoupleData(user.id);
+      
+      toast({
+        title: "Sanctuary Created! 💕",
+        description: "Share your invite code with your partner",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const joinCouple = async () => {
+    if (!user || !inviteCode) return;
+
+    try {
+      const { data: couple, error: coupleError } = await supabase
+        .from("couples")
+        .select("id")
+        .eq("invite_code", inviteCode.toUpperCase())
+        .maybeSingle();
+
+      if (coupleError || !couple) {
+        toast({
+          title: "Invalid Code",
+          description: "Please check the invite code and try again",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error: memberError } = await supabase
+        .from("couple_members")
+        .insert({ couple_id: couple.id, user_id: user.id });
+
+      if (memberError) {
+        if (memberError.code === '23505') {
+          toast({
+            title: "Already Joined",
+            description: "You're already part of this sanctuary",
+            variant: "destructive",
+          });
+        } else {
+          throw memberError;
+        }
+        return;
+      }
+
+      await fetchCoupleData(user.id);
+      setInviteCode("");
+      
+      toast({
+        title: "Connected! ❤️",
+        description: "You've joined your partner's sanctuary",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const copyInviteCode = () => {
+    if (coupleData?.inviteCode) {
+      navigator.clipboard.writeText(coupleData.inviteCode);
+      toast({
+        title: "Copied!",
+        description: "Invite code copied to clipboard",
+      });
+    }
+  };
+
+  const shareInvite = async () => {
+    if (!coupleData?.inviteCode) return;
+    
+    const inviteUrl = `${window.location.origin}/dashboard?code=${coupleData.inviteCode}`;
+    const shareText = `💕 Join me in our couples sanctuary!\n\nUse code: ${coupleData.inviteCode}\nOr click: ${inviteUrl}`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Join Our Sanctuary 💕',
+          text: shareText,
+        });
+      } catch (err) {
+        navigator.clipboard.writeText(shareText);
+        toast({
+          title: "Copied!",
+          description: "Invite link copied to clipboard",
+        });
+      }
+    } else {
+      navigator.clipboard.writeText(shareText);
+      toast({
+        title: "Copied!",
+        description: "Invite link copied to clipboard",
+      });
     }
   };
 
@@ -64,45 +288,6 @@ const Dashboard = () => {
       </div>
     );
   }
-
-  const features = [
-    {
-      icon: MessageCircle,
-      title: "Daily Notes",
-      description: "Morning whispers and evening blessings",
-      gradient: "from-primary/20 to-accent/20",
-    },
-    {
-      icon: Heart,
-      title: "Love Notes",
-      description: "Share your deepest affections",
-      gradient: "from-accent/20 to-secondary/20",
-    },
-    {
-      icon: Calendar,
-      title: "Memory Calendar",
-      description: "Cherish special moments together",
-      gradient: "from-secondary/20 to-primary/20",
-    },
-    {
-      icon: Smile,
-      title: "Mood Check-in",
-      description: "Express how you're feeling today",
-      gradient: "from-primary/20 to-secondary/20",
-    },
-    {
-      icon: Sparkles,
-      title: "Gratitude Wall",
-      description: "Celebrate what you appreciate",
-      gradient: "from-accent/20 to-primary/20",
-    },
-    {
-      icon: BookHeart,
-      title: "Shared Journal",
-      description: "Grow together through reflection",
-      gradient: "from-secondary/20 to-accent/20",
-    },
-  ];
 
   return (
     <>
@@ -131,97 +316,130 @@ const Dashboard = () => {
         </nav>
 
         <main className="container mx-auto px-4 py-8">
-          {/* Welcome Card */}
-          <Card className="p-8 mb-8 bg-gradient-to-br from-primary/5 to-accent/5 shadow-glow">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-full bg-gradient-romantic flex items-center justify-center">
-                <Users className="w-8 h-8 text-primary-foreground" />
-              </div>
-              <div>
-                <h2 className="text-3xl font-bold text-foreground">
-                  Welcome to Your Sanctuary
-                </h2>
-                <p className="text-muted-foreground">
-                  {user?.email}
+          {!coupleData ? (
+            // Not in a couple - show create/join options
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-12">
+                <h2 className="text-4xl font-bold mb-4">Create Your Sacred Space</h2>
+                <p className="text-muted-foreground text-lg">
+                  Start your journey together by creating or joining a sanctuary
                 </p>
               </div>
-            </div>
 
-            <div className="bg-card/50 rounded-lg p-6 border-2 border-dashed border-primary/20">
-              <div className="flex items-start gap-4">
-                <Star className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
-                <div>
-                  <h3 className="font-semibold text-lg mb-2">
-                    Your sanctuary is ready to grow
-                  </h3>
-                  <p className="text-muted-foreground">
-                    Explore the features below to deepen your connection, share moments, and celebrate your journey together.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          {/* Features Grid */}
-          <section>
-            <h2 className="text-2xl font-bold mb-6 text-foreground">
-              Your Sacred Tools
-            </h2>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {features.map((feature, index) => (
-                <Card
-                  key={index}
-                  className="group p-8 hover:shadow-glow transition-all duration-300 cursor-pointer border-2 hover:border-primary/30 bg-card/80 backdrop-blur"
-                >
-                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                    <feature.icon className="w-7 h-7 text-primary" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3 text-foreground">
-                    {feature.title}
-                  </h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {feature.description}
-                  </p>
-                  <div className="mt-4 pt-4 border-t border-border/50">
-                    <span className="text-sm text-primary font-medium">
-                      Coming soon
-                    </span>
+              <div className="grid md:grid-cols-2 gap-8">
+                {/* Create Sanctuary */}
+                <Card className="p-8 hover:shadow-glow transition-all">
+                  <div className="flex flex-col items-center text-center space-y-6">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                      <Heart className="w-8 h-8 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-semibold mb-2">Create Sanctuary</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Start a new space and invite your partner
+                      </p>
+                    </div>
+                    <Button onClick={createCouple} className="w-full" size="lg">
+                      <Heart className="w-4 h-4 mr-2" />
+                      Create Your Space
+                    </Button>
                   </div>
                 </Card>
-              ))}
-            </div>
-          </section>
 
-          {/* Quick Stats */}
-          <section className="mt-12">
-            <div className="grid md:grid-cols-3 gap-6">
-              <Card className="p-6 text-center bg-gradient-to-br from-primary/5 to-transparent">
-                <div className="text-4xl font-bold text-primary mb-2">0</div>
-                <div className="text-muted-foreground">Love Notes Sent</div>
-              </Card>
-              <Card className="p-6 text-center bg-gradient-to-br from-accent/5 to-transparent">
-                <div className="text-4xl font-bold text-accent mb-2">0</div>
-                <div className="text-muted-foreground">Memories Shared</div>
-              </Card>
-              <Card className="p-6 text-center bg-gradient-to-br from-secondary/5 to-transparent">
-                <div className="text-4xl font-bold text-secondary mb-2">0</div>
-                <div className="text-muted-foreground">Days Together</div>
-              </Card>
+                {/* Join Sanctuary */}
+                <Card className="p-8 hover:shadow-glow transition-all">
+                  <div className="flex flex-col items-center text-center space-y-6">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-secondary/20 to-primary/20 flex items-center justify-center">
+                      <Link2 className="w-8 h-8 text-secondary" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-semibold mb-2">Join Partner</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Enter your partner's invite code
+                      </p>
+                    </div>
+                    <div className="w-full space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="inviteCode">Invite Code</Label>
+                        <Input
+                          id="inviteCode"
+                          placeholder="Enter 8-character code"
+                          value={inviteCode}
+                          onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                          maxLength={8}
+                          className="text-center text-lg font-mono"
+                        />
+                      </div>
+                      <Button onClick={joinCouple} className="w-full" size="lg" disabled={inviteCode.length !== 8}>
+                        <Link2 className="w-4 h-4 mr-2" />
+                        Join Sanctuary
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              </div>
             </div>
-          </section>
+          ) : (
+            // In a couple - show sanctuary dashboard
+            <div className="max-w-4xl mx-auto space-y-8">
+              {/* Partner Connection Card */}
+              <Card className="p-8 bg-gradient-to-br from-primary/5 to-accent/5 shadow-glow">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-gradient-romantic flex items-center justify-center">
+                      <Users className="w-6 h-6 text-primary-foreground" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-semibold">Your Sanctuary</h2>
+                      <p className="text-muted-foreground">
+                        {coupleData.partner 
+                          ? `Connected with ${coupleData.partner.full_name}`
+                          : "Waiting for partner to join"}
+                      </p>
+                    </div>
+                  </div>
+                  {coupleData.partner && (
+                    <div className="flex items-center gap-3 px-4 py-2 bg-card/50 rounded-lg">
+                      <UserCircle className="w-5 h-5 text-primary" />
+                      <span className="font-medium">{coupleData.partner.full_name}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Invite Code Section */}
+                <div className="bg-card/50 rounded-lg p-6 border-2 border-dashed border-primary/20">
+                  <Label className="text-sm text-muted-foreground mb-2 block">
+                    {coupleData.partner ? "Your sanctuary code" : "Share this code with your partner"}
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={coupleData.inviteCode}
+                      readOnly
+                      className="font-mono text-lg font-semibold text-center"
+                    />
+                    <Button onClick={copyInviteCode} variant="outline" size="icon">
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                    <Button onClick={shareInvite} variant="outline" size="icon">
+                      <Share2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Features Coming Soon */}
+              {coupleData.partner && (
+                <Card className="p-8">
+                  <h3 className="text-2xl font-bold mb-6">Your Sacred Tools</h3>
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Heart className="w-16 h-16 mx-auto mb-4 text-primary/30" />
+                    <p className="text-lg">Love notes, daily check-ins, and more features coming soon!</p>
+                  </div>
+                </Card>
+              )}
+            </div>
+          )}
         </main>
-
-        {/* Footer */}
-        <footer className="border-t border-border/50 mt-16">
-          <div className="container mx-auto px-4 py-6">
-            <div className="text-center text-muted-foreground text-sm">
-              <p className="flex items-center justify-center gap-2">
-                Made with <Heart className="w-4 h-4 text-primary fill-primary" /> for couples
-              </p>
-            </div>
-          </div>
-        </footer>
       </div>
     </>
   );
