@@ -242,6 +242,26 @@ const Dashboard = () => {
       }
 
       await fetchCoupleData(user.id);
+
+      // Fallback: ensure UI flips to connected state immediately
+      try {
+        if (!coupleData) {
+          const { data: coupleRow } = await supabase
+            .from("couples")
+            .select("invite_code")
+            .eq("id", coupleId)
+            .maybeSingle();
+
+          setCoupleData({
+            coupleId,
+            inviteCode: coupleRow?.invite_code ?? "",
+            partner: null,
+          });
+        }
+      } catch (_) {
+        // no-op: UI will still update from fetchCoupleData
+      }
+
       setInviteCode("");
       
       toast({
@@ -249,8 +269,8 @@ const Dashboard = () => {
         description: t("connectedDesc"),
       });
       
-      // Redirect to dashboard to show the connected state
-      window.location.href = "/dashboard";
+      // Navigate using React Router and clear any invite code from the URL
+      navigate("/dashboard", { replace: true });
     } catch (error: any) {
       toast({
         title: t("error"),
