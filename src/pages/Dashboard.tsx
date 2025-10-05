@@ -214,12 +214,19 @@ const Dashboard = () => {
   const shareInvite = async () => {
     if (!coupleData?.inviteCode) return;
     
-    const shareText = `Join our sanctuary! Use this code: ${coupleData.inviteCode}\n\nOr visit: ${window.location.origin}/dashboard`;
+    const shareText = `💕 Join me in our couples sanctuary!
+
+1. Visit: ${window.location.origin}/dashboard
+2. Create an account or sign in
+3. Click "Join Your Partner"
+4. Enter this code: ${coupleData.inviteCode}
+
+Looking forward to connecting with you! ❤️`;
     
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Join Our Sanctuary',
+          title: 'Join Our Sanctuary 💕',
           text: shareText,
         });
       } catch (err) {
