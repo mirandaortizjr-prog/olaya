@@ -146,11 +146,23 @@ const Dashboard = () => {
         return;
       }
 
-      const { error: memberError } = await supabase
+      // Check if already a member to avoid duplicate constraint errors
+      const { data: existingMembership, error: existingError } = await supabase
         .from("couple_members")
-        .insert({ couple_id: couple.id, user_id: user.id });
+        .select("id")
+        .eq("couple_id", couple.id)
+        .eq("user_id", user.id)
+        .maybeSingle();
 
-      if (memberError) throw memberError;
+      if (existingError) throw existingError;
+
+      if (!existingMembership) {
+        const { error: memberError } = await supabase
+          .from("couple_members")
+          .insert({ couple_id: couple.id, user_id: user.id });
+
+        if (memberError) throw memberError;
+      }
 
       await fetchCoupleData(user.id);
       setInviteCode("");
