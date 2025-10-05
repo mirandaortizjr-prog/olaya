@@ -102,6 +102,44 @@ export type Database = {
           },
         ]
       }
+      love_notes: {
+        Row: {
+          content: string
+          couple_id: string
+          created_at: string
+          id: string
+          note_type: string
+          read_at: string | null
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          couple_id: string
+          created_at?: string
+          id?: string
+          note_type: string
+          read_at?: string | null
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          couple_id?: string
+          created_at?: string
+          id?: string
+          note_type?: string
+          read_at?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "love_notes_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mood_tracker: {
         Row: {
           couple_id: string
