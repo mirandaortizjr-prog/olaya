@@ -102,6 +102,44 @@ export type Database = {
           },
         ]
       }
+      mood_tracker: {
+        Row: {
+          couple_id: string
+          created_at: string
+          id: string
+          mood_type: string
+          note: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          id?: string
+          mood_type: string
+          note?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          id?: string
+          mood_type?: string
+          note?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mood_tracker_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

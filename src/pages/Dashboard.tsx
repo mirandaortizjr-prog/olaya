@@ -13,6 +13,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { QuickActions } from "@/components/QuickActions";
 import { RecentMessages } from "@/components/RecentMessages";
 import { DailyNotes } from "@/components/DailyNotes";
+import { MoodTracker } from "@/components/MoodTracker";
 import { requestNotificationPermission, showQuickMessageNotification } from "@/utils/notifications";
 import {
   Heart, 
@@ -612,6 +613,11 @@ const Dashboard = () => {
               {/* Quick Actions & Messages */}
               {coupleData.partner && user && (
                 <div className="space-y-6">
+                  <MoodTracker 
+                    coupleId={coupleData.coupleId} 
+                    userId={user.id}
+                    partnerName={coupleData.partner.full_name}
+                  />
                   <QuickActions coupleId={coupleData.coupleId} userId={user.id} />
                   <DailyNotes 
                     coupleId={coupleData.coupleId} 
