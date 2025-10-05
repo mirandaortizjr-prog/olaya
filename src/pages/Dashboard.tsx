@@ -18,6 +18,13 @@ import { LoveNotes } from "@/components/LoveNotes";
 import { MemoryCalendar } from "@/components/MemoryCalendar";
 import { CravingBoard } from "@/components/CravingBoard";
 import { MediaSharing } from "@/components/MediaSharing";
+import { DesireVault } from "@/components/DesireVault";
+import { SharedJournal } from "@/components/SharedJournal";
+import { RelationshipTimeline } from "@/components/RelationshipTimeline";
+import { LoveLanguageSelector } from "@/components/LoveLanguageSelector";
+import { PostsFeed } from "@/components/PostsFeed";
+import { CalmingTools } from "@/components/CalmingTools";
+import { useSubscription } from "@/hooks/useSubscription";
 import { requestNotificationPermission, showQuickMessageNotification } from "@/utils/notifications";
 import {
   Heart, 
@@ -31,7 +38,8 @@ import {
   Flame,
   Sparkles,
   Mail,
-  Brain
+  Brain,
+  Crown
 } from "lucide-react";
 
 import {
@@ -65,6 +73,7 @@ const Dashboard = () => {
   const { toast } = useToast();
   const { t, language } = useLanguage();
   const [searchParams] = useSearchParams();
+  const { isPremium, isLoading: subscriptionLoading, createCheckoutSession } = useSubscription(user?.id);
 
   useEffect(() => {
     // Check for invite code in URL
@@ -614,9 +623,40 @@ const Dashboard = () => {
                 </div>
               </Card>
 
+              {/* Subscription Status & Upgrade */}
+              {coupleData.partner && user && !subscriptionLoading && (
+                <Card className="p-6 bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Crown className={`w-6 h-6 ${isPremium ? 'text-yellow-500' : 'text-muted-foreground'}`} />
+                      <div>
+                        <h3 className="font-semibold">
+                          {isPremium ? 'Legacy Temple Member' : 'Everyday Sanctuary'}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {isPremium 
+                            ? 'Access to all premium features' 
+                            : 'Upgrade to unlock premium features like Desire Vault, Timeline & more'}
+                        </p>
+                      </div>
+                    </div>
+                    {!isPremium && (
+                      <Button 
+                        onClick={() => createCheckoutSession(user.email || '')}
+                        className="bg-gradient-to-r from-primary to-accent"
+                      >
+                        <Crown className="w-4 h-4 mr-2" />
+                        Upgrade - $9.99/mo
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              )}
+
               {/* Quick Actions & Messages */}
               {coupleData.partner && user && (
                 <div className="space-y-6">
+                  {/* Free Features */}
                   <MoodTracker 
                     coupleId={coupleData.coupleId} 
                     userId={user.id}
@@ -653,6 +693,51 @@ const Dashboard = () => {
                     userId={user.id} 
                     partnerName={coupleData.partner.full_name}
                   />
+
+                  {/* Premium Features */}
+                  {isPremium ? (
+                    <>
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <DesireVault 
+                          coupleId={coupleData.coupleId} 
+                          userId={user.id}
+                        />
+                        <LoveLanguageSelector 
+                          userId={user.id}
+                          partnerUserId={coupleData.partner.user_id}
+                        />
+                      </div>
+                      <SharedJournal 
+                        coupleId={coupleData.coupleId} 
+                        userId={user.id}
+                      />
+                      <RelationshipTimeline 
+                        coupleId={coupleData.coupleId} 
+                        userId={user.id}
+                      />
+                      <PostsFeed 
+                        coupleId={coupleData.coupleId} 
+                        userId={user.id}
+                      />
+                      <CalmingTools />
+                    </>
+                  ) : (
+                    <Card className="p-8 text-center bg-gradient-to-br from-primary/5 to-accent/5">
+                      <Crown className="w-16 h-16 mx-auto mb-4 text-primary" />
+                      <h3 className="text-2xl font-bold mb-2">Unlock Premium Features</h3>
+                      <p className="text-muted-foreground mb-6">
+                        Get access to Desire Vault, Shared Journal, Timeline, Love Languages, Posts, and Calming Tools
+                      </p>
+                      <Button 
+                        size="lg"
+                        onClick={() => createCheckoutSession(user.email || '')}
+                        className="bg-gradient-to-r from-primary to-accent"
+                      >
+                        <Crown className="w-5 h-5 mr-2" />
+                        Upgrade to Legacy Temple - $9.99/month
+                      </Button>
+                    </Card>
+                  )}
                 </div>
               )}
             </div>

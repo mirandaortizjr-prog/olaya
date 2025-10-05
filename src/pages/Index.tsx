@@ -61,20 +61,15 @@ const Index = () => {
   ];
 
   const premiumFeatures = [
-    "Desire Vault: Share fantasies and emotional cravings with layered privacy",
-    "Invisible Thread: Hidden messages that can be 'pulled' when needed",
-    "Voice & Video Whispers: Intimate audio/video with poetic overlays",
-    "Legacy Mode Calendar: Reflect on past years with media and prayers",
-    "Love Language Selector: Choose how you give/receive love daily",
-    "Shared Journal: Write reflections, prayers, and insights together",
-    "Relationship Timeline: Visual journey of your love story",
-    "Restoration Rituals: Prayers, covenant reminders, healing messages",
-    "Calming Tools: Breathing timers, soothing visuals, reset buttons",
-    "Sacred Vault: Advanced encryption, emotional tagging, media collections",
-    "Ritual of Deletion: Ceremonial way to release media with intention",
-    "Custom Prompts & Rituals: Tailored daily questions and ceremonies",
-    "Theme Customization: Choose visual and poetic themes",
-    "Priority Support & Legacy Export: Save your journey as a keepsake",
+    "Desire Vault: Share desires and goals with privacy controls",
+    "Love Language Selector: Discover and share your love languages",
+    "Shared Journal: Write reflections and thoughts together",
+    "Relationship Timeline: Track milestones and special moments",
+    "Posts Feed: Share moments with likes and interactions",
+    "Calming Tools: Breathing exercises, meditation, and soothing sounds",
+    "Voice & Video Whispers: Intimate audio/video messages (coming soon)",
+    "Legacy Mode Calendar: Enhanced memory calendar with rich features",
+    "Priority Support: Get help when you need it",
   ];
 
   return (
