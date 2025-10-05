@@ -16,6 +16,7 @@ import { DailyNotes } from "@/components/DailyNotes";
 import { MoodTracker } from "@/components/MoodTracker";
 import { LoveNotes } from "@/components/LoveNotes";
 import { MemoryCalendar } from "@/components/MemoryCalendar";
+import { CravingBoard } from "@/components/CravingBoard";
 import { requestNotificationPermission, showQuickMessageNotification } from "@/utils/notifications";
 import {
   Heart, 
@@ -616,6 +617,11 @@ const Dashboard = () => {
               {coupleData.partner && user && (
                 <div className="space-y-6">
                   <MoodTracker 
+                    coupleId={coupleData.coupleId} 
+                    userId={user.id}
+                    partnerName={coupleData.partner.full_name}
+                  />
+                  <CravingBoard 
                     coupleId={coupleData.coupleId} 
                     userId={user.id}
                     partnerName={coupleData.partner.full_name}

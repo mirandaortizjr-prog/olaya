@@ -64,6 +64,47 @@ export type Database = {
         }
         Relationships: []
       }
+      craving_board: {
+        Row: {
+          couple_id: string
+          craving_type: string
+          created_at: string
+          custom_message: string | null
+          fulfilled: boolean | null
+          fulfilled_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          couple_id: string
+          craving_type: string
+          created_at?: string
+          custom_message?: string | null
+          fulfilled?: boolean | null
+          fulfilled_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          couple_id?: string
+          craving_type?: string
+          created_at?: string
+          custom_message?: string | null
+          fulfilled?: boolean | null
+          fulfilled_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "craving_board_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_notes: {
         Row: {
           content: string
