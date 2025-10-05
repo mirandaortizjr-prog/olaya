@@ -92,32 +92,16 @@ const Dashboard = () => {
   };
 
   const createCouple = async () => {
-    if (!user) {
-      console.error("No user found");
-      return;
-    }
+    if (!user) return;
     
     try {
-      console.log("Starting couple creation for user:", user.id);
       const code = await generateInviteCode();
-      console.log("Generated invite code:", code);
       
-      const { data: couple, error: coupleError } = await supabase
+      const { error: coupleError } = await supabase
         .from("couples")
-        .insert({ invite_code: code })
-        .select()
-        .single();
+        .insert({ invite_code: code });
 
-      console.log("Couple creation result:", { couple, coupleError });
       if (coupleError) throw coupleError;
-
-      console.log("Inserting couple member:", { couple_id: couple.id, user_id: user.id });
-      const { error: memberError } = await supabase
-        .from("couple_members")
-        .insert({ couple_id: couple.id, user_id: user.id });
-
-      console.log("Member creation result:", { memberError });
-      if (memberError) throw memberError;
 
       await fetchCoupleData(user.id);
       
@@ -126,7 +110,6 @@ const Dashboard = () => {
         description: t("shareInviteCode"),
       });
     } catch (error: any) {
-      console.error("Error creating couple:", error);
       toast({
         title: t("error"),
         description: error.message,
