@@ -88,10 +88,10 @@ const Index = () => {
                 Your sacred space for connection, intimacy, and love
               </p>
               <div className="flex gap-4 justify-center lg:justify-start">
-                <Button size="lg" className="shadow-glow">
+                <Button size="lg" className="shadow-glow" onClick={() => window.location.href = '/auth'}>
                   Start Free
                 </Button>
-                <Button size="lg" variant="outline">
+                <Button size="lg" variant="outline" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
                   View Pricing
                 </Button>
               </div>
@@ -139,7 +139,7 @@ const Index = () => {
       </section>
 
       {/* Pricing Section */}
-      <section className="container mx-auto px-4 py-20">
+      <section className="container mx-auto px-4 py-20" id="pricing">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-4 text-foreground">
             Choose your journey
@@ -165,7 +165,7 @@ const Index = () => {
               </div>
             </div>
 
-            <Button size="lg" className="w-full mb-8">
+            <Button size="lg" className="w-full mb-8" onClick={() => window.location.href = '/auth'}>
               Start Your Sanctuary
             </Button>
 
@@ -198,7 +198,7 @@ const Index = () => {
               </div>
             </div>
 
-            <Button size="lg" variant="default" className="w-full mb-8 shadow-soft">
+            <Button size="lg" variant="default" className="w-full mb-8 shadow-soft" onClick={() => window.location.href = '/auth'}>
               Unlock the Temple
             </Button>
 
@@ -225,7 +225,7 @@ const Index = () => {
             <p className="text-xl text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
               Create your private sanctuary and start building deeper connections today
             </p>
-            <Button size="lg" variant="secondary" className="shadow-soft">
+            <Button size="lg" variant="secondary" className="shadow-soft" onClick={() => window.location.href = '/auth'}>
               Create Your Space
             </Button>
           </div>
