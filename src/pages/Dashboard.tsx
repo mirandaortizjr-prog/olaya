@@ -347,9 +347,21 @@ Looking forward to connecting with you! ❤️`;
                 </div>
               </div>
 
+              {!coupleData.partner && (
+                <div className="mb-6 p-4 bg-primary/10 rounded-lg border border-primary/20">
+                  <p className="text-sm font-medium mb-3 text-center">
+                    👋 Invite your partner to join your sanctuary
+                  </p>
+                  <Button onClick={shareInvite} className="w-full" size="lg">
+                    <Share2 className="w-5 h-5 mr-2" />
+                    Send Invite to Partner
+                  </Button>
+                </div>
+              )}
+
               <div className="bg-card/50 rounded-lg p-6 border-2 border-dashed border-primary/20">
                 <Label className="text-sm text-muted-foreground mb-2 block">
-                  {t("shareThisCode")}
+                  {coupleData.partner ? "Your sanctuary code" : "Share this code with your partner"}
                 </Label>
                 <div className="flex gap-2 mb-3">
                   <Input
@@ -361,10 +373,12 @@ Looking forward to connecting with you! ❤️`;
                     <Copy className="w-4 h-4" />
                   </Button>
                 </div>
-                <Button onClick={shareInvite} className="w-full" variant="default">
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Share Invite Link
-                </Button>
+                {coupleData.partner && (
+                  <Button onClick={shareInvite} className="w-full" variant="outline">
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share Invite Link
+                  </Button>
+                )}
               </div>
             </Card>
 
