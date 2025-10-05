@@ -66,6 +66,8 @@ const Dashboard = () => {
         .from("couple_members")
         .select("couple_id, couples(id, invite_code)")
         .eq("user_id", userId)
+        .order("joined_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (memberError) throw memberError;
@@ -95,6 +97,25 @@ const Dashboard = () => {
     if (!user) return;
     
     try {
+      // Prevent creating multiple sanctuaries for the same user
+      const { data: existing, error: existingErr } = await supabase
+        .from("couple_members")
+        .select("id")
+        .eq("user_id", user.id)
+        .limit(1)
+        .maybeSingle();
+
+      if (existingErr) throw existingErr;
+
+      if (existing) {
+        toast({
+          title: t("error"),
+          description: "You're already connected to a sanctuary.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const code = await generateInviteCode();
       
       const { error: coupleError } = await supabase
