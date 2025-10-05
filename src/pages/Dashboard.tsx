@@ -122,37 +122,21 @@ const Dashboard = () => {
 
       if (coupleError) throw coupleError;
 
-      // Get partner info
-      const { data: members, error: membersError } = await supabase
-        .from("couple_members")
-        .select("user_id")
-        .eq("couple_id", membership.couple_id)
-        .neq("user_id", userId);
+      // Get partner profile via RPC (bypasses RLS on couple_members)
+      const { data: partner, error: partnerError } = await supabase.rpc(
+        "get_partner_profile",
+        { c_id: membership.couple_id }
+      );
 
-      console.log("Members data:", members, "Error:", membersError);
-
-      if (membersError) throw membersError;
+      console.log("RPC partner result:", partner, "Error:", partnerError);
 
       let partnerProfile = null;
-      if (members && members.length > 0) {
-        const partnerId = members[0].user_id;
-        console.log("Fetching partner profile for:", partnerId);
-        
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("full_name, email")
-          .eq("id", partnerId)
-          .maybeSingle();
-
-        console.log("Partner profile:", profile, "Error:", profileError);
-
-        if (!profileError && profile) {
-          partnerProfile = {
-            user_id: partnerId,
-            full_name: profile.full_name || profile.email,
-            email: profile.email,
-          };
-        }
+      if (!partnerError && Array.isArray(partner) && partner.length > 0) {
+        partnerProfile = {
+          user_id: partner[0].user_id,
+          full_name: partner[0].full_name,
+          email: partner[0].email,
+        };
       }
 
       console.log("Setting couple data with partner:", partnerProfile);
