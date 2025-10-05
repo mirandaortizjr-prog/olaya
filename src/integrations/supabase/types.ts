@@ -48,18 +48,24 @@ export type Database = {
           created_at: string
           id: string
           invite_code: string
+          invite_code_expires_at: string | null
+          invite_code_used: boolean | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           id?: string
           invite_code: string
+          invite_code_expires_at?: string | null
+          invite_code_used?: boolean | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
           invite_code?: string
+          invite_code_expires_at?: string | null
+          invite_code_used?: boolean | null
           updated_at?: string
         }
         Relationships: []
@@ -581,7 +587,30 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      subscription_status: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          created_at: string | null
+          current_period_end: string | null
+          status: string | null
+          user_id: string | null
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string | null
+          current_period_end?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string | null
+          current_period_end?: string | null
+          status?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       find_couple_by_invite_code: {
@@ -592,6 +621,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_own_email: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_partner_profile: {
         Args: { c_id: string }
         Returns: {
@@ -599,6 +632,10 @@ export type Database = {
           full_name: string
           user_id: string
         }[]
+      }
+      refresh_invite_code: {
+        Args: { couple_uuid: string }
+        Returns: string
       }
     }
     Enums: {

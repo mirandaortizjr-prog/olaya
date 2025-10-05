@@ -16,8 +16,9 @@ export const useSubscription = (userId: string | undefined) => {
 
     const checkSubscription = async () => {
       try {
+        // Use secure view instead of direct table access
         const { data, error } = await supabase
-          .from('subscriptions')
+          .from('subscription_status')
           .select('*')
           .eq('user_id', userId)
           .maybeSingle();
@@ -51,9 +52,15 @@ export const useSubscription = (userId: string | undefined) => {
           table: 'subscriptions',
           filter: `user_id=eq.${userId}`,
         },
-        (payload) => {
-          console.log('Subscription updated:', payload);
-          const newStatus = (payload.new as any)?.status;
+        async () => {
+          // Re-fetch from secure view when subscription changes
+          const { data } = await supabase
+            .from('subscription_status')
+            .select('*')
+            .eq('user_id', userId)
+            .maybeSingle();
+          
+          const newStatus = data?.status;
           const isActive = newStatus === 'active' || newStatus === 'trialing';
           setIsPremium(isActive);
         }
