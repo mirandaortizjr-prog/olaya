@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Heart, Sparkles, Zap, Coffee, Mountain, AlertCircle, Moon, Gift, Flame, Battery } from "lucide-react";
+import { Heart, Sparkles, Zap, Coffee, Mountain, AlertCircle, Moon, Gift, Flame, Battery, Frown, CloudRain, Laugh, Annoyed, HeartCrack, Brain, Smile } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +28,14 @@ const moodConfigs = [
   { type: 'loving', icon: Flame, color: 'bg-red-500/10 hover:bg-red-500/20 border-red-500/30 text-red-600', emoji: '❤️' },
   { type: 'peaceful', icon: Moon, color: 'bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/30 text-blue-600', emoji: '🌙' },
   { type: 'excited', icon: Zap, color: 'bg-orange-500/10 hover:bg-orange-500/20 border-orange-500/30 text-orange-600', emoji: '⚡' },
-  { type: 'stressed', icon: AlertCircle, color: 'bg-purple-500/10 hover:bg-purple-500/20 border-purple-500/30 text-purple-600', emoji: '😰' },
+  { type: 'happy', icon: Laugh, color: 'bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/30 text-amber-600', emoji: '😊' },
+  { type: 'sad', icon: Frown, color: 'bg-indigo-500/10 hover:bg-indigo-500/20 border-indigo-500/30 text-indigo-600', emoji: '😢' },
+  { type: 'worried', icon: Brain, color: 'bg-violet-500/10 hover:bg-violet-500/20 border-violet-500/30 text-violet-600', emoji: '😟' },
+  { type: 'anxious', icon: CloudRain, color: 'bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/30 text-slate-600', emoji: '😰' },
+  { type: 'frustrated', icon: Annoyed, color: 'bg-red-600/10 hover:bg-red-600/20 border-red-600/30 text-red-700', emoji: '😤' },
+  { type: 'heartbroken', icon: HeartCrack, color: 'bg-pink-600/10 hover:bg-pink-600/20 border-pink-600/30 text-pink-700', emoji: '💔' },
+  { type: 'content', icon: Smile, color: 'bg-teal-500/10 hover:bg-teal-500/20 border-teal-500/30 text-teal-600', emoji: '😌' },
+  { type: 'stressed', icon: AlertCircle, color: 'bg-purple-500/10 hover:bg-purple-500/20 border-purple-500/30 text-purple-600', emoji: '😫' },
   { type: 'needSpace', icon: Mountain, color: 'bg-gray-500/10 hover:bg-gray-500/20 border-gray-500/30 text-gray-600', emoji: '🌲' },
   { type: 'grateful', icon: Gift, color: 'bg-green-500/10 hover:bg-green-500/20 border-green-500/30 text-green-600', emoji: '🙏' },
   { type: 'romantic', icon: Heart, color: 'bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-600', emoji: '🌹' },
@@ -192,7 +199,7 @@ export const MoodTracker = ({ coupleId, userId, partnerName }: MoodTrackerProps)
         {/* Mood Selection */}
         <div className="space-y-4">
           <p className="text-sm font-medium">{t('howAreYouFeeling')}</p>
-          <div className="grid grid-cols-5 gap-2">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
             {moodConfigs.map((mood) => (
               <Button
                 key={mood.type}
