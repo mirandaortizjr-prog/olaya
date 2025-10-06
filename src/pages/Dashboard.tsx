@@ -510,41 +510,41 @@ const Dashboard = () => {
         <meta name="description" content="Your private couples sanctuary for daily connection, love notes, and shared moments" />
       </header>
 
-      <div className="min-h-screen bg-gradient-warm">
-        {/* Navigation Header */}
-        <nav className="border-b border-border/50 bg-card/80 backdrop-blur sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-4">
+      <div className="min-h-screen bg-gradient-cool">
+        {/* Modern Navigation Header */}
+        <nav className="border-b border-border bg-card backdrop-blur-xl sticky top-0 z-50 shadow-soft">
+          <div className="max-w-7xl mx-auto px-4 py-3">
             <div className="flex justify-between items-center">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <button 
                   onClick={() => setShowProfileSettings(!showProfileSettings)}
-                  className="focus:outline-none hover:opacity-80 transition-opacity"
+                  className="focus:outline-none hover:scale-105 transition-transform"
                 >
-                  <Avatar className="h-10 w-10">
+                  <Avatar className="h-11 w-11 ring-2 ring-primary/20">
                     <AvatarImage src={userProfile?.avatar_url || undefined} alt={userProfile?.full_name || user?.email} />
-                    <AvatarFallback className="bg-primary/10 text-primary">
+                    <AvatarFallback className="bg-gradient-romantic text-white font-semibold">
                       {userProfile?.full_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
                     </AvatarFallback>
                   </Avatar>
                 </button>
-                <h1 className="text-2xl font-bold bg-gradient-romantic bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold bg-gradient-romantic bg-clip-text text-transparent hidden sm:block">
                   {t("yourSanctuary")}
                 </h1>
               </div>
-              <div className="flex gap-2 items-center">
+              <div className="flex gap-3 items-center">
                 <LanguageSwitcher />
-                <Button variant="outline" size="sm" onClick={handleSignOut}>
-                  <LogOut className="w-4 h-4 mr-2" />
-                  {t("signOut")}
+                <Button variant="ghost" size="sm" onClick={handleSignOut} className="hover:bg-muted">
+                  <LogOut className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">{t("signOut")}</span>
                 </Button>
               </div>
             </div>
           </div>
         </nav>
 
-        <main className="container mx-auto px-4 py-8">
+        <main className="max-w-7xl mx-auto px-4 py-6">
           {showProfileSettings && user && (
-            <Card className="max-w-md mx-auto mb-6">
+            <Card className="max-w-md mx-auto mb-6 shadow-medium border-primary/10">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold">Profile Settings</h3>
@@ -633,100 +633,88 @@ const Dashboard = () => {
             </div>
           ) : (
             // In a couple - show sanctuary dashboard
-            <div className="max-w-4xl mx-auto space-y-8">
-              {/* Partner Connection Card */}
-              <Card className="p-8 bg-gradient-to-br from-primary/5 to-accent/5 shadow-glow">
-                <div className="flex items-center justify-between mb-6">
+            <div className="space-y-6">
+              {/* Header Card - Partner Connection */}
+              <Card className="p-6 bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 shadow-medium border-primary/20">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-gradient-romantic flex items-center justify-center">
-                      <Users className="w-6 h-6 text-primary-foreground" />
+                    <div className="w-14 h-14 rounded-full bg-gradient-romantic flex items-center justify-center shadow-glow">
+                      <Users className="w-7 h-7 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-semibold">Your Sanctuary</h2>
-                      <p className="text-muted-foreground">
+                      <h2 className="text-xl font-bold">Your Sanctuary</h2>
+                      <p className="text-sm text-muted-foreground">
                         {coupleData.partner 
                           ? `Connected with ${coupleData.partner.full_name}`
                           : "Waiting for partner to join"}
                       </p>
                     </div>
                   </div>
-                  {coupleData.partner && (
-                    <div className="flex items-center gap-3 px-4 py-2 bg-card/50 rounded-lg">
-                      <UserCircle className="w-5 h-5 text-primary" />
-                      <span className="font-medium">{coupleData.partner.full_name}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Invite Code Section - Only show if no partner yet */}
-                {!coupleData.partner && (
-                  <div className="bg-card/50 rounded-lg p-6 border-2 border-dashed border-primary/20">
-                    <Label className="text-sm text-muted-foreground mb-2 block">
-                      Share this code with your partner
-                    </Label>
-                    <div className="flex gap-2">
-                      <Input
-                        value={coupleData.inviteCode}
-                        readOnly
-                        className="font-mono text-lg font-semibold text-center"
-                      />
-                      <Button onClick={copyInviteCode} variant="outline" size="icon">
-                        <Copy className="w-4 h-4" />
-                      </Button>
-                      <Button onClick={shareInvite} variant="outline" size="icon">
-                        <Share2 className="w-4 h-4" />
-                      </Button>
-                    </div>
+                  
+                  <div className="flex items-center gap-3 w-full sm:w-auto">
+                    {!coupleData.partner && coupleData.inviteCode && (
+                      <div className="flex gap-2 flex-1 sm:flex-initial">
+                        <Input
+                          value={coupleData.inviteCode}
+                          readOnly
+                          className="font-mono text-sm font-semibold text-center bg-card"
+                        />
+                        <Button onClick={copyInviteCode} variant="outline" size="icon">
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                        <Button onClick={shareInvite} variant="outline" size="icon">
+                          <Share2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )}
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                          Leave
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Leave this sanctuary?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will remove your connection. You can rejoin later with an invite code.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={leaveCouple}>Leave</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
-                )}
-
-                <div className="mt-6 flex justify-end">
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="destructive">
-                        Leave Sanctuary
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Leave this sanctuary?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This will remove your connection to this sanctuary. You can rejoin later with an invite code.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={leaveCouple}>Leave</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
                 </div>
               </Card>
 
-              {/* Subscription Status & Upgrade */}
+              {/* Subscription Card */}
               {coupleData.partner && user && !subscriptionLoading && (
-                <Card className="p-6 bg-gradient-to-br from-primary/10 to-accent/10 border-primary/20">
-                  <div className="flex items-center justify-between">
+                <Card className="p-5 bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20 shadow-soft">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                       <Crown className={`w-6 h-6 ${isPremium ? 'text-yellow-500' : 'text-muted-foreground'}`} />
                       <div>
-                        <h3 className="font-semibold">
+                        <h3 className="font-semibold text-sm">
                           {isPremium ? 'Legacy Temple Member' : 'Everyday Sanctuary'}
                         </h3>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                           {isPremium 
-                            ? 'Access to all premium features' 
-                            : 'Upgrade to unlock premium features like Desire Vault, Timeline & more'}
+                            ? 'All premium features unlocked' 
+                            : 'Upgrade for premium features'}
                         </p>
                       </div>
                     </div>
                     {!isPremium && (
                       <Button 
                         onClick={() => createCheckoutSession(user.email || '')}
-                        className="bg-gradient-to-r from-primary to-accent"
+                        size="sm"
+                        className="bg-gradient-romantic shadow-soft w-full sm:w-auto"
                       >
                         <Crown className="w-4 h-4 mr-2" />
-                        Upgrade - $9.99/mo
+                        Upgrade $9.99/mo
                       </Button>
                     )}
                   </div>
@@ -738,92 +726,114 @@ const Dashboard = () => {
                 <LoveMeter coupleId={coupleData.coupleId} />
               )}
 
-              {/* Quick Actions & Messages */}
+              {/* Main Content Grid */}
               {coupleData.partner && user && (
-                <div className="space-y-6">
-                  {/* Free Features */}
-                  <MoodTracker 
-                    coupleId={coupleData.coupleId} 
-                    userId={user.id}
-                    partnerName={coupleData.partner.full_name}
-                  />
-                  <CravingBoard 
-                    coupleId={coupleData.coupleId} 
-                    userId={user.id}
-                    partnerName={coupleData.partner.full_name}
-                  />
-                  <MediaSharing 
-                    coupleId={coupleData.coupleId} 
-                    userId={user.id}
-                    partnerName={coupleData.partner.full_name}
-                  />
-                  <MemoryCalendar 
-                    coupleId={coupleData.coupleId} 
-                    userId={user.id}
-                    partnerName={coupleData.partner.full_name}
-                  />
-                  <LoveNotes 
-                    coupleId={coupleData.coupleId} 
-                    userId={user.id}
-                    partnerName={coupleData.partner.full_name}
-                  />
-                  <QuickActions coupleId={coupleData.coupleId} userId={user.id} />
-                  <DailyNotes 
-                    coupleId={coupleData.coupleId} 
-                    userId={user.id}
-                    partnerName={coupleData.partner.full_name}
-                  />
-                  <RecentMessages 
-                    coupleId={coupleData.coupleId} 
-                    userId={user.id} 
-                    partnerName={coupleData.partner.full_name}
-                  />
+                <div className="grid lg:grid-cols-2 gap-6">
+                  {/* Column 1 - Interactive Features */}
+                  <div className="space-y-6">
+                    <QuickActions coupleId={coupleData.coupleId} userId={user.id} />
+                    <MoodTracker 
+                      coupleId={coupleData.coupleId} 
+                      userId={user.id}
+                      partnerName={coupleData.partner.full_name}
+                    />
+                    <LoveNotes 
+                      coupleId={coupleData.coupleId} 
+                      userId={user.id}
+                      partnerName={coupleData.partner.full_name}
+                    />
+                    <CravingBoard 
+                      coupleId={coupleData.coupleId} 
+                      userId={user.id}
+                      partnerName={coupleData.partner.full_name}
+                    />
+                  </div>
 
-                  {/* Premium Features */}
-                  {isPremium ? (
-                    <>
-                      <div className="grid md:grid-cols-2 gap-6">
-                        <DesireVault 
-                          coupleId={coupleData.coupleId} 
-                          userId={user.id}
-                        />
-                        <LoveLanguageSelector 
-                          userId={user.id}
-                          partnerUserId={coupleData.partner.user_id}
-                        />
-                      </div>
-                      <SharedJournal 
-                        coupleId={coupleData.coupleId} 
-                        userId={user.id}
-                      />
-                      <RelationshipTimeline 
-                        coupleId={coupleData.coupleId} 
-                        userId={user.id}
-                      />
-                      <PostsFeed 
-                        coupleId={coupleData.coupleId} 
-                        userId={user.id}
-                      />
-                      <CalmingTools />
-                    </>
-                  ) : (
-                    <Card className="p-8 text-center bg-gradient-to-br from-primary/5 to-accent/5">
-                      <Crown className="w-16 h-16 mx-auto mb-4 text-primary" />
-                      <h3 className="text-2xl font-bold mb-2">Unlock Premium Features</h3>
-                      <p className="text-muted-foreground mb-6">
-                        Get access to Desire Vault, Shared Journal, Timeline, Love Languages, Posts, and Calming Tools
-                      </p>
-                      <Button 
-                        size="lg"
-                        onClick={() => createCheckoutSession(user.email || '')}
-                        className="bg-gradient-to-r from-primary to-accent"
-                      >
-                        <Crown className="w-5 h-5 mr-2" />
-                        Upgrade to Legacy Temple - $9.99/month
-                      </Button>
-                    </Card>
-                  )}
+                  {/* Column 2 - Memory & Communication */}
+                  <div className="space-y-6">
+                    <RecentMessages 
+                      coupleId={coupleData.coupleId} 
+                      userId={user.id} 
+                      partnerName={coupleData.partner.full_name}
+                    />
+                    <DailyNotes 
+                      coupleId={coupleData.coupleId} 
+                      userId={user.id}
+                      partnerName={coupleData.partner.full_name}
+                    />
+                    <MemoryCalendar 
+                      coupleId={coupleData.coupleId} 
+                      userId={user.id}
+                      partnerName={coupleData.partner.full_name}
+                    />
+                    <MediaSharing 
+                      coupleId={coupleData.coupleId} 
+                      userId={user.id}
+                      partnerName={coupleData.partner.full_name}
+                    />
+                  </div>
                 </div>
+              )}
+
+              {/* Premium Features Section */}
+              {coupleData.partner && user && isPremium && (
+                <div className="space-y-6 mt-8">
+                  <div className="flex items-center gap-3 px-4 py-2 bg-gradient-romantic rounded-lg w-fit shadow-glow">
+                    <Crown className="w-5 h-5 text-white" />
+                    <span className="font-semibold text-white">Premium Features</span>
+                  </div>
+
+                  <div className="grid lg:grid-cols-2 gap-6">
+                    <DesireVault 
+                      coupleId={coupleData.coupleId} 
+                      userId={user.id}
+                    />
+                    <LoveLanguageSelector 
+                      userId={user.id}
+                      partnerUserId={coupleData.partner.user_id}
+                    />
+                  </div>
+                  
+                  <SharedJournal 
+                    coupleId={coupleData.coupleId} 
+                    userId={user.id}
+                  />
+                  
+                  <RelationshipTimeline 
+                    coupleId={coupleData.coupleId} 
+                    userId={user.id}
+                  />
+                  
+                  <PostsFeed 
+                    coupleId={coupleData.coupleId} 
+                    userId={user.id}
+                  />
+                  
+                  <CalmingTools />
+                </div>
+              )}
+
+              {/* Upgrade CTA for Non-Premium */}
+              {coupleData.partner && user && !isPremium && (
+                <Card className="p-10 text-center bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 shadow-glow border-primary/20">
+                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-romantic flex items-center justify-center shadow-glow">
+                    <Crown className="w-10 h-10 text-white" />
+                  </div>
+                  <h3 className="text-3xl font-bold mb-3 bg-gradient-romantic bg-clip-text text-transparent">
+                    Unlock Premium Features
+                  </h3>
+                  <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
+                    Access Desire Vault, Shared Journal, Relationship Timeline, Love Languages, Posts Feed, and Calming Tools
+                  </p>
+                  <Button 
+                    size="lg"
+                    onClick={() => createCheckoutSession(user.email || '')}
+                    className="bg-gradient-romantic shadow-glow hover:scale-105 transition-transform"
+                  >
+                    <Crown className="w-5 h-5 mr-2" />
+                    Upgrade to Legacy Temple - $9.99/month
+                  </Button>
+                </Card>
               )}
             </div>
           )}
