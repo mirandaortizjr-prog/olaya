@@ -50,27 +50,28 @@ const Index = () => {
 
   const freeFeatures = [
     "Daily Notes: Morning whispers, evening blessings, shared reflections",
-    "Mood & Desire Check-ins: Emoji or slider-based emotional states",
-    "Love Notes: Flirtation, devotion, and affirmations",
-    "Craving Board: Requests for hugs, chocolate, or emotional closeness",
-    "Memory Calendar: Add anniversaries and special dates",
-    "Gratitude Rituals: Daily thank-you notes and affirmations",
-    "Gentle Asks: Quick requests and daily coordination",
-    "Basic Media Sharing: Send private photos and videos",
-    "Kind Disagreement Prompts: Structure for respectful conflict",
-    "Mood Tracker: Share emotional states like 'Tender' or 'Playful'",
+    "Love Notes: Flirtation, devotion, and affirmations between partners",
+    "Mood Tracker: Share emotional states with 13 moods including intimate feelings",
+    "Craving Board: Request hugs, chocolate, emotional support, and intimate desires",
+    "Memory Calendar: Track anniversaries, special dates, and recurring events",
+    "Quick Actions: Send instant messages like winks, kisses, and love notes",
+    "Love Meter: Track daily interactions and weekly connection strength",
+    "Basic Media Sharing: Share private photos and videos with your partner",
+    "Profile Management: Customize avatars and personal information",
+    "Real-time Sync: Instant updates when your partner adds content",
   ];
 
   const premiumFeatures = [
-    "Desire Vault: Share desires and goals with privacy controls",
+    "Desire Vault: Share intimate fantasies, fetishes & desires with 10 categories",
+    "Privacy Controls: Toggle between private desires and shared with partner",
+    "Fulfilled Tracking: Mark desires as completed with timestamps",
     "Love Language Selector: Discover and share your love languages",
-    "Shared Journal: Write reflections and thoughts together",
-    "Relationship Timeline: Track milestones and special moments",
-    "Posts Feed: Share moments with likes and interactions",
-    "Calming Tools: Breathing exercises, meditation, and soothing sounds",
-    "Voice & Video Whispers: Intimate audio/video messages (coming soon)",
-    "Legacy Mode Calendar: Enhanced memory calendar with rich features",
-    "Priority Support: Get help when you need it",
+    "Shared Journal: Write reflections and thoughts together with mood tracking",
+    "Relationship Timeline: Document milestones with photos and rich descriptions",
+    "Posts Feed: Share moments with likes, comments, and media galleries",
+    "Calming Tools: Breathing exercises, meditation timers, and soothing sounds",
+    "Enhanced Categories: 10 intimate desire categories with custom emojis",
+    "Priority Support: Get help when you need it most",
   ];
 
   return (
