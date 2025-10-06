@@ -26,6 +26,7 @@ import { RelationshipTimeline } from "@/components/RelationshipTimeline";
 import { LoveLanguageSelector } from "@/components/LoveLanguageSelector";
 import { PostsFeed } from "@/components/PostsFeed";
 import { CalmingTools } from "@/components/CalmingTools";
+import { LoveMeter } from "@/components/LoveMeter";
 import { useSubscription } from "@/hooks/useSubscription";
 import { requestNotificationPermission, showQuickMessageNotification, subscribeToPushNotifications } from "@/utils/notifications";
 import {
@@ -730,6 +731,11 @@ const Dashboard = () => {
                     )}
                   </div>
                 </Card>
+              )}
+
+              {/* Love-O-Meter */}
+              {coupleData.partner && (
+                <LoveMeter coupleId={coupleData.coupleId} />
               )}
 
               {/* Quick Actions & Messages */}
