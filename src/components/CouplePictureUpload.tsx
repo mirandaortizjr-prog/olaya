@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +18,11 @@ export const CouplePictureUpload = ({
 }: CouplePictureUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleClick = () => {
+    fileInputRef.current?.click();
+  };
 
   const uploadCouplePicture = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -81,17 +86,22 @@ export const CouplePictureUpload = ({
             💑
           </AvatarFallback>
         </Avatar>
-        <label
-          htmlFor="couple-picture-upload"
-          className="absolute bottom-0 right-0 p-2 rounded-full bg-primary text-white cursor-pointer hover:bg-primary/90 transition-all shadow-lg group-hover:scale-110"
+        <Button
+          type="button"
+          size="icon"
+          className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg group-hover:scale-110"
+          onClick={handleClick}
+          disabled={uploading}
+          aria-label="Upload couple picture"
         >
           {uploading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <Camera className="h-4 w-4" />
           )}
-        </label>
+        </Button>
         <input
+          ref={fileInputRef}
           id="couple-picture-upload"
           type="file"
           accept="image/*"
