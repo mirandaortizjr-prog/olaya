@@ -186,8 +186,17 @@ export const MemoryCalendar = ({ coupleId, userId, partnerName }: MemoryCalendar
   const upcomingMemories = memories.filter(m => {
     const eventDate = new Date(m.date);
     const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    eventDate.setHours(0, 0, 0, 0);
     return eventDate >= now;
   }).slice(0, 5);
+
+  // For all memories view, show in reverse chronological order (most recent first)
+  const allMemoriesSorted = [...memories].sort((a, b) => {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    return dateB.getTime() - dateA.getTime();
+  });
 
   return (
     <Card>
@@ -381,7 +390,7 @@ export const MemoryCalendar = ({ coupleId, userId, partnerName }: MemoryCalendar
             </div>
           ) : (
             <div className="space-y-2">
-              {(showAllMemories ? memories : upcomingMemories).map((memory) => {
+              {(showAllMemories ? allMemoriesSorted : upcomingMemories).map((memory) => {
                 const config = getEventConfig(memory.event_type);
                 return (
                   <div
