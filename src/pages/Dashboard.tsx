@@ -30,6 +30,7 @@ import { CalmingTools } from "@/components/CalmingTools";
 import { LoveMeter } from "@/components/LoveMeter";
 import { useSubscription } from "@/hooks/useSubscription";
 import { requestNotificationPermission, showQuickMessageNotification, subscribeToPushNotifications } from "@/utils/notifications";
+import { ThemeSettings } from "@/components/ThemeSettings";
 import {
   Heart, 
   LogOut, 
@@ -43,7 +44,8 @@ import {
   Sparkles,
   Mail,
   Brain,
-  Crown
+  Crown,
+  Settings
 } from "lucide-react";
 
 import {
@@ -82,6 +84,7 @@ const Dashboard = () => {
   const [editingAnniversary, setEditingAnniversary] = useState(false);
   const [sanctuaryName, setSanctuaryName] = useState("");
   const [anniversaryDate, setAnniversaryDate] = useState("");
+  const [showThemeSettings, setShowThemeSettings] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t, language } = useLanguage();
@@ -614,6 +617,14 @@ const Dashboard = () => {
               </div>
               <div className="flex gap-3 items-center">
                 <LanguageSwitcher />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowThemeSettings(true)} 
+                  className="hover:bg-muted"
+                >
+                  <Settings className="w-4 h-4" />
+                </Button>
                 <Button variant="ghost" size="sm" onClick={handleSignOut} className="hover:bg-muted">
                   <LogOut className="w-4 h-4 sm:mr-2" />
                   <span className="hidden sm:inline">{t("signOut")}</span>
@@ -624,6 +635,8 @@ const Dashboard = () => {
         </nav>
 
         <main className="max-w-7xl mx-auto px-4 py-6">
+          <ThemeSettings open={showThemeSettings} onOpenChange={setShowThemeSettings} />
+          
           {showProfileSettings && user && (
             <Card className="max-w-md mx-auto mb-6 shadow-medium border-primary/10">
               <div className="p-6">

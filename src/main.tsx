@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "sonner";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import "./index.css";
 
 const rootElement = document.getElementById("root");
@@ -16,8 +17,9 @@ if (!rootElement) throw new Error("Root element not found");
 
 createRoot(rootElement).render(
   <BrowserRouter>
-    <LanguageProvider>
-      <Routes>
+    <ThemeProvider>
+      <LanguageProvider>
+        <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/dashboard" element={<Dashboard />} />
@@ -29,5 +31,6 @@ createRoot(rootElement).render(
       <Toaster />
       <SonnerToaster position="top-center" />
     </LanguageProvider>
+    </ThemeProvider>
   </BrowserRouter>,
 );

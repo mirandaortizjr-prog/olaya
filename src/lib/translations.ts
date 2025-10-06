@@ -32,6 +32,11 @@ export const translations = {
     // Dashboard page
     yourSanctuary: "Your Sanctuary",
     signOut: "Sign Out",
+    themeSettings: "Theme Settings",
+    themeSettingsDescription: "Choose a color palette that reflects your style",
+    paletteDefault: "Default (Romantic)",
+    paletteFeminine: "Feminine (Soft Pink)",
+    paletteMasculine: "Masculine (Cool Blue)",
     createYourSpace: "Create Your Space",
     createSpaceDesc: "Start a new sanctuary and invite your partner",
     createSanctuaryBtn: "Create Sanctuary",
