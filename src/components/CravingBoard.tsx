@@ -33,6 +33,8 @@ const cravingTypes = [
   { type: 'cuddle', icon: Heart, color: 'bg-pink-500/20 hover:bg-pink-500/30 text-pink-600', emoji: '🥰' },
   { type: 'massage', icon: Sparkles, color: 'bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-600', emoji: '💆' },
   { type: 'date', icon: Calendar, color: 'bg-red-500/20 hover:bg-red-500/30 text-red-600', emoji: '💑' },
+  { type: 'yumyum', icon: Heart, color: 'bg-fuchsia-500/20 hover:bg-fuchsia-500/30 text-fuchsia-600', emoji: '🍑' },
+  { type: 'oralSex', icon: Heart, color: 'bg-rose-600/20 hover:bg-rose-600/30 text-rose-700', emoji: '👅' },
   { type: 'surprise', icon: PartyPopper, color: 'bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-600', emoji: '🎉' },
   { type: 'custom', icon: Sparkles, color: 'bg-gray-500/20 hover:bg-gray-500/30 text-gray-600', emoji: '✨' },
 ];
