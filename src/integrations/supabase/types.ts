@@ -51,6 +51,7 @@ export type Database = {
           invite_code: string
           invite_code_expires_at: string | null
           invite_code_used: boolean | null
+          name: string | null
           updated_at: string
         }
         Insert: {
@@ -60,6 +61,7 @@ export type Database = {
           invite_code: string
           invite_code_expires_at?: string | null
           invite_code_used?: boolean | null
+          name?: string | null
           updated_at?: string
         }
         Update: {
@@ -69,6 +71,7 @@ export type Database = {
           invite_code?: string
           invite_code_expires_at?: string | null
           invite_code_used?: boolean | null
+          name?: string | null
           updated_at?: string
         }
         Relationships: []

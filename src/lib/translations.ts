@@ -218,6 +218,10 @@ export const translations = {
     category_romantic: "Romantic",
     category_adventure: "Adventure",
     category_experience: "Experience",
+    sanctuaryNamePlaceholder: "Enter sanctuary name...",
+    sanctuaryNameUpdated: "Sanctuary name updated successfully",
+    clickToEditName: "Click to edit sanctuary name",
+    save: "Save",
   },
   es: {
     // Index page
@@ -438,6 +442,10 @@ export const translations = {
     category_romantic: "Romántico",
     category_adventure: "Aventura",
     category_experience: "Experiencia",
+    sanctuaryNamePlaceholder: "Ingresa el nombre del santuario...",
+    sanctuaryNameUpdated: "Nombre del santuario actualizado exitosamente",
+    clickToEditName: "Haz clic para editar el nombre del santuario",
+    save: "Guardar",
   },
 };
 

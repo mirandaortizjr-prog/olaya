@@ -60,6 +60,7 @@ import {
 interface CoupleData {
   coupleId: string;
   inviteCode: string;
+  sanctuaryName: string;
   partner: {
     user_id: string;
     full_name: string;
@@ -74,6 +75,8 @@ const Dashboard = () => {
   const [inviteCode, setInviteCode] = useState("");
   const [userProfile, setUserProfile] = useState<any>(null);
   const [showProfileSettings, setShowProfileSettings] = useState(false);
+  const [editingSanctuaryName, setEditingSanctuaryName] = useState(false);
+  const [sanctuaryName, setSanctuaryName] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t, language } = useLanguage();
@@ -178,10 +181,10 @@ const Dashboard = () => {
         return;
       }
 
-      // Fetch couple data (without invite_code for security)
+      // Fetch couple data (with sanctuary name)
       const { data: couple, error: coupleError } = await supabase
         .from("couples")
-        .select("id, created_by")
+        .select("id, created_by, name")
         .eq("id", membership.couple_id)
         .maybeSingle();
 
@@ -226,8 +229,10 @@ const Dashboard = () => {
       setCoupleData({
         coupleId: membership.couple_id,
         inviteCode: inviteCode,
+        sanctuaryName: couple?.name || 'Our Sanctuary',
         partner: partnerProfile,
       });
+      setSanctuaryName(couple?.name || 'Our Sanctuary');
     } catch (error: any) {
       console.error("Error fetching couple data:", error);
     }
@@ -429,6 +434,32 @@ const Dashboard = () => {
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/");
+  };
+
+  const updateSanctuaryName = async () => {
+    if (!coupleData || !sanctuaryName.trim()) return;
+    
+    try {
+      const { error } = await supabase
+        .from('couples')
+        .update({ name: sanctuaryName.trim() })
+        .eq('id', coupleData.coupleId);
+      
+      if (error) throw error;
+      
+      setCoupleData({ ...coupleData, sanctuaryName: sanctuaryName.trim() });
+      setEditingSanctuaryName(false);
+      toast({
+        title: t('success'),
+        description: t('sanctuaryNameUpdated'),
+      });
+    } catch (error: any) {
+      toast({
+        title: t('error'),
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
   };
 
   const showQuickMessageToast = (messageType: string) => {
@@ -639,14 +670,48 @@ const Dashboard = () => {
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div className="w-14 h-14 rounded-full bg-gradient-romantic flex items-center justify-center shadow-glow">
-                      <Users className="w-7 h-7 text-white" />
+                      <Heart className="w-7 h-7 text-white fill-white" />
                     </div>
-                    <div>
-                      <h2 className="text-xl font-bold">Your Sanctuary</h2>
+                    <div className="flex-1">
+                      {editingSanctuaryName ? (
+                        <div className="flex gap-2 items-center">
+                          <Input
+                            value={sanctuaryName}
+                            onChange={(e) => setSanctuaryName(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && updateSanctuaryName()}
+                            placeholder={t('sanctuaryNamePlaceholder')}
+                            maxLength={50}
+                            className="text-lg font-bold"
+                            autoFocus
+                          />
+                          <Button size="sm" onClick={updateSanctuaryName}>
+                            {t('save')}
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            onClick={() => {
+                              setEditingSanctuaryName(false);
+                              setSanctuaryName(coupleData.sanctuaryName);
+                            }}
+                          >
+                            {t('cancel')}
+                          </Button>
+                        </div>
+                      ) : (
+                        <h2 
+                          className="text-xl font-bold cursor-pointer hover:text-primary transition-colors flex items-center gap-2"
+                          onClick={() => setEditingSanctuaryName(true)}
+                          title={t('clickToEditName')}
+                        >
+                          {coupleData.sanctuaryName}
+                          <UserCircle className="w-4 h-4 opacity-50" />
+                        </h2>
+                      )}
                       <p className="text-sm text-muted-foreground">
                         {coupleData.partner 
-                          ? `Connected with ${coupleData.partner.full_name}`
-                          : "Waiting for partner to join"}
+                          ? `${t('connectedWith')} ${coupleData.partner.full_name}`
+                          : t('waitingForPartner')}
                       </p>
                     </div>
                   </div>
