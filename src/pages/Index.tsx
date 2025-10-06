@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
 import heroImage from "@/assets/hero-image.jpg";
+import logo from "@/assets/logo.png";
 
 const Index = () => {
   const { t } = useLanguage();
@@ -83,6 +84,11 @@ const Index = () => {
         <div className="relative container mx-auto px-4 py-20">
           <div className="flex flex-col lg:flex-row items-center gap-12">
             <div className="flex-1 text-center lg:text-left space-y-6">
+              <img 
+                src={logo} 
+                alt="Us2 Logo" 
+                className="w-32 h-32 mx-auto lg:mx-0 mb-6"
+              />
               <h1 className="text-5xl lg:text-7xl font-bold bg-gradient-romantic bg-clip-text text-transparent">
                 {t("indexTitle")}
               </h1>
