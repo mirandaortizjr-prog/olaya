@@ -124,18 +124,26 @@ export const PostsFeed = ({ coupleId, userId }: PostsFeedProps) => {
       
       const { error: uploadError } = await supabase.storage
         .from('couple_media')
-        .upload(filePath, file);
+        .upload(filePath, file, { upsert: true });
 
       if (uploadError) {
         console.error('Upload error:', uploadError);
+        toast({
+          title: 'Upload failed',
+          description: `Failed to upload ${file.name}`,
+          variant: 'destructive',
+        });
         continue;
       }
 
-      const { data: { publicUrl } } = supabase.storage
+      // Create signed URL for immediate display (7 days)
+      const { data: signedData } = await supabase.storage
         .from('couple_media')
-        .getPublicUrl(filePath);
+        .createSignedUrl(filePath, 60 * 60 * 24 * 7);
 
-      uploadedUrls.push(publicUrl);
+      if (signedData?.signedUrl) {
+        uploadedUrls.push(signedData.signedUrl);
+      }
     }
     
     return uploadedUrls;
