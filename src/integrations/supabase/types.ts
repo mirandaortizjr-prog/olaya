@@ -221,6 +221,47 @@ export type Database = {
         }
         Relationships: []
       }
+      love_meter: {
+        Row: {
+          couple_id: string
+          created_at: string
+          id: string
+          interaction_count: number
+          last_interaction_at: string | null
+          updated_at: string
+          week_start_date: string
+          weekly_count: number
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          id?: string
+          interaction_count?: number
+          last_interaction_at?: string | null
+          updated_at?: string
+          week_start_date?: string
+          weekly_count?: number
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          id?: string
+          interaction_count?: number
+          last_interaction_at?: string | null
+          updated_at?: string
+          week_start_date?: string
+          weekly_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "love_meter_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: true
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       love_notes: {
         Row: {
           content: string
@@ -673,6 +714,10 @@ export type Database = {
           full_name: string
           user_id: string
         }[]
+      }
+      increment_love_meter: {
+        Args: { p_couple_id: string; p_points?: number }
+        Returns: undefined
       }
       refresh_invite_code: {
         Args: { couple_uuid: string }
