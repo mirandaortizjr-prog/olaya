@@ -29,15 +29,18 @@ export const LoveMeter = ({ coupleId }: LoveMeterProps) => {
   const fetchLoveMeter = async () => {
     try {
       const { data, error } = await supabase
-        .rpc('get_love_meter_data', { p_couple_id: coupleId });
+        .from('love_meter' as any)
+        .select('interaction_count, weekly_count, last_interaction_at')
+        .eq('couple_id', coupleId)
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching love meter:', error);
         return;
       }
 
-      if (data && data.length > 0) {
-        setMeterData(data[0]);
+      if (data) {
+        setMeterData(data as unknown as LoveMeterData);
       }
     } catch (err) {
       console.error('Error in fetchLoveMeter:', err);
