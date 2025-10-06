@@ -63,6 +63,7 @@ interface CoupleData {
   inviteCode: string;
   sanctuaryName: string;
   couplePictureUrl?: string;
+  anniversaryDate?: string;
   partner: {
     user_id: string;
     full_name: string;
@@ -78,7 +79,9 @@ const Dashboard = () => {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [showProfileSettings, setShowProfileSettings] = useState(false);
   const [editingSanctuaryName, setEditingSanctuaryName] = useState(false);
+  const [editingAnniversary, setEditingAnniversary] = useState(false);
   const [sanctuaryName, setSanctuaryName] = useState("");
+  const [anniversaryDate, setAnniversaryDate] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t, language } = useLanguage();
@@ -186,7 +189,7 @@ const Dashboard = () => {
       // Fetch couple data (with sanctuary name and picture)
       const { data: couple, error: coupleError } = await supabase
         .from("couples")
-        .select("id, created_by, name, couple_picture_url")
+        .select("id, created_by, name, couple_picture_url, anniversary_date")
         .eq("id", membership.couple_id)
         .maybeSingle();
 
@@ -233,9 +236,11 @@ const Dashboard = () => {
         inviteCode: inviteCode,
         sanctuaryName: couple?.name || 'Our Sanctuary',
         couplePictureUrl: couple?.couple_picture_url || undefined,
+        anniversaryDate: couple?.anniversary_date || undefined,
         partner: partnerProfile,
       });
       setSanctuaryName(couple?.name || 'Our Sanctuary');
+      setAnniversaryDate(couple?.anniversary_date || '');
     } catch (error: any) {
       console.error("Error fetching couple data:", error);
     }
@@ -455,6 +460,32 @@ const Dashboard = () => {
       toast({
         title: t('success'),
         description: t('sanctuaryNameUpdated'),
+      });
+    } catch (error: any) {
+      toast({
+        title: t('error'),
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const updateAnniversaryDate = async () => {
+    if (!coupleData) return;
+    
+    try {
+      const { error } = await supabase
+        .from('couples')
+        .update({ anniversary_date: anniversaryDate || null })
+        .eq('id', coupleData.coupleId);
+      
+      if (error) throw error;
+      
+      setCoupleData({ ...coupleData, anniversaryDate: anniversaryDate || undefined });
+      setEditingAnniversary(false);
+      toast({
+        title: 'Success! 💕',
+        description: anniversaryDate ? 'Anniversary date saved' : 'Anniversary date cleared',
       });
     } catch (error: any) {
       toast({
@@ -720,6 +751,40 @@ const Dashboard = () => {
                           ? `${t('connectedWith')} ${coupleData.partner.full_name}`
                           : t('waitingForPartner')}
                       </p>
+                      {editingAnniversary ? (
+                        <div className="flex gap-2 items-center mt-2">
+                          <Input
+                            type="date"
+                            value={anniversaryDate}
+                            onChange={(e) => setAnniversaryDate(e.target.value)}
+                            className="text-sm"
+                          />
+                          <Button size="sm" onClick={updateAnniversaryDate}>
+                            {t('save')}
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            onClick={() => {
+                              setEditingAnniversary(false);
+                              setAnniversaryDate(coupleData.anniversaryDate || '');
+                            }}
+                          >
+                            {t('cancel')}
+                          </Button>
+                        </div>
+                      ) : (
+                        <p 
+                          className="text-xs text-muted-foreground cursor-pointer hover:text-primary transition-colors mt-1 flex items-center gap-1"
+                          onClick={() => setEditingAnniversary(true)}
+                          title="Click to edit anniversary"
+                        >
+                          <Heart className="w-3 h-3" />
+                          {coupleData.anniversaryDate 
+                            ? `Anniversary: ${new Date(coupleData.anniversaryDate).toLocaleDateString()}`
+                            : 'Add anniversary date'}
+                        </p>
+                      )}
                     </div>
                   </div>
                   

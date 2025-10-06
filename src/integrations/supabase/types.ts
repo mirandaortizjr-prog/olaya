@@ -45,6 +45,7 @@ export type Database = {
       }
       couples: {
         Row: {
+          anniversary_date: string | null
           couple_picture_url: string | null
           created_at: string
           created_by: string | null
@@ -56,6 +57,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          anniversary_date?: string | null
           couple_picture_url?: string | null
           created_at?: string
           created_by?: string | null
@@ -67,6 +69,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          anniversary_date?: string | null
           couple_picture_url?: string | null
           created_at?: string
           created_by?: string | null
