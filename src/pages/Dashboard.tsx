@@ -863,6 +863,14 @@ const Dashboard = () => {
                 <LoveMeter coupleId={coupleData.coupleId} />
               )}
 
+              {/* Love Wall */}
+              {coupleData.partner && user && (
+                <PostsFeed 
+                  coupleId={coupleData.coupleId} 
+                  userId={user.id}
+                />
+              )}
+
               {/* Main Content Grid */}
               {coupleData.partner && user && (
                 <div className="grid lg:grid-cols-2 gap-6">
@@ -951,11 +959,6 @@ const Dashboard = () => {
                   />
                   
                   <RelationshipTimeline 
-                    coupleId={coupleData.coupleId} 
-                    userId={user.id}
-                  />
-                  
-                  <PostsFeed 
                     coupleId={coupleData.coupleId} 
                     userId={user.id}
                   />

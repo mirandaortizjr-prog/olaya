@@ -72,51 +72,64 @@ export const PostsFeed = ({ coupleId, userId }: PostsFeedProps) => {
   };
 
   return (
-    <Card className="bg-card/50 backdrop-blur border-border/50">
+    <Card className="bg-gradient-to-br from-card to-card/50 border-primary/10 shadow-soft">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MessageCircle className="h-5 w-5 text-primary" />
-          Posts
+        <CardTitle className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-primary/10">
+            <Heart className="h-6 w-6 text-primary" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold">The Love Wall</h3>
+            <p className="text-sm text-muted-foreground font-normal">Share pics, moments, and messages</p>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex gap-2">
           <Textarea
-            placeholder="Share something with your partner..."
+            placeholder="Share a moment, thought, or just say hi... 💕"
             value={newPost}
             onChange={(e) => setNewPost(e.target.value)}
             rows={3}
+            className="bg-background/50"
           />
-          <Button onClick={createPost} size="icon">
+          <Button onClick={createPost} size="icon" className="h-auto">
             <Send className="h-4 w-4" />
           </Button>
         </div>
 
-        <div className="space-y-4 max-h-[500px] overflow-y-auto">
-          {posts.map((post) => (
-            <Card key={post.id}>
-              <CardContent className="p-4">
-                <p className="text-sm mb-3">{post.content}</p>
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>{format(new Date(post.created_at), 'PPp')}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleLike(post.id, post.likes || [])}
-                    className="gap-1"
-                  >
-                    <Heart
-                      className={`h-4 w-4 ${
-                        (post.likes || []).includes(userId) ? 'fill-red-500 text-red-500' : ''
-                      }`}
-                    />
-                    {(post.likes || []).length}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {posts.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            <Heart className="w-12 h-12 mx-auto mb-3 opacity-20" />
+            <p className="text-sm">Start sharing moments on your Love Wall</p>
+          </div>
+        ) : (
+          <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+            {posts.map((post) => (
+              <Card key={post.id} className="bg-background/50 hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <p className="text-sm mb-3 whitespace-pre-wrap">{post.content}</p>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>{format(new Date(post.created_at), 'PPp')}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleLike(post.id, post.likes || [])}
+                      className="gap-1 hover:scale-110 transition-transform"
+                    >
+                      <Heart
+                        className={`h-4 w-4 transition-colors ${
+                          (post.likes || []).includes(userId) ? 'fill-red-500 text-red-500' : ''
+                        }`}
+                      />
+                      <span className="font-medium">{(post.likes || []).length}</span>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
