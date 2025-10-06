@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Heart, Cake, Gift, Sparkles, Star, Trash2, Plus } from "lucide-react";
+import { Calendar, Heart, Cake, Gift, Sparkles, Star, Trash2, Plus, CalendarIcon } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -40,6 +42,8 @@ const eventTypes = [
 export const MemoryCalendar = ({ coupleId, userId, partnerName }: MemoryCalendarProps) => {
   const [memories, setMemories] = useState<MemoryEvent[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [eventType, setEventType] = useState("anniversary");
@@ -167,6 +171,17 @@ export const MemoryCalendar = ({ coupleId, userId, partnerName }: MemoryCalendar
     return `${diffDays} ${t('daysAway')}`;
   };
 
+  const getMemoriesForDate = (date: Date) => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    return memories.filter(m => m.date === dateStr);
+  };
+
+  const hasMemoryOnDate = (date: Date) => {
+    return getMemoriesForDate(date).length > 0;
+  };
+
+  const selectedDateMemories = selectedDate ? getMemoriesForDate(selectedDate) : [];
+
   const upcomingMemories = memories.filter(m => {
     const eventDate = new Date(m.date);
     const now = new Date();
@@ -183,6 +198,15 @@ export const MemoryCalendar = ({ coupleId, userId, partnerName }: MemoryCalendar
           </CardTitle>
           <Button
             size="sm"
+            onClick={() => setShowCalendar(!showCalendar)}
+            variant={showCalendar ? "default" : "outline"}
+            className="mr-2"
+          >
+            <CalendarIcon className="h-4 w-4 mr-1" />
+            {showCalendar ? t('hideCalendar') : t('showCalendar')}
+          </Button>
+          <Button
+            size="sm"
             onClick={() => setShowAddForm(!showAddForm)}
             variant={showAddForm ? "outline" : "default"}
           >
@@ -196,6 +220,71 @@ export const MemoryCalendar = ({ coupleId, userId, partnerName }: MemoryCalendar
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Calendar View */}
+        {showCalendar && (
+          <div className="space-y-4 p-4 border rounded-lg bg-card/50">
+            <CalendarComponent
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              className={cn("rounded-md border pointer-events-auto mx-auto")}
+              modifiers={{
+                hasMemory: (date) => hasMemoryOnDate(date)
+              }}
+              modifiersStyles={{
+                hasMemory: {
+                  backgroundColor: 'hsl(var(--primary) / 0.2)',
+                  fontWeight: 'bold',
+                  color: 'hsl(var(--primary))'
+                }
+              }}
+            />
+            
+            {/* Memories on selected date */}
+            {selectedDate && selectedDateMemories.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium">
+                  {t('memoriesOn')} {format(selectedDate, 'MMMM d, yyyy')}
+                </p>
+                {selectedDateMemories.map((memory) => {
+                  const config = getEventConfig(memory.event_type);
+                  return (
+                    <div
+                      key={memory.id}
+                      className={cn("p-3 rounded-lg border", config.color)}
+                    >
+                      <div className="flex items-start gap-2">
+                        <span className="text-xl">{config.emoji}</span>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{memory.title}</p>
+                          {memory.notes && (
+                            <p className="text-xs mt-1 opacity-80">{memory.notes}</p>
+                          )}
+                        </div>
+                        {memory.created_by === userId && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => deleteMemory(memory.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            
+            {selectedDate && selectedDateMemories.length === 0 && (
+              <p className="text-center text-sm text-muted-foreground">
+                {t('noMemoriesOnDate')}
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Add Memory Form */}
         {showAddForm && (
           <div className="space-y-4 p-4 border rounded-lg animate-fade-in">
