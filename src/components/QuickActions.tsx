@@ -49,12 +49,12 @@ export const QuickActions = ({ coupleId, userId }: QuickActionsProps) => {
       if (members) {
         // Send push notification to partner
         const messageLabels: Record<string, { en: string; es: string }> = {
-          wink: { en: 'sent you a wink 😉', es: 'te envió un guiño 😉' },
-          kiss: { en: 'sent you a kiss 💋', es: 'te envió un beso 💋' },
-          love: { en: 'said I love you 💕', es: 'dijo te amo 💕' },
-          want: { en: 'said I want you 🔥', es: 'dijo te deseo 🔥' },
-          hot: { en: "said you're hot 🌟", es: 'dijo estás ardiente 🌟' },
-          thinking: { en: 'is thinking of you 💭', es: 'está pensando en ti 💭' },
+          wink: { en: 'Wink wink 😉✨', es: 'Guiño guiño 😉✨' },
+          kiss: { en: 'Muahh 💋💋', es: 'Muahh 💋💋' },
+          love: { en: 'I love you baby 💕😘', es: 'Te amo mi amor 💕😘' },
+          want: { en: 'I want you now 🔥😈', es: 'Te deseo ahora 🔥😈' },
+          hot: { en: "You're so hot 🌟🔥", es: 'Estás tan ardiente 🌟🔥' },
+          thinking: { en: "Can't stop thinking of you 💭💕", es: 'No puedo dejar de pensar en ti 💭💕' },
         };
 
         await supabase.functions.invoke('send-push-notification', {
