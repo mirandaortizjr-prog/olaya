@@ -11,6 +11,7 @@ import { toast as sonnerToast } from "sonner";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
+import { CouplePictureUpload } from "@/components/CouplePictureUpload";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { QuickActions } from "@/components/QuickActions";
 import { RecentMessages } from "@/components/RecentMessages";
@@ -61,6 +62,7 @@ interface CoupleData {
   coupleId: string;
   inviteCode: string;
   sanctuaryName: string;
+  couplePictureUrl?: string;
   partner: {
     user_id: string;
     full_name: string;
@@ -181,10 +183,10 @@ const Dashboard = () => {
         return;
       }
 
-      // Fetch couple data (with sanctuary name)
+      // Fetch couple data (with sanctuary name and picture)
       const { data: couple, error: coupleError } = await supabase
         .from("couples")
-        .select("id, created_by, name")
+        .select("id, created_by, name, couple_picture_url")
         .eq("id", membership.couple_id)
         .maybeSingle();
 
@@ -230,6 +232,7 @@ const Dashboard = () => {
         coupleId: membership.couple_id,
         inviteCode: inviteCode,
         sanctuaryName: couple?.name || 'Our Sanctuary',
+        couplePictureUrl: couple?.couple_picture_url || undefined,
         partner: partnerProfile,
       });
       setSanctuaryName(couple?.name || 'Our Sanctuary');
@@ -668,10 +671,14 @@ const Dashboard = () => {
               {/* Header Card - Partner Connection */}
               <Card className="p-6 bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 shadow-medium border-primary/20">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full bg-gradient-romantic flex items-center justify-center shadow-glow">
-                      <Heart className="w-7 h-7 text-white fill-white" />
-                    </div>
+                  <div className="flex items-center gap-4 flex-1">
+                    <CouplePictureUpload
+                      coupleId={coupleData.coupleId}
+                      currentPictureUrl={coupleData.couplePictureUrl}
+                      onUploadComplete={(url) => {
+                        setCoupleData({ ...coupleData, couplePictureUrl: url });
+                      }}
+                    />
                     <div className="flex-1">
                       {editingSanctuaryName ? (
                         <div className="flex gap-2 items-center">

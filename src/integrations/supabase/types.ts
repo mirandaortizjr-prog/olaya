@@ -45,6 +45,7 @@ export type Database = {
       }
       couples: {
         Row: {
+          couple_picture_url: string | null
           created_at: string
           created_by: string | null
           id: string
@@ -55,6 +56,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          couple_picture_url?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -65,6 +67,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          couple_picture_url?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
