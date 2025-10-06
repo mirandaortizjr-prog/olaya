@@ -29,6 +29,7 @@ const moodConfigs = [
   { type: 'peaceful', icon: Moon, color: 'bg-blue-500/10 hover:bg-blue-500/20 border-blue-500/30 text-blue-600', emoji: '🌙' },
   { type: 'excited', icon: Zap, color: 'bg-orange-500/10 hover:bg-orange-500/20 border-orange-500/30 text-orange-600', emoji: '⚡' },
   { type: 'happy', icon: Laugh, color: 'bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/30 text-amber-600', emoji: '😊' },
+  { type: 'horny', icon: Flame, color: 'bg-fuchsia-600/10 hover:bg-fuchsia-600/20 border-fuchsia-600/30 text-fuchsia-700', emoji: '🔥' },
   { type: 'sad', icon: Frown, color: 'bg-indigo-500/10 hover:bg-indigo-500/20 border-indigo-500/30 text-indigo-600', emoji: '😢' },
   { type: 'worried', icon: Brain, color: 'bg-violet-500/10 hover:bg-violet-500/20 border-violet-500/30 text-violet-600', emoji: '😟' },
   { type: 'anxious', icon: CloudRain, color: 'bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/30 text-slate-600', emoji: '😰' },
