@@ -657,46 +657,48 @@ const Dashboard = () => {
                   )}
                 </div>
 
-                {/* Invite Code Section */}
-                <div className="bg-card/50 rounded-lg p-6 border-2 border-dashed border-primary/20">
-                  <Label className="text-sm text-muted-foreground mb-2 block">
-                    {coupleData.partner ? "Your sanctuary code" : "Share this code with your partner"}
-                  </Label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={coupleData.inviteCode}
-                      readOnly
-                      className="font-mono text-lg font-semibold text-center"
-                    />
-                    <Button onClick={copyInviteCode} variant="outline" size="icon">
-                      <Copy className="w-4 h-4" />
-                    </Button>
-                    <Button onClick={shareInvite} variant="outline" size="icon">
-                      <Share2 className="w-4 h-4" />
-                    </Button>
+                {/* Invite Code Section - Only show if no partner yet */}
+                {!coupleData.partner && (
+                  <div className="bg-card/50 rounded-lg p-6 border-2 border-dashed border-primary/20">
+                    <Label className="text-sm text-muted-foreground mb-2 block">
+                      Share this code with your partner
+                    </Label>
+                    <div className="flex gap-2">
+                      <Input
+                        value={coupleData.inviteCode}
+                        readOnly
+                        className="font-mono text-lg font-semibold text-center"
+                      />
+                      <Button onClick={copyInviteCode} variant="outline" size="icon">
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                      <Button onClick={shareInvite} variant="outline" size="icon">
+                        <Share2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
+                )}
 
-                  <div className="mt-6 flex justify-end">
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="destructive">
-                          Leave Sanctuary
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Leave this sanctuary?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will remove your connection to this sanctuary. You can rejoin later with an invite code.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={leaveCouple}>Leave</AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
+                <div className="mt-6 flex justify-end">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive">
+                        Leave Sanctuary
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Leave this sanctuary?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will remove your connection to this sanctuary. You can rejoin later with an invite code.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={leaveCouple}>Leave</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </Card>
 
