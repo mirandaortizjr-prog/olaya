@@ -229,13 +229,29 @@ const Dashboard = () => {
         };
       }
 
-      console.log("Setting couple data with partner:", partnerProfile);
+      // Resolve couple picture URL (handles private bucket by signing stored path)
+      let couplePicUrl: string | undefined = undefined;
+      if (couple?.couple_picture_url) {
+        if (couple.couple_picture_url.startsWith('http')) {
+          couplePicUrl = couple.couple_picture_url;
+        } else {
+          const stored = couple.couple_picture_url; // e.g., 'couple_media/user-or-couple-id/filename.jpg'
+          const [bucket, ...rest] = stored.split('/');
+          const path = rest.join('/');
+          if (bucket && path) {
+            const { data: signed } = await supabase.storage
+              .from(bucket)
+              .createSignedUrl(path, 60 * 60 * 24 * 7); // 7 days
+            couplePicUrl = signed?.signedUrl;
+          }
+        }
+      }
 
       setCoupleData({
         coupleId: membership.couple_id,
         inviteCode: inviteCode,
         sanctuaryName: couple?.name || 'Our Sanctuary',
-        couplePictureUrl: couple?.couple_picture_url || undefined,
+        couplePictureUrl: couplePicUrl,
         anniversaryDate: couple?.anniversary_date || undefined,
         partner: partnerProfile,
       });

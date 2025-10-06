@@ -38,20 +38,24 @@ export const CouplePictureUpload = ({
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: urlData } = supabase.storage
+      // Create a signed URL for immediate display
+      const { data: signedData } = await supabase.storage
         .from("couple_media")
-        .getPublicUrl(filePath);
+        .createSignedUrl(filePath, 60 * 60 * 24 * 7); // 7 days
 
-      // Update couple record with picture URL
+      // Store the storage path in DB (bucket/path)
+      const storagePath = `couple_media/${filePath}`;
+
+      // Update couple record with storage path
       const { error: updateError } = await supabase
         .from("couples")
-        .update({ couple_picture_url: urlData.publicUrl })
+        .update({ couple_picture_url: storagePath })
         .eq("id", coupleId);
 
       if (updateError) throw updateError;
 
-      onUploadComplete(urlData.publicUrl);
+      // Inform UI with a signed URL for immediate display
+      onUploadComplete(signedData?.signedUrl || "");
 
       toast({
         title: "Success! 💕",
