@@ -82,12 +82,12 @@ export default function CoupleProfiles() {
         .single();
 
       if (ownProfile) {
-        setUserProfile(ownProfile);
+        setUserProfile(ownProfile as Profile);
         setEditForm({
           full_name: ownProfile.full_name || "",
-          bio: ownProfile.bio || "",
-          birthday: ownProfile.birthday || "",
-          location: ownProfile.location || "",
+          bio: (ownProfile as any).bio || "",
+          birthday: (ownProfile as any).birthday || "",
+          location: (ownProfile as any).location || "",
         });
       }
 
@@ -106,7 +106,7 @@ export default function CoupleProfiles() {
           .single();
 
         if (partnerData) {
-          setPartnerProfile(partnerData);
+          setPartnerProfile(partnerData as Profile);
         }
       }
     } catch (error: any) {
