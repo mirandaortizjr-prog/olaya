@@ -43,6 +43,7 @@ export const MemoryCalendar = ({ coupleId, userId, partnerName }: MemoryCalendar
   const [memories, setMemories] = useState<MemoryEvent[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showAllMemories, setShowAllMemories] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
@@ -191,32 +192,33 @@ export const MemoryCalendar = ({ coupleId, userId, partnerName }: MemoryCalendar
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-purple-500" />
             {t('memoryCalendar')}
           </CardTitle>
-          <Button
-            size="sm"
-            onClick={() => setShowCalendar(!showCalendar)}
-            variant={showCalendar ? "default" : "outline"}
-            className="mr-2"
-          >
-            <CalendarIcon className="h-4 w-4 mr-1" />
-            {showCalendar ? t('hideCalendar') : t('showCalendar')}
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => setShowAddForm(!showAddForm)}
-            variant={showAddForm ? "outline" : "default"}
-          >
-            {showAddForm ? t('cancel') : (
-              <>
-                <Plus className="h-4 w-4 mr-1" />
-                {t('addMemory')}
-              </>
-            )}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              onClick={() => setShowCalendar(!showCalendar)}
+              variant={showCalendar ? "default" : "outline"}
+            >
+              <CalendarIcon className="h-4 w-4 mr-1" />
+              {showCalendar ? t('hideCalendar') : t('showCalendar')}
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setShowAddForm(!showAddForm)}
+              variant={showAddForm ? "outline" : "default"}
+            >
+              {showAddForm ? t('cancel') : (
+                <>
+                  <Plus className="h-4 w-4 mr-1" />
+                  {t('addMemory')}
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -357,7 +359,18 @@ export const MemoryCalendar = ({ coupleId, userId, partnerName }: MemoryCalendar
 
         {/* Upcoming Memories */}
         <div className="space-y-3">
-          <p className="text-sm font-medium">{t('upcomingMemories')}</p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium">{t('upcomingMemories')}</p>
+            {memories.length > 0 && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setShowAllMemories(!showAllMemories)}
+              >
+                {showAllMemories ? t('showLess') : t('viewAllMemories')}
+              </Button>
+            )}
+          </div>
           {memories.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground text-sm">
               {t('noMemoriesYet')}
@@ -368,7 +381,7 @@ export const MemoryCalendar = ({ coupleId, userId, partnerName }: MemoryCalendar
             </div>
           ) : (
             <div className="space-y-2">
-              {upcomingMemories.map((memory) => {
+              {(showAllMemories ? memories : upcomingMemories).map((memory) => {
                 const config = getEventConfig(memory.event_type);
                 return (
                   <div
@@ -417,7 +430,7 @@ export const MemoryCalendar = ({ coupleId, userId, partnerName }: MemoryCalendar
         </div>
 
         {/* All Memories Count */}
-        {memories.length > 5 && (
+        {!showAllMemories && memories.length > 5 && (
           <p className="text-xs text-center text-muted-foreground">
             Showing {upcomingMemories.length} of {memories.length} memories
           </p>
