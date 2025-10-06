@@ -821,11 +821,25 @@ const Dashboard = () => {
                       userId={user.id} 
                       partnerName={coupleData.partner.full_name}
                     />
-                    <DailyNotes 
-                      coupleId={coupleData.coupleId} 
-                      userId={user.id}
-                      partnerName={coupleData.partner.full_name}
-                    />
+                    <Card 
+                      className="p-6 hover:shadow-glow transition-shadow cursor-pointer bg-gradient-to-br from-card to-card/50 border-primary/10"
+                      onClick={() => navigate('/daily-notes')}
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-primary/10">
+                            <Mail className="w-5 h-5 text-primary" />
+                          </div>
+                          <h3 className="text-lg font-semibold">{t('dailyNotes')}</h3>
+                        </div>
+                        <Button variant="ghost" size="sm" className="text-primary">
+                          Open →
+                        </Button>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Share morning whispers, evening blessings, and reflections
+                      </p>
+                    </Card>
                     <MemoryCalendar 
                       coupleId={coupleData.coupleId} 
                       userId={user.id}
