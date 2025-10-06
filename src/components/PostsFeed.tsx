@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Heart, Send } from 'lucide-react';
+import { Heart, Send, Image as ImageIcon, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -14,6 +14,7 @@ interface Post {
   created_at: string;
   author_id: string;
   likes: string[];
+  media_urls?: string[];
   author_name?: string;
 }
 
@@ -26,6 +27,9 @@ export const PostsFeed = ({ coupleId, userId }: PostsFeedProps) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [newPost, setNewPost] = useState('');
   const [currentUserName, setCurrentUserName] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -66,6 +70,7 @@ export const PostsFeed = ({ coupleId, userId }: PostsFeedProps) => {
         created_at: post.created_at,
         author_id: post.author_id,
         likes: Array.isArray(post.likes) ? post.likes.filter((item): item is string => typeof item === 'string') : [],
+        media_urls: Array.isArray(post.media_urls) ? post.media_urls.filter((item): item is string => typeof item === 'string') : [],
         author_name: profiles?.find(p => p.id === post.author_id)?.full_name || 'Unknown'
       }));
 
@@ -73,26 +78,111 @@ export const PostsFeed = ({ coupleId, userId }: PostsFeedProps) => {
     }
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      const validFiles = files.filter(file => {
+        const isImage = file.type.startsWith('image/');
+        const isVideo = file.type.startsWith('video/');
+        const isUnder10MB = file.size <= 10 * 1024 * 1024;
+        
+        if (!isImage && !isVideo) {
+          toast({
+            title: 'Invalid file type',
+            description: 'Only images and videos are allowed',
+            variant: 'destructive',
+          });
+          return false;
+        }
+        
+        if (!isUnder10MB) {
+          toast({
+            title: 'File too large',
+            description: 'Files must be under 10MB',
+            variant: 'destructive',
+          });
+          return false;
+        }
+        
+        return true;
+      });
+      
+      setSelectedFiles(prev => [...prev, ...validFiles].slice(0, 5)); // Max 5 files
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadFiles = async (): Promise<string[]> => {
+    const uploadedUrls: string[] = [];
+    
+    for (const file of selectedFiles) {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${userId}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('couple_media')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        continue;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('couple_media')
+        .getPublicUrl(filePath);
+
+      uploadedUrls.push(publicUrl);
+    }
+    
+    return uploadedUrls;
+  };
+
   const createPost = async () => {
-    if (!newPost.trim()) return;
+    if (!newPost.trim() && selectedFiles.length === 0) return;
 
-    const { error } = await supabase.from('posts').insert({
-      couple_id: coupleId,
-      author_id: userId,
-      content: newPost,
-    });
+    setUploading(true);
+    
+    try {
+      const mediaUrls = selectedFiles.length > 0 ? await uploadFiles() : [];
 
-    if (error) {
+      const { error } = await supabase.from('posts').insert({
+        couple_id: coupleId,
+        author_id: userId,
+        content: newPost,
+        media_urls: mediaUrls.length > 0 ? mediaUrls : null,
+      });
+
+      if (error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to create post',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      setNewPost('');
+      setSelectedFiles([]);
+      fetchPosts();
+      
+      toast({
+        title: 'Success',
+        description: 'Post created successfully',
+      });
+    } catch (error) {
+      console.error('Error creating post:', error);
       toast({
         title: 'Error',
         description: 'Failed to create post',
         variant: 'destructive',
       });
-      return;
+    } finally {
+      setUploading(false);
     }
-
-    setNewPost('');
-    fetchPosts();
   };
 
   const toggleLike = async (postId: string, likes: any[]) => {
@@ -126,23 +216,83 @@ export const PostsFeed = ({ coupleId, userId }: PostsFeedProps) => {
       </CardHeader>
       <CardContent className="p-6 space-y-6">
         {/* Create Post Section */}
-        <div className="flex gap-3">
-          <Avatar className="h-10 w-10 border-2 border-primary/20">
-            <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-              {currentUserName.charAt(0) || 'Y'}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 flex gap-2">
-            <Textarea
-              placeholder="Share a moment, thought, or just say hi... 💕"
-              value={newPost}
-              onChange={(e) => setNewPost(e.target.value)}
-              rows={3}
-              className="resize-none bg-background/50 border-border/50 focus:border-primary/50"
-            />
-            <Button onClick={createPost} size="icon" className="h-auto shrink-0">
-              <Send className="h-4 w-4" />
-            </Button>
+        <div className="space-y-3">
+          <div className="flex gap-3">
+            <Avatar className="h-10 w-10 border-2 border-primary/20">
+              <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                {currentUserName.charAt(0) || 'Y'}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 space-y-2">
+              <Textarea
+                placeholder="Share a moment, thought, or just say hi... 💕"
+                value={newPost}
+                onChange={(e) => setNewPost(e.target.value)}
+                rows={3}
+                className="resize-none bg-background/50 border-border/50 focus:border-primary/50"
+              />
+              
+              {/* Selected Files Preview */}
+              {selectedFiles.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {selectedFiles.map((file, index) => (
+                    <div key={index} className="relative group">
+                      <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted">
+                        {file.type.startsWith('image/') ? (
+                          <img 
+                            src={URL.createObjectURL(file)} 
+                            alt="Preview" 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
+                            Video
+                          </div>
+                        )}
+                      </div>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeFile(index)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,video/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileSelect}
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading || selectedFiles.length >= 5}
+                  className="gap-2"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  Add Media
+                </Button>
+                <Button 
+                  onClick={createPost} 
+                  size="sm" 
+                  disabled={uploading || (!newPost.trim() && selectedFiles.length === 0)}
+                  className="gap-2 ml-auto"
+                >
+                  {uploading ? 'Posting...' : 'Post'}
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -176,9 +326,47 @@ export const PostsFeed = ({ coupleId, userId }: PostsFeedProps) => {
                   </div>
 
                   {/* Post Content */}
-                  <p className="text-sm whitespace-pre-wrap mb-4 leading-relaxed">
-                    {post.content}
-                  </p>
+                  {post.content && (
+                    <p className="text-sm whitespace-pre-wrap mb-3 leading-relaxed">
+                      {post.content}
+                    </p>
+                  )}
+
+                  {/* Post Media */}
+                  {post.media_urls && post.media_urls.length > 0 && (
+                    <div className={`grid gap-2 mb-3 ${
+                      post.media_urls.length === 1 ? 'grid-cols-1' : 
+                      post.media_urls.length === 2 ? 'grid-cols-2' : 
+                      'grid-cols-2'
+                    }`}>
+                      {post.media_urls.map((url, index) => {
+                        const isVideo = url.includes('.mp4') || url.includes('.mov') || url.includes('.webm');
+                        return (
+                          <div 
+                            key={index} 
+                            className={`rounded-lg overflow-hidden ${
+                              post.media_urls!.length === 1 ? 'max-h-96' : 'h-48'
+                            }`}
+                          >
+                            {isVideo ? (
+                              <video 
+                                src={url} 
+                                controls 
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <img 
+                                src={url} 
+                                alt="Post media" 
+                                className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
+                                onClick={() => window.open(url, '_blank')}
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
 
                   {/* Post Actions */}
                   <div className="flex items-center gap-4 pt-2 border-t border-border/30">
