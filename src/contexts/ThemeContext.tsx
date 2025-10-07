@@ -1,10 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 type ColorPalette = 'default' | 'feminine' | 'masculine';
 
 interface ThemeContextType {
   palette: ColorPalette;
-  setPalette: (palette: ColorPalette) => void;
+  setPalette: (palette: ColorPalette, coupleId?: string) => void;
+  coupleId: string | null;
+  setCoupleId: (id: string | null) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -43,15 +46,67 @@ const palettes = {
 };
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [palette, setPaletteState] = useState<ColorPalette>(() => {
-    const saved = localStorage.getItem('color-palette');
-    return (saved as ColorPalette) || 'default';
-  });
+  const [palette, setPaletteState] = useState<ColorPalette>('default');
+  const [coupleId, setCoupleId] = useState<string | null>(null);
 
-  const setPalette = (newPalette: ColorPalette) => {
+  const setPalette = async (newPalette: ColorPalette, cId?: string) => {
     setPaletteState(newPalette);
-    localStorage.setItem('color-palette', newPalette);
+    
+    // Update database if couple ID is available
+    const targetCoupleId = cId || coupleId;
+    if (targetCoupleId) {
+      try {
+        await supabase
+          .from('couples')
+          .update({ theme: newPalette })
+          .eq('id', targetCoupleId);
+      } catch (error) {
+        console.error('Error updating theme:', error);
+      }
+    }
   };
+
+  // Load theme from database when couple ID changes
+  useEffect(() => {
+    if (!coupleId) return;
+
+    const loadTheme = async () => {
+      const { data } = await supabase
+        .from('couples')
+        .select('theme')
+        .eq('id', coupleId)
+        .single();
+
+      if (data?.theme) {
+        setPaletteState(data.theme as ColorPalette);
+      }
+    };
+
+    loadTheme();
+
+    // Subscribe to theme changes
+    const channel = supabase
+      .channel('theme-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'couples',
+          filter: `id=eq.${coupleId}`
+        },
+        (payload: any) => {
+          if (payload.new?.theme) {
+            setPaletteState(payload.new.theme as ColorPalette);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [coupleId]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -63,7 +118,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [palette]);
 
   return (
-    <ThemeContext.Provider value={{ palette, setPalette }}>
+    <ThemeContext.Provider value={{ palette, setPalette, coupleId, setCoupleId }}>
       {children}
     </ThemeContext.Provider>
   );

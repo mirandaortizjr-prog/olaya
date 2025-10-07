@@ -16,7 +16,7 @@ interface ThemeSettingsProps {
 }
 
 export const ThemeSettings = ({ open, onOpenChange }: ThemeSettingsProps) => {
-  const { palette, setPalette } = useTheme();
+  const { palette, setPalette, coupleId } = useTheme();
   const { t } = useLanguage();
 
   const palettes = [
@@ -38,7 +38,7 @@ export const ThemeSettings = ({ open, onOpenChange }: ThemeSettingsProps) => {
           {palettes.map((p) => (
             <button
               key={p.id}
-              onClick={() => setPalette(p.id)}
+              onClick={() => setPalette(p.id, coupleId || undefined)}
               className={`w-full flex items-center justify-between p-4 rounded-lg border-2 transition-all hover:scale-[1.02] ${
                 palette === p.id 
                   ? 'border-primary bg-primary/5' 

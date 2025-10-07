@@ -31,6 +31,7 @@ import { LoveMeter } from "@/components/LoveMeter";
 import { useSubscription } from "@/hooks/useSubscription";
 import { requestNotificationPermission, showQuickMessageNotification, subscribeToPushNotifications } from "@/utils/notifications";
 import { ThemeSettings } from "@/components/ThemeSettings";
+import { useTheme } from "@/contexts/ThemeContext";
 import {
   Heart, 
   LogOut, 
@@ -90,6 +91,7 @@ const Dashboard = () => {
   const { t, language } = useLanguage();
   const [searchParams] = useSearchParams();
   const { isPremium, isLoading: subscriptionLoading, createCheckoutSession } = useSubscription(user?.id);
+  const { setCoupleId } = useTheme();
 
   useEffect(() => {
     // Check for invite code in URL
@@ -260,6 +262,7 @@ const Dashboard = () => {
       });
       setSanctuaryName(couple?.name || 'Our Sanctuary');
       setAnniversaryDate(couple?.anniversary_date || '');
+      setCoupleId(membership.couple_id); // Set couple ID for theme sync
     } catch (error: any) {
       console.error("Error fetching couple data:", error);
     }
