@@ -54,14 +54,14 @@ export const DailyNotes = ({ coupleId, userId, partnerName }: DailyNotesProps) =
   }, [coupleId]);
 
   const fetchTodaysNotes = async () => {
-    const today = new Date().toISOString().split('T')[0];
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     
     const { data, error } = await supabase
       .from('daily_notes')
       .select('*')
       .eq('couple_id', coupleId)
-      .gte('created_at', `${today}T00:00:00`)
-      .lt('created_at', `${today}T23:59:59`)
+      .gte('created_at', sevenDaysAgo.toISOString())
       .order('created_at', { ascending: false });
 
     if (error) {
