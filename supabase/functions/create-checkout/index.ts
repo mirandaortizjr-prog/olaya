@@ -87,7 +87,8 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error creating checkout session:', error);
+    // Log errors for monitoring (visible in edge function logs)
+    console.error('Checkout session error:', error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       { 

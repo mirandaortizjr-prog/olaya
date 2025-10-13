@@ -26,6 +26,9 @@ export const useSubscription = (userId: string | undefined) => {
         const isActive = data?.status === 'active' || data?.status === 'trialing';
         setIsPremium(isActive);
       } catch (error) {
+        if (import.meta.env.DEV) {
+          console.error('Subscription check error:', error);
+        }
         toast({
           title: 'Error',
           description: 'Failed to check subscription status',
@@ -82,6 +85,9 @@ export const useSubscription = (userId: string | undefined) => {
         window.location.href = data.url;
       }
     } catch (error) {
+      if (import.meta.env.DEV) {
+        console.error('Checkout error:', error);
+      }
       toast({
         title: 'Error',
         description: 'Failed to start checkout process',
