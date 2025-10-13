@@ -16,11 +16,9 @@ export const useSubscription = (userId: string | undefined) => {
 
     const checkSubscription = async () => {
       try {
-        // Use secure view instead of direct table access
+        // Use secure function instead of direct table access
         const { data, error } = await supabase
-          .from('subscription_status')
-          .select('*')
-          .eq('user_id', userId)
+          .rpc('get_user_subscription_status')
           .maybeSingle();
 
         if (error) throw error;
@@ -28,7 +26,6 @@ export const useSubscription = (userId: string | undefined) => {
         const isActive = data?.status === 'active' || data?.status === 'trialing';
         setIsPremium(isActive);
       } catch (error) {
-        console.error('Error checking subscription:', error);
         toast({
           title: 'Error',
           description: 'Failed to check subscription status',
@@ -53,11 +50,9 @@ export const useSubscription = (userId: string | undefined) => {
           filter: `user_id=eq.${userId}`,
         },
         async () => {
-          // Re-fetch from secure view when subscription changes
+          // Re-fetch from secure function when subscription changes
           const { data } = await supabase
-            .from('subscription_status')
-            .select('*')
-            .eq('user_id', userId)
+            .rpc('get_user_subscription_status')
             .maybeSingle();
           
           const newStatus = data?.status;
@@ -77,7 +72,6 @@ export const useSubscription = (userId: string | undefined) => {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: {
           priceId: 'price_1234567890', // Replace with actual Stripe price ID
-          userId,
           email,
         },
       });
@@ -88,7 +82,6 @@ export const useSubscription = (userId: string | undefined) => {
         window.location.href = data.url;
       }
     } catch (error) {
-      console.error('Error creating checkout session:', error);
       toast({
         title: 'Error',
         description: 'Failed to start checkout process',

@@ -682,30 +682,7 @@ export type Database = {
       }
     }
     Views: {
-      subscription_status: {
-        Row: {
-          cancel_at_period_end: boolean | null
-          created_at: string | null
-          current_period_end: string | null
-          status: string | null
-          user_id: string | null
-        }
-        Insert: {
-          cancel_at_period_end?: boolean | null
-          created_at?: string | null
-          current_period_end?: string | null
-          status?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          cancel_at_period_end?: boolean | null
-          created_at?: string | null
-          current_period_end?: string | null
-          status?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       find_couple_by_invite_code: {
@@ -733,6 +710,16 @@ export type Database = {
         Returns: {
           email: string
           full_name: string
+          user_id: string
+        }[]
+      }
+      get_user_subscription_status: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          cancel_at_period_end: boolean
+          created_at: string
+          current_period_end: string
+          status: string
           user_id: string
         }[]
       }
