@@ -46,7 +46,8 @@ import {
   Mail,
   Brain,
   Crown,
-  Settings
+  Settings,
+  RefreshCw
 } from "lucide-react";
 
 import {
@@ -67,6 +68,7 @@ interface CoupleData {
   sanctuaryName: string;
   couplePictureUrl?: string;
   anniversaryDate?: string;
+  isCreator: boolean;
   partner: {
     user_id: string;
     full_name: string;
@@ -258,6 +260,7 @@ const Dashboard = () => {
         sanctuaryName: couple?.name || 'Our Sanctuary',
         couplePictureUrl: couplePicUrl,
         anniversaryDate: couple?.anniversary_date || undefined,
+        isCreator: couple?.created_by === userId,
         partner: partnerProfile,
       });
       setSanctuaryName(couple?.name || 'Our Sanctuary');
@@ -344,7 +347,7 @@ const Dashboard = () => {
       // Use RPC to bypass RLS for looking up a couple by invite code
       const { data: coupleId, error: rpcError } = await supabase.rpc(
         "find_couple_by_invite_code",
-        { code: inviteCode.toUpperCase() }
+        { code: inviteCode.trim().toUpperCase() }
       );
 
       if (rpcError) {
@@ -713,13 +716,13 @@ const Dashboard = () => {
                         <Input
                           id="inviteCode"
                           placeholder="Enter 8-character code"
-                          value={inviteCode}
-                          onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-                          maxLength={8}
-                          className="text-center text-lg font-mono"
+                           value={inviteCode}
+                           onChange={(e) => setInviteCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0,8))}
+                           maxLength={8}
+                           className="text-center text-lg font-mono"
                         />
                       </div>
-                      <Button onClick={joinCouple} className="w-full" size="lg" disabled={inviteCode.length !== 8}>
+                       <Button onClick={joinCouple} className="w-full" size="lg" disabled={inviteCode.trim().length !== 8}>
                         <Link2 className="w-4 h-4 mr-2" />
                         Join Sanctuary
                       </Button>
@@ -830,18 +833,36 @@ const Dashboard = () => {
                       <Users className="w-4 h-4" />
                       View Profiles
                     </Button>
-                    {!coupleData.partner && coupleData.inviteCode && (
+                    {!coupleData.partner && coupleData.inviteCode && coupleData.isCreator && (
                       <div className="flex gap-2 flex-1 sm:flex-initial">
                         <Input
                           value={coupleData.inviteCode}
                           readOnly
                           className="font-mono text-sm font-semibold text-center bg-card"
                         />
-                        <Button onClick={copyInviteCode} variant="outline" size="icon">
+                        <Button onClick={copyInviteCode} variant="outline" size="icon" title="Copy code">
                           <Copy className="w-4 h-4" />
                         </Button>
-                        <Button onClick={shareInvite} variant="outline" size="icon">
+                        <Button onClick={shareInvite} variant="outline" size="icon" title="Share code">
                           <Share2 className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          onClick={async () => {
+                            const { data, error } = await supabase.rpc("refresh_invite_code", { couple_uuid: coupleData.coupleId });
+                            if (error) {
+                              toast({ title: "Error", description: error.message, variant: "destructive" });
+                              return;
+                            }
+                            if (typeof data === 'string') {
+                              setCoupleData({ ...coupleData, inviteCode: data });
+                              toast({ title: "Invite code refreshed", description: "Share the new code with your partner." });
+                            }
+                          }}
+                          variant="outline"
+                          size="icon"
+                          title="Refresh invite code"
+                        >
+                          <RefreshCw className="w-4 h-4" />
                         </Button>
                       </div>
                     )}
