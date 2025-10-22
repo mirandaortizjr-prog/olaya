@@ -483,7 +483,12 @@ const Dashboard = () => {
                 </div>
                 <div className="mt-3">
                   <div className="bg-gradient-to-r from-gray-400 to-gray-500 rounded-full px-8 py-2 shadow-lg">
-                    <span className="text-sm">{partnerFeelingStatus || "Feeling"}</span>
+                    <FeelingStatusSelector
+                      coupleId={coupleData.coupleId}
+                      userId={coupleData.partner.user_id}
+                      currentStatus={partnerFeelingStatus}
+                      onStatusChange={setPartnerFeelingStatus}
+                    />
                   </div>
                 </div>
               </>
