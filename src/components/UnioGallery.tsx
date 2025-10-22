@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ThumbsUp, ThumbsDown, Heart, Bookmark, Upload, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ThumbsUp, ThumbsDown, Heart, Bookmark, Upload, X, Send, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
@@ -13,6 +14,14 @@ interface Post {
   author_id: string;
   created_at: string;
   media_urls: any;
+}
+
+interface Comment {
+  id: string;
+  post_id: string;
+  user_id: string;
+  comment: string;
+  created_at: string;
 }
 
 interface Reaction {
@@ -30,21 +39,26 @@ interface UnioGalleryProps {
 export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }: UnioGalleryProps) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [reactions, setReactions] = useState<Record<string, Reaction[]>>({});
+  const [comments, setComments] = useState<Record<string, Comment[]>>({});
   const [newPost, setNewPost] = useState("");
   const [showNewPost, setShowNewPost] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [newComment, setNewComment] = useState<Record<string, string>>({});
+  const [showComments, setShowComments] = useState<Record<string, boolean>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     loadPosts();
     loadReactions();
+    loadComments();
 
     const channel = supabase
-      .channel('posts-reactions')
+      .channel('posts-reactions-comments')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'posts', filter: `couple_id=eq.${coupleId}` }, loadPosts)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'post_reactions' }, loadReactions)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'post_comments' }, loadComments)
       .subscribe();
 
     return () => {
@@ -71,6 +85,22 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
         return acc;
       }, {} as Record<string, Reaction[]>);
       setReactions(grouped);
+    }
+  };
+
+  const loadComments = async () => {
+    const { data } = await supabase
+      .from('post_comments')
+      .select('*')
+      .order('created_at', { ascending: true });
+    
+    if (data) {
+      const grouped = data.reduce((acc, comment) => {
+        if (!acc[comment.post_id]) acc[comment.post_id] = [];
+        acc[comment.post_id].push(comment);
+        return acc;
+      }, {} as Record<string, Comment[]>);
+      setComments(grouped);
     }
   };
 
@@ -207,6 +237,31 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
     return reactions[postId]?.some(r => r.user_id === userId && r.reaction_type === type) || false;
   };
 
+  const addComment = async (postId: string) => {
+    const commentText = newComment[postId]?.trim();
+    if (!commentText) return;
+
+    const { error } = await supabase
+      .from('post_comments')
+      .insert({
+        post_id: postId,
+        user_id: userId,
+        couple_id: coupleId,
+        comment: commentText
+      });
+
+    if (error) {
+      toast({ title: "Error adding comment", variant: "destructive" });
+    } else {
+      setNewComment({ ...newComment, [postId]: '' });
+      loadComments();
+    }
+  };
+
+  const getCommentAuthor = (comment: Comment) => {
+    return comment.user_id === userId ? userFullName : partnerFullName;
+  };
+
   const PostCard = ({ post }: { post: Post }) => (
     <Card className="mb-4 overflow-hidden animate-fade-in">
       <div className="p-4">
@@ -231,7 +286,7 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
                   <source src={url} />
                 </video>
               ) : (
-                <img key={index} src={url} alt="post media" className="w-full object-cover" />
+                <img key={index} src={url} alt="post media" className="w-full object-cover max-h-96" />
               );
             })}
           </div>
@@ -239,7 +294,7 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
 
         {post.content && <p className="mb-3">{post.content}</p>}
         
-        <div className="flex gap-2 border-t pt-3">
+        <div className="flex gap-2 border-t pt-3 mb-3">
           <Button
             variant={hasReacted(post.id, 'like') ? 'default' : 'outline'}
             size="sm"
@@ -276,7 +331,47 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
             <Bookmark className="w-4 h-4" />
             {getReactionCount(post.id, 'save')}
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowComments({ ...showComments, [post.id]: !showComments[post.id] })}
+            className="gap-1 ml-auto"
+          >
+            <MessageCircle className="w-4 h-4" />
+            {comments[post.id]?.length || 0}
+          </Button>
         </div>
+
+        {/* Comments section */}
+        {showComments[post.id] && (
+          <div className="border-t pt-3 space-y-2">
+            {comments[post.id]?.map((comment) => (
+              <div key={comment.id} className="bg-muted p-2 rounded text-sm">
+                <p className="font-semibold text-xs">{getCommentAuthor(comment)}</p>
+                <p>{comment.comment}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {format(new Date(comment.created_at), 'PPp')}
+                </p>
+              </div>
+            ))}
+            <div className="flex gap-2">
+              <Input
+                value={newComment[post.id] || ''}
+                onChange={(e) => setNewComment({ ...newComment, [post.id]: e.target.value })}
+                placeholder="Add a comment..."
+                className="flex-1"
+                onKeyDown={(e) => e.key === 'Enter' && addComment(post.id)}
+              />
+              <Button
+                size="sm"
+                onClick={() => addComment(post.id)}
+                disabled={!newComment[post.id]?.trim()}
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </Card>
   );
