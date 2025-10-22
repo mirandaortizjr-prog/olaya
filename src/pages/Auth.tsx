@@ -75,9 +75,20 @@ const Auth = () => {
         });
       }
     } catch (error: any) {
+      let errorMessage = error.message;
+      
+      // Provide clearer error messages
+      if (error.message.includes("Invalid login credentials")) {
+        errorMessage = isSignUp 
+          ? "Error al crear cuenta. Por favor intenta de nuevo." 
+          : "Correo o contraseña incorrectos. ¿Necesitas crear una cuenta?";
+      } else if (error.message.includes("User already registered")) {
+        errorMessage = "Esta cuenta ya existe. Por favor inicia sesión.";
+      }
+      
       toast({
         title: t("authError"),
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -175,25 +186,6 @@ const Auth = () => {
             {isSignUp ? t("signUp") : t("signIn")}
           </Button>
         </form>
-
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-card text-muted-foreground">{t("orContinueWith")}</span>
-          </div>
-        </div>
-
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={handleGoogleAuth}
-          disabled={loading}
-        >
-          <Chrome className="w-4 h-4 mr-2" />
-          {t("google")}
-        </Button>
 
         <div className="mt-6 text-center">
           <button
