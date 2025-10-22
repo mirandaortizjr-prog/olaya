@@ -104,38 +104,59 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
     try {
       const mediaUrls: string[] = [];
 
+      console.log('Starting upload process. Files:', uploadedFiles.length);
+
       // Upload files to storage
       for (const file of uploadedFiles) {
         const fileExt = file.name.split('.').pop();
         const fileName = `${coupleId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
         
+        console.log('Uploading file:', fileName);
         const { error: uploadError } = await supabase.storage
           .from('couple_media')
           .upload(fileName, file);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          throw uploadError;
+        }
 
         // Create signed URL that lasts 7 days
-        const { data: signedData } = await supabase.storage
+        console.log('Creating signed URL for:', fileName);
+        const { data: signedData, error: signError } = await supabase.storage
           .from('couple_media')
           .createSignedUrl(fileName, 60 * 60 * 24 * 7);
 
+        if (signError) {
+          console.error('Sign URL error:', signError);
+          throw signError;
+        }
+
         if (signedData?.signedUrl) {
+          console.log('Signed URL created:', signedData.signedUrl);
           mediaUrls.push(signedData.signedUrl);
         }
       }
 
+      console.log('All files uploaded. Creating post with URLs:', mediaUrls);
+
       // Create post with media URLs
-      const { error } = await supabase
+      const { error, data: postData } = await supabase
         .from('posts')
         .insert({
           couple_id: coupleId,
           author_id: userId,
           content: newPost.trim() || '',
           media_urls: mediaUrls.length > 0 ? mediaUrls : null
-        });
+        })
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Post insert error:', error);
+        throw error;
+      }
+
+      console.log('Post created successfully:', postData);
 
       setNewPost("");
       setUploadedFiles([]);
@@ -143,6 +164,7 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
       loadPosts();
       toast({ title: "Post created successfully!" });
     } catch (error: any) {
+      console.error('Full error details:', error);
       toast({ 
         title: "Error creating post", 
         description: error.message,
