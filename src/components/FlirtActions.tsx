@@ -2,12 +2,12 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Flame, Heart, Eye, Sparkles, Lips, Wind } from "lucide-react";
+import { Flame, Heart, Eye, Sparkles, Wind } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const FLIRT_ACTIONS = [
   { value: "wink", label: "Wink", icon: Eye, emoji: "😉" },
-  { value: "kiss", label: "Kiss", icon: Lips, emoji: "💋" },
+  { value: "kiss", label: "Kiss", icon: Heart, emoji: "💋" },
   { value: "bite", label: "Bite", icon: Sparkles, emoji: "🦷" },
   { value: "lick", label: "Lick", icon: Wind, emoji: "👅" },
   { value: "heart", label: "Send Heart", icon: Heart, emoji: "❤️" },
