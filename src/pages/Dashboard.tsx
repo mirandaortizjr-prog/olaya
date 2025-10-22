@@ -495,38 +495,19 @@ const Dashboard = () => {
         </div>
 
         {/* UNIO Gallery - Large beige card */}
-        <div className="bg-[#F5E6D3] rounded-3xl p-6 shadow-xl min-h-[400px]">
+        <div className="bg-[#F5E6D3] rounded-3xl p-6 shadow-xl h-[550px] flex flex-col">
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-gray-700">Posted by.....</p>
             <h2 className="text-xl font-normal">UNIO Gallery</h2>
           </div>
           
-          <div className="space-y-4">
+          <div className="flex-1 overflow-hidden">
             <UnioGallery
               coupleId={coupleData.coupleId}
               userId={user!.id}
               userFullName={userProfile?.full_name || "You"}
               partnerFullName={coupleData.partner?.full_name || "Partner"}
             />
-          </div>
-          
-          {/* Reaction Icons at Bottom */}
-          <div className="flex justify-around items-center mt-6 pt-4 border-t border-gray-300">
-            <Button variant="ghost" size="icon">
-              <ThumbsDown className="w-6 h-6" />
-            </Button>
-            <Button variant="ghost" size="icon">
-              <ThumbsUp className="w-6 h-6" />
-            </Button>
-            <Button variant="ghost" size="icon">
-              <Heart className="w-6 h-6 text-red-500" />
-            </Button>
-            <Button variant="ghost" size="icon">
-              <MessageCircle className="w-6 h-6" />
-            </Button>
-            <Button variant="ghost" size="icon">
-              <Bookmark className="w-6 h-6" />
-            </Button>
           </div>
         </div>
 
