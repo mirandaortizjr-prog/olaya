@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Heart, Calendar, MapPin, Mail, Edit2, Check, X, Lock } from "lucide-react";
+import { ArrowLeft, Heart, Calendar, MapPin, Mail, Edit2, Check, X, Lock, Link2 } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -27,6 +27,7 @@ export default function CoupleProfiles() {
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const [partnerProfile, setPartnerProfile] = useState<Profile | null>(null);
   const [coupleId, setCoupleId] = useState<string | null>(null);
+  const [inviteCode, setInviteCode] = useState<string>("");
   const [editingOwn, setEditingOwn] = useState(false);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -82,6 +83,17 @@ export default function CoupleProfiles() {
       }
 
       setCoupleId(membership.couple_id);
+
+      // Get couple data for invite code
+      const { data: couple } = await supabase
+        .from("couples")
+        .select("invite_code")
+        .eq("id", membership.couple_id)
+        .single();
+
+      if (couple) {
+        setInviteCode(couple.invite_code);
+      }
 
       // Get own profile
       const { data: ownProfile } = await supabase
@@ -398,6 +410,41 @@ export default function CoupleProfiles() {
           {userProfile && <ProfileCard profile={userProfile} isOwn={true} />}
           {partnerProfile && <ProfileCard profile={partnerProfile} isOwn={false} />}
         </div>
+
+        {/* Invite Code Section */}
+        {!partnerProfile && inviteCode && (
+          <Card className="bg-gradient-to-br from-card to-card/50 border-primary/10 shadow-soft">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Link2 className="h-5 w-5 text-primary" />
+                Invite Your Partner
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Share this code with your partner so they can join your space
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  value={inviteCode}
+                  readOnly
+                  className="font-mono text-lg font-semibold text-center"
+                />
+                <Button
+                  onClick={() => {
+                    navigator.clipboard.writeText(inviteCode);
+                    toast({
+                      title: "Copied! 💕",
+                      description: "Invite code copied to clipboard",
+                    });
+                  }}
+                >
+                  Copy
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Password Change Section */}
         <Card className="bg-gradient-to-br from-card to-card/50 border-primary/10 shadow-soft">
