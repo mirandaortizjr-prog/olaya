@@ -9,14 +9,14 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Sensual intimate palette */
-    --background: 0 0% 94%;
-    --foreground: 0 0% 20%;
+    --background: 215 16% 47%;
+    --foreground: 0 0% 98%;
 
-    --card: 0 0% 98%;
-    --card-foreground: 0 0% 20%;
+    --card: 217 19% 40%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 98%;
-    --popover-foreground: 0 0% 20%;
+    --popover: 217 19% 40%;
+    --popover-foreground: 0 0% 98%;
 
     /* Deep passionate magenta */
     --primary: 330 65% 48%;
@@ -27,8 +27,8 @@ All colors MUST be HSL.
     --secondary-foreground: 0 0% 100%;
 
     /* Warm muted tones */
-    --muted: 0 0% 90%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 215 14% 34%;
+    --muted-foreground: 0 0% 85%;
 
     /* Warm amber accent */
     --accent: 25 75% 55%;
@@ -37,8 +37,8 @@ All colors MUST be HSL.
     --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 85%;
-    --input: 0 0% 90%;
+    --border: 215 15% 30%;
+    --input: 217 19% 35%;
     --ring: 330 65% 48%;
 
     --radius: 0.75rem;
