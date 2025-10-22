@@ -1,78 +1,36 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { MessageCircle, Settings, LogOut, Users, Link2, Heart, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { toast as sonnerToast } from "sonner";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { useLanguage } from "@/contexts/LanguageContext";
 import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
 import { CouplePictureUpload } from "@/components/CouplePictureUpload";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { QuickActions } from "@/components/QuickActions";
-import { RecentMessages } from "@/components/RecentMessages";
-import { DailyNotes } from "@/components/DailyNotes";
-import { MoodTracker } from "@/components/MoodTracker";
-import { LoveNotes } from "@/components/LoveNotes";
+import { FeelingStatusSelector } from "@/components/FeelingStatusSelector";
+import { MessengerChat } from "@/components/MessengerChat";
+import { FlirtActions } from "@/components/FlirtActions";
+import { PrivateContentPage } from "@/components/PrivateContentPage";
+import { PrivatePhotosPage } from "@/components/PrivatePhotosPage";
+import { UnioGallery } from "@/components/UnioGallery";
 import { MemoryCalendar } from "@/components/MemoryCalendar";
-import { CravingBoard } from "@/components/CravingBoard";
-import { MediaSharing } from "@/components/MediaSharing";
-import { DesireVault } from "@/components/DesireVault";
-import { SharedJournal } from "@/components/SharedJournal";
-import { RelationshipTimeline } from "@/components/RelationshipTimeline";
-import { LoveLanguageSelector } from "@/components/LoveLanguageSelector";
-import { PostsFeed } from "@/components/PostsFeed";
-import { CalmingTools } from "@/components/CalmingTools";
-import { LoveMeter } from "@/components/LoveMeter";
-import { useSubscription } from "@/hooks/useSubscription";
-import { requestNotificationPermission, showQuickMessageNotification, subscribeToPushNotifications } from "@/utils/notifications";
-import { ThemeSettings } from "@/components/ThemeSettings";
-import { useTheme } from "@/contexts/ThemeContext";
-import {
-  Heart, 
-  LogOut, 
-  Users,
-  Link2,
-  Copy,
-  Share2,
-  UserCircle,
-  Eye,
-  Flame,
-  Sparkles,
-  Mail,
-  Brain,
-  Crown,
-  Settings,
-  RefreshCw
-} from "lucide-react";
-
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { BottomNavigation } from "@/components/BottomNavigation";
 
 interface CoupleData {
   coupleId: string;
   inviteCode: string;
-  sanctuaryName: string;
-  couplePictureUrl?: string;
-  anniversaryDate?: string;
-  isCreator: boolean;
+  spaceName: string;
   partner: {
     user_id: string;
     full_name: string;
     email: string;
+    avatar_url?: string;
   } | null;
 }
 
@@ -82,980 +40,500 @@ const Dashboard = () => {
   const [coupleData, setCoupleData] = useState<CoupleData | null>(null);
   const [inviteCode, setInviteCode] = useState("");
   const [userProfile, setUserProfile] = useState<any>(null);
-  const [showProfileSettings, setShowProfileSettings] = useState(false);
-  const [editingSanctuaryName, setEditingSanctuaryName] = useState(false);
-  const [editingAnniversary, setEditingAnniversary] = useState(false);
-  const [sanctuaryName, setSanctuaryName] = useState("");
-  const [anniversaryDate, setAnniversaryDate] = useState("");
-  const [showThemeSettings, setShowThemeSettings] = useState(false);
+  const [partnerFeelingStatus, setPartnerFeelingStatus] = useState("");
+  const [userFeelingStatus, setUserFeelingStatus] = useState("");
+  const [loveMeter, setLoveMeter] = useState(0);
+  const [activeView, setActiveView] = useState("home");
+  const [showMessenger, setShowMessenger] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showFlirt, setShowFlirt] = useState(false);
+  const [editingSpaceName, setEditingSpaceName] = useState(false);
+  const [spaceName, setSpaceName] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { t, language } = useLanguage();
-  const [searchParams] = useSearchParams();
-  const { isPremium, isLoading: subscriptionLoading, createCheckoutSession } = useSubscription(user?.id);
-  const { setCoupleId } = useTheme();
 
   useEffect(() => {
-    // Check for invite code in URL
-    const codeFromUrl = searchParams.get('code');
-    if (codeFromUrl) {
-      setInviteCode(codeFromUrl.toUpperCase());
-    }
+    checkUser();
+  }, []);
 
-    checkAuth();
-    requestNotificationPermission().then(async (hasPermission) => {
-      if (hasPermission) {
-        subscribeToPushNotifications();
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (!session) {
-        navigate("/auth");
-      } else {
-        fetchCoupleData(session.user.id);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate, searchParams]);
-
-  // Realtime subscription for quick messages
-  useEffect(() => {
-    if (!coupleData?.coupleId || !user?.id) return;
-
-    const channel = supabase
-      .channel('quick_messages_channel')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'quick_messages',
-          filter: `couple_id=eq.${coupleData.coupleId}`,
-        },
-        (payload) => {
-          const message = payload.new as any;
-          // Only show notification if it's from partner (not from self)
-          if (message.sender_id !== user.id) {
-            showQuickMessageToast(message.message_type);
-            showQuickMessageNotification(
-              message.message_type,
-              coupleData.partner?.full_name,
-              language
-            );
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [coupleData?.coupleId, user?.id, coupleData?.partner?.full_name, language]);
-
-  const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    setUser(session?.user ?? null);
+  const checkUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
     
-    if (session?.user) {
-      await fetchCoupleData(session.user.id);
-      await fetchUserProfile(session.user.id);
-    }
-    
-    setLoading(false);
-    
-    if (!session) {
+    if (!user) {
       navigate("/auth");
+      return;
+    }
+
+    setUser(user);
+    await loadUserProfile(user.id);
+    await loadCoupleData(user.id);
+    setLoading(false);
+  };
+
+  const loadUserProfile = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (data) {
+      setUserProfile(data);
     }
   };
 
-  const fetchCoupleData = async (userId: string) => {
-    try {
-      console.log("Fetching couple data for user:", userId);
+  const loadCoupleData = async (userId: string) => {
+    const { data: membership } = await supabase
+      .from('couple_members')
+      .select('couple_id')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (!membership) return;
+
+    const { data: couple } = await supabase
+      .from('couples')
+      .select('*')
+      .eq('id', membership.couple_id)
+      .single();
+
+    if (!couple) return;
+
+    const { data: partner } = await supabase.rpc('get_partner_profile', { c_id: couple.id });
+
+    const partnerProfile = partner && partner.length > 0 ? partner[0] : null;
+
+    // Load partner avatar if exists
+    let partnerAvatarUrl = null;
+    if (partnerProfile) {
+      const { data: partnerProfileData } = await supabase
+        .from('profiles')
+        .select('avatar_url')
+        .eq('id', partnerProfile.user_id)
+        .single();
       
-      // Get user's couple membership
-      const { data: membership, error: memberError } = await supabase
-        .from("couple_members")
-        .select("couple_id")
-        .eq("user_id", userId)
-        .order("joined_at", { ascending: false })
+      if (partnerProfileData?.avatar_url) {
+        partnerAvatarUrl = partnerProfileData.avatar_url;
+      }
+    }
+
+    setCoupleData({
+      coupleId: couple.id,
+      inviteCode: couple.invite_code,
+      spaceName: couple.name || 'Our Space',
+      partner: partnerProfile ? {
+        ...partnerProfile,
+        avatar_url: partnerAvatarUrl
+      } : null,
+    });
+    setSpaceName(couple.name || 'Our Space');
+
+    // Load feeling statuses
+    loadFeelingStatuses(couple.id, userId, partnerProfile?.user_id);
+    loadLoveMeter(couple.id);
+  };
+
+  const loadFeelingStatuses = async (coupleId: string, userId: string, partnerId?: string) => {
+    const { data: userStatus } = await supabase
+      .from('feeling_status')
+      .select('status')
+      .eq('couple_id', coupleId)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (userStatus) setUserFeelingStatus(userStatus.status);
+
+    if (partnerId) {
+      const { data: partnerStatus } = await supabase
+        .from('feeling_status')
+        .select('status')
+        .eq('couple_id', coupleId)
+        .eq('user_id', partnerId)
+        .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
 
-      console.log("Membership data:", membership, "Error:", memberError);
-
-      if (memberError) throw memberError;
-
-      if (!membership) {
-        setCoupleData(null);
-        return;
-      }
-
-      // Fetch couple data (with sanctuary name and picture)
-      const { data: couple, error: coupleError } = await supabase
-        .from("couples")
-        .select("id, created_by, name, couple_picture_url, anniversary_date")
-        .eq("id", membership.couple_id)
-        .maybeSingle();
-
-      console.log("Couple data:", couple, "Error:", coupleError);
-
-      if (coupleError) throw coupleError;
-
-      // Fetch invite code securely (only if user is the creator)
-      let inviteCode = "";
-      if (couple?.created_by === userId) {
-        const { data: inviteData, error: inviteError } = await supabase.rpc(
-          "get_couple_invite_code",
-          { couple_uuid: membership.couple_id }
-        );
-
-        console.log("Invite code data:", inviteData, "Error:", inviteError);
-
-        if (!inviteError && Array.isArray(inviteData) && inviteData.length > 0) {
-          inviteCode = inviteData[0].invite_code || "";
-        }
-      }
-
-      // Get partner profile via RPC (bypasses RLS on couple_members)
-      const { data: partner, error: partnerError } = await supabase.rpc(
-        "get_partner_profile",
-        { c_id: membership.couple_id }
-      );
-
-      console.log("RPC partner result:", partner, "Error:", partnerError);
-
-      let partnerProfile = null;
-      if (!partnerError && Array.isArray(partner) && partner.length > 0) {
-        partnerProfile = {
-          user_id: partner[0].user_id,
-          full_name: partner[0].full_name,
-          email: partner[0].email,
-        };
-      }
-
-      // Resolve couple picture URL (handles private bucket by signing stored path)
-      let couplePicUrl: string | undefined = undefined;
-      if (couple?.couple_picture_url) {
-        if (couple.couple_picture_url.startsWith('http')) {
-          couplePicUrl = couple.couple_picture_url;
-        } else {
-          const stored = couple.couple_picture_url; // e.g., 'couple_media/user-or-couple-id/filename.jpg'
-          const [bucket, ...rest] = stored.split('/');
-          const path = rest.join('/');
-          if (bucket && path) {
-            const { data: signed } = await supabase.storage
-              .from(bucket)
-              .createSignedUrl(path, 60 * 60 * 24 * 7); // 7 days
-            couplePicUrl = signed?.signedUrl;
-          }
-        }
-      }
-
-      setCoupleData({
-        coupleId: membership.couple_id,
-        inviteCode: inviteCode,
-        sanctuaryName: couple?.name || 'Our Sanctuary',
-        couplePictureUrl: couplePicUrl,
-        anniversaryDate: couple?.anniversary_date || undefined,
-        isCreator: couple?.created_by === userId,
-        partner: partnerProfile,
-      });
-      setSanctuaryName(couple?.name || 'Our Sanctuary');
-      setAnniversaryDate(couple?.anniversary_date || '');
-      setCoupleId(membership.couple_id); // Set couple ID for theme sync
-    } catch (error: any) {
-      console.error("Error fetching couple data:", error);
+      if (partnerStatus) setPartnerFeelingStatus(partnerStatus.status);
     }
   };
 
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+  const loadLoveMeter = async (coupleId: string) => {
+    const { data } = await supabase
+      .from('love_meter')
+      .select('weekly_count')
+      .eq('couple_id', coupleId)
+      .single();
 
-      if (error) throw error;
-      setUserProfile(data);
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-    }
-  };
-
-  const generateInviteCode = () => {
-    const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let result = '';
-    for (let i = 0; i < 8; i++) {
-      result += characters.charAt(Math.floor(Math.random() * characters.length));
-    }
-    return result;
-  };
-
-  const createCouple = async () => {
-    if (!user) return;
-    
-    try {
-      const code = generateInviteCode();
-      
-      const { data: newCouple, error: coupleError } = await supabase
-        .from("couples")
-        .insert({ invite_code: code })
-        .select()
-        .single();
-
-      if (coupleError) throw coupleError;
-
-      const { error: memberError } = await supabase
-        .from("couple_members")
-        .insert({ couple_id: newCouple.id, user_id: user.id });
-
-      if (memberError) throw memberError;
-
-      await fetchCoupleData(user.id);
-      
-      toast({
-        title: "Sanctuary Created! 💕",
-        description: "Share your invite code with your partner",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+    if (data) {
+      const percentage = Math.min((data.weekly_count / 50) * 100, 100);
+      setLoveMeter(percentage);
     }
   };
 
   const joinCouple = async () => {
-    if (!user || !inviteCode) return;
+    if (!user || !inviteCode.trim()) return;
 
-    // Check if user is already in a couple
-    if (coupleData) {
-      toast({
-        title: "Already in a sanctuary",
-        description: "Please leave your current sanctuary first using the 'Leave Sanctuary' button below.",
-        variant: "destructive",
-      });
+    const { data: coupleId, error: rpcError } = await supabase.rpc(
+      "find_couple_by_invite_code",
+      { code: inviteCode.trim().toUpperCase() }
+    );
+
+    if (rpcError || !coupleId) {
+      toast({ title: "Invalid or expired invite code", variant: "destructive" });
       return;
     }
 
-    try {
-      // Use RPC to bypass RLS for looking up a couple by invite code
-      const { data: coupleId, error: rpcError } = await supabase.rpc(
-        "find_couple_by_invite_code",
-        { code: inviteCode.trim().toUpperCase() }
-      );
+    const { error } = await supabase
+      .from('couple_members')
+      .insert({ couple_id: coupleId, user_id: user.id });
 
-      if (rpcError) {
-        toast({
-          title: "Error",
-          description: rpcError.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (!coupleId) {
-        toast({
-          title: "Invalid Code",
-          description: "Please check the invite code and try again",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const { error: memberError } = await supabase
-        .from("couple_members")
-        .insert({ couple_id: coupleId as string, user_id: user.id });
-
-      if (memberError) {
-        if (memberError.code === '23505') {
-          toast({
-            title: "Already Joined",
-            description: "You're already part of this sanctuary",
-            variant: "destructive",
-          });
-        } else {
-          throw memberError;
-        }
-        return;
-      }
-
-      await fetchCoupleData(user.id);
-      setInviteCode("");
-      
-      toast({
-        title: "Connected! ❤️",
-        description: "You've joined your partner's sanctuary",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const copyInviteCode = () => {
-    if (coupleData?.inviteCode) {
-      navigator.clipboard.writeText(coupleData.inviteCode);
-      toast({
-        title: "Copied!",
-        description: "Invite code copied to clipboard",
-      });
-    }
-  };
-
-  const shareInvite = async () => {
-    if (!coupleData?.inviteCode) return;
-    
-    const inviteUrl = `${window.location.origin}/dashboard?code=${coupleData.inviteCode}`;
-    const shareText = `💕 Join me in our couples sanctuary!\n\nUse code: ${coupleData.inviteCode}\nOr click: ${inviteUrl}`;
-    
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Join Our Sanctuary 💕',
-          text: shareText,
-        });
-      } catch (err) {
-        navigator.clipboard.writeText(shareText);
-        toast({
-          title: "Copied!",
-          description: "Invite link copied to clipboard",
-        });
-      }
+    if (error) {
+      toast({ title: "Error joining couple", variant: "destructive" });
     } else {
-      navigator.clipboard.writeText(shareText);
-      toast({
-        title: "Copied!",
-        description: "Invite link copied to clipboard",
-      });
+      toast({ title: "Successfully joined!" });
+      loadCoupleData(user.id);
     }
   };
 
-  const leaveCouple = async () => {
+  const createCouple = async () => {
     if (!user) return;
-    try {
-      const { error } = await supabase
-        .from("couple_members")
-        .delete()
-        .eq("user_id", user.id);
-      if (error) throw error;
 
-      setCoupleData(null);
-      setInviteCode("");
+    const { data, error } = await supabase
+      .from('couples')
+      .insert({ invite_code: '' })
+      .select()
+      .single();
 
-      toast({
-        title: "Left sanctuary",
-        description: "You can now join your partner's code.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+    if (error) {
+      toast({ title: "Error creating couple", variant: "destructive" });
+    } else {
+      toast({ title: "Couple created successfully!" });
+      loadCoupleData(user.id);
+    }
+  };
+
+  const updateSpaceName = async () => {
+    if (!coupleData || !spaceName.trim()) return;
+
+    const { error } = await supabase
+      .from('couples')
+      .update({ name: spaceName.trim() })
+      .eq('id', coupleData.coupleId);
+
+    if (error) {
+      toast({ title: "Error updating name", variant: "destructive" });
+    } else {
+      setCoupleData({ ...coupleData, spaceName: spaceName.trim() });
+      setEditingSpaceName(false);
+      toast({ title: "Space name updated!" });
     }
   };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    navigate("/");
-  };
-
-  const updateSanctuaryName = async () => {
-    if (!coupleData || !sanctuaryName.trim()) return;
-    
-    try {
-      const { error } = await supabase
-        .from('couples')
-        .update({ name: sanctuaryName.trim() })
-        .eq('id', coupleData.coupleId);
-      
-      if (error) throw error;
-      
-      setCoupleData({ ...coupleData, sanctuaryName: sanctuaryName.trim() });
-      setEditingSanctuaryName(false);
-      toast({
-        title: t('success'),
-        description: t('sanctuaryNameUpdated'),
-      });
-    } catch (error: any) {
-      toast({
-        title: t('error'),
-        description: error.message,
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const updateAnniversaryDate = async () => {
-    if (!coupleData) return;
-    
-    try {
-      const { error } = await supabase
-        .from('couples')
-        .update({ anniversary_date: anniversaryDate || null })
-        .eq('id', coupleData.coupleId);
-      
-      if (error) throw error;
-      
-      setCoupleData({ ...coupleData, anniversaryDate: anniversaryDate || undefined });
-      setEditingAnniversary(false);
-      toast({
-        title: 'Success! 💕',
-        description: anniversaryDate ? 'Anniversary date saved' : 'Anniversary date cleared',
-      });
-    } catch (error: any) {
-      toast({
-        title: t('error'),
-        description: error.message,
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const showQuickMessageToast = (messageType: string) => {
-    const messageConfig = {
-      wink: { 
-        icon: Eye, 
-        label: language === 'en' ? 'Wink' : 'Guiño',
-        emoji: '😉',
-        className: 'from-purple-500 to-pink-500'
-      },
-      kiss: { 
-        icon: Heart, 
-        label: language === 'en' ? 'Kiss' : 'Beso',
-        emoji: '💋',
-        className: 'from-red-500 to-pink-500'
-      },
-      love: { 
-        icon: Mail, 
-        label: language === 'en' ? 'I Love You' : 'Te Amo',
-        emoji: '💕',
-        className: 'from-pink-500 to-rose-500'
-      },
-      want: { 
-        icon: Flame, 
-        label: language === 'en' ? 'I Want You' : 'Te Deseo',
-        emoji: '🔥',
-        className: 'from-orange-500 to-red-500'
-      },
-      hot: { 
-        icon: Sparkles, 
-        label: language === 'en' ? "You're Hot" : 'Estás Ardiente',
-        emoji: '🌟',
-        className: 'from-amber-500 to-orange-500'
-      },
-      thinking: { 
-        icon: Brain, 
-        label: language === 'en' ? "Thinking of You" : 'Pensando en Ti',
-        emoji: '💭',
-        className: 'from-blue-500 to-purple-500'
-      },
-    };
-
-    const config = messageConfig[messageType as keyof typeof messageConfig] || messageConfig.wink;
-    const Icon = config.icon;
-    const partnerName = coupleData?.partner?.full_name || (language === 'en' ? 'Your partner' : 'Tu pareja');
-
-    sonnerToast(
-      <div className="flex items-center gap-3">
-        <div className={`p-3 rounded-full bg-gradient-to-br ${config.className} animate-bounce`}>
-          <Icon className="w-6 h-6 text-white" />
-        </div>
-        <div>
-          <p className="font-semibold">{partnerName}</p>
-          <p className="text-sm opacity-90">{config.label} {config.emoji}</p>
-        </div>
-      </div>,
-      {
-        duration: 4000,
-        className: 'bg-card border-2 border-primary/20',
-      }
-    );
+    navigate("/auth");
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-warm flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-full bg-gradient-romantic animate-pulse mx-auto mb-4" />
-          <p className="text-muted-foreground">{t("loadingSanctuary")}</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!coupleData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted p-4">
+        <Card className="max-w-md mx-auto mt-10 p-6">
+          <h1 className="text-2xl font-bold text-center mb-6">Welcome to Us Two</h1>
+          <div className="space-y-4">
+            <div>
+              <Button onClick={createCouple} className="w-full" size="lg">
+                Create Your Space
+              </Button>
+              <p className="text-sm text-center text-muted-foreground mt-2">
+                Start your journey together
+              </p>
+            </div>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">Or</span>
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="inviteCode">Join with invite code</Label>
+              <div className="flex gap-2 mt-2">
+                <Input
+                  id="inviteCode"
+                  placeholder="Enter code"
+                  value={inviteCode}
+                  onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 8))}
+                  maxLength={8}
+                />
+                <Button onClick={joinCouple} disabled={inviteCode.length !== 8}>
+                  <Link2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (showMessenger && coupleData.partner) {
+    return (
+      <MessengerChat
+        coupleId={coupleData.coupleId}
+        currentUserId={user!.id}
+        partnerName={coupleData.partner.full_name}
+        onClose={() => setShowMessenger(false)}
+      />
+    );
+  }
+
+  if (activeView === "calendar") {
+    return (
+      <div className="min-h-screen pb-20">
+        <div className="p-4 border-b flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Calendar</h2>
+          <Button variant="ghost" onClick={() => setActiveView("home")}>Close</Button>
         </div>
+        <div className="p-4">
+          <MemoryCalendar coupleId={coupleData.coupleId} userId={user!.id} />
+        </div>
+        <BottomNavigation activeView={activeView} onViewChange={setActiveView} />
+      </div>
+    );
+  }
+
+  if (activeView === "locked") {
+    return (
+      <>
+        <PrivateContentPage
+          coupleId={coupleData.coupleId}
+          userId={user!.id}
+          onClose={() => setActiveView("home")}
+        />
+        <BottomNavigation activeView={activeView} onViewChange={setActiveView} />
+      </>
+    );
+  }
+
+  if (activeView === "photos") {
+    return (
+      <>
+        <PrivatePhotosPage
+          coupleId={coupleData.coupleId}
+          userId={user!.id}
+          onClose={() => setActiveView("home")}
+        />
+        <BottomNavigation activeView={activeView} onViewChange={setActiveView} />
+      </>
+    );
+  }
+
+  if (activeView === "flirt") {
+    return (
+      <div className="min-h-screen pb-20">
+        <FlirtActions
+          coupleId={coupleData.coupleId}
+          senderId={user!.id}
+          open={true}
+          onClose={() => setActiveView("home")}
+        />
+        <BottomNavigation activeView={activeView} onViewChange={setActiveView} />
       </div>
     );
   }
 
   return (
-    <>
-      <header>
-        <title>Dashboard - Your Sanctuary | UsTwo</title>
-        <meta name="description" content="Your private couples sanctuary for daily connection, love notes, and shared moments" />
-      </header>
-
-      <div className="min-h-screen bg-gradient-cool">
-        {/* Modern Navigation Header */}
-        <nav className="border-b border-border bg-card backdrop-blur-xl sticky top-0 z-50 shadow-soft">
-          <div className="max-w-7xl mx-auto px-4 py-3">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-4">
-                <button 
-                  onClick={() => setShowProfileSettings(!showProfileSettings)}
-                  className="focus:outline-none hover:scale-105 transition-transform"
-                >
-                  <Avatar className="h-11 w-11 ring-2 ring-primary/20">
-                    <AvatarImage src={userProfile?.avatar_url || undefined} alt={userProfile?.full_name || user?.email} />
-                    <AvatarFallback className="bg-gradient-romantic text-white font-semibold">
-                      {userProfile?.full_name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                </button>
-                <h1 className="text-2xl font-bold bg-gradient-romantic bg-clip-text text-transparent hidden sm:block">
-                  {t("yourSanctuary")}
-                </h1>
-              </div>
-              <div className="flex gap-3 items-center">
-                <LanguageSwitcher />
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setShowThemeSettings(true)} 
-                  className="hover:bg-muted"
-                >
-                  <Settings className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="sm" onClick={handleSignOut} className="hover:bg-muted">
-                  <LogOut className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">{t("signOut")}</span>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </nav>
-
-        <main className="max-w-7xl mx-auto px-4 py-6">
-          <ThemeSettings open={showThemeSettings} onOpenChange={setShowThemeSettings} />
+    <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background pb-20">
+      {/* Top Header */}
+      <div className="sticky top-0 z-30 bg-card/95 backdrop-blur border-b">
+        <div className="flex items-center justify-between p-4 max-w-lg mx-auto">
+          <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)}>
+            <Settings className="w-5 h-5" />
+          </Button>
           
-          {showProfileSettings && user && (
-            <Card className="max-w-md mx-auto mb-6 shadow-medium border-primary/10">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Profile Settings</h3>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => setShowProfileSettings(false)}
-                  >
-                    Close
-                  </Button>
-                </div>
-                <ProfilePictureUpload
-                  userId={user.id}
-                  currentAvatarUrl={userProfile?.avatar_url}
-                  userName={userProfile?.full_name || user?.email}
-                  onUploadComplete={(url) => {
-                    setUserProfile({ ...userProfile, avatar_url: url });
-                  }}
-                />
-              </div>
-            </Card>
-          )}
-          
-          {!coupleData ? (
-            // Not in a couple - show create/join options
-            <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-4xl font-bold mb-4">Create Your Sacred Space</h2>
-                <p className="text-muted-foreground text-lg">
-                  Start your journey together by creating or joining a sanctuary
-                </p>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-8">
-                {/* Create Sanctuary */}
-                <Card className="p-8 hover:shadow-glow transition-all">
-                  <div className="flex flex-col items-center text-center space-y-6">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                      <Heart className="w-8 h-8 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-semibold mb-2">Create Sanctuary</h3>
-                      <p className="text-muted-foreground mb-4">
-                        Start a new space and invite your partner
-                      </p>
-                    </div>
-                    <Button onClick={createCouple} className="w-full" size="lg">
-                      <Heart className="w-4 h-4 mr-2" />
-                      Create Your Space
-                    </Button>
-                  </div>
-                </Card>
-
-                {/* Join Sanctuary */}
-                <Card className="p-8 hover:shadow-glow transition-all">
-                  <div className="flex flex-col items-center text-center space-y-6">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-secondary/20 to-primary/20 flex items-center justify-center">
-                      <Link2 className="w-8 h-8 text-secondary" />
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-semibold mb-2">Join Partner</h3>
-                      <p className="text-muted-foreground mb-4">
-                        Enter your partner's invite code
-                      </p>
-                    </div>
-                    <div className="w-full space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="inviteCode">Invite Code</Label>
-                        <Input
-                          id="inviteCode"
-                          placeholder="Enter 8-character code"
-                           value={inviteCode}
-                           onChange={(e) => setInviteCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0,8))}
-                           maxLength={8}
-                           className="text-center text-lg font-mono"
-                        />
-                      </div>
-                       <Button onClick={joinCouple} className="w-full" size="lg" disabled={inviteCode.trim().length !== 8}>
-                        <Link2 className="w-4 h-4 mr-2" />
-                        Join Sanctuary
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              </div>
+          {editingSpaceName ? (
+            <div className="flex-1 mx-2">
+              <Input
+                value={spaceName}
+                onChange={(e) => setSpaceName(e.target.value)}
+                onBlur={updateSpaceName}
+                onKeyPress={(e) => e.key === 'Enter' && updateSpaceName()}
+                className="text-center"
+                autoFocus
+              />
             </div>
           ) : (
-            // In a couple - show sanctuary dashboard
-            <div className="space-y-6">
-              {/* Header Card - Partner Connection */}
-              <Card className="p-6 bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 shadow-medium border-primary/20">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-4 flex-1">
-                    <CouplePictureUpload
-                      coupleId={coupleData.coupleId}
-                      currentPictureUrl={coupleData.couplePictureUrl}
-                      onUploadComplete={(url) => {
-                        setCoupleData({ ...coupleData, couplePictureUrl: url });
-                      }}
-                    />
-                    <div className="flex-1">
-                      {editingSanctuaryName ? (
-                        <div className="flex gap-2 items-center">
-                          <Input
-                            value={sanctuaryName}
-                            onChange={(e) => setSanctuaryName(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && updateSanctuaryName()}
-                            placeholder={t('sanctuaryNamePlaceholder')}
-                            maxLength={50}
-                            className="text-lg font-bold"
-                            autoFocus
-                          />
-                          <Button size="sm" onClick={updateSanctuaryName}>
-                            {t('save')}
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            onClick={() => {
-                              setEditingSanctuaryName(false);
-                              setSanctuaryName(coupleData.sanctuaryName);
-                            }}
-                          >
-                            {t('cancel')}
-                          </Button>
-                        </div>
-                      ) : (
-                        <h2 
-                          className="text-xl font-bold cursor-pointer hover:text-primary transition-colors flex items-center gap-2"
-                          onClick={() => setEditingSanctuaryName(true)}
-                          title={t('clickToEditName')}
-                        >
-                          {coupleData.sanctuaryName}
-                          <UserCircle className="w-4 h-4 opacity-50" />
-                        </h2>
-                      )}
-                      <p className="text-sm text-muted-foreground">
-                        {coupleData.partner 
-                          ? `${t('connectedWith')} ${coupleData.partner.full_name}`
-                          : t('waitingForPartner')}
-                      </p>
-                      {editingAnniversary ? (
-                        <div className="flex gap-2 items-center mt-2">
-                          <Input
-                            type="date"
-                            value={anniversaryDate}
-                            onChange={(e) => setAnniversaryDate(e.target.value)}
-                            className="text-sm"
-                          />
-                          <Button size="sm" onClick={updateAnniversaryDate}>
-                            {t('save')}
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            onClick={() => {
-                              setEditingAnniversary(false);
-                              setAnniversaryDate(coupleData.anniversaryDate || '');
-                            }}
-                          >
-                            {t('cancel')}
-                          </Button>
-                        </div>
-                      ) : (
-                        <p 
-                          className="text-xs text-muted-foreground cursor-pointer hover:text-primary transition-colors mt-1 flex items-center gap-1"
-                          onClick={() => setEditingAnniversary(true)}
-                          title="Click to edit anniversary"
-                        >
-                          <Heart className="w-3 h-3" />
-                          {coupleData.anniversaryDate 
-                            ? `Anniversary: ${new Date(coupleData.anniversaryDate).toLocaleDateString()}`
-                            : 'Add anniversary date'}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => navigate("/couple-profiles")}
-                      className="gap-2"
-                    >
-                      <Users className="w-4 h-4" />
-                      View Profiles
-                    </Button>
-                    {!coupleData.partner && coupleData.inviteCode && coupleData.isCreator && (
-                      <div className="flex gap-2 flex-1 sm:flex-initial">
-                        <Input
-                          value={coupleData.inviteCode}
-                          readOnly
-                          className="font-mono text-sm font-semibold text-center bg-card"
-                        />
-                        <Button onClick={copyInviteCode} variant="outline" size="icon" title="Copy code">
-                          <Copy className="w-4 h-4" />
-                        </Button>
-                        <Button onClick={shareInvite} variant="outline" size="icon" title="Share code">
-                          <Share2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          onClick={async () => {
-                            const { data, error } = await supabase.rpc("refresh_invite_code", { couple_uuid: coupleData.coupleId });
-                            if (error) {
-                              toast({ title: "Error", description: error.message, variant: "destructive" });
-                              return;
-                            }
-                            if (typeof data === 'string') {
-                              setCoupleData({ ...coupleData, inviteCode: data });
-                              toast({ title: "Invite code refreshed", description: "Share the new code with your partner." });
-                            }
-                          }}
-                          variant="outline"
-                          size="icon"
-                          title="Refresh invite code"
-                        >
-                          <RefreshCw className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    )}
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-                          Leave
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Leave this sanctuary?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will remove your connection. You can rejoin later with an invite code.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={leaveCouple}>Leave</AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </div>
-              </Card>
+            <h1
+              className="text-xl font-semibold cursor-pointer hover:text-primary"
+              onClick={() => setEditingSpaceName(true)}
+            >
+              {coupleData.spaceName}
+            </h1>
+          )}
 
-              {/* Subscription Card */}
-              {coupleData.partner && user && !subscriptionLoading && (
-                <Card className="p-5 bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20 shadow-soft">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <Crown className={`w-6 h-6 ${isPremium ? 'text-yellow-500' : 'text-muted-foreground'}`} />
-                      <div>
-                        <h3 className="font-semibold text-sm">
-                          {isPremium ? 'Legacy Temple Member' : 'Everyday Sanctuary'}
-                        </h3>
-                        <p className="text-xs text-muted-foreground">
-                          {isPremium 
-                            ? 'All premium features unlocked' 
-                            : 'Upgrade for premium features'}
-                        </p>
-                      </div>
-                    </div>
-                    {!isPremium && (
-                      <Button 
-                        onClick={() => createCheckoutSession(user.email || '')}
-                        size="sm"
-                        className="bg-gradient-romantic shadow-soft w-full sm:w-auto"
-                      >
-                        <Crown className="w-4 h-4 mr-2" />
-                        Upgrade $9.99/mo
-                      </Button>
-                    )}
-                  </div>
-                </Card>
-              )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowMessenger(true)}
+            disabled={!coupleData.partner}
+          >
+            <MessageCircle className="w-5 h-5" />
+          </Button>
+        </div>
+      </div>
 
-              {/* Love-O-Meter */}
-              {coupleData.partner && (
-                <LoveMeter coupleId={coupleData.coupleId} />
-              )}
-
-              {/* Love Wall */}
-              {coupleData.partner && user && (
-                <PostsFeed 
-                  coupleId={coupleData.coupleId} 
+      <div className="max-w-lg mx-auto p-4 space-y-6">
+        {/* Profile Photos */}
+        <div className="flex justify-around items-center">
+          <div className="text-center">
+            <div className="relative inline-block">
+              <ProfilePictureUpload 
+                userId={user!.id} 
+                currentAvatarUrl={userProfile?.avatar_url}
+                onUploadComplete={(url) => setUserProfile({...userProfile, avatar_url: url})}
+              />
+            </div>
+            <div className="mt-2">
+              {user && (
+                <FeelingStatusSelector
+                  coupleId={coupleData.coupleId}
                   userId={user.id}
+                  currentStatus={userFeelingStatus}
+                  onStatusChange={setUserFeelingStatus}
                 />
               )}
-
-              {/* Main Content Grid */}
-              {coupleData.partner && user && (
-                <div className="grid lg:grid-cols-2 gap-6">
-                  {/* Column 1 - Interactive Features */}
-                  <div className="space-y-6">
-                    <QuickActions coupleId={coupleData.coupleId} userId={user.id} />
-                    <MoodTracker 
-                      coupleId={coupleData.coupleId} 
-                      userId={user.id}
-                      partnerName={coupleData.partner.full_name}
-                    />
-                    <LoveNotes 
-                      coupleId={coupleData.coupleId} 
-                      userId={user.id}
-                      partnerName={coupleData.partner.full_name}
-                    />
-                    <CravingBoard 
-                      coupleId={coupleData.coupleId} 
-                      userId={user.id}
-                      partnerName={coupleData.partner.full_name}
-                    />
-                  </div>
-
-                  {/* Column 2 - Memory & Communication */}
-                  <div className="space-y-6">
-                    <RecentMessages 
-                      coupleId={coupleData.coupleId} 
-                      userId={user.id} 
-                      partnerName={coupleData.partner.full_name}
-                    />
-                    <Card 
-                      className="p-6 hover:shadow-glow transition-shadow cursor-pointer bg-gradient-to-br from-card to-card/50 border-primary/10"
-                      onClick={() => navigate('/daily-notes')}
-                    >
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-primary/10">
-                            <Mail className="w-5 h-5 text-primary" />
-                          </div>
-                          <h3 className="text-lg font-semibold">{t('dailyNotes')}</h3>
-                        </div>
-                        <Button variant="ghost" size="sm" className="text-primary">
-                          Open →
-                        </Button>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Share morning whispers, evening blessings, and reflections
-                      </p>
-                    </Card>
-                    <MemoryCalendar 
-                      coupleId={coupleData.coupleId} 
-                      userId={user.id}
-                      partnerName={coupleData.partner.full_name}
-                    />
-                    <MediaSharing 
-                      coupleId={coupleData.coupleId} 
-                      userId={user.id}
-                      partnerName={coupleData.partner.full_name}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Premium Features Section */}
-              {coupleData.partner && user && isPremium && (
-                <div className="space-y-6 mt-8">
-                  <div className="flex items-center gap-3 px-4 py-2 bg-gradient-romantic rounded-lg w-fit shadow-glow">
-                    <Crown className="w-5 h-5 text-white" />
-                    <span className="font-semibold text-white">Premium Features</span>
-                  </div>
-
-                  <div className="grid lg:grid-cols-2 gap-6">
-                    <DesireVault 
-                      coupleId={coupleData.coupleId} 
-                      userId={user.id}
-                    />
-                    <LoveLanguageSelector 
-                      userId={user.id}
-                      partnerUserId={coupleData.partner.user_id}
-                    />
-                  </div>
-                  
-                  <SharedJournal 
-                    coupleId={coupleData.coupleId} 
-                    userId={user.id}
-                  />
-                  
-                  <RelationshipTimeline 
-                    coupleId={coupleData.coupleId} 
-                    userId={user.id}
-                  />
-                  
-                  <CalmingTools />
-                </div>
-              )}
-
-              {/* Upgrade CTA for Non-Premium */}
-              {coupleData.partner && user && !isPremium && (
-                <Card className="p-10 text-center bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 shadow-glow border-primary/20">
-                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-romantic flex items-center justify-center shadow-glow">
-                    <Crown className="w-10 h-10 text-white" />
-                  </div>
-                  <h3 className="text-3xl font-bold mb-3 bg-gradient-romantic bg-clip-text text-transparent">
-                    Unlock Premium Features
-                  </h3>
-                  <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-                    Access Desire Vault, Shared Journal, Relationship Timeline, Love Languages, Posts Feed, and Calming Tools
-                  </p>
-                  <Button 
-                    size="lg"
-                    onClick={() => createCheckoutSession(user.email || '')}
-                    className="bg-gradient-romantic shadow-glow hover:scale-105 transition-transform"
-                  >
-                    <Crown className="w-5 h-5 mr-2" />
-                    Upgrade to Legacy Temple - $9.99/month
-                  </Button>
-                </Card>
-              )}
             </div>
-          )}
-        </main>
+          </div>
+
+          <div className="text-center">
+            {coupleData.partner ? (
+              <>
+                <Avatar className="w-28 h-28 border-4 border-card">
+                  <AvatarImage src={coupleData.partner.avatar_url} />
+                  <AvatarFallback>
+                    {coupleData.partner.full_name.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="mt-2">
+                  <Button variant="outline" size="sm" disabled>
+                    {partnerFeelingStatus || "No status"}
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="w-28 h-28 rounded-full border-4 border-dashed border-muted flex items-center justify-center">
+                <Users className="w-12 h-12 text-muted-foreground" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Love-O-Meter */}
+        <Card className="p-4 bg-gradient-to-r from-primary/10 to-primary/5">
+          <div className="text-center mb-2 flex items-center justify-center gap-2">
+            <Heart className="w-5 h-5 text-primary" />
+            <h3 className="font-semibold">Love-O-Meter</h3>
+          </div>
+          <div className="w-full bg-muted rounded-full h-6 overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-red-500 via-pink-500 to-red-600 transition-all duration-500"
+              style={{ width: `${loveMeter}%` }}
+            />
+          </div>
+          <p className="text-center text-sm mt-2 text-muted-foreground">
+            {Math.round(loveMeter)}% this week
+          </p>
+        </Card>
+
+        {/* UNIO Gallery */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">UNIO Gallery</h2>
+          </div>
+          <UnioGallery
+            coupleId={coupleData.coupleId}
+            userId={user!.id}
+            userFullName={userProfile?.full_name || "You"}
+            partnerFullName={coupleData.partner?.full_name || "Partner"}
+          />
+        </div>
+
+        {/* Show invite code if no partner */}
+        {!coupleData.partner && (
+          <Card className="p-4">
+            <h3 className="font-semibold mb-2">Invite Your Partner</h3>
+            <p className="text-sm text-muted-foreground mb-3">
+              Share this code with your partner to join your space
+            </p>
+            <div className="flex gap-2">
+              <Input
+                value={coupleData.inviteCode}
+                readOnly
+                className="font-mono text-center"
+              />
+              <Button
+                onClick={() => {
+                  navigator.clipboard.writeText(coupleData.inviteCode);
+                  toast({ title: "Code copied!" });
+                }}
+              >
+                Copy
+              </Button>
+            </div>
+          </Card>
+        )}
       </div>
-    </>
+
+      <BottomNavigation activeView={activeView} onViewChange={setActiveView} />
+      <FlirtActions
+        coupleId={coupleData.coupleId}
+        senderId={user!.id}
+        open={showFlirt}
+        onClose={() => setShowFlirt(false)}
+      />
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Settings</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold mb-2">Language</h3>
+              <LanguageSwitcher />
+            </div>
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => navigate('/couple-profiles')}
+            >
+              <Users className="w-4 h-4 mr-2" />
+              View Profiles
+            </Button>
+            <Button
+              variant="destructive"
+              className="w-full"
+              onClick={handleSignOut}
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 
