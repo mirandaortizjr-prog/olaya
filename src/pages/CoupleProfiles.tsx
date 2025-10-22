@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Heart, Calendar, MapPin, Mail, Edit2, Check, X } from "lucide-react";
+import { ArrowLeft, Heart, Calendar, MapPin, Mail, Edit2, Check, X, Lock } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -39,6 +39,15 @@ export default function CoupleProfiles() {
     birthday: "",
     location: "",
   });
+
+  // Password change states
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -154,6 +163,56 @@ export default function CoupleProfiles() {
         description: error.message,
         variant: "destructive",
       });
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    if (!passwordForm.newPassword || passwordForm.newPassword.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setPasswordLoading(true);
+      
+      const { error } = await supabase.auth.updateUser({
+        password: passwordForm.newPassword,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success! 🔒",
+        description: "Your password has been updated",
+      });
+
+      setPasswordForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      setShowPasswordChange(false);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -339,6 +398,85 @@ export default function CoupleProfiles() {
           {userProfile && <ProfileCard profile={userProfile} isOwn={true} />}
           {partnerProfile && <ProfileCard profile={partnerProfile} isOwn={false} />}
         </div>
+
+        {/* Password Change Section */}
+        <Card className="bg-gradient-to-br from-card to-card/50 border-primary/10 shadow-soft">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Lock className="h-5 w-5 text-primary" />
+                Change Password
+              </span>
+              {!showPasswordChange && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowPasswordChange(true)}
+                >
+                  <Edit2 className="h-4 w-4" />
+                </Button>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {showPasswordChange ? (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                    placeholder="Enter new password (min 6 characters)"
+                    minLength={6}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                    placeholder="Confirm new password"
+                    minLength={6}
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handlePasswordChange} 
+                    className="flex-1"
+                    disabled={passwordLoading}
+                  >
+                    <Check className="h-4 w-4 mr-2" />
+                    {passwordLoading ? "Updating..." : "Update Password"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowPasswordChange(false);
+                      setPasswordForm({
+                        currentPassword: "",
+                        newPassword: "",
+                        confirmPassword: "",
+                      });
+                    }}
+                    disabled={passwordLoading}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Click the edit button to change your password
+              </p>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
