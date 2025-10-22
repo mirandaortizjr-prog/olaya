@@ -191,18 +191,36 @@ const Dashboard = () => {
   const createCouple = async () => {
     if (!user) return;
 
-    const { data, error } = await supabase
+    const { data: couple, error } = await supabase
       .from('couples')
       .insert({ invite_code: '' })
       .select()
       .single();
 
-    if (error) {
+    if (error || !couple) {
       toast({ title: "Error creating couple", variant: "destructive" });
-    } else {
-      toast({ title: "Couple created successfully!" });
-      loadCoupleData(user.id);
+      return;
     }
+
+    // Link current user to the newly created couple
+    const { error: memberError } = await supabase
+      .from('couple_members')
+      .insert({ couple_id: couple.id, user_id: user.id });
+
+    if (memberError) {
+      toast({ title: "Error linking your profile to the couple", variant: "destructive" });
+      return;
+    }
+
+    // Generate a fresh invite code for sharing
+    try {
+      await supabase.rpc('refresh_invite_code', { couple_uuid: couple.id });
+    } catch (e) {
+      console.warn('Could not refresh invite code', e);
+    }
+
+    toast({ title: "Couple created successfully!" });
+    await loadCoupleData(user.id);
   };
 
   const updateSpaceName = async () => {
