@@ -4,15 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MessageCircle, Settings, LogOut, Users, Link2, Heart, Eye } from "lucide-react";
+import { MessageCircle, Settings, LogOut, Users, Link2, Calendar, Flame, Home, Lock, Clock, ThumbsUp, ThumbsDown, Heart, Bookmark } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
-import { CouplePictureUpload } from "@/components/CouplePictureUpload";
 import { FeelingStatusSelector } from "@/components/FeelingStatusSelector";
 import { MessengerChat } from "@/components/MessengerChat";
 import { FlirtActions } from "@/components/FlirtActions";
@@ -20,7 +18,6 @@ import { PrivateContentPage } from "@/components/PrivateContentPage";
 import { PrivatePhotosPage } from "@/components/PrivatePhotosPage";
 import { UnioGallery } from "@/components/UnioGallery";
 import { MemoryCalendar } from "@/components/MemoryCalendar";
-import { BottomNavigation } from "@/components/BottomNavigation";
 
 interface CoupleData {
   coupleId: string;
@@ -71,7 +68,7 @@ const Dashboard = () => {
   };
 
   const loadUserProfile = async (userId: string) => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', userId)
@@ -100,10 +97,8 @@ const Dashboard = () => {
     if (!couple) return;
 
     const { data: partner } = await supabase.rpc('get_partner_profile', { c_id: couple.id });
-
     const partnerProfile = partner && partner.length > 0 ? partner[0] : null;
 
-    // Load partner avatar if exists
     let partnerAvatarUrl = null;
     if (partnerProfile) {
       const { data: partnerProfileData } = await supabase
@@ -120,15 +115,11 @@ const Dashboard = () => {
     setCoupleData({
       coupleId: couple.id,
       inviteCode: couple.invite_code,
-      spaceName: couple.name || 'Our Space',
-      partner: partnerProfile ? {
-        ...partnerProfile,
-        avatar_url: partnerAvatarUrl
-      } : null,
+      spaceName: couple.name || 'name your space',
+      partner: partnerProfile ? { ...partnerProfile, avatar_url: partnerAvatarUrl } : null,
     });
-    setSpaceName(couple.name || 'Our Space');
+    setSpaceName(couple.name || 'name your space');
 
-    // Load feeling statuses
     loadFeelingStatuses(couple.id, userId, partnerProfile?.user_id);
     loadLoveMeter(couple.id);
   };
@@ -238,7 +229,7 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-muted">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
@@ -246,18 +237,13 @@ const Dashboard = () => {
 
   if (!coupleData) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted p-4">
+      <div className="min-h-screen bg-muted p-4">
         <Card className="max-w-md mx-auto mt-10 p-6">
           <h1 className="text-2xl font-bold text-center mb-6">Welcome to Us Two</h1>
           <div className="space-y-4">
-            <div>
-              <Button onClick={createCouple} className="w-full" size="lg">
-                Create Your Space
-              </Button>
-              <p className="text-sm text-center text-muted-foreground mt-2">
-                Start your journey together
-              </p>
-            </div>
+            <Button onClick={createCouple} className="w-full" size="lg">
+              Create Your Space
+            </Button>
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
@@ -267,19 +253,17 @@ const Dashboard = () => {
               </div>
             </div>
             <div>
-              <Label htmlFor="inviteCode">Join with invite code</Label>
-              <div className="flex gap-2 mt-2">
-                <Input
-                  id="inviteCode"
-                  placeholder="Enter code"
-                  value={inviteCode}
-                  onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 8))}
-                  maxLength={8}
-                />
-                <Button onClick={joinCouple} disabled={inviteCode.length !== 8}>
-                  <Link2 className="w-4 h-4" />
-                </Button>
-              </div>
+              <Input
+                placeholder="Enter invite code"
+                value={inviteCode}
+                onChange={(e) => setInviteCode(e.target.value.toUpperCase().slice(0, 8))}
+                maxLength={8}
+                className="mb-2"
+              />
+              <Button onClick={joinCouple} disabled={inviteCode.length !== 8} className="w-full">
+                <Link2 className="w-4 h-4 mr-2" />
+                Join with Code
+              </Button>
             </div>
           </div>
         </Card>
@@ -300,15 +284,33 @@ const Dashboard = () => {
 
   if (activeView === "calendar") {
     return (
-      <div className="min-h-screen pb-20">
-        <div className="p-4 border-b flex justify-between items-center">
+      <div className="min-h-screen bg-muted pb-20">
+        <div className="p-4 border-b bg-card flex justify-between items-center">
           <h2 className="text-xl font-semibold">Calendar</h2>
           <Button variant="ghost" onClick={() => setActiveView("home")}>Close</Button>
         </div>
         <div className="p-4">
           <MemoryCalendar coupleId={coupleData.coupleId} userId={user!.id} />
         </div>
-        <BottomNavigation activeView={activeView} onViewChange={setActiveView} />
+        <div className="fixed bottom-0 left-0 right-0 bg-muted/80 backdrop-blur border-t">
+          <div className="flex justify-around items-center h-20 max-w-lg mx-auto px-4">
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("calendar")}>
+              <Calendar className="w-7 h-7 text-foreground" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("flirt")}>
+              <Flame className="w-7 h-7 text-red-500" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("home")}>
+              <Home className="w-7 h-7 text-muted-foreground" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("locked")}>
+              <Lock className="w-7 h-7 text-muted-foreground" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("photos")}>
+              <Clock className="w-7 h-7 text-muted-foreground" />
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -321,7 +323,25 @@ const Dashboard = () => {
           userId={user!.id}
           onClose={() => setActiveView("home")}
         />
-        <BottomNavigation activeView={activeView} onViewChange={setActiveView} />
+        <div className="fixed bottom-0 left-0 right-0 bg-muted/80 backdrop-blur border-t">
+          <div className="flex justify-around items-center h-20 max-w-lg mx-auto px-4">
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("calendar")}>
+              <Calendar className="w-7 h-7 text-muted-foreground" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("flirt")}>
+              <Flame className="w-7 h-7 text-red-500" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("home")}>
+              <Home className="w-7 h-7 text-muted-foreground" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("locked")}>
+              <Lock className="w-7 h-7 text-foreground" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("photos")}>
+              <Clock className="w-7 h-7 text-muted-foreground" />
+            </Button>
+          </div>
+        </div>
       </>
     );
   }
@@ -334,48 +354,51 @@ const Dashboard = () => {
           userId={user!.id}
           onClose={() => setActiveView("home")}
         />
-        <BottomNavigation activeView={activeView} onViewChange={setActiveView} />
+        <div className="fixed bottom-0 left-0 right-0 bg-muted/80 backdrop-blur border-t">
+          <div className="flex justify-around items-center h-20 max-w-lg mx-auto px-4">
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("calendar")}>
+              <Calendar className="w-7 h-7 text-muted-foreground" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("flirt")}>
+              <Flame className="w-7 h-7 text-red-500" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("home")}>
+              <Home className="w-7 h-7 text-muted-foreground" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("locked")}>
+              <Lock className="w-7 h-7 text-muted-foreground" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("photos")}>
+              <Clock className="w-7 h-7 text-foreground" />
+            </Button>
+          </div>
+        </div>
       </>
     );
   }
 
-  if (activeView === "flirt") {
-    return (
-      <div className="min-h-screen pb-20">
-        <FlirtActions
-          coupleId={coupleData.coupleId}
-          senderId={user!.id}
-          open={true}
-          onClose={() => setActiveView("home")}
-        />
-        <BottomNavigation activeView={activeView} onViewChange={setActiveView} />
-      </div>
-    );
-  }
-
+  // Main Home View - matches the image layout exactly
   return (
-    <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background pb-20">
-      {/* Top Header */}
-      <div className="sticky top-0 z-30 bg-card/95 backdrop-blur border-b">
-        <div className="flex items-center justify-between p-4 max-w-lg mx-auto">
-          <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)}>
-            <Settings className="w-5 h-5" />
+    <div className="min-h-screen bg-muted pb-24">
+      {/* Top Header Bar */}
+      <div className="bg-muted p-4">
+        <div className="flex items-center justify-between max-w-lg mx-auto">
+          <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="text-foreground">
+            <Settings className="w-7 h-7" />
           </Button>
           
           {editingSpaceName ? (
-            <div className="flex-1 mx-2">
-              <Input
-                value={spaceName}
-                onChange={(e) => setSpaceName(e.target.value)}
-                onBlur={updateSpaceName}
-                onKeyPress={(e) => e.key === 'Enter' && updateSpaceName()}
-                className="text-center"
-                autoFocus
-              />
-            </div>
+            <Input
+              value={spaceName}
+              onChange={(e) => setSpaceName(e.target.value)}
+              onBlur={updateSpaceName}
+              onKeyPress={(e) => e.key === 'Enter' && updateSpaceName()}
+              className="text-center bg-transparent border-0 text-xl font-normal"
+              autoFocus
+            />
           ) : (
             <h1
-              className="text-xl font-semibold cursor-pointer hover:text-primary"
+              className="text-xl font-normal cursor-pointer"
               onClick={() => setEditingSpaceName(true)}
             >
               {coupleData.spaceName}
@@ -387,107 +410,130 @@ const Dashboard = () => {
             size="icon"
             onClick={() => setShowMessenger(true)}
             disabled={!coupleData.partner}
+            className="text-foreground"
           >
-            <MessageCircle className="w-5 h-5" />
+            <MessageCircle className="w-7 h-7" />
           </Button>
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto p-4 space-y-6">
-        {/* Profile Photos */}
-        <div className="flex justify-around items-center">
-          <div className="text-center">
-            <div className="relative inline-block">
-              <ProfilePictureUpload 
-                userId={user!.id} 
-                currentAvatarUrl={userProfile?.avatar_url}
-                onUploadComplete={(url) => setUserProfile({...userProfile, avatar_url: url})}
-              />
+      <div className="max-w-lg mx-auto px-4 space-y-4">
+        {/* Large Profile Photos */}
+        <div className="flex justify-around items-start gap-8 mt-6">
+          <div className="flex flex-col items-center">
+            <div className="relative">
+              <div className="w-40 h-40 rounded-full border-8 border-black overflow-hidden bg-[#F5E6D3] flex items-center justify-center">
+                {userProfile?.avatar_url ? (
+                  <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-3xl">Photo</span>
+                )}
+              </div>
             </div>
-            <div className="mt-2">
+            <div className="mt-3">
               {user && (
-                <FeelingStatusSelector
-                  coupleId={coupleData.coupleId}
-                  userId={user.id}
-                  currentStatus={userFeelingStatus}
-                  onStatusChange={setUserFeelingStatus}
-                />
+                <div className="bg-gradient-to-r from-gray-400 to-gray-500 rounded-full px-8 py-2 shadow-lg">
+                  <FeelingStatusSelector
+                    coupleId={coupleData.coupleId}
+                    userId={user.id}
+                    currentStatus={userFeelingStatus}
+                    onStatusChange={setUserFeelingStatus}
+                  />
+                </div>
               )}
             </div>
           </div>
 
-          <div className="text-center">
+          <div className="flex flex-col items-center">
             {coupleData.partner ? (
               <>
-                <Avatar className="w-28 h-28 border-4 border-card">
-                  <AvatarImage src={coupleData.partner.avatar_url} />
-                  <AvatarFallback>
-                    {coupleData.partner.full_name.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="mt-2">
-                  <Button variant="outline" size="sm" disabled>
-                    {partnerFeelingStatus || "No status"}
-                  </Button>
+                <div className="w-40 h-40 rounded-full border-8 border-black overflow-hidden bg-[#F5E6D3] flex items-center justify-center">
+                  {coupleData.partner.avatar_url ? (
+                    <img src={coupleData.partner.avatar_url} alt="Partner" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-3xl">Photo</span>
+                  )}
+                </div>
+                <div className="mt-3">
+                  <div className="bg-gradient-to-r from-gray-400 to-gray-500 rounded-full px-8 py-2 shadow-lg">
+                    <span className="text-sm">{partnerFeelingStatus || "Feeling"}</span>
+                  </div>
                 </div>
               </>
             ) : (
-              <div className="w-28 h-28 rounded-full border-4 border-dashed border-muted flex items-center justify-center">
-                <Users className="w-12 h-12 text-muted-foreground" />
-              </div>
+              <>
+                <div className="w-40 h-40 rounded-full border-8 border-black bg-[#F5E6D3] flex items-center justify-center">
+                  <span className="text-3xl">Photo</span>
+                </div>
+                <div className="mt-3">
+                  <div className="bg-gradient-to-r from-gray-400 to-gray-500 rounded-full px-8 py-2 shadow-lg">
+                    <span className="text-sm">Feeling</span>
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </div>
 
-        {/* Love-O-Meter */}
-        <Card className="p-4 bg-gradient-to-r from-primary/10 to-primary/5">
-          <div className="text-center mb-2 flex items-center justify-center gap-2">
-            <Heart className="w-5 h-5 text-primary" />
-            <h3 className="font-semibold">Love-O-Meter</h3>
+        {/* Love-O-Meter - Black background with red bar */}
+        <div className="bg-black rounded-3xl p-6 shadow-xl">
+          <div className="text-center mb-3">
+            <h3 className="text-white font-normal text-lg">Love - O - Meter</h3>
           </div>
-          <div className="w-full bg-muted rounded-full h-6 overflow-hidden">
+          <div className="w-full bg-gray-800 rounded-full h-8 overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-red-500 via-pink-500 to-red-600 transition-all duration-500"
+              className="h-full bg-red-500 transition-all duration-500 rounded-full"
               style={{ width: `${loveMeter}%` }}
             />
           </div>
-          <p className="text-center text-sm mt-2 text-muted-foreground">
-            {Math.round(loveMeter)}% this week
-          </p>
-        </Card>
-
-        {/* UNIO Gallery */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">UNIO Gallery</h2>
-          </div>
-          <UnioGallery
-            coupleId={coupleData.coupleId}
-            userId={user!.id}
-            userFullName={userProfile?.full_name || "You"}
-            partnerFullName={coupleData.partner?.full_name || "Partner"}
-          />
         </div>
 
-        {/* Show invite code if no partner */}
+        {/* UNIO Gallery - Large beige card */}
+        <div className="bg-[#F5E6D3] rounded-3xl p-6 shadow-xl min-h-[400px]">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm text-gray-700">Posted by.....</p>
+            <h2 className="text-xl font-normal">UNIO Gallery</h2>
+          </div>
+          
+          <div className="space-y-4">
+            <UnioGallery
+              coupleId={coupleData.coupleId}
+              userId={user!.id}
+              userFullName={userProfile?.full_name || "You"}
+              partnerFullName={coupleData.partner?.full_name || "Partner"}
+            />
+          </div>
+          
+          {/* Reaction Icons at Bottom */}
+          <div className="flex justify-around items-center mt-6 pt-4 border-t border-gray-300">
+            <Button variant="ghost" size="icon">
+              <ThumbsDown className="w-6 h-6" />
+            </Button>
+            <Button variant="ghost" size="icon">
+              <ThumbsUp className="w-6 h-6" />
+            </Button>
+            <Button variant="ghost" size="icon">
+              <Heart className="w-6 h-6 text-red-500" />
+            </Button>
+            <Button variant="ghost" size="icon">
+              <MessageCircle className="w-6 h-6" />
+            </Button>
+            <Button variant="ghost" size="icon">
+              <Bookmark className="w-6 h-6" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Invite Code if no partner */}
         {!coupleData.partner && (
-          <Card className="p-4">
+          <Card className="p-4 bg-card">
             <h3 className="font-semibold mb-2">Invite Your Partner</h3>
-            <p className="text-sm text-muted-foreground mb-3">
-              Share this code with your partner to join your space
-            </p>
             <div className="flex gap-2">
-              <Input
-                value={coupleData.inviteCode}
-                readOnly
-                className="font-mono text-center"
-              />
-              <Button
-                onClick={() => {
-                  navigator.clipboard.writeText(coupleData.inviteCode);
-                  toast({ title: "Code copied!" });
-                }}
-              >
+              <Input value={coupleData.inviteCode} readOnly className="font-mono" />
+              <Button onClick={() => {
+                navigator.clipboard.writeText(coupleData.inviteCode);
+                toast({ title: "Code copied!" });
+              }}>
                 Copy
               </Button>
             </div>
@@ -495,7 +541,27 @@ const Dashboard = () => {
         )}
       </div>
 
-      <BottomNavigation activeView={activeView} onViewChange={setActiveView} />
+      {/* Bottom Navigation - matches image */}
+      <div className="fixed bottom-0 left-0 right-0 bg-muted/80 backdrop-blur border-t">
+        <div className="flex justify-around items-center h-20 max-w-lg mx-auto px-4">
+          <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("calendar")}>
+            <Calendar className="w-7 h-7 text-muted-foreground" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setShowFlirt(true)}>
+            <Flame className="w-7 h-7 text-red-500" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("home")}>
+            <Home className="w-7 h-7 text-foreground" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("locked")}>
+            <Lock className="w-7 h-7 text-muted-foreground" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("photos")}>
+            <Clock className="w-7 h-7 text-muted-foreground" />
+          </Button>
+        </div>
+      </div>
+
       <FlirtActions
         coupleId={coupleData.coupleId}
         senderId={user!.id}
@@ -514,19 +580,11 @@ const Dashboard = () => {
               <h3 className="font-semibold mb-2">Language</h3>
               <LanguageSwitcher />
             </div>
-            <Button
-              variant="outline"
-              className="w-full justify-start"
-              onClick={() => navigate('/couple-profiles')}
-            >
+            <Button variant="outline" className="w-full" onClick={() => navigate('/couple-profiles')}>
               <Users className="w-4 h-4 mr-2" />
               View Profiles
             </Button>
-            <Button
-              variant="destructive"
-              className="w-full"
-              onClick={handleSignOut}
-            >
+            <Button variant="destructive" className="w-full" onClick={handleSignOut}>
               <LogOut className="w-4 h-4 mr-2" />
               Sign Out
             </Button>
