@@ -96,19 +96,28 @@ const Dashboard = () => {
 
     if (!couple) return;
 
+    // Get partner info using RPC
     const { data: partner } = await supabase.rpc('get_partner_profile', { c_id: couple.id });
     const partnerProfile = partner && partner.length > 0 ? partner[0] : null;
 
-    let partnerAvatarUrl = null;
+    // Fetch partner's full profile including avatar directly
+    let partnerData = null;
     if (partnerProfile) {
-      const { data: partnerProfileData } = await supabase
+      const { data: fullPartnerProfile } = await supabase
         .from('profiles')
-        .select('avatar_url')
+        .select('avatar_url, full_name, email')
         .eq('id', partnerProfile.user_id)
         .maybeSingle();
       
-      if (partnerProfileData?.avatar_url) {
-        partnerAvatarUrl = partnerProfileData.avatar_url;
+      if (fullPartnerProfile) {
+        partnerData = {
+          user_id: partnerProfile.user_id,
+          full_name: fullPartnerProfile.full_name || partnerProfile.full_name,
+          email: fullPartnerProfile.email || partnerProfile.email,
+          avatar_url: fullPartnerProfile.avatar_url
+        };
+      } else {
+        partnerData = { ...partnerProfile, avatar_url: null };
       }
     }
 
@@ -116,11 +125,11 @@ const Dashboard = () => {
       coupleId: couple.id,
       inviteCode: couple.invite_code,
       spaceName: couple.name || 'name your space',
-      partner: partnerProfile ? { ...partnerProfile, avatar_url: partnerAvatarUrl } : null,
+      partner: partnerData,
     });
     setSpaceName(couple.name || 'name your space');
 
-    loadFeelingStatuses(couple.id, userId, partnerProfile?.user_id);
+    loadFeelingStatuses(couple.id, userId, partnerData?.user_id);
     loadLoveMeter(couple.id);
   };
 
