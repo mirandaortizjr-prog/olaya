@@ -3,8 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
-import heroImage from "@/assets/hero-image.jpg";
-import logo from "@/assets/logo.png";
+import unioLogo from "@/assets/unio-logo.png";
 
 const Index = () => {
   const { t } = useLanguage();
@@ -75,42 +74,32 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-warm">
+    <div className="min-h-screen bg-slate-700">
       {/* Hero Section */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-romantic opacity-30" />
         <div className="absolute top-4 right-4 z-10">
           <LanguageSwitcher />
         </div>
         <div className="relative container mx-auto px-4 py-20">
-          <div className="flex flex-col lg:flex-row items-center gap-12">
-            <div className="flex-1 text-center lg:text-left space-y-6">
-              <img 
-                src={logo} 
-                alt="Us2 Logo" 
-                className="w-32 h-32 mx-auto lg:mx-0 mb-6"
-              />
-              <h1 className="text-5xl lg:text-7xl font-bold bg-gradient-romantic bg-clip-text text-transparent">
-                {t("indexTitle")}
-              </h1>
-              <p className="text-xl lg:text-2xl text-muted-foreground max-w-lg">
-                {t("indexSubtitle")}
-              </p>
-              <div className="flex gap-4 justify-center lg:justify-start">
-                <Button size="lg" className="shadow-glow" onClick={() => window.location.href = '/auth'}>
-                  {t("getStarted")}
-                </Button>
-                <Button size="lg" variant="outline" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
-                  {t("viewPricing")}
-                </Button>
-              </div>
-            </div>
-            <div className="flex-1">
-              <img
-                src={heroImage}
-                alt="Romantic couple connection"
-                className="rounded-3xl shadow-glow w-full max-w-2xl mx-auto"
-              />
+          <div className="flex flex-col items-center text-center space-y-6">
+            <img 
+              src={unioLogo} 
+              alt="Unio Logo" 
+              className="w-48 h-48 mb-6"
+            />
+            <h1 className="text-5xl lg:text-7xl font-bold text-white">
+              {t("indexTitle")}
+            </h1>
+            <p className="text-xl lg:text-2xl text-slate-300 max-w-lg">
+              {t("indexSubtitle")}
+            </p>
+            <div className="flex gap-4 justify-center">
+              <Button size="lg" className="shadow-glow" onClick={() => window.location.href = '/auth'}>
+                {t("getStarted")}
+              </Button>
+              <Button size="lg" variant="outline" onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}>
+                {t("viewPricing")}
+              </Button>
             </div>
           </div>
         </div>
