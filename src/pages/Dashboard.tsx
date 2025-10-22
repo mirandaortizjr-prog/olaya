@@ -105,7 +105,7 @@ const Dashboard = () => {
         .from('profiles')
         .select('avatar_url')
         .eq('id', partnerProfile.user_id)
-        .single();
+        .maybeSingle();
       
       if (partnerProfileData?.avatar_url) {
         partnerAvatarUrl = partnerProfileData.avatar_url;
