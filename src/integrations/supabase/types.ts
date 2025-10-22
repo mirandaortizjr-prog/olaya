@@ -840,6 +840,7 @@ export type Database = {
       get_partner_profile: {
         Args: { c_id: string }
         Returns: {
+          avatar_url: string
           email: string
           full_name: string
           user_id: string

@@ -96,30 +96,9 @@ const Dashboard = () => {
 
     if (!couple) return;
 
-    // Get partner info using RPC
+    // Get partner info using RPC (now includes avatar_url)
     const { data: partner } = await supabase.rpc('get_partner_profile', { c_id: couple.id });
-    const partnerProfile = partner && partner.length > 0 ? partner[0] : null;
-
-    // Fetch partner's full profile including avatar directly
-    let partnerData = null;
-    if (partnerProfile) {
-      const { data: fullPartnerProfile } = await supabase
-        .from('profiles')
-        .select('avatar_url, full_name, email')
-        .eq('id', partnerProfile.user_id)
-        .maybeSingle();
-      
-      if (fullPartnerProfile) {
-        partnerData = {
-          user_id: partnerProfile.user_id,
-          full_name: fullPartnerProfile.full_name || partnerProfile.full_name,
-          email: fullPartnerProfile.email || partnerProfile.email,
-          avatar_url: fullPartnerProfile.avatar_url
-        };
-      } else {
-        partnerData = { ...partnerProfile, avatar_url: null };
-      }
-    }
+    const partnerData = partner && partner.length > 0 ? partner[0] : null;
 
     setCoupleData({
       coupleId: couple.id,
@@ -483,12 +462,7 @@ const Dashboard = () => {
                 </div>
                 <div className="mt-3">
                   <div className="bg-gradient-to-r from-gray-400 to-gray-500 rounded-full px-8 py-2 shadow-lg">
-                    <FeelingStatusSelector
-                      coupleId={coupleData.coupleId}
-                      userId={coupleData.partner.user_id}
-                      currentStatus={partnerFeelingStatus}
-                      onStatusChange={setPartnerFeelingStatus}
-                    />
+                    <span className="text-sm">{partnerFeelingStatus || "Feeling"}</span>
                   </div>
                 </div>
               </>
