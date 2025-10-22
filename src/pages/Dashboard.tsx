@@ -239,7 +239,7 @@ const Dashboard = () => {
     return (
       <div className="min-h-screen bg-muted p-4">
         <Card className="max-w-md mx-auto mt-10 p-6">
-          <h1 className="text-2xl font-bold text-center mb-6">Welcome to Us Two</h1>
+          <h1 className="text-2xl font-bold text-center mb-6">Welcome to Unio</h1>
           <div className="space-y-4">
             <Button onClick={createCouple} className="w-full" size="lg">
               Create Your Space

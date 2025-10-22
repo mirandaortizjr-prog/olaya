@@ -131,8 +131,8 @@ export const showQuickMessageNotification = (
     },
   };
 
-  const title = language === 'en' ? 'UsTwo' : 'UsTwo';
-  const body = messages[messageType as keyof typeof messages]?.[language] || 
+  const title = language === 'en' ? 'Unio' : 'Unio';
+  const body = messages[messageType as keyof typeof messages]?.[language] ||
                messages.wink[language];
 
   try {
