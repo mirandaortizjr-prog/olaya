@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ThumbsUp, ThumbsDown, Heart, Bookmark, ChevronLeft, ChevronRight, Upload, X } from "lucide-react";
+import { ThumbsUp, ThumbsDown, Heart, Bookmark, Upload, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
@@ -31,7 +31,6 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
   const [posts, setPosts] = useState<Post[]>([]);
   const [reactions, setReactions] = useState<Record<string, Reaction[]>>({});
   const [newPost, setNewPost] = useState("");
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [showNewPost, setShowNewPost] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -154,20 +153,6 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
     }
   };
 
-  const nextPost = () => {
-    if (currentIndex < posts.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    }
-  };
-
-  const prevPost = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    }
-  };
-
-  const currentPost = posts[currentIndex];
-
   const toggleReaction = async (postId: string, reactionType: string) => {
     const existingReaction = reactions[postId]?.find(
       r => r.user_id === userId && r.reaction_type === reactionType
@@ -200,10 +185,91 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
     return reactions[postId]?.some(r => r.user_id === userId && r.reaction_type === type) || false;
   };
 
+  const PostCard = ({ post }: { post: Post }) => (
+    <Card className="mb-4 overflow-hidden animate-fade-in">
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <p className="font-semibold">
+              {post.author_id === userId ? userFullName : partnerFullName}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {format(new Date(post.created_at), 'PPp')}
+            </p>
+          </div>
+        </div>
+
+        {/* Display media if available */}
+        {post.media_urls && Array.isArray(post.media_urls) && post.media_urls.length > 0 && (
+          <div className="mb-3 -mx-4">
+            {post.media_urls.map((url: string, index: number) => {
+              const isVideo = url.includes('.mp4') || url.includes('.webm') || url.includes('.mov');
+              return isVideo ? (
+                <video key={index} controls className="w-full">
+                  <source src={url} />
+                </video>
+              ) : (
+                <img key={index} src={url} alt="post media" className="w-full object-cover" />
+              );
+            })}
+          </div>
+        )}
+
+        {post.content && <p className="mb-3">{post.content}</p>}
+        
+        <div className="flex gap-2 border-t pt-3">
+          <Button
+            variant={hasReacted(post.id, 'like') ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => toggleReaction(post.id, 'like')}
+            className="gap-1"
+          >
+            <ThumbsUp className="w-4 h-4" />
+            {getReactionCount(post.id, 'like')}
+          </Button>
+          <Button
+            variant={hasReacted(post.id, 'dislike') ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => toggleReaction(post.id, 'dislike')}
+            className="gap-1"
+          >
+            <ThumbsDown className="w-4 h-4" />
+            {getReactionCount(post.id, 'dislike')}
+          </Button>
+          <Button
+            variant={hasReacted(post.id, 'love') ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => toggleReaction(post.id, 'love')}
+            className="gap-1"
+          >
+            <Heart className="w-4 h-4" />
+            {getReactionCount(post.id, 'love')}
+          </Button>
+          <Button
+            variant={hasReacted(post.id, 'save') ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => toggleReaction(post.id, 'save')}
+            className="gap-1"
+          >
+            <Bookmark className="w-4 h-4" />
+            {getReactionCount(post.id, 'save')}
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+
   return (
-    <div className="relative h-full">
-      {showNewPost ? (
-        <Card className="p-4 h-full flex flex-col overflow-y-auto">
+    <div className="relative h-full flex flex-col">
+      <div className="flex justify-between items-center mb-3 px-2">
+        <h3 className="font-semibold">Feed</h3>
+        <Button size="sm" onClick={() => setShowNewPost(true)}>
+          New Post
+        </Button>
+      </div>
+
+      {showNewPost && (
+        <Card className="p-4 mb-4 animate-scale-in">
           <Textarea
             value={newPost}
             onChange={(e) => setNewPost(e.target.value)}
@@ -262,7 +328,7 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
             </div>
           )}
 
-          <div className="flex gap-2 mt-auto">
+          <div className="flex gap-2">
             <Button 
               onClick={createPost} 
               disabled={(!newPost.trim() && uploadedFiles.length === 0) || uploading}
@@ -281,111 +347,21 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
             </Button>
           </div>
         </Card>
-      ) : posts.length === 0 ? (
-        <Card className="p-8 h-full flex flex-col items-center justify-center">
-          <p className="text-muted-foreground mb-4">No posts yet</p>
-          <Button onClick={() => setShowNewPost(true)}>
-            Create First Post
-          </Button>
-        </Card>
-      ) : (
-        <Card className="p-6 h-full flex flex-col relative overflow-y-auto">
-          <div className="flex-1 flex flex-col">
-            <div className="mb-3">
-              <p className="font-semibold">
-                {currentPost.author_id === userId ? userFullName : partnerFullName}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {format(new Date(currentPost.created_at), 'PPp')}
-              </p>
-            </div>
-
-            {/* Display media if available */}
-            {currentPost.media_urls && Array.isArray(currentPost.media_urls) && currentPost.media_urls.length > 0 && (
-              <div className="mb-4 grid grid-cols-1 gap-2 max-h-96 overflow-y-auto">
-                {currentPost.media_urls.map((url: string, index: number) => {
-                  const isVideo = url.includes('.mp4') || url.includes('.webm') || url.includes('.mov');
-                  return isVideo ? (
-                    <video key={index} controls className="w-full rounded-lg">
-                      <source src={url} />
-                    </video>
-                  ) : (
-                    <img key={index} src={url} alt="post media" className="w-full rounded-lg object-cover" />
-                  );
-                })}
-              </div>
-            )}
-
-            {currentPost.content && <p className="text-lg mb-4">{currentPost.content}</p>}
-            
-            <div className="flex gap-2 border-t pt-3 mt-auto">
-              <Button
-                variant={hasReacted(currentPost.id, 'like') ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => toggleReaction(currentPost.id, 'like')}
-                className="gap-1"
-              >
-                <ThumbsUp className="w-4 h-4" />
-                {getReactionCount(currentPost.id, 'like')}
-              </Button>
-              <Button
-                variant={hasReacted(currentPost.id, 'dislike') ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => toggleReaction(currentPost.id, 'dislike')}
-                className="gap-1"
-              >
-                <ThumbsDown className="w-4 h-4" />
-                {getReactionCount(currentPost.id, 'dislike')}
-              </Button>
-              <Button
-                variant={hasReacted(currentPost.id, 'love') ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => toggleReaction(currentPost.id, 'love')}
-                className="gap-1"
-              >
-                <Heart className="w-4 h-4" />
-                {getReactionCount(currentPost.id, 'love')}
-              </Button>
-              <Button
-                variant={hasReacted(currentPost.id, 'save') ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => toggleReaction(currentPost.id, 'save')}
-                className="gap-1"
-              >
-                <Bookmark className="w-4 h-4" />
-                {getReactionCount(currentPost.id, 'save')}
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between mt-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={prevPost}
-              disabled={currentIndex === 0}
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-            <div className="flex gap-2 items-center">
-              <span className="text-sm text-muted-foreground">
-                {currentIndex + 1} / {posts.length}
-              </span>
-              <Button size="sm" onClick={() => setShowNewPost(true)}>
-                New Post
-              </Button>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={nextPost}
-              disabled={currentIndex === posts.length - 1}
-            >
-              <ChevronRight className="w-5 h-5" />
-            </Button>
-          </div>
-        </Card>
       )}
+
+      {/* Feed scroll area */}
+      <div className="flex-1 overflow-y-auto px-2 scroll-smooth">
+        {posts.length === 0 && !showNewPost ? (
+          <Card className="p-8 flex flex-col items-center justify-center">
+            <p className="text-muted-foreground mb-4">No posts yet</p>
+            <Button onClick={() => setShowNewPost(true)}>
+              Create First Post
+            </Button>
+          </Card>
+        ) : (
+          posts.map((post) => <PostCard key={post.id} post={post} />)
+        )}
+      </div>
     </div>
   );
 };
