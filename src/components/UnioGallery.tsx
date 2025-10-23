@@ -288,14 +288,14 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
                     className={`${post.media_urls.length > 1 ? 'flex-shrink-0 w-[85vw]' : 'w-full'}`}
                   >
                     {isVideo ? (
-                      <video controls className="w-full h-[60vh] object-cover rounded">
+                      <video controls className="w-full h-[70vh] object-cover rounded">
                         <source src={url} />
                       </video>
                     ) : (
                       <img 
                         src={url} 
                         alt="post media" 
-                        className="w-full h-[60vh] object-cover rounded" 
+                        className="w-full h-[70vh] object-cover rounded" 
                       />
                     )}
                   </div>
@@ -392,8 +392,7 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
   return (
     <div className="relative h-full flex flex-col">
       <div className="flex justify-between items-center mb-3 px-2">
-        <h3 className="font-semibold">Feed</h3>
-        <Button size="sm" onClick={() => setShowNewPost(true)}>
+        <Button size="sm" onClick={() => setShowNewPost(true)} className="w-full">
           New Post
         </Button>
       </div>
