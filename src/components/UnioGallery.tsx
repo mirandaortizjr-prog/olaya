@@ -36,6 +36,175 @@ interface UnioGalleryProps {
   partnerFullName: string;
 }
 
+interface PostCardProps {
+  post: Post;
+  userId: string;
+  userFullName: string;
+  partnerFullName: string;
+  reactions: Record<string, Reaction[]>;
+  comments: Record<string, Comment[]>;
+  newComment: Record<string, string>;
+  showComments: Record<string, boolean>;
+  onToggleReaction: (postId: string, reactionType: string) => void;
+  onToggleComments: (postId: string) => void;
+  onCommentChange: (postId: string, value: string) => void;
+  onAddComment: (postId: string) => void;
+}
+
+const PostCard = ({ 
+  post, 
+  userId, 
+  userFullName, 
+  partnerFullName, 
+  reactions, 
+  comments, 
+  newComment,
+  showComments,
+  onToggleReaction,
+  onToggleComments,
+  onCommentChange,
+  onAddComment
+}: PostCardProps) => {
+  const getReactionCount = (postId: string, type: string) => {
+    return reactions[postId]?.filter(r => r.reaction_type === type).length || 0;
+  };
+
+  const hasReacted = (postId: string, type: string) => {
+    return reactions[postId]?.some(r => r.user_id === userId && r.reaction_type === type) || false;
+  };
+
+  const getCommentAuthor = (comment: Comment) => {
+    return comment.user_id === userId ? userFullName : partnerFullName;
+  };
+
+  return (
+    <Card className="mb-4 overflow-hidden animate-fade-in">
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <p className="font-semibold">
+              {post.author_id === userId ? userFullName : partnerFullName}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {format(new Date(post.created_at), 'PPp')}
+            </p>
+          </div>
+        </div>
+
+        {/* Display media if available */}
+        {post.media_urls && Array.isArray(post.media_urls) && post.media_urls.length > 0 && (
+          <div className="mb-3 -mx-4 overflow-x-auto">
+            <div className={`flex gap-2 ${post.media_urls.length > 1 ? 'px-4' : ''}`}>
+              {post.media_urls.map((url: string, index: number) => {
+                const isVideo = url.includes('.mp4') || url.includes('.webm') || url.includes('.mov');
+                return (
+                  <div 
+                    key={index} 
+                    className={`${post.media_urls.length > 1 ? 'flex-shrink-0 w-[85vw]' : 'w-full'}`}
+                  >
+                    {isVideo ? (
+                      <video controls className="w-full h-[70vh] object-cover rounded">
+                        <source src={url} />
+                      </video>
+                    ) : (
+                      <img 
+                        src={url} 
+                        alt="post media" 
+                        className="w-full h-[70vh] object-cover rounded" 
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {post.content && <p className="mb-3">{post.content}</p>}
+        
+        <div className="flex gap-2 border-t pt-3 mb-3">
+          <Button
+            variant={hasReacted(post.id, 'like') ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => onToggleReaction(post.id, 'like')}
+            className="gap-1"
+          >
+            <ThumbsUp className="w-4 h-4" />
+            {getReactionCount(post.id, 'like')}
+          </Button>
+          <Button
+            variant={hasReacted(post.id, 'dislike') ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => onToggleReaction(post.id, 'dislike')}
+            className="gap-1"
+          >
+            <ThumbsDown className="w-4 h-4" />
+            {getReactionCount(post.id, 'dislike')}
+          </Button>
+          <Button
+            variant={hasReacted(post.id, 'love') ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => onToggleReaction(post.id, 'love')}
+            className="gap-1"
+          >
+            <Heart className="w-4 h-4" />
+            {getReactionCount(post.id, 'love')}
+          </Button>
+          <Button
+            variant={hasReacted(post.id, 'save') ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => onToggleReaction(post.id, 'save')}
+            className="gap-1"
+          >
+            <Bookmark className="w-4 h-4" />
+            {getReactionCount(post.id, 'save')}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onToggleComments(post.id)}
+            className="gap-1 ml-auto"
+          >
+            <MessageCircle className="w-4 h-4" />
+            {comments[post.id]?.length || 0}
+          </Button>
+        </div>
+
+        {/* Comments section */}
+        {showComments[post.id] && (
+          <div className="border-t pt-3 space-y-2">
+            {comments[post.id]?.map((comment) => (
+              <div key={comment.id} className="bg-muted p-2 rounded text-sm">
+                <p className="font-semibold text-xs">{getCommentAuthor(comment)}</p>
+                <p>{comment.comment}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {format(new Date(comment.created_at), 'PPp')}
+                </p>
+              </div>
+            ))}
+            <div className="flex gap-2">
+              <Input
+                value={newComment[post.id] || ''}
+                onChange={(e) => onCommentChange(post.id, e.target.value)}
+                placeholder="Add a comment..."
+                className="flex-1"
+                onKeyDown={(e) => e.key === 'Enter' && onAddComment(post.id)}
+              />
+              <Button
+                size="sm"
+                onClick={() => onAddComment(post.id)}
+                disabled={!newComment[post.id]?.trim()}
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+};
+
 export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }: UnioGalleryProps) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [reactions, setReactions] = useState<Record<string, Reaction[]>>({});
@@ -229,13 +398,6 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
     loadReactions();
   };
 
-  const getReactionCount = (postId: string, type: string) => {
-    return reactions[postId]?.filter(r => r.reaction_type === type).length || 0;
-  };
-
-  const hasReacted = (postId: string, type: string) => {
-    return reactions[postId]?.some(r => r.user_id === userId && r.reaction_type === type) || false;
-  };
 
   const addComment = async (postId: string) => {
     const commentText = newComment[postId]?.trim();
@@ -258,136 +420,13 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
     }
   };
 
-  const getCommentAuthor = (comment: Comment) => {
-    return comment.user_id === userId ? userFullName : partnerFullName;
+  const handleCommentChange = (postId: string, value: string) => {
+    setNewComment({ ...newComment, [postId]: value });
   };
 
-  const PostCard = ({ post }: { post: Post }) => (
-    <Card className="mb-4 overflow-hidden animate-fade-in">
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <p className="font-semibold">
-              {post.author_id === userId ? userFullName : partnerFullName}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {format(new Date(post.created_at), 'PPp')}
-            </p>
-          </div>
-        </div>
-
-        {/* Display media if available */}
-        {post.media_urls && Array.isArray(post.media_urls) && post.media_urls.length > 0 && (
-          <div className="mb-3 -mx-4 overflow-x-auto">
-            <div className={`flex gap-2 ${post.media_urls.length > 1 ? 'px-4' : ''}`}>
-              {post.media_urls.map((url: string, index: number) => {
-                const isVideo = url.includes('.mp4') || url.includes('.webm') || url.includes('.mov');
-                return (
-                  <div 
-                    key={index} 
-                    className={`${post.media_urls.length > 1 ? 'flex-shrink-0 w-[85vw]' : 'w-full'}`}
-                  >
-                    {isVideo ? (
-                      <video controls className="w-full h-[70vh] object-cover rounded">
-                        <source src={url} />
-                      </video>
-                    ) : (
-                      <img 
-                        src={url} 
-                        alt="post media" 
-                        className="w-full h-[70vh] object-cover rounded" 
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {post.content && <p className="mb-3">{post.content}</p>}
-        
-        <div className="flex gap-2 border-t pt-3 mb-3">
-          <Button
-            variant={hasReacted(post.id, 'like') ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => toggleReaction(post.id, 'like')}
-            className="gap-1"
-          >
-            <ThumbsUp className="w-4 h-4" />
-            {getReactionCount(post.id, 'like')}
-          </Button>
-          <Button
-            variant={hasReacted(post.id, 'dislike') ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => toggleReaction(post.id, 'dislike')}
-            className="gap-1"
-          >
-            <ThumbsDown className="w-4 h-4" />
-            {getReactionCount(post.id, 'dislike')}
-          </Button>
-          <Button
-            variant={hasReacted(post.id, 'love') ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => toggleReaction(post.id, 'love')}
-            className="gap-1"
-          >
-            <Heart className="w-4 h-4" />
-            {getReactionCount(post.id, 'love')}
-          </Button>
-          <Button
-            variant={hasReacted(post.id, 'save') ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => toggleReaction(post.id, 'save')}
-            className="gap-1"
-          >
-            <Bookmark className="w-4 h-4" />
-            {getReactionCount(post.id, 'save')}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowComments({ ...showComments, [post.id]: !showComments[post.id] })}
-            className="gap-1 ml-auto"
-          >
-            <MessageCircle className="w-4 h-4" />
-            {comments[post.id]?.length || 0}
-          </Button>
-        </div>
-
-        {/* Comments section */}
-        {showComments[post.id] && (
-          <div className="border-t pt-3 space-y-2">
-            {comments[post.id]?.map((comment) => (
-              <div key={comment.id} className="bg-muted p-2 rounded text-sm">
-                <p className="font-semibold text-xs">{getCommentAuthor(comment)}</p>
-                <p>{comment.comment}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {format(new Date(comment.created_at), 'PPp')}
-                </p>
-              </div>
-            ))}
-            <div className="flex gap-2">
-              <Input
-                value={newComment[post.id] || ''}
-                onChange={(e) => setNewComment({ ...newComment, [post.id]: e.target.value })}
-                placeholder="Add a comment..."
-                className="flex-1"
-                onKeyDown={(e) => e.key === 'Enter' && addComment(post.id)}
-              />
-              <Button
-                size="sm"
-                onClick={() => addComment(post.id)}
-                disabled={!newComment[post.id]?.trim()}
-              >
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
-    </Card>
-  );
+  const handleToggleComments = (postId: string) => {
+    setShowComments({ ...showComments, [postId]: !showComments[postId] });
+  };
 
   return (
     <div className="relative h-full flex flex-col">
@@ -488,7 +527,23 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
             </Button>
           </Card>
         ) : (
-          posts.map((post) => <PostCard key={post.id} post={post} />)
+          posts.map((post) => (
+            <PostCard 
+              key={post.id} 
+              post={post}
+              userId={userId}
+              userFullName={userFullName}
+              partnerFullName={partnerFullName}
+              reactions={reactions}
+              comments={comments}
+              newComment={newComment}
+              showComments={showComments}
+              onToggleReaction={toggleReaction}
+              onToggleComments={handleToggleComments}
+              onCommentChange={handleCommentChange}
+              onAddComment={addComment}
+            />
+          ))
         )}
       </div>
     </div>
