@@ -28,10 +28,11 @@ interface FeelingStatusSelectorProps {
   coupleId: string;
   userId: string;
   currentStatus?: string;
-  onStatusChange: (status: string) => void;
+  currentCustomMessage?: string;
+  onStatusChange: (status: string, customMessage?: string) => void;
 }
 
-export const FeelingStatusSelector = ({ coupleId, userId, currentStatus, onStatusChange }: FeelingStatusSelectorProps) => {
+export const FeelingStatusSelector = ({ coupleId, userId, currentStatus, currentCustomMessage, onStatusChange }: FeelingStatusSelectorProps) => {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showCustomInput, setShowCustomInput] = useState(false);
@@ -74,7 +75,7 @@ export const FeelingStatusSelector = ({ coupleId, userId, currentStatus, onStatu
         return;
       }
 
-      onStatusChange(status);
+      onStatusChange(status, customMessage);
       setOpen(false);
       setShowCustomInput(false);
       setCustomFeeling("");
@@ -104,7 +105,9 @@ export const FeelingStatusSelector = ({ coupleId, userId, currentStatus, onStatu
         className="gap-2"
       >
         <CurrentIcon className={`w-4 h-4 ${currentColor}`} />
-        {currentStatus || "Set feeling"}
+        {currentStatus === "custom" && currentCustomMessage 
+          ? currentCustomMessage 
+          : currentStatus || "Set feeling"}
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>

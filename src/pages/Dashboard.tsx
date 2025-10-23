@@ -38,7 +38,9 @@ const Dashboard = () => {
   const [inviteCode, setInviteCode] = useState("");
   const [userProfile, setUserProfile] = useState<any>(null);
   const [partnerFeelingStatus, setPartnerFeelingStatus] = useState("");
+  const [partnerCustomMessage, setPartnerCustomMessage] = useState("");
   const [userFeelingStatus, setUserFeelingStatus] = useState("");
+  const [userCustomMessage, setUserCustomMessage] = useState("");
   const [loveMeter, setLoveMeter] = useState(0);
   const [activeView, setActiveView] = useState("home");
   const [showMessenger, setShowMessenger] = useState(false);
@@ -115,26 +117,32 @@ const Dashboard = () => {
   const loadFeelingStatuses = async (coupleId: string, userId: string, partnerId?: string) => {
     const { data: userStatus } = await supabase
       .from('feeling_status')
-      .select('status')
+      .select('status, custom_message')
       .eq('couple_id', coupleId)
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    if (userStatus) setUserFeelingStatus(userStatus.status);
+    if (userStatus) {
+      setUserFeelingStatus(userStatus.status);
+      setUserCustomMessage(userStatus.custom_message || "");
+    }
 
     if (partnerId) {
       const { data: partnerStatus } = await supabase
         .from('feeling_status')
-        .select('status')
+        .select('status, custom_message')
         .eq('couple_id', coupleId)
         .eq('user_id', partnerId)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
 
-      if (partnerStatus) setPartnerFeelingStatus(partnerStatus.status);
+      if (partnerStatus) {
+        setPartnerFeelingStatus(partnerStatus.status);
+        setPartnerCustomMessage(partnerStatus.custom_message || "");
+      }
     }
   };
 
@@ -443,7 +451,11 @@ const Dashboard = () => {
                     coupleId={coupleData.coupleId}
                     userId={user.id}
                     currentStatus={userFeelingStatus}
-                    onStatusChange={setUserFeelingStatus}
+                    currentCustomMessage={userCustomMessage}
+                    onStatusChange={(status, customMsg) => {
+                      setUserFeelingStatus(status);
+                      setUserCustomMessage(customMsg || "");
+                    }}
                   />
                 </div>
               )}
@@ -462,7 +474,11 @@ const Dashboard = () => {
                 </div>
                 <div className="mt-3">
                   <div className="bg-gradient-to-r from-gray-400 to-gray-500 rounded-full px-8 py-2 shadow-lg">
-                    <span className="text-sm">{partnerFeelingStatus || "Feeling"}</span>
+                    <span className="text-sm">
+                      {partnerFeelingStatus === "custom" && partnerCustomMessage 
+                        ? partnerCustomMessage 
+                        : partnerFeelingStatus || "Feeling"}
+                    </span>
                   </div>
                 </div>
               </>
