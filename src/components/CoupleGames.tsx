@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Gamepad2, Heart, MessageCircle, Sparkles, Calendar, TrendingUp, Zap } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translations } from "@/lib/translations";
 import { HowWellGame } from "./games/HowWellGame";
 import { MemoryLaneGame } from "./games/MemoryLaneGame";
 import { LoveLanguageGame } from "./games/LoveLanguageGame";
@@ -18,60 +19,63 @@ interface CoupleGamesProps {
   onClose: () => void;
 }
 
-const gamesList = [
-  {
-    id: "how-well",
-    name: "How Well Do You Know Me?",
-    description: "Test how well you know your partner's favorites and quirks",
-    icon: Heart,
-    color: "text-pink-500"
-  },
-  {
-    id: "memory-lane",
-    name: "Memory Lane Match",
-    description: "Compare your favorite shared memories",
-    icon: MessageCircle,
-    color: "text-purple-500"
-  },
-  {
-    id: "love-language",
-    name: "Love Language Decoder",
-    description: "Discover and match your love languages",
-    icon: Sparkles,
-    color: "text-yellow-500"
-  },
-  {
-    id: "would-you-rather",
-    name: "Would You Rather?",
-    description: "Fun dilemmas with a romantic twist",
-    icon: Zap,
-    color: "text-blue-500"
-  },
-  {
-    id: "daily-sync",
-    name: "The Daily Sync",
-    description: "Quick emotional check-in ritual",
-    icon: Calendar,
-    color: "text-green-500"
-  },
-  {
-    id: "future-forecast",
-    name: "Future Forecast",
-    description: "Predict each other's dreams and goals",
-    icon: TrendingUp,
-    color: "text-indigo-500"
-  },
-  {
-    id: "truth-or-tender",
-    name: "Truth or Tender",
-    description: "Deep questions or acts of affection",
-    icon: Heart,
-    color: "text-red-500"
-  }
-];
 
 export const CoupleGames = ({ coupleId, userId, partnerId, onClose }: CoupleGamesProps) => {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
+  const { language } = useLanguage();
+  const t = translations[language];
+
+  const gamesList = [
+    {
+      id: "how-well",
+      name: t.howWellDoYouKnowMe,
+      description: t.howWellDesc,
+      icon: Heart,
+      color: "text-pink-500"
+    },
+    {
+      id: "memory-lane",
+      name: t.memoryLaneMatch,
+      description: t.memoryLaneDesc,
+      icon: MessageCircle,
+      color: "text-purple-500"
+    },
+    {
+      id: "love-language",
+      name: t.loveLanguageDecoder,
+      description: t.loveLanguageDesc,
+      icon: Sparkles,
+      color: "text-yellow-500"
+    },
+    {
+      id: "would-you-rather",
+      name: t.wouldYouRather,
+      description: t.wouldYouRatherDesc,
+      icon: Zap,
+      color: "text-blue-500"
+    },
+    {
+      id: "daily-sync",
+      name: t.dailySync,
+      description: t.dailySyncDesc,
+      icon: Calendar,
+      color: "text-green-500"
+    },
+    {
+      id: "future-forecast",
+      name: t.futureForecast,
+      description: t.futureForecastDesc,
+      icon: TrendingUp,
+      color: "text-indigo-500"
+    },
+    {
+      id: "truth-or-tender",
+      name: t.truthOrTender,
+      description: t.truthOrTenderDesc,
+      icon: Heart,
+      color: "text-red-500"
+    }
+  ];
 
   if (selectedGame === "how-well") {
     return <HowWellGame coupleId={coupleId} userId={userId} partnerId={partnerId} onBack={() => setSelectedGame(null)} />;
@@ -100,16 +104,16 @@ export const CoupleGames = ({ coupleId, userId, partnerId, onClose }: CoupleGame
       <div className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-2">
           <Gamepad2 className="w-5 h-5 text-primary" />
-          <h2 className="text-xl font-semibold">Couples Games</h2>
+          <h2 className="text-xl font-semibold">{t.coupleGames}</h2>
         </div>
-        <Button variant="ghost" onClick={onClose}>Close</Button>
+        <Button variant="ghost" onClick={onClose}>{t.close}</Button>
       </div>
 
       <div className="flex-1 overflow-auto p-4">
         <div className="max-w-4xl mx-auto space-y-4">
           <div className="text-center mb-6">
-            <h3 className="text-2xl font-semibold mb-2">Get to Know Each Other Better</h3>
-            <p className="text-muted-foreground">Choose a game to play together and deepen your connection</p>
+            <h3 className="text-2xl font-semibold mb-2">{t.getToKnowBetter}</h3>
+            <p className="text-muted-foreground">{t.chooseGameToPlay}</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
@@ -138,7 +142,7 @@ export const CoupleGames = ({ coupleId, userId, partnerId, onClose }: CoupleGame
           {!partnerId && (
             <div className="text-center py-8 text-muted-foreground">
               <Heart className="w-12 h-12 mx-auto mb-3 opacity-50" />
-              <p>Invite your partner to play these games together!</p>
+              <p>{t.invitePartner}</p>
             </div>
           )}
         </div>
