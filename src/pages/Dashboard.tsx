@@ -507,12 +507,13 @@ const Dashboard = () => {
           />
         )}
 
-        {/* Love-O-Meter - Black background with red bar */}
-        <div className="bg-black rounded-3xl p-6 shadow-xl">
-          <div className="text-center mb-3">
-            <h3 className="text-white font-normal text-lg">Love - O - Meter</h3>
+        {/* Love-O-Meter - Compact version */}
+        <div className="bg-black rounded-2xl p-4 shadow-xl">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-white font-normal text-sm">Love-O-Meter</h3>
+            <span className="text-white text-sm font-semibold">{Math.round(loveMeter)}%</span>
           </div>
-          <div className="w-full bg-gray-800 rounded-full h-8 overflow-hidden">
+          <div className="w-full bg-gray-800 rounded-full h-4 overflow-hidden">
             <div
               className="h-full bg-red-500 transition-all duration-500 rounded-full"
               style={{ width: `${loveMeter}%` }}
