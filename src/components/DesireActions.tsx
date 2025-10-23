@@ -94,24 +94,27 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Heart className="w-5 h-5 text-pink-500" />
-            {desires.title}
+            {desires?.title || "Desires"}
           </DialogTitle>
         </DialogHeader>
         
         {!showCustom ? (
           <div className="grid grid-cols-2 gap-2">
-            {DESIRE_ACTIONS.map((desire) => (
-              <Button
-                key={desire.value}
-                variant="outline"
-                className="h-20 flex-col gap-1 text-sm"
-                onClick={() => sendDesire(desire.value)}
-                disabled={sending}
-              >
-                <span className="text-2xl">{desire.emoji}</span>
-                <span className="text-xs">{desires[desire.labelKey as keyof typeof desires]}</span>
-              </Button>
-            ))}
+            {DESIRE_ACTIONS.map((desire) => {
+              const labelText = desires?.[desire.labelKey as keyof typeof desires] || desire.labelKey;
+              return (
+                <Button
+                  key={desire.value}
+                  variant="outline"
+                  className="h-20 flex-col gap-1 text-sm"
+                  onClick={() => sendDesire(desire.value)}
+                  disabled={sending}
+                >
+                  <span className="text-2xl">{desire.emoji}</span>
+                  <span className="text-xs">{labelText}</span>
+                </Button>
+              );
+            })}
             <Button
               variant="outline"
               className="h-20 flex-col gap-1 text-sm col-span-2"
@@ -119,13 +122,13 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
               disabled={sending}
             >
               <span className="text-2xl">✍️</span>
-              <span className="text-xs">{desires.custom}</span>
+              <span className="text-xs">{desires?.custom || "Custom"}</span>
             </Button>
           </div>
         ) : (
           <div className="space-y-4">
             <Input
-              placeholder={desires.customPlaceholder}
+              placeholder={desires?.customPlaceholder || "Enter your desire..."}
               value={customDesire}
               onChange={(e) => setCustomDesire(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleCustomSubmit()}

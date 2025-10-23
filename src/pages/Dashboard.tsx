@@ -563,12 +563,14 @@ const Dashboard = () => {
         onClose={() => setShowFlirt(false)}
       />
 
-      <DesireActions
-        coupleId={coupleData.coupleId}
-        userId={user!.id}
-        open={showDesires}
-        onClose={() => setShowDesires(false)}
-      />
+      {coupleData && (
+        <DesireActions
+          coupleId={coupleData.coupleId}
+          userId={user!.id}
+          open={showDesires}
+          onClose={() => setShowDesires(false)}
+        />
+      )}
 
       <BottomNavigation
         activeView={activeView}
