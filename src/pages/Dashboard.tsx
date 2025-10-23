@@ -510,21 +510,14 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* UNIO Gallery - Large beige card */}
-        <div className="bg-[#F5E6D3] rounded-3xl p-6 shadow-xl h-[550px] flex flex-col">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-sm text-gray-700">Posted by.....</p>
-            <h2 className="text-xl font-normal">UNIO Gallery</h2>
-          </div>
-          
-          <div className="flex-1 overflow-hidden">
-            <UnioGallery
-              coupleId={coupleData.coupleId}
-              userId={user!.id}
-              userFullName={userProfile?.full_name || "You"}
-              partnerFullName={coupleData.partner?.full_name || "Partner"}
-            />
-          </div>
+        {/* Feed Section - Large beige card */}
+        <div className="bg-[#F5E6D3] rounded-3xl p-6 shadow-xl h-[600px] flex flex-col">
+          <UnioGallery
+            coupleId={coupleData.coupleId}
+            userId={user!.id}
+            userFullName={userProfile?.full_name || "You"}
+            partnerFullName={coupleData.partner?.full_name || "Partner"}
+          />
         </div>
 
         {/* Invite Code if no partner */}

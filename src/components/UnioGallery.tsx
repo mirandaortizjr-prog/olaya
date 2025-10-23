@@ -391,7 +391,7 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
 
   return (
     <div className="relative h-full flex flex-col">
-      <div className="flex justify-between items-center mb-3 px-2">
+      <div className="mb-3">
         <Button size="sm" onClick={() => setShowNewPost(true)} className="w-full">
           New Post
         </Button>
@@ -479,7 +479,7 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
       )}
 
       {/* Feed scroll area */}
-      <div className="flex-1 overflow-y-auto px-2 scroll-smooth">
+      <div className="flex-1 overflow-y-auto scroll-smooth">
         {posts.length === 0 && !showNewPost ? (
           <Card className="p-8 flex flex-col items-center justify-center">
             <p className="text-muted-foreground mb-4">No posts yet</p>
