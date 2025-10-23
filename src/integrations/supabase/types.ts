@@ -293,6 +293,42 @@ export type Database = {
         }
         Relationships: []
       }
+      game_sessions: {
+        Row: {
+          couple_id: string
+          created_at: string
+          game_type: string
+          id: string
+          initiated_by: string
+          partner_id: string
+          session_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          game_type: string
+          id?: string
+          initiated_by: string
+          partner_id: string
+          session_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          game_type?: string
+          id?: string
+          initiated_by?: string
+          partner_id?: string
+          session_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       love_languages: {
         Row: {
           created_at: string

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Trophy } from "lucide-react";
+import { ArrowLeft, Trophy, Bell } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface HowWellGameProps {
@@ -33,6 +33,7 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
   const [sessionId] = useState(() => `hw-${Date.now()}`);
   const [score, setScore] = useState(0);
   const [partnerAnswers, setPartnerAnswers] = useState<Record<string, string>>({});
+  const [pendingInvitation, setPendingInvitation] = useState<any>(null);
   const { toast } = useToast();
 
   const loadPartnerAnswers = async () => {
@@ -56,6 +57,76 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
     }
   };
 
+  const checkPendingInvitations = async () => {
+    if (!partnerId) return;
+
+    const { data } = await supabase
+      .from('game_sessions')
+      .select('*')
+      .eq('couple_id', coupleId)
+      .eq('partner_id', userId)
+      .eq('game_type', 'how-well')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (data) {
+      setPendingInvitation(data);
+    }
+  };
+
+  const sendGameInvitation = async () => {
+    if (!partnerId) return;
+
+    // Create game session
+    const { data: session, error } = await supabase
+      .from('game_sessions')
+      .insert({
+        couple_id: coupleId,
+        game_type: 'how-well',
+        initiated_by: userId,
+        partner_id: partnerId,
+        session_id: sessionId,
+        status: 'pending'
+      })
+      .select()
+      .single();
+
+    if (error) {
+      toast({ title: "Error sending invitation", variant: "destructive" });
+      return;
+    }
+
+    // Send push notification
+    try {
+      await supabase.functions.invoke('send-push-notification', {
+        body: {
+          userId: partnerId,
+          title: "Let's Play!",
+          body: "Your partner wants to play 'How Well Do You Know Me?' 🎮",
+          data: { type: 'game_invitation', gameType: 'how-well', sessionId }
+        }
+      });
+    } catch (e) {
+      console.error('Failed to send notification:', e);
+    }
+
+    toast({ title: "Invitation sent! 💌" });
+  };
+
+  const acceptInvitation = async () => {
+    if (!pendingInvitation) return;
+
+    await supabase
+      .from('game_sessions')
+      .update({ status: 'active' })
+      .eq('id', pendingInvitation.id);
+
+    setPendingInvitation(null);
+    setGameMode("answer");
+  };
+
   const saveAnswer = async () => {
     if (!myAnswer.trim()) return;
 
@@ -72,7 +143,22 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      toast({ title: "Answers saved! Now have your partner answer." });
+      // All answers complete - notify partner
+      if (partnerId) {
+        try {
+          await supabase.functions.invoke('send-push-notification', {
+            body: {
+              userId: partnerId,
+              title: "Ready to Guess!",
+              body: "Your partner has finished answering. Time to guess their answers! 🎯",
+              data: { type: 'game_ready', gameType: 'how-well' }
+            }
+          });
+        } catch (e) {
+          console.error('Failed to send notification:', e);
+        }
+      }
+      toast({ title: "Answers saved! Partner notified." });
       onBack();
     }
   };
@@ -104,6 +190,7 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
 
   useEffect(() => {
     loadPartnerAnswers();
+    checkPendingInvitations();
   }, []);
 
   useEffect(() => {
@@ -124,13 +211,34 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
 
         <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
           <div className="max-w-md w-full space-y-4">
+            {pendingInvitation && (
+              <Card className="p-6 border-primary bg-primary/5">
+                <div className="flex items-start gap-3 mb-4">
+                  <Bell className="w-5 h-5 text-primary mt-1" />
+                  <div>
+                    <h3 className="font-semibold">Game Invitation!</h3>
+                    <p className="text-sm text-muted-foreground">Your partner invited you to play</p>
+                  </div>
+                </div>
+                <Button onClick={acceptInvitation} className="w-full">
+                  Accept & Start Answering
+                </Button>
+              </Card>
+            )}
+
             <Card className="p-6 text-center">
               <h3 className="text-lg font-semibold mb-2">Choose Your Role</h3>
               <p className="text-sm text-muted-foreground mb-6">
                 One partner answers questions about themselves, the other guesses
               </p>
               <div className="space-y-3">
-                <Button className="w-full" onClick={() => setGameMode("answer")}>
+                <Button 
+                  className="w-full" 
+                  onClick={() => {
+                    sendGameInvitation();
+                    setGameMode("answer");
+                  }}
+                >
                   I'll Answer Questions
                 </Button>
                 <Button 
