@@ -85,7 +85,7 @@ const Index = () => {
             <img 
               src={olayaLogo} 
               alt="OLAYA Logo" 
-              className="w-48 h-48 mb-6"
+              className="w-64 h-64 mb-6 drop-shadow-2xl"
             />
             <h1 className="text-5xl lg:text-7xl font-bold text-white">
               {t("indexTitle")}
