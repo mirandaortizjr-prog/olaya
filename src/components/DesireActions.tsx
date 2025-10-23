@@ -32,31 +32,52 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
   const [customDesire, setCustomDesire] = useState("");
   const { toast } = useToast();
   const { t, language } = useLanguage();
-  const desires = translations[language]?.desires ?? translations.en.desires;
+  
+  console.log('DesireActions render:', { coupleId, userId, language });
+  
+  let desires;
+  try {
+    desires = translations[language]?.desires ?? translations.en.desires;
+    console.log('Desires loaded successfully:', desires);
+  } catch (error) {
+    console.error('Error loading desires translations:', error);
+    desires = translations.en.desires; // fallback
+  }
 
   const sendDesire = async (desireType: string, customMessage?: string) => {
     setSending(true);
-    const { error } = await supabase
-      .from('craving_board')
-      .insert({
-        couple_id: coupleId,
-        user_id: userId,
-        craving_type: desireType,
-        custom_message: customMessage || null
-      });
+    console.log('Sending desire:', { desireType, customMessage, coupleId, userId });
+    
+    try {
+      const { data, error } = await supabase
+        .from('craving_board')
+        .insert({
+          couple_id: coupleId,
+          user_id: userId,
+          craving_type: desireType,
+          custom_message: customMessage || null
+        })
+        .select();
 
-    if (error) {
-      toast({ title: t("error"), variant: "destructive" });
-    } else {
-      const desire = DESIRE_ACTIONS.find(d => d.value === desireType);
-      const label = desire ? desires[desire.labelKey as keyof typeof desires] : customMessage;
-      toast({ 
-        title: `${desire?.emoji || "💝"} ${label}`,
-        description: desires.desireSent
-      });
-      setCustomDesire("");
-      setShowCustom(false);
-      onClose();
+      console.log('Desire response:', { data, error });
+
+      if (error) {
+        console.error('Desire error:', error);
+        toast({ title: t("error"), description: error.message, variant: "destructive" });
+      } else {
+        const desire = DESIRE_ACTIONS.find(d => d.value === desireType);
+        const label = desire ? desires[desire.labelKey as keyof typeof desires] : customMessage;
+        toast({ 
+          title: `${desire?.emoji || "💝"} ${label}`,
+          description: desires.desireSent
+        });
+        setCustomDesire("");
+        setShowCustom(false);
+        onClose();
+      }
+    } catch (error) {
+      console.error('Unexpected error sending desire:', error);
+      toast({ title: t("error"), description: "Unexpected error occurred", variant: "destructive" });
     }
     setSending(false);
   };
