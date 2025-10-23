@@ -14,6 +14,7 @@ import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
 import { FeelingStatusSelector } from "@/components/FeelingStatusSelector";
 import { MessengerChat } from "@/components/MessengerChat";
 import { FlirtActions } from "@/components/FlirtActions";
+import { FlirtNotifications } from "@/components/FlirtNotifications";
 import { PrivateContentPage } from "@/components/PrivateContentPage";
 import { PrivatePhotosPage } from "@/components/PrivatePhotosPage";
 import { UnioGallery } from "@/components/UnioGallery";
@@ -496,6 +497,15 @@ const Dashboard = () => {
             )}
           </div>
         </div>
+
+        {/* Flirt Notifications */}
+        {coupleData.partner && (
+          <FlirtNotifications
+            coupleId={coupleData.coupleId}
+            userId={user!.id}
+            partnerName={coupleData.partner.full_name || "Partner"}
+          />
+        )}
 
         {/* Love-O-Meter - Black background with red bar */}
         <div className="bg-black rounded-3xl p-6 shadow-xl">
