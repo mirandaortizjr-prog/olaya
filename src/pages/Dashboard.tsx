@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MessageCircle, Settings, LogOut, Users, Link2, Calendar, Flame, Home, Lock, Clock, ThumbsUp, ThumbsDown, Heart, Bookmark } from "lucide-react";
+import { MessageCircle, Settings, LogOut, Users, Link2, Calendar, Flame, Home, Lock, Clock, ThumbsUp, ThumbsDown, Heart, Bookmark, Gamepad2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
@@ -16,6 +16,7 @@ import { MessengerChat } from "@/components/MessengerChat";
 import { FlirtActions } from "@/components/FlirtActions";
 import { FlirtNotifications } from "@/components/FlirtNotifications";
 import { PrivateVault } from "@/components/PrivateVault";
+import { CoupleGames } from "@/components/CoupleGames";
 import { UnioGallery } from "@/components/UnioGallery";
 import { MemoryCalendar } from "@/components/MemoryCalendar";
 
@@ -326,6 +327,18 @@ const Dashboard = () => {
     );
   }
 
+  if (activeView === "games") {
+    return (
+      <CoupleGames
+        coupleId={coupleData.coupleId}
+        userId={user!.id}
+        partnerId={coupleData.partner?.user_id || null}
+        onClose={() => setActiveView("home")}
+      />
+    );
+  }
+
+
   if (activeView === "locked") {
     return (
       <>
@@ -552,6 +565,9 @@ const Dashboard = () => {
           </Button>
           <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("locked")}>
             <Lock className="w-7 h-7 text-muted-foreground" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("games")}>
+            <Gamepad2 className="w-7 h-7 text-muted-foreground" />
           </Button>
         </div>
       </div>

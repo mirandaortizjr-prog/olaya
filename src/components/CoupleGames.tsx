@@ -1,0 +1,148 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Gamepad2, Heart, MessageCircle, Sparkles, Calendar, TrendingUp, Zap } from "lucide-react";
+import { HowWellGame } from "./games/HowWellGame";
+import { MemoryLaneGame } from "./games/MemoryLaneGame";
+import { LoveLanguageGame } from "./games/LoveLanguageGame";
+import { WouldYouRatherGame } from "./games/WouldYouRatherGame";
+import { DailySyncGame } from "./games/DailySyncGame";
+import { FutureForecastGame } from "./games/FutureForecastGame";
+import { TruthOrTenderGame } from "./games/TruthOrTenderGame";
+
+interface CoupleGamesProps {
+  coupleId: string;
+  userId: string;
+  partnerId: string | null;
+  onClose: () => void;
+}
+
+const gamesList = [
+  {
+    id: "how-well",
+    name: "How Well Do You Know Me?",
+    description: "Test how well you know your partner's favorites and quirks",
+    icon: Heart,
+    color: "text-pink-500"
+  },
+  {
+    id: "memory-lane",
+    name: "Memory Lane Match",
+    description: "Compare your favorite shared memories",
+    icon: MessageCircle,
+    color: "text-purple-500"
+  },
+  {
+    id: "love-language",
+    name: "Love Language Decoder",
+    description: "Discover and match your love languages",
+    icon: Sparkles,
+    color: "text-yellow-500"
+  },
+  {
+    id: "would-you-rather",
+    name: "Would You Rather?",
+    description: "Fun dilemmas with a romantic twist",
+    icon: Zap,
+    color: "text-blue-500"
+  },
+  {
+    id: "daily-sync",
+    name: "The Daily Sync",
+    description: "Quick emotional check-in ritual",
+    icon: Calendar,
+    color: "text-green-500"
+  },
+  {
+    id: "future-forecast",
+    name: "Future Forecast",
+    description: "Predict each other's dreams and goals",
+    icon: TrendingUp,
+    color: "text-indigo-500"
+  },
+  {
+    id: "truth-or-tender",
+    name: "Truth or Tender",
+    description: "Deep questions or acts of affection",
+    icon: Heart,
+    color: "text-red-500"
+  }
+];
+
+export const CoupleGames = ({ coupleId, userId, partnerId, onClose }: CoupleGamesProps) => {
+  const [selectedGame, setSelectedGame] = useState<string | null>(null);
+
+  if (selectedGame === "how-well") {
+    return <HowWellGame coupleId={coupleId} userId={userId} partnerId={partnerId} onBack={() => setSelectedGame(null)} />;
+  }
+  if (selectedGame === "memory-lane") {
+    return <MemoryLaneGame coupleId={coupleId} userId={userId} partnerId={partnerId} onBack={() => setSelectedGame(null)} />;
+  }
+  if (selectedGame === "love-language") {
+    return <LoveLanguageGame coupleId={coupleId} userId={userId} partnerId={partnerId} onBack={() => setSelectedGame(null)} />;
+  }
+  if (selectedGame === "would-you-rather") {
+    return <WouldYouRatherGame coupleId={coupleId} userId={userId} partnerId={partnerId} onBack={() => setSelectedGame(null)} />;
+  }
+  if (selectedGame === "daily-sync") {
+    return <DailySyncGame coupleId={coupleId} userId={userId} onBack={() => setSelectedGame(null)} />;
+  }
+  if (selectedGame === "future-forecast") {
+    return <FutureForecastGame coupleId={coupleId} userId={userId} partnerId={partnerId} onBack={() => setSelectedGame(null)} />;
+  }
+  if (selectedGame === "truth-or-tender") {
+    return <TruthOrTenderGame coupleId={coupleId} userId={userId} onBack={() => setSelectedGame(null)} />;
+  }
+
+  return (
+    <div className="fixed inset-0 bg-background z-50 flex flex-col">
+      <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center gap-2">
+          <Gamepad2 className="w-5 h-5 text-primary" />
+          <h2 className="text-xl font-semibold">Couples Games</h2>
+        </div>
+        <Button variant="ghost" onClick={onClose}>Close</Button>
+      </div>
+
+      <div className="flex-1 overflow-auto p-4">
+        <div className="max-w-4xl mx-auto space-y-4">
+          <div className="text-center mb-6">
+            <h3 className="text-2xl font-semibold mb-2">Get to Know Each Other Better</h3>
+            <p className="text-muted-foreground">Choose a game to play together and deepen your connection</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            {gamesList.map((game) => {
+              const Icon = game.icon;
+              return (
+                <Card
+                  key={game.id}
+                  className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                  onClick={() => setSelectedGame(game.id)}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className={`p-3 rounded-full bg-muted ${game.color}`}>
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold mb-1">{game.name}</h4>
+                      <p className="text-sm text-muted-foreground">{game.description}</p>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+
+          {!partnerId && (
+            <div className="text-center py-8 text-muted-foreground">
+              <Heart className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <p>Invite your partner to play these games together!</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -260,6 +260,39 @@ export type Database = {
         }
         Relationships: []
       }
+      game_responses: {
+        Row: {
+          answer: string
+          couple_id: string
+          created_at: string
+          game_type: string
+          id: string
+          question_id: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          couple_id: string
+          created_at?: string
+          game_type: string
+          id?: string
+          question_id: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          couple_id?: string
+          created_at?: string
+          game_type?: string
+          id?: string
+          question_id?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       love_languages: {
         Row: {
           created_at: string
