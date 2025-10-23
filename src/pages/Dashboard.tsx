@@ -21,6 +21,7 @@ import { PrivateVault } from "@/components/PrivateVault";
 import { CoupleGames } from "@/components/CoupleGames";
 import { UnioGallery } from "@/components/UnioGallery";
 import { MemoryCalendar } from "@/components/MemoryCalendar";
+import { LoveMeter } from "@/components/LoveMeter";
 
 interface CoupleData {
   coupleId: string;
@@ -44,7 +45,6 @@ const Dashboard = () => {
   const [partnerCustomMessage, setPartnerCustomMessage] = useState("");
   const [userFeelingStatus, setUserFeelingStatus] = useState("");
   const [userCustomMessage, setUserCustomMessage] = useState("");
-  const [loveMeter, setLoveMeter] = useState(0);
   const [activeView, setActiveView] = useState("home");
   const [showMessenger, setShowMessenger] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -115,7 +115,6 @@ const Dashboard = () => {
     setSpaceName(couple.name || 'name your space');
 
     loadFeelingStatuses(couple.id, userId, partnerData?.user_id);
-    loadLoveMeter(couple.id);
   };
 
   const loadFeelingStatuses = async (coupleId: string, userId: string, partnerId?: string) => {
@@ -150,18 +149,6 @@ const Dashboard = () => {
     }
   };
 
-  const loadLoveMeter = async (coupleId: string) => {
-    const { data } = await supabase
-      .from('love_meter')
-      .select('weekly_count')
-      .eq('couple_id', coupleId)
-      .single();
-
-    if (data) {
-      const percentage = Math.min((data.weekly_count / 50) * 100, 100);
-      setLoveMeter(percentage);
-    }
-  };
 
   const joinCouple = async () => {
     if (!user || !inviteCode.trim()) return;
@@ -518,19 +505,8 @@ const Dashboard = () => {
           />
         )}
 
-        {/* Love-O-Meter - Compact version */}
-        <div className="bg-black rounded-2xl p-4 shadow-xl">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-white font-normal text-sm">Love-O-Meter</h3>
-            <span className="text-white text-sm font-semibold">{Math.round(loveMeter)}%</span>
-          </div>
-          <div className="w-full bg-gray-800 rounded-full h-4 overflow-hidden">
-            <div
-              className="h-full bg-red-500 transition-all duration-500 rounded-full"
-              style={{ width: `${loveMeter}%` }}
-            />
-          </div>
-        </div>
+        {/* Love-O-Meter */}
+        <LoveMeter coupleId={coupleData.coupleId} />
 
         {/* Feed Section - Large beige card */}
         <div className="bg-[#F5E6D3] rounded-3xl p-6 shadow-xl h-[600px] flex flex-col">
