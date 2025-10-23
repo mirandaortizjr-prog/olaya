@@ -15,8 +15,7 @@ import { FeelingStatusSelector } from "@/components/FeelingStatusSelector";
 import { MessengerChat } from "@/components/MessengerChat";
 import { FlirtActions } from "@/components/FlirtActions";
 import { FlirtNotifications } from "@/components/FlirtNotifications";
-import { PrivateContentPage } from "@/components/PrivateContentPage";
-import { PrivatePhotosPage } from "@/components/PrivatePhotosPage";
+import { PrivateVault } from "@/components/PrivateVault";
 import { UnioGallery } from "@/components/UnioGallery";
 import { MemoryCalendar } from "@/components/MemoryCalendar";
 
@@ -321,9 +320,6 @@ const Dashboard = () => {
             <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("locked")}>
               <Lock className="w-7 h-7 text-muted-foreground" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("photos")}>
-              <Clock className="w-7 h-7 text-muted-foreground" />
-            </Button>
           </div>
         </div>
       </div>
@@ -333,7 +329,7 @@ const Dashboard = () => {
   if (activeView === "locked") {
     return (
       <>
-        <PrivateContentPage
+        <PrivateVault
           coupleId={coupleData.coupleId}
           userId={user!.id}
           onClose={() => setActiveView("home")}
@@ -352,19 +348,16 @@ const Dashboard = () => {
             <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("locked")}>
               <Lock className="w-7 h-7 text-foreground" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("photos")}>
-              <Clock className="w-7 h-7 text-muted-foreground" />
-            </Button>
           </div>
         </div>
       </>
     );
   }
 
-  if (activeView === "photos") {
+  if (activeView === "vault") {
     return (
       <>
-        <PrivatePhotosPage
+        <PrivateVault
           coupleId={coupleData.coupleId}
           userId={user!.id}
           onClose={() => setActiveView("home")}
@@ -382,9 +375,6 @@ const Dashboard = () => {
             </Button>
             <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("locked")}>
               <Lock className="w-7 h-7 text-muted-foreground" />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("photos")}>
-              <Clock className="w-7 h-7 text-foreground" />
             </Button>
           </div>
         </div>
@@ -562,9 +552,6 @@ const Dashboard = () => {
           </Button>
           <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("locked")}>
             <Lock className="w-7 h-7 text-muted-foreground" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("photos")}>
-            <Clock className="w-7 h-7 text-muted-foreground" />
           </Button>
         </div>
       </div>
