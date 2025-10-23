@@ -103,6 +103,10 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
   };
 
   useEffect(() => {
+    loadPartnerAnswers();
+  }, []);
+
+  useEffect(() => {
     if (gameMode === "guess") {
       loadPartnerAnswers();
     }
@@ -133,10 +137,20 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
                   className="w-full" 
                   variant="outline"
                   onClick={() => setGameMode("guess")}
-                  disabled={!partnerId || Object.keys(partnerAnswers).length === 0}
+                  disabled={!partnerId}
                 >
                   I'll Guess Their Answers
                 </Button>
+                {!partnerId && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    Waiting for partner to join
+                  </p>
+                )}
+                {partnerId && Object.keys(partnerAnswers).length === 0 && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    Waiting for partner to answer questions first
+                  </p>
+                )}
               </div>
             </Card>
           </div>
