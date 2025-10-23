@@ -86,12 +86,12 @@ export const FlirtNotifications = ({ coupleId, userId, partnerName }: FlirtNotif
   if (recentFlirts.length === 0) return null;
 
   return (
-    <Card className="p-4 bg-gradient-to-br from-pink-50 to-red-50 dark:from-pink-950/20 dark:to-red-950/20 border-pink-200 dark:border-pink-800">
-      <h3 className="text-sm font-semibold mb-3 text-pink-700 dark:text-pink-300 flex items-center gap-2">
-        <Flame className="w-4 h-4" />
-        Recent Flirts from {partnerName}
+    <Card className="p-3 bg-[#F5E6D3] border-gray-300 max-h-32">
+      <h3 className="text-xs font-semibold mb-2 text-gray-800 flex items-center gap-2">
+        <Flame className="w-3 h-3 text-red-500" />
+        Flirts from {partnerName}
       </h3>
-      <div className="space-y-2">
+      <div className="space-y-1.5 overflow-y-auto max-h-20 pr-1">
         {recentFlirts.map((flirt) => {
           const flirtInfo = FLIRT_ICONS[flirt.flirt_type];
           if (!flirtInfo) return null;
@@ -101,16 +101,16 @@ export const FlirtNotifications = ({ coupleId, userId, partnerName }: FlirtNotif
           return (
             <div
               key={flirt.id}
-              className="flex items-center gap-3 p-2 rounded-lg bg-white/50 dark:bg-gray-800/50"
+              className="flex items-center gap-2 p-1.5 rounded-lg bg-white/60"
             >
-              <span className="text-2xl">{flirtInfo.emoji}</span>
-              <div className="flex-1">
-                <p className="text-sm font-medium">{flirtInfo.label}</p>
-                <p className="text-xs text-muted-foreground">
+              <span className="text-lg">{flirtInfo.emoji}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium truncate">{flirtInfo.label}</p>
+                <p className="text-[10px] text-gray-600">
                   {formatDistanceToNow(new Date(flirt.created_at), { addSuffix: true })}
                 </p>
               </div>
-              <FlirtIcon className="w-4 h-4 text-pink-500" />
+              <FlirtIcon className="w-3 h-3 text-red-500 flex-shrink-0" />
             </div>
           );
         })}
