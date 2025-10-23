@@ -302,7 +302,7 @@ const Dashboard = () => {
             <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("calendar")}>
               <Calendar className="w-7 h-7 text-foreground" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("flirt")}>
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setShowFlirt(true)}>
               <Flame className="w-7 h-7 text-red-500" />
             </Button>
             <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("home")}>
@@ -347,7 +347,7 @@ const Dashboard = () => {
             <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("calendar")}>
               <Calendar className="w-7 h-7 text-muted-foreground" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("flirt")}>
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setShowFlirt(true)}>
               <Flame className="w-7 h-7 text-red-500" />
             </Button>
             <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("home")}>
@@ -375,7 +375,7 @@ const Dashboard = () => {
             <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("calendar")}>
               <Calendar className="w-7 h-7 text-muted-foreground" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("flirt")}>
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setShowFlirt(true)}>
               <Flame className="w-7 h-7 text-red-500" />
             </Button>
             <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("home")}>
@@ -575,6 +575,8 @@ const Dashboard = () => {
         onViewChange={(view) => {
           if (view === "desires") {
             setShowDesires(true);
+          } else if (view === "flirt") {
+            setShowFlirt(true);
           } else {
             setActiveView(view);
           }
