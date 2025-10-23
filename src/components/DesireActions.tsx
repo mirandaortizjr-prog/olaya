@@ -31,8 +31,8 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
   const [showCustom, setShowCustom] = useState(false);
   const [customDesire, setCustomDesire] = useState("");
   const { toast } = useToast();
-  const { language } = useLanguage();
-  const t = translations[language];
+  const { t, language } = useLanguage();
+  const desires = translations[language].desires;
 
   const sendDesire = async (desireType: string, customMessage?: string) => {
     setSending(true);
@@ -46,13 +46,13 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
       });
 
     if (error) {
-      toast({ title: t.error || "Error", variant: "destructive" });
+      toast({ title: t("error"), variant: "destructive" });
     } else {
       const desire = DESIRE_ACTIONS.find(d => d.value === desireType);
-      const label = desire ? t.desires[desire.labelKey] : customMessage;
+      const label = desire ? desires[desire.labelKey as keyof typeof desires] : customMessage;
       toast({ 
         title: `${desire?.emoji || "💝"} ${label}`,
-        description: t.desires.desireSent || "Desire sent!"
+        description: desires.desireSent
       });
       setCustomDesire("");
       setShowCustom(false);
@@ -73,7 +73,7 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Heart className="w-5 h-5 text-pink-500" />
-            {t.desires.title}
+            {desires.title}
           </DialogTitle>
         </DialogHeader>
         
@@ -88,7 +88,7 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
                 disabled={sending}
               >
                 <span className="text-2xl">{desire.emoji}</span>
-                <span className="text-xs">{t.desires[desire.labelKey]}</span>
+                <span className="text-xs">{desires[desire.labelKey as keyof typeof desires]}</span>
               </Button>
             ))}
             <Button
@@ -98,13 +98,13 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
               disabled={sending}
             >
               <span className="text-2xl">✍️</span>
-              <span className="text-xs">{t.desires.custom}</span>
+              <span className="text-xs">{desires.custom}</span>
             </Button>
           </div>
         ) : (
           <div className="space-y-4">
             <Input
-              placeholder={t.desires.customPlaceholder || "Enter your desire..."}
+              placeholder={desires.customPlaceholder}
               value={customDesire}
               onChange={(e) => setCustomDesire(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleCustomSubmit()}
@@ -116,14 +116,14 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
                 onClick={() => setShowCustom(false)}
                 className="flex-1"
               >
-                {t.back || "Back"}
+                {t("back")}
               </Button>
               <Button
                 onClick={handleCustomSubmit}
                 disabled={!customDesire.trim() || sending}
                 className="flex-1"
               >
-                {t.send || "Send"}
+                {t("send")}
               </Button>
             </div>
           </div>
