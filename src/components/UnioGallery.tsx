@@ -278,17 +278,30 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
 
         {/* Display media if available */}
         {post.media_urls && Array.isArray(post.media_urls) && post.media_urls.length > 0 && (
-          <div className="mb-3 -mx-4">
-            {post.media_urls.map((url: string, index: number) => {
-              const isVideo = url.includes('.mp4') || url.includes('.webm') || url.includes('.mov');
-              return isVideo ? (
-                <video key={index} controls className="w-full">
-                  <source src={url} />
-                </video>
-              ) : (
-                <img key={index} src={url} alt="post media" className="w-full object-cover max-h-96" />
-              );
-            })}
+          <div className="mb-3 -mx-4 overflow-x-auto">
+            <div className={`flex gap-2 ${post.media_urls.length > 1 ? 'px-4' : ''}`}>
+              {post.media_urls.map((url: string, index: number) => {
+                const isVideo = url.includes('.mp4') || url.includes('.webm') || url.includes('.mov');
+                return (
+                  <div 
+                    key={index} 
+                    className={`${post.media_urls.length > 1 ? 'flex-shrink-0 w-[85vw]' : 'w-full'}`}
+                  >
+                    {isVideo ? (
+                      <video controls className="w-full h-[60vh] object-cover rounded">
+                        <source src={url} />
+                      </video>
+                    ) : (
+                      <img 
+                        src={url} 
+                        alt="post media" 
+                        className="w-full h-[60vh] object-cover rounded" 
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
