@@ -27,16 +27,26 @@ export const FlirtActions = ({ coupleId, senderId, open, onClose }: FlirtActions
 
   const sendFlirt = async (flirtType: string, label: string, emoji: string) => {
     setSending(true);
-    const { error } = await supabase
+    console.log('Sending flirt:', { couple_id: coupleId, sender_id: senderId, flirt_type: flirtType });
+    
+    const { data, error } = await supabase
       .from('flirts')
       .insert({
         couple_id: coupleId,
         sender_id: senderId,
         flirt_type: flirtType
-      });
+      })
+      .select();
+
+    console.log('Flirt response:', { data, error });
 
     if (error) {
-      toast({ title: "Error sending flirt", variant: "destructive" });
+      console.error('Flirt error:', error);
+      toast({ 
+        title: "Error sending flirt", 
+        description: error.message,
+        variant: "destructive" 
+      });
     } else {
       toast({ 
         title: `${emoji} ${label} sent!`,
