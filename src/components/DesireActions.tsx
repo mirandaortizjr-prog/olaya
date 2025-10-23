@@ -32,7 +32,7 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
   const [customDesire, setCustomDesire] = useState("");
   const { toast } = useToast();
   const { t, language } = useLanguage();
-  const desires = translations[language].desires;
+  const desires = translations[language]?.desires ?? translations.en.desires;
 
   const sendDesire = async (desireType: string, customMessage?: string) => {
     setSending(true);
