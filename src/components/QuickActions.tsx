@@ -60,7 +60,7 @@ export const QuickActions = ({ coupleId, userId }: QuickActionsProps) => {
         await supabase.functions.invoke('send-push-notification', {
           body: {
             userId: members.user_id,
-            title: 'Unio',
+            title: 'OLAYA',
             body: messageLabels[messageType]?.[language] || messageLabels.wink[language],
           },
         });

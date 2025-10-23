@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
-import unioLogo from "@/assets/unio-logo.png";
+import olayaLogo from "@/assets/olaya-logo.png";
 
 const Index = () => {
   const { t } = useLanguage();
@@ -83,8 +83,8 @@ const Index = () => {
         <div className="relative container mx-auto px-4 py-20">
           <div className="flex flex-col items-center text-center space-y-6">
             <img 
-              src={unioLogo} 
-              alt="Unio Logo" 
+              src={olayaLogo} 
+              alt="OLAYA Logo" 
               className="w-48 h-48 mb-6"
             />
             <h1 className="text-5xl lg:text-7xl font-bold text-white">

@@ -1,14 +1,14 @@
 export const translations = {
   en: {
     // Index page
-    indexTitle: "Unio",
+    indexTitle: "OLAYA",
     indexSubtitle: "Your private sanctuary for two hearts",
     indexDescription: "A beautiful space designed exclusively for you and your partner to share moments, memories, and love.",
     getStarted: "Get Started",
     viewPricing: "View Pricing",
     
     // Auth page
-    authTitle: "Unio",
+    authTitle: "OLAYA",
     createSanctuary: "Create your sanctuary",
     welcomeBack: "Welcome back",
     fullName: "Full Name",
@@ -23,7 +23,7 @@ export const translations = {
     google: "Google",
     alreadyHaveAccount: "Already have an account? Sign in",
     dontHaveAccount: "Don't have an account? Sign up",
-    welcomeToUsTwo: "Welcome to Unio!",
+    welcomeToUsTwo: "Welcome to OLAYA!",
     accountCreated: "Your account has been created successfully.",
     welcomeBackTitle: "Welcome back!",
     signedInSuccess: "You've been signed in successfully.",
@@ -319,14 +319,14 @@ export const translations = {
   },
   es: {
     // Index page
-    indexTitle: "Unio",
+    indexTitle: "OLAYA",
     indexSubtitle: "Tu santuario privado para dos corazones",
     indexDescription: "Un hermoso espacio diseñado exclusivamente para ti y tu pareja para compartir momentos, recuerdos y amor.",
     getStarted: "Comenzar",
     viewPricing: "Ver Precios",
     
     // Auth page
-    authTitle: "Unio",
+    authTitle: "OLAYA",
     createSanctuary: "Crea tu santuario",
     welcomeBack: "Bienvenido de nuevo",
     fullName: "Nombre Completo",
@@ -341,7 +341,7 @@ export const translations = {
     google: "Google",
     alreadyHaveAccount: "¿Ya tienes una cuenta? Inicia sesión",
     dontHaveAccount: "¿No tienes una cuenta? Regístrate",
-    welcomeToUsTwo: "¡Bienvenido a Unio!",
+    welcomeToUsTwo: "¡Bienvenido a OLAYA!",
     accountCreated: "Tu cuenta ha sido creada exitosamente.",
     welcomeBackTitle: "¡Bienvenido de nuevo!",
     signedInSuccess: "Has iniciado sesión exitosamente.",
