@@ -15,6 +15,8 @@ import { FeelingStatusSelector } from "@/components/FeelingStatusSelector";
 import { MessengerChat } from "@/components/MessengerChat";
 import { FlirtActions } from "@/components/FlirtActions";
 import { FlirtNotifications } from "@/components/FlirtNotifications";
+import { DesireActions } from "@/components/DesireActions";
+import { BottomNavigation } from "@/components/BottomNavigation";
 import { PrivateVault } from "@/components/PrivateVault";
 import { CoupleGames } from "@/components/CoupleGames";
 import { UnioGallery } from "@/components/UnioGallery";
@@ -47,6 +49,7 @@ const Dashboard = () => {
   const [showMessenger, setShowMessenger] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showFlirt, setShowFlirt] = useState(false);
+  const [showDesires, setShowDesires] = useState(false);
   const [editingSpaceName, setEditingSpaceName] = useState(false);
   const [spaceName, setSpaceName] = useState("");
   const navigate = useNavigate();
@@ -338,6 +341,11 @@ const Dashboard = () => {
     );
   }
 
+  if (activeView === "desires") {
+    setShowDesires(true);
+    setActiveView("home");
+  }
+
 
   if (activeView === "locked") {
     return (
@@ -577,6 +585,24 @@ const Dashboard = () => {
         senderId={user!.id}
         open={showFlirt}
         onClose={() => setShowFlirt(false)}
+      />
+
+      <DesireActions
+        coupleId={coupleData.coupleId}
+        userId={user!.id}
+        open={showDesires}
+        onClose={() => setShowDesires(false)}
+      />
+
+      <BottomNavigation
+        activeView={activeView}
+        onViewChange={(view) => {
+          if (view === "desires") {
+            setShowDesires(true);
+          } else {
+            setActiveView(view);
+          }
+        }}
       />
 
       {/* Settings Dialog */}

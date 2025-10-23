@@ -289,6 +289,24 @@ export const translations = {
     answersSaved: "Answers saved! Partner notified.",
     comingSoon: "Coming soon!",
     
+    // Desires
+    desires: {
+      title: "Desires",
+      kiss: "Kiss",
+      qualityTime: "Quality Time",
+      backRub: "Back Rub",
+      yumYum: "Yum Yum",
+      oral: "Oral Pleasure",
+      talk: "Talk",
+      coffee: "Coffee",
+      dateNight: "Date Night",
+      custom: "Custom",
+      customPlaceholder: "Enter your desire...",
+      desireSent: "Desire sent!",
+    },
+    back: "Back",
+    send: "Send",
+    
     // Game questions - How Well Do You Know Me
     q_favoriteFood: "What's my favorite comfort food?",
     q_alwaysForget: "What's one thing I always forget?",
@@ -583,6 +601,24 @@ export const translations = {
     keepPlaying: "¡Sigan jugando para conocerse mejor! 💑",
     answersSaved: "Respuestas guardadas! Pareja notificada.",
     comingSoon: "¡Próximamente!",
+    
+    // Desires
+    desires: {
+      title: "Deseos",
+      kiss: "Beso",
+      qualityTime: "Tiempo de Calidad",
+      backRub: "Masaje de Espalda",
+      yumYum: "Yum Yum",
+      oral: "Placer Oral",
+      talk: "Charlar",
+      coffee: "Café",
+      dateNight: "Noche de Cita",
+      custom: "Personalizado",
+      customPlaceholder: "Ingresa tu deseo...",
+      desireSent: "¡Deseo enviado!",
+    },
+    back: "Atrás",
+    send: "Enviar",
     
     // Game questions - How Well Do You Know Me
     q_favoriteFood: "¿Cuál es mi comida reconfortante favorita?",
