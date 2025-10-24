@@ -22,7 +22,7 @@ import { CoupleGames } from "@/components/CoupleGames";
 import { UnioGallery } from "@/components/UnioGallery";
 import { MemoryCalendar } from "@/components/MemoryCalendar";
 import { LoveMeter } from "@/components/LoveMeter";
-import { CoupleSongPlayer } from "@/components/CoupleSongPlayer";
+import { CoupleSongPlayer, CoupleSongPlayerEmbed } from "@/components/CoupleSongPlayer";
 
 interface CoupleData {
   coupleId: string;
@@ -47,6 +47,7 @@ const Dashboard = () => {
   const [userFeelingStatus, setUserFeelingStatus] = useState("");
   const [userCustomMessage, setUserCustomMessage] = useState("");
   const [coupleSongUrl, setCoupleSongUrl] = useState<string | null>(null);
+  const [isSongPlaying, setIsSongPlaying] = useState(false);
   const [activeView, setActiveView] = useState("home");
   const [showMessenger, setShowMessenger] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -404,7 +405,9 @@ const Dashboard = () => {
               coupleId={coupleData.coupleId}
               songUrl={coupleSongUrl}
               onUpdate={setCoupleSongUrl}
-              autoplay={true}
+              autoplay={false}
+              isPlaying={isSongPlaying}
+              onPlayingChange={setIsSongPlaying}
             />
             <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="text-foreground">
               <Settings className="w-7 h-7" />
@@ -513,6 +516,15 @@ const Dashboard = () => {
             coupleId={coupleData.coupleId}
             userId={user!.id}
             partnerName={coupleData.partner.full_name || "Partner"}
+          />
+        )}
+
+        {/* YouTube Song Player - Centered between notifications and Love Meter */}
+        {coupleSongUrl && (
+          <CoupleSongPlayerEmbed
+            videoId={coupleSongUrl ? coupleSongUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/|music\.youtube\.com\/watch\?v=)([^&\n?#]+)/)?.[1] || null : null}
+            isPlaying={isSongPlaying}
+            onClose={() => setIsSongPlaying(false)}
           />
         )}
 

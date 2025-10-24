@@ -12,6 +12,8 @@ interface CoupleSongPlayerProps {
   songUrl: string | null;
   onUpdate: (newUrl: string | null) => void;
   autoplay?: boolean;
+  isPlaying?: boolean;
+  onPlayingChange?: (playing: boolean) => void;
 }
 
 const extractYouTubeId = (url: string): string | null => {
@@ -32,44 +34,54 @@ const extractYouTubeId = (url: string): string | null => {
   return null;
 };
 
-export const CoupleSongPlayer = ({ coupleId, songUrl, onUpdate, autoplay = false }: CoupleSongPlayerProps) => {
+interface PlayerComponentProps {
+  videoId: string | null;
+  isPlaying: boolean;
+  onClose: () => void;
+}
+
+export const CoupleSongPlayerEmbed = ({ videoId, isPlaying, onClose }: PlayerComponentProps) => {
+  if (!isPlaying || !videoId) return null;
+  
+  return (
+    <div className="w-full max-w-lg mx-auto shadow-2xl rounded-lg overflow-hidden bg-background border">
+      <div className="flex items-center justify-between p-2 bg-muted">
+        <div className="flex items-center gap-2">
+          <Music className="w-4 h-4" />
+          <span className="text-sm font-medium">Our Song 🎵</span>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onClose}
+        >
+          <X className="w-4 h-4" />
+        </Button>
+      </div>
+      <div className="aspect-video">
+        <iframe
+          src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0`}
+          className="w-full h-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
+    </div>
+  );
+};
+
+export const CoupleSongPlayer = ({ coupleId, songUrl, onUpdate, autoplay = false, isPlaying = false, onPlayingChange }: CoupleSongPlayerProps) => {
   const [showDialog, setShowDialog] = useState(false);
   const [newSongUrl, setNewSongUrl] = useState(songUrl || "");
   const [saving, setSaving] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
-  const autoplayAttempted = useRef(false);
   const { toast } = useToast();
   const { t } = useLanguage();
 
-  // Attempt autoplay when song URL is available
-  useEffect(() => {
-    if (autoplay && songUrl && !autoplayAttempted.current) {
-      autoplayAttempted.current = true;
-      // Small delay to ensure component is mounted
-      const timer = setTimeout(() => {
-        setIsPlaying(true);
-      }, 1000);
-      return () => clearTimeout(timer);
+  const togglePlay = () => {
+    if (onPlayingChange) {
+      onPlayingChange(!isPlaying);
     }
-  }, [songUrl, autoplay]);
-
-  // Track user interaction to enable autoplay
-  useEffect(() => {
-    const handleInteraction = () => {
-      setHasInteracted(true);
-      document.removeEventListener('click', handleInteraction);
-      document.removeEventListener('touchstart', handleInteraction);
-    };
-    
-    document.addEventListener('click', handleInteraction);
-    document.addEventListener('touchstart', handleInteraction);
-    
-    return () => {
-      document.removeEventListener('click', handleInteraction);
-      document.removeEventListener('touchstart', handleInteraction);
-    };
-  }, []);
+  };
 
   const saveSongUrl = async () => {
     setSaving(true);
@@ -113,7 +125,7 @@ export const CoupleSongPlayer = ({ coupleId, songUrl, onUpdate, autoplay = false
         size="sm"
         onClick={() => {
           if (songUrl) {
-            setIsPlaying(!isPlaying);
+            togglePlay();
           } else {
             setShowDialog(true);
           }
@@ -121,8 +133,8 @@ export const CoupleSongPlayer = ({ coupleId, songUrl, onUpdate, autoplay = false
         className="gap-1 text-xs sm:text-sm whitespace-nowrap"
       >
         <Music className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-        <span className="hidden sm:inline">{songUrl ? "Our Song" : "Add Song"}</span>
-        <span className="sm:hidden">{songUrl ? "Song" : "Add"}</span>
+        <span className="hidden sm:inline">{songUrl ? (isPlaying ? "Pause Song" : "Our Song") : "Add Song"}</span>
+        <span className="sm:hidden">{songUrl ? (isPlaying ? "⏸" : "Song") : "Add"}</span>
       </Button>
 
       {songUrl && (
@@ -192,32 +204,6 @@ export const CoupleSongPlayer = ({ coupleId, songUrl, onUpdate, autoplay = false
         </DialogContent>
       </Dialog>
 
-      {/* Floating Player */}
-      {isPlaying && videoId && (
-        <div className="fixed bottom-20 right-4 z-50 w-80 shadow-2xl rounded-lg overflow-hidden bg-background border">
-          <div className="flex items-center justify-between p-2 bg-muted">
-            <div className="flex items-center gap-2">
-              <Music className="w-4 h-4" />
-              <span className="text-sm font-medium">Our Song 🎵</span>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsPlaying(false)}
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-          <div className="aspect-video">
-            <iframe
-              src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0`}
-              className="w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
-        </div>
-      )}
     </>
   );
 };
