@@ -22,6 +22,7 @@ import { CoupleGames } from "@/components/CoupleGames";
 import { UnioGallery } from "@/components/UnioGallery";
 import { MemoryCalendar } from "@/components/MemoryCalendar";
 import { LoveMeter } from "@/components/LoveMeter";
+import { CoupleSongPlayer } from "@/components/CoupleSongPlayer";
 
 interface CoupleData {
   coupleId: string;
@@ -45,6 +46,7 @@ const Dashboard = () => {
   const [partnerCustomMessage, setPartnerCustomMessage] = useState("");
   const [userFeelingStatus, setUserFeelingStatus] = useState("");
   const [userCustomMessage, setUserCustomMessage] = useState("");
+  const [coupleSongUrl, setCoupleSongUrl] = useState<string | null>(null);
   const [activeView, setActiveView] = useState("home");
   const [showMessenger, setShowMessenger] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -113,6 +115,7 @@ const Dashboard = () => {
       partner: partnerData,
     });
     setSpaceName(couple.name || 'name your space');
+    setCoupleSongUrl(couple.couple_song_url || null);
 
     loadFeelingStatuses(couple.id, userId, partnerData?.user_id);
   };
@@ -396,9 +399,16 @@ const Dashboard = () => {
       {/* Top Header Bar */}
       <div className="bg-muted p-4">
         <div className="flex items-center justify-between max-w-lg mx-auto">
-          <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="text-foreground">
-            <Settings className="w-7 h-7" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <CoupleSongPlayer
+              coupleId={coupleData.coupleId}
+              songUrl={coupleSongUrl}
+              onUpdate={setCoupleSongUrl}
+            />
+            <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="text-foreground">
+              <Settings className="w-7 h-7" />
+            </Button>
+          </div>
           
           {editingSpaceName ? (
             <Input
