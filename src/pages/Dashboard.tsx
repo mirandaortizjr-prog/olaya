@@ -404,6 +404,7 @@ const Dashboard = () => {
               coupleId={coupleData.coupleId}
               songUrl={coupleSongUrl}
               onUpdate={setCoupleSongUrl}
+              autoplay={true}
             />
             <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="text-foreground">
               <Settings className="w-7 h-7" />

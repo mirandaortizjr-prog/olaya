@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -11,6 +11,7 @@ interface CoupleSongPlayerProps {
   coupleId: string;
   songUrl: string | null;
   onUpdate: (newUrl: string | null) => void;
+  autoplay?: boolean;
 }
 
 const extractYouTubeId = (url: string): string | null => {
@@ -31,13 +32,44 @@ const extractYouTubeId = (url: string): string | null => {
   return null;
 };
 
-export const CoupleSongPlayer = ({ coupleId, songUrl, onUpdate }: CoupleSongPlayerProps) => {
+export const CoupleSongPlayer = ({ coupleId, songUrl, onUpdate, autoplay = false }: CoupleSongPlayerProps) => {
   const [showDialog, setShowDialog] = useState(false);
   const [newSongUrl, setNewSongUrl] = useState(songUrl || "");
   const [saving, setSaving] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
+  const autoplayAttempted = useRef(false);
   const { toast } = useToast();
   const { t } = useLanguage();
+
+  // Attempt autoplay when song URL is available
+  useEffect(() => {
+    if (autoplay && songUrl && !autoplayAttempted.current) {
+      autoplayAttempted.current = true;
+      // Small delay to ensure component is mounted
+      const timer = setTimeout(() => {
+        setIsPlaying(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [songUrl, autoplay]);
+
+  // Track user interaction to enable autoplay
+  useEffect(() => {
+    const handleInteraction = () => {
+      setHasInteracted(true);
+      document.removeEventListener('click', handleInteraction);
+      document.removeEventListener('touchstart', handleInteraction);
+    };
+    
+    document.addEventListener('click', handleInteraction);
+    document.addEventListener('touchstart', handleInteraction);
+    
+    return () => {
+      document.removeEventListener('click', handleInteraction);
+      document.removeEventListener('touchstart', handleInteraction);
+    };
+  }, []);
 
   const saveSongUrl = async () => {
     setSaving(true);
@@ -165,7 +197,7 @@ export const CoupleSongPlayer = ({ coupleId, songUrl, onUpdate }: CoupleSongPlay
           <div className="flex items-center justify-between p-2 bg-muted">
             <div className="flex items-center gap-2">
               <Music className="w-4 h-4" />
-              <span className="text-sm font-medium">Our Song</span>
+              <span className="text-sm font-medium">Our Song 🎵</span>
             </div>
             <Button
               variant="ghost"
@@ -177,7 +209,7 @@ export const CoupleSongPlayer = ({ coupleId, songUrl, onUpdate }: CoupleSongPlay
           </div>
           <div className="aspect-video">
             <iframe
-              src={`https://www.youtube.com/embed/${videoId}?autoplay=1`}
+              src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0`}
               className="w-full h-full"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
