@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Heart, Coffee, MessageCircle, Hand, Flame, Sparkles, Calendar, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -64,11 +64,20 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
     console.log('Sending desire:', { desireType, mappedType, customMessage, coupleId, userId });
     
     try {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      const currentUserId = authData?.user?.id;
+      if (authError || !currentUserId) {
+        console.error('Auth error before sending desire:', authError);
+        toast({ title: t('error'), description: 'Please sign in again to send desires.', variant: 'destructive' });
+        setSending(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('craving_board')
         .insert({
           couple_id: coupleId,
-          user_id: userId,
+          user_id: currentUserId,
           craving_type: mappedType,
           custom_message: customMessage || null
         })
@@ -78,7 +87,11 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
 
       if (error) {
         console.error('Desire error:', error);
-        toast({ title: t("error"), description: error.message, variant: "destructive" });
+        const msg = (error.message || '').toLowerCase();
+        const friendly = msg.includes('row-level security')
+          ? 'You do not have permission for this couple space. Make sure you joined the same couple.'
+          : error.message;
+        toast({ title: t('error'), description: friendly, variant: 'destructive' });
       } else {
         const desire = DESIRE_ACTIONS.find(d => d.value === desireType);
         const label = desire ? desires[desire.labelKey as keyof typeof desires] : customMessage;
@@ -106,12 +119,13 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Heart className="w-5 h-5 text-pink-500" />
-            {desires?.title || "Desires"}
-          </DialogTitle>
-        </DialogHeader>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Heart className="w-5 h-5 text-pink-500" />
+              {desires?.title || "Desires"}
+            </DialogTitle>
+            <DialogDescription className="sr-only">Send a desire to your partner</DialogDescription>
+          </DialogHeader>
         
         {!showCustom ? (
           <div className="grid grid-cols-2 gap-2">
