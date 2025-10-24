@@ -118,10 +118,11 @@ export const CoupleSongPlayer = ({ coupleId, songUrl, onUpdate, autoplay = false
             setShowDialog(true);
           }
         }}
-        className="gap-2"
+        className="gap-1 text-xs sm:text-sm whitespace-nowrap"
       >
-        <Music className="w-4 h-4" />
-        {songUrl ? (isPlaying ? "Our Song" : "Our Song") : "Add Song"}
+        <Music className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+        <span className="hidden sm:inline">{songUrl ? "Our Song" : "Add Song"}</span>
+        <span className="sm:hidden">{songUrl ? "Song" : "Add"}</span>
       </Button>
 
       {songUrl && (

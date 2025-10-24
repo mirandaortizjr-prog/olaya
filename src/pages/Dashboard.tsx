@@ -398,8 +398,8 @@ const Dashboard = () => {
     <div className="min-h-screen bg-muted pb-24">
       {/* Top Header Bar */}
       <div className="bg-muted p-4">
-        <div className="flex items-center justify-between max-w-lg mx-auto">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between max-w-lg mx-auto gap-2">
+          <div className="flex items-center gap-1 flex-shrink-0">
             <CoupleSongPlayer
               coupleId={coupleData.coupleId}
               songUrl={coupleSongUrl}
@@ -417,12 +417,12 @@ const Dashboard = () => {
               onChange={(e) => setSpaceName(e.target.value)}
               onBlur={updateSpaceName}
               onKeyPress={(e) => e.key === 'Enter' && updateSpaceName()}
-              className="text-center bg-transparent border-0 text-xl font-normal"
+              className="text-center bg-transparent border-0 text-lg sm:text-xl font-normal flex-1 min-w-0"
               autoFocus
             />
           ) : (
             <h1
-              className="text-xl font-normal cursor-pointer"
+              className="text-lg sm:text-xl font-normal cursor-pointer flex-1 text-center truncate"
               onClick={() => setEditingSpaceName(true)}
             >
               {coupleData.spaceName}
@@ -434,7 +434,7 @@ const Dashboard = () => {
             size="icon"
             onClick={() => setShowMessenger(true)}
             disabled={!coupleData.partner}
-            className="text-foreground"
+            className="text-foreground flex-shrink-0"
           >
             <MessageCircle className="w-7 h-7" />
           </Button>
