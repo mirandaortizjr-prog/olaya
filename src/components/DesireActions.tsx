@@ -19,6 +19,20 @@ const DESIRE_ACTIONS = [
   { value: "date_night", labelKey: "dateNight", icon: Star, emoji: "🌟" },
 ];
 
+// Map local DesireActions values to canonical craving_board types used across the app
+// This prevents DB check-constraint errors and keeps UI labels flexible
+const CANONICAL_CRAVING_TYPES: Record<string, string> = {
+  kiss: "kiss",
+  quality_time: "qualityTime",
+  back_rub: "massage",
+  yum_yum: "yumyum",
+  oral: "oralSex",
+  talk: "qualityTime", // map "Talk" to quality time for now
+  coffee: "coffee",
+  date_night: "date",
+  custom: "custom",
+};
+
 interface DesireActionsProps {
   coupleId: string;
   userId: string;
@@ -46,7 +60,8 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
 
   const sendDesire = async (desireType: string, customMessage?: string) => {
     setSending(true);
-    console.log('Sending desire:', { desireType, customMessage, coupleId, userId });
+    const mappedType = CANONICAL_CRAVING_TYPES[desireType] || desireType;
+    console.log('Sending desire:', { desireType, mappedType, customMessage, coupleId, userId });
     
     try {
       const { data, error } = await supabase
@@ -54,7 +69,7 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
         .insert({
           couple_id: coupleId,
           user_id: userId,
-          craving_type: desireType,
+          craving_type: mappedType,
           custom_message: customMessage || null
         })
         .select();
