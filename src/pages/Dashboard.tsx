@@ -48,6 +48,13 @@ const Dashboard = () => {
   const [userCustomMessage, setUserCustomMessage] = useState("");
   const [coupleSongUrl, setCoupleSongUrl] = useState<string | null>(null);
   const [isSongPlaying, setIsSongPlaying] = useState(false);
+
+  // Autoplay song when it's available
+  useEffect(() => {
+    if (coupleSongUrl) {
+      setIsSongPlaying(true);
+    }
+  }, [coupleSongUrl]);
   const [activeView, setActiveView] = useState("home");
   const [showMessenger, setShowMessenger] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
