@@ -100,6 +100,24 @@ export const MessengerChat = ({ coupleId, currentUserId, partnerName, onClose }:
       console.error('Error sending message:', error);
       toast({ title: "Failed to send", variant: "destructive" });
       setNewMessage(messageContent);
+    } else {
+      // Get partner's user_id and send push notification
+      const { data: partner } = await supabase
+        .from('couple_members')
+        .select('user_id')
+        .eq('couple_id', coupleId)
+        .neq('user_id', currentUserId)
+        .single();
+
+      if (partner) {
+        await supabase.functions.invoke('send-push-notification', {
+          body: {
+            userId: partner.user_id,
+            title: `New message from ${partnerName}`,
+            body: messageContent.substring(0, 100)
+          }
+        });
+      }
     }
     setLoading(false);
   };

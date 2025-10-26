@@ -10,26 +10,32 @@ import { translations } from "@/lib/translations";
 
 const DESIRE_ACTIONS = [
   { value: "kiss", labelKey: "kiss", icon: Heart, emoji: "💋" },
+  { value: "hug", labelKey: "hug", icon: Heart, emoji: "🤗" },
   { value: "quality_time", labelKey: "qualityTime", icon: Calendar, emoji: "⏰" },
   { value: "back_rub", labelKey: "backRub", icon: Hand, emoji: "💆" },
+  { value: "video_games", labelKey: "videoGames", icon: Heart, emoji: "🎮" },
   { value: "yum_yum", labelKey: "yumYum", icon: Flame, emoji: "🔥" },
   { value: "oral", labelKey: "oral", icon: Sparkles, emoji: "✨" },
   { value: "talk", labelKey: "talk", icon: MessageCircle, emoji: "💬" },
   { value: "coffee", labelKey: "coffee", icon: Coffee, emoji: "☕" },
   { value: "date_night", labelKey: "dateNight", icon: Star, emoji: "🌟" },
+  { value: "adventure", labelKey: "adventure", icon: Heart, emoji: "🗺️" },
 ];
 
 // Map local DesireActions values to canonical craving_board types used across the app
 // This prevents DB check-constraint errors and keeps UI labels flexible
 const CANONICAL_CRAVING_TYPES: Record<string, string> = {
   kiss: "kiss",
+  hug: "hug",
   quality_time: "qualityTime",
   back_rub: "massage",
+  video_games: "videoGames",
   yum_yum: "yumyum",
   oral: "oralSex",
-  talk: "qualityTime", // map "Talk" to quality time for now
+  talk: "qualityTime",
   coffee: "coffee",
   date_night: "date",
+  adventure: "adventure",
   custom: "custom",
 };
 
@@ -93,6 +99,26 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
           : error.message;
         toast({ title: t('error'), description: friendly, variant: 'destructive' });
       } else {
+        // Send push notification to partner
+        const { data: partner } = await supabase
+          .from('couple_members')
+          .select('user_id')
+          .eq('couple_id', coupleId)
+          .neq('user_id', currentUserId)
+          .single();
+
+        if (partner) {
+          const desire = DESIRE_ACTIONS.find(d => d.value === desireType);
+          const label = desire ? desires[desire.labelKey as keyof typeof desires] : customMessage;
+          await supabase.functions.invoke('send-push-notification', {
+            body: {
+              userId: partner.user_id,
+              title: '💝 New desire from your partner',
+              body: label || 'Your partner sent you a desire'
+            }
+          });
+        }
+
         const desire = DESIRE_ACTIONS.find(d => d.value === desireType);
         const label = desire ? desires[desire.labelKey as keyof typeof desires] : customMessage;
         toast({ 
