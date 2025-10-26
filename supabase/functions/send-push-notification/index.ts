@@ -6,6 +6,10 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// VAPID keys for Web Push authentication
+const VAPID_PUBLIC_KEY = 'BEl62iUYgUivxIkv69yViEuiBIa-Ib37J8-fTt64F6qO4KJEOGw8YEp6pjTWrF9rKqYqQq7pJvXzBKBqLjLQvPY';
+const VAPID_PRIVATE_KEY = 'yKH7VzbKLmO8wQvmBZ3gKJ0sYGJLz6QN8dP4xT5vK3M';
+
 interface PushSubscription {
   endpoint: string;
   p256dh: string;
@@ -16,6 +20,27 @@ interface NotificationPayload {
   userId: string;
   title: string;
   body: string;
+}
+
+// Function to send web push using native Deno APIs
+async function sendWebPush(subscription: PushSubscription, payload: string) {
+  const { endpoint, p256dh, auth } = subscription;
+
+  // Create the message
+  const message = new TextEncoder().encode(payload);
+
+  // For simplicity, we'll use the endpoint directly
+  // In production, you'd implement full VAPID authentication
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'TTL': '86400',
+    },
+    body: payload,
+  });
+
+  return response;
 }
 
 serve(async (req) => {
@@ -51,30 +76,15 @@ serve(async (req) => {
       );
     }
 
-    // Send push notification to all subscriptions using Web Push Protocol
-    const vapidKeys = {
-      publicKey: 'BEl62iUYgUivxIkv69yViEuiBIa-Ib37J8-fTt64F6qO4KJEOGw8YEp6pjTWrF9rKqYqQq7pJvXzBKBqLjLQvPY',
-      privateKey: Deno.env.get('VAPID_PRIVATE_KEY') || ''
-    };
-
+    // Send push notification to all subscriptions
     const pushPromises = subscriptions.map(async (sub: PushSubscription) => {
       try {
-        // Create the Web Push message
-        const pushMessage = JSON.stringify({
+        const payload = JSON.stringify({
           title,
           body,
         });
 
-        // For now, we'll make a direct push to the endpoint
-        // In production, you'd use a proper Web Push library with VAPID signing
-        const response = await fetch(sub.endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'TTL': '86400',
-          },
-          body: pushMessage,
-        });
+        const response = await sendWebPush(sub, payload);
 
         if (!response.ok) {
           console.error(`Push failed for endpoint ${sub.endpoint}:`, response.status);
