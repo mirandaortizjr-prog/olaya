@@ -4,10 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { BookOpen, Plus } from 'lucide-react';
+import { BookOpen, Plus, Lock, Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { PrivacyPasswordDialog } from './PrivacyPasswordDialog';
 
 interface SharedJournalProps {
   coupleId: string;
@@ -19,11 +20,73 @@ export const SharedJournal = ({ coupleId, userId }: SharedJournalProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [hasPassword, setHasPassword] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [passwordMode, setPasswordMode] = useState<'set' | 'verify'>('verify');
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchEntries();
-  }, [coupleId]);
+    checkPassword();
+  }, [userId]);
+
+  useEffect(() => {
+    if (isUnlocked) {
+      fetchEntries();
+    }
+  }, [coupleId, isUnlocked]);
+
+  const checkPassword = async () => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('privacy_password_hash')
+      .eq('id', userId)
+      .single();
+
+    if (data?.privacy_password_hash) {
+      setHasPassword(true);
+      setPasswordMode('verify');
+      setShowPasswordDialog(true);
+    } else {
+      setHasPassword(false);
+      setPasswordMode('set');
+      setShowPasswordDialog(true);
+    }
+  };
+
+  const hashPassword = async (password: string): Promise<string> => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hash))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+  };
+
+  const verifyPassword = async (password: string): Promise<boolean> => {
+    const hash = await hashPassword(password);
+    const { data } = await supabase
+      .from('profiles')
+      .select('privacy_password_hash')
+      .eq('id', userId)
+      .single();
+
+    return data?.privacy_password_hash === hash;
+  };
+
+  const setPassword = async (password: string): Promise<boolean> => {
+    const hash = await hashPassword(password);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ privacy_password_hash: hash })
+      .eq('id', userId);
+
+    if (!error) {
+      setHasPassword(true);
+      return true;
+    }
+    return false;
+  };
 
   const fetchEntries = async () => {
     const { data, error } = await supabase
@@ -66,12 +129,61 @@ export const SharedJournal = ({ coupleId, userId }: SharedJournalProps) => {
     });
   };
 
+  if (!isUnlocked) {
+    return (
+      <>
+        <Card className="bg-card/50 backdrop-blur border-border/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 justify-between">
+              <div className="flex items-center gap-2">
+                <Lock className="h-5 w-5 text-primary" />
+                Shared Journal (Locked)
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8">
+              <Lock className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground mb-4">
+                {hasPassword ? 'Enter your password to unlock' : 'Set a password to protect your journal'}
+              </p>
+              <Button onClick={() => setShowPasswordDialog(true)}>
+                {hasPassword ? 'Unlock Journal' : 'Set Password'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        <PrivacyPasswordDialog
+          open={showPasswordDialog}
+          onClose={() => setShowPasswordDialog(false)}
+          onSuccess={() => setIsUnlocked(true)}
+          mode={passwordMode}
+          onVerify={verifyPassword}
+          onSet={setPassword}
+        />
+      </>
+    );
+  }
+
   return (
     <Card className="bg-card/50 backdrop-blur border-border/50">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BookOpen className="h-5 w-5 text-primary" />
-          Shared Journal
+        <CardTitle className="flex items-center gap-2 justify-between">
+          <div className="flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-primary" />
+            Shared Journal
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              setPasswordMode('set');
+              setShowPasswordDialog(true);
+            }}
+            title="Change Password"
+          >
+            <Settings className="h-5 w-5" />
+          </Button>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -117,6 +229,16 @@ export const SharedJournal = ({ coupleId, userId }: SharedJournalProps) => {
           ))}
         </div>
       </CardContent>
+
+      <PrivacyPasswordDialog
+        open={showPasswordDialog && passwordMode === 'set'}
+        onClose={() => setShowPasswordDialog(false)}
+        onSuccess={() => {
+          toast({ title: "Password updated successfully" });
+        }}
+        mode="set"
+        onSet={setPassword}
+      />
     </Card>
   );
 };

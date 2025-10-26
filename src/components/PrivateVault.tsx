@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Lock, Plus, Trash2, Upload, Calendar } from "lucide-react";
+import { Lock, Plus, Trash2, Upload, Calendar, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { PrivacyPasswordDialog } from "./PrivacyPasswordDialog";
 
 interface PrivatePhoto {
   id: string;
@@ -40,12 +41,75 @@ export const PrivateVault = ({ coupleId, userId, onClose }: PrivateVaultProps) =
   const [showJournalDialog, setShowJournalDialog] = useState(false);
   const [journalTitle, setJournalTitle] = useState("");
   const [journalDescription, setJournalDescription] = useState("");
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [hasPassword, setHasPassword] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [passwordMode, setPasswordMode] = useState<'set' | 'verify'>('verify');
   const { toast } = useToast();
 
   useEffect(() => {
-    loadPhotos();
-    loadJournalEntries();
-  }, [coupleId]);
+    checkPassword();
+  }, [userId]);
+
+  useEffect(() => {
+    if (isUnlocked) {
+      loadPhotos();
+      loadJournalEntries();
+    }
+  }, [coupleId, isUnlocked]);
+
+  const checkPassword = async () => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('privacy_password_hash')
+      .eq('id', userId)
+      .single();
+
+    if (data?.privacy_password_hash) {
+      setHasPassword(true);
+      setPasswordMode('verify');
+      setShowPasswordDialog(true);
+    } else {
+      setHasPassword(false);
+      setPasswordMode('set');
+      setShowPasswordDialog(true);
+    }
+  };
+
+  const hashPassword = async (password: string): Promise<string> => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hash))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+  };
+
+  const verifyPassword = async (password: string): Promise<boolean> => {
+    const hash = await hashPassword(password);
+    const { data } = await supabase
+      .from('profiles')
+      .select('privacy_password_hash')
+      .eq('id', userId)
+      .single();
+
+    return data?.privacy_password_hash === hash;
+  };
+
+  const setPassword = async (password: string): Promise<boolean> => {
+    const hash = await hashPassword(password);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ privacy_password_hash: hash })
+      .eq('id', userId);
+
+    if (!error) {
+      setHasPassword(true);
+      return true;
+    }
+    return false;
+  };
+
 
   const loadPhotos = async () => {
     const { data, error } = await supabase
@@ -158,6 +222,34 @@ export const PrivateVault = ({ coupleId, userId, onClose }: PrivateVaultProps) =
     }
   };
 
+  if (!isUnlocked) {
+    return (
+      <>
+        <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
+          <div className="text-center">
+            <Lock className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-2xl font-bold mb-2">Private Vault Locked</h2>
+            <p className="text-muted-foreground mb-4">
+              {hasPassword ? 'Enter your password to unlock' : 'Set a password to protect your private content'}
+            </p>
+            <Button variant="outline" onClick={onClose}>Back</Button>
+          </div>
+        </div>
+        <PrivacyPasswordDialog
+          open={showPasswordDialog}
+          onClose={() => {
+            setShowPasswordDialog(false);
+            onClose();
+          }}
+          onSuccess={() => setIsUnlocked(true)}
+          mode={passwordMode}
+          onVerify={verifyPassword}
+          onSet={setPassword}
+        />
+      </>
+    );
+  }
+
   return (
     <div className="fixed inset-0 bg-background z-50 flex flex-col">
       <div className="flex items-center justify-between p-4 border-b">
@@ -165,7 +257,20 @@ export const PrivateVault = ({ coupleId, userId, onClose }: PrivateVaultProps) =
           <Lock className="w-5 h-5 text-primary" />
           <h2 className="text-xl font-semibold">Private Vault</h2>
         </div>
-        <Button variant="ghost" onClick={onClose}>Close</Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => {
+              setPasswordMode('set');
+              setShowPasswordDialog(true);
+            }}
+            title="Change Password"
+          >
+            <Settings className="w-5 h-5" />
+          </Button>
+          <Button variant="ghost" onClick={onClose}>Close</Button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-auto p-4">
@@ -305,6 +410,16 @@ export const PrivateVault = ({ coupleId, userId, onClose }: PrivateVaultProps) =
           </div>
         </DialogContent>
       </Dialog>
+
+      <PrivacyPasswordDialog
+        open={showPasswordDialog && passwordMode === 'set'}
+        onClose={() => setShowPasswordDialog(false)}
+        onSuccess={() => {
+          toast({ title: "Password updated successfully" });
+        }}
+        mode="set"
+        onSet={setPassword}
+      />
     </div>
   );
 };
