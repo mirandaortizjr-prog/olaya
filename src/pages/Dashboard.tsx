@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
 import { FeelingStatusSelector } from "@/components/FeelingStatusSelector";
+import { NotificationSettings } from "@/components/NotificationSettings";
 import { MessengerChat } from "@/components/MessengerChat";
 import { FlirtActions } from "@/components/FlirtActions";
 import { FlirtNotifications } from "@/components/FlirtNotifications";
@@ -626,6 +627,7 @@ const Dashboard = () => {
               <h3 className="font-semibold mb-2">Language</h3>
               <LanguageSwitcher />
             </div>
+            <NotificationSettings />
             <Button variant="outline" className="w-full" onClick={() => navigate('/couple-profiles')}>
               <Users className="w-4 h-4 mr-2" />
               View Profiles
