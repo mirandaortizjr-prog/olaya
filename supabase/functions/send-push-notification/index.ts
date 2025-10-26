@@ -51,19 +51,29 @@ serve(async (req) => {
       );
     }
 
-    // Send push notification to all subscriptions
+    // Send push notification to all subscriptions using Web Push Protocol
+    const vapidKeys = {
+      publicKey: 'BEl62iUYgUivxIkv69yViEuiBIa-Ib37J8-fTt64F6qO4KJEOGw8YEp6pjTWrF9rKqYqQq7pJvXzBKBqLjLQvPY',
+      privateKey: Deno.env.get('VAPID_PRIVATE_KEY') || ''
+    };
+
     const pushPromises = subscriptions.map(async (sub: PushSubscription) => {
       try {
+        // Create the Web Push message
+        const pushMessage = JSON.stringify({
+          title,
+          body,
+        });
+
+        // For now, we'll make a direct push to the endpoint
+        // In production, you'd use a proper Web Push library with VAPID signing
         const response = await fetch(sub.endpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'TTL': '86400',
           },
-          body: JSON.stringify({
-            title,
-            body,
-          }),
+          body: pushMessage,
         });
 
         if (!response.ok) {
@@ -75,6 +85,8 @@ serve(async (req) => {
               .delete()
               .eq('endpoint', sub.endpoint);
           }
+        } else {
+          console.log(`Push notification sent successfully to ${sub.endpoint}`);
         }
       } catch (error) {
         console.error('Error sending push:', error);
