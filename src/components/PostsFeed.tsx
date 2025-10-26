@@ -173,6 +173,25 @@ export const PostsFeed = ({ coupleId, userId }: PostsFeedProps) => {
         return;
       }
 
+      // Send push notification to partner
+      const { data: partner } = await supabase
+        .from('couple_members')
+        .select('user_id')
+        .eq('couple_id', coupleId)
+        .neq('user_id', userId)
+        .single();
+
+      if (partner) {
+        const contentPreview = newPost.trim().substring(0, 100) || 'Shared a new post';
+        await supabase.functions.invoke('send-push-notification', {
+          body: {
+            userId: partner.user_id,
+            title: '💕 New post from your partner',
+            body: contentPreview
+          }
+        });
+      }
+
       setNewPost('');
       setSelectedFiles([]);
       fetchPosts();

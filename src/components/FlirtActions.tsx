@@ -48,6 +48,24 @@ export const FlirtActions = ({ coupleId, senderId, open, onClose }: FlirtActions
         variant: "destructive" 
       });
     } else {
+      // Send push notification to partner
+      const { data: partner } = await supabase
+        .from('couple_members')
+        .select('user_id')
+        .eq('couple_id', coupleId)
+        .neq('user_id', senderId)
+        .single();
+
+      if (partner) {
+        await supabase.functions.invoke('send-push-notification', {
+          body: {
+            userId: partner.user_id,
+            title: `${emoji} Flirt from your partner!`,
+            body: `${label} - Check your notifications`
+          }
+        });
+      }
+
       toast({ 
         title: `${emoji} ${label} sent!`,
         description: "Your partner will feel the love!"
