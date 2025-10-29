@@ -497,20 +497,8 @@ const Dashboard = () => {
         <div className="relative h-64 overflow-hidden rounded-2xl mt-4">
           <BackgroundSlideshow coupleId={coupleData.coupleId} />
           
-          {/* Profile picture as circular overlay - smaller size */}
+          {/* Couple picture as circular overlay in bottom-left corner */}
           <div className="absolute bottom-4 left-4">
-            <Avatar className="w-16 h-16 border-4 border-background shadow-lg">
-              <AvatarImage src={userProfile?.avatar_url} />
-              <AvatarFallback className="bg-primary text-primary-foreground text-base">
-                {user?.email?.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-        </div>
-
-        {/* Couple Profile Photo */}
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative">
             <CouplePictureUpload
               coupleId={coupleData.coupleId}
               currentPictureUrl={coupleData.couplePictureUrl || userProfile?.avatar_url || null}
@@ -519,42 +507,42 @@ const Dashboard = () => {
               }}
             />
           </div>
+        </div>
 
-          {/* Feeling Status with Names */}
-          <div className="w-full space-y-3">
-            {/* User Status */}
-            <div className="flex items-center justify-between bg-gradient-to-r from-gray-400 to-gray-500 rounded-full px-6 py-2 shadow-lg">
-              <span className="text-sm font-medium text-white">
-                {userProfile?.full_name || 'You'}
-              </span>
-              {user && (
-                <FeelingStatusSelector
-                  coupleId={coupleData.coupleId}
-                  userId={user.id}
-                  currentStatus={userFeelingStatus}
-                  currentCustomMessage={userCustomMessage}
-                  onStatusChange={(status, customMsg) => {
-                    setUserFeelingStatus(status);
-                    setUserCustomMessage(customMsg || "");
-                  }}
-                />
-              )}
-            </div>
-
-            {/* Partner Status */}
-            {coupleData.partner && (
-              <div className="flex items-center justify-between bg-gradient-to-r from-gray-400 to-gray-500 rounded-full px-6 py-2 shadow-lg">
-                <span className="text-sm font-medium text-white">
-                  {coupleData.partner.full_name || 'Partner'}
-                </span>
-                <span className="text-sm text-white">
-                  {partnerFeelingStatus === "custom" && partnerCustomMessage 
-                    ? partnerCustomMessage 
-                    : partnerFeelingStatus || "Feeling"}
-                </span>
-              </div>
+        {/* Feeling Status with Names */}
+        <div className="w-full space-y-3">
+          {/* User Status */}
+          <div className="flex items-center justify-between bg-gradient-to-r from-gray-400 to-gray-500 rounded-full px-6 py-2 shadow-lg">
+            <span className="text-sm font-medium text-white">
+              {userProfile?.full_name || 'You'}
+            </span>
+            {user && (
+              <FeelingStatusSelector
+                coupleId={coupleData.coupleId}
+                userId={user.id}
+                currentStatus={userFeelingStatus}
+                currentCustomMessage={userCustomMessage}
+                onStatusChange={(status, customMsg) => {
+                  setUserFeelingStatus(status);
+                  setUserCustomMessage(customMsg || "");
+                }}
+              />
             )}
           </div>
+
+          {/* Partner Status */}
+          {coupleData.partner && (
+            <div className="flex items-center justify-between bg-gradient-to-r from-gray-400 to-gray-500 rounded-full px-6 py-2 shadow-lg">
+              <span className="text-sm font-medium text-white">
+                {coupleData.partner.full_name || 'Partner'}
+              </span>
+              <span className="text-sm text-white">
+                {partnerFeelingStatus === "custom" && partnerCustomMessage 
+                  ? partnerCustomMessage 
+                  : partnerFeelingStatus || "Feeling"}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Flirt Notifications */}
