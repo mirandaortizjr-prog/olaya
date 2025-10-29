@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Heart, Coffee, MessageCircle, Hand, Flame, Sparkles, Calendar, Star } from "lucide-react";
+import { Heart, Coffee, MessageCircle, Hand, Flame, Sparkles, Calendar, Star, Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/lib/translations";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const DESIRE_ACTIONS = [
   { value: "kiss", labelKey: "kiss", icon: Heart, emoji: "💋" },
@@ -39,6 +40,16 @@ const CANONICAL_CRAVING_TYPES: Record<string, string> = {
   custom: "custom",
 };
 
+interface Craving {
+  id: string;
+  user_id: string;
+  craving_type: string;
+  custom_message: string | null;
+  fulfilled: boolean;
+  created_at: string;
+  fulfilled_at: string | null;
+}
+
 interface DesireActionsProps {
   coupleId: string;
   userId: string;
@@ -50,6 +61,7 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
   const [sending, setSending] = useState(false);
   const [showCustom, setShowCustom] = useState(false);
   const [customDesire, setCustomDesire] = useState("");
+  const [cravings, setCravings] = useState<Craving[]>([]);
   const { toast } = useToast();
   const { t, language } = useLanguage();
   
@@ -63,6 +75,104 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
     console.error('Error loading desires translations:', error);
     desires = translations.en.desires; // fallback
   }
+
+  // Fetch cravings when dialog opens
+  useEffect(() => {
+    if (open) {
+      fetchCravings();
+      
+      const channel = supabase
+        .channel('desire_craving_board_channel')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'craving_board',
+            filter: `couple_id=eq.${coupleId}`
+          },
+          () => {
+            fetchCravings();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [open, coupleId]);
+
+  const fetchCravings = async () => {
+    const { data, error } = await supabase
+      .from('craving_board')
+      .select('*')
+      .eq('couple_id', coupleId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching cravings:', error);
+      return;
+    }
+
+    setCravings((data as Craving[]) || []);
+  };
+
+  const fulfillCraving = async (cravingId: string) => {
+    const { error } = await supabase
+      .from('craving_board')
+      .update({
+        fulfilled: true,
+        fulfilled_at: new Date().toISOString()
+      })
+      .eq('id', cravingId);
+
+    if (error) {
+      console.error('Error fulfilling craving:', error);
+      toast({
+        title: t('error'),
+        description: 'Failed to fulfill',
+        variant: "destructive"
+      });
+      return;
+    }
+
+    toast({
+      title: t('success'),
+      description: 'Craving fulfilled!'
+    });
+  };
+
+  const deleteCraving = async (cravingId: string) => {
+    const { error } = await supabase
+      .from('craving_board')
+      .delete()
+      .eq('id', cravingId)
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Error deleting craving:', error);
+      toast({
+        title: t('error'),
+        description: 'Failed to delete',
+        variant: "destructive"
+      });
+    }
+  };
+
+  const getCravingEmoji = (type: string) => {
+    const action = DESIRE_ACTIONS.find(d => CANONICAL_CRAVING_TYPES[d.value] === type);
+    return action?.emoji || "💝";
+  };
+
+  const getCravingLabel = (craving: Craving) => {
+    if (craving.custom_message) return craving.custom_message;
+    const action = DESIRE_ACTIONS.find(d => CANONICAL_CRAVING_TYPES[d.value] === craving.craving_type);
+    return action ? desires[action.labelKey as keyof typeof desires] : craving.craving_type;
+  };
+
+  const activeCravings = cravings.filter(c => !c.fulfilled);
+  const fulfilledCravings = cravings.filter(c => c.fulfilled).slice(0, 3);
 
   const sendDesire = async (desireType: string, customMessage?: string) => {
     setSending(true);
@@ -144,69 +254,140 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Heart className="w-5 h-5 text-pink-500" />
-              {desires?.title || "Desires"}
-            </DialogTitle>
-            <DialogDescription className="sr-only">Send a desire to your partner</DialogDescription>
-          </DialogHeader>
+      <DialogContent className="max-w-md max-h-[90vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Heart className="w-5 h-5 text-pink-500" />
+            {desires?.title || "Desires"}
+          </DialogTitle>
+          <DialogDescription className="sr-only">Send a desire to your partner</DialogDescription>
+        </DialogHeader>
         
-        {!showCustom ? (
-          <div className="grid grid-cols-2 gap-2">
-            {DESIRE_ACTIONS.map((desire) => {
-              const labelText = desires?.[desire.labelKey as keyof typeof desires] || desire.labelKey;
-              return (
+        <ScrollArea className="flex-1 -mx-6 px-6">
+          <div className="space-y-4">
+            {/* Send Desires Section */}
+            {!showCustom ? (
+              <div className="grid grid-cols-2 gap-2">
+                {DESIRE_ACTIONS.map((desire) => {
+                  const labelText = desires?.[desire.labelKey as keyof typeof desires] || desire.labelKey;
+                  return (
+                    <Button
+                      key={desire.value}
+                      variant="outline"
+                      className="h-20 flex-col gap-1 text-sm"
+                      onClick={() => sendDesire(desire.value)}
+                      disabled={sending}
+                    >
+                      <span className="text-2xl">{desire.emoji}</span>
+                      <span className="text-xs">{labelText}</span>
+                    </Button>
+                  );
+                })}
                 <Button
-                  key={desire.value}
                   variant="outline"
-                  className="h-20 flex-col gap-1 text-sm"
-                  onClick={() => sendDesire(desire.value)}
+                  className="h-20 flex-col gap-1 text-sm col-span-2"
+                  onClick={() => setShowCustom(true)}
                   disabled={sending}
                 >
-                  <span className="text-2xl">{desire.emoji}</span>
-                  <span className="text-xs">{labelText}</span>
+                  <span className="text-2xl">✍️</span>
+                  <span className="text-xs">{desires?.custom || "Custom"}</span>
                 </Button>
-              );
-            })}
-            <Button
-              variant="outline"
-              className="h-20 flex-col gap-1 text-sm col-span-2"
-              onClick={() => setShowCustom(true)}
-              disabled={sending}
-            >
-              <span className="text-2xl">✍️</span>
-              <span className="text-xs">{desires?.custom || "Custom"}</span>
-            </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <Input
+                  placeholder={desires?.customPlaceholder || "Enter your desire..."}
+                  value={customDesire}
+                  onChange={(e) => setCustomDesire(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleCustomSubmit()}
+                  autoFocus
+                />
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowCustom(false)}
+                    className="flex-1"
+                  >
+                    {t("back")}
+                  </Button>
+                  <Button
+                    onClick={handleCustomSubmit}
+                    disabled={!customDesire.trim() || sending}
+                    className="flex-1"
+                  >
+                    {t("send")}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Active Cravings */}
+            {activeCravings.length > 0 && (
+              <div className="space-y-2 p-3 bg-[#F5E6D3] border border-gray-300 rounded-lg">
+                <p className="text-xs font-semibold text-gray-800">Active Desires</p>
+                <div className="space-y-1.5 max-h-[200px] overflow-y-auto pr-1 scrollbar-bold">
+                  {activeCravings.map((craving) => {
+                    const isMine = craving.user_id === userId;
+                    return (
+                      <div
+                        key={craving.id}
+                        className="flex items-center gap-2 p-2 rounded-lg bg-white/60"
+                      >
+                        <span className="text-lg">{getCravingEmoji(craving.craving_type)}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium truncate">
+                            {isMine ? "You" : "Partner"} want: {getCravingLabel(craving)}
+                          </p>
+                        </div>
+                        <div className="flex gap-1 flex-shrink-0">
+                          {!isMine && (
+                            <Button
+                              size="sm"
+                              variant="default"
+                              className="h-7 w-7 p-0"
+                              onClick={() => fulfillCraving(craving.id)}
+                            >
+                              <Check className="h-3 w-3" />
+                            </Button>
+                          )}
+                          {isMine && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 w-7 p-0"
+                              onClick={() => deleteCraving(craving.id)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Recently Fulfilled */}
+            {fulfilledCravings.length > 0 && (
+              <div className="space-y-2 p-3 bg-[#F5E6D3] border border-gray-300 rounded-lg">
+                <p className="text-xs font-semibold text-gray-800">Recently Fulfilled</p>
+                <div className="space-y-1">
+                  {fulfilledCravings.map((craving) => (
+                    <div
+                      key={craving.id}
+                      className="flex items-center gap-2 p-1.5 rounded-lg bg-white/60"
+                    >
+                      <Check className="h-3 w-3 text-green-600 flex-shrink-0" />
+                      <span className="text-sm">{getCravingEmoji(craving.craving_type)}</span>
+                      <span className="text-[10px] text-gray-600 truncate">{getCravingLabel(craving)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="space-y-4">
-            <Input
-              placeholder={desires?.customPlaceholder || "Enter your desire..."}
-              value={customDesire}
-              onChange={(e) => setCustomDesire(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleCustomSubmit()}
-              autoFocus
-            />
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowCustom(false)}
-                className="flex-1"
-              >
-                {t("back")}
-              </Button>
-              <Button
-                onClick={handleCustomSubmit}
-                disabled={!customDesire.trim() || sending}
-                className="flex-1"
-              >
-                {t("send")}
-              </Button>
-            </div>
-          </div>
-        )}
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

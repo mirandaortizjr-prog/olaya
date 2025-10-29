@@ -20,7 +20,6 @@ import { MessengerChat } from "@/components/MessengerChat";
 import { FlirtActions } from "@/components/FlirtActions";
 import { FlirtNotifications } from "@/components/FlirtNotifications";
 import { DesireActions } from "@/components/DesireActions";
-import { CravingBoard } from "@/components/CravingBoard";
 import { RecentMessages } from "@/components/RecentMessages";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { PrivateVault } from "@/components/PrivateVault";
@@ -571,15 +570,6 @@ const Dashboard = () => {
         {/* Recent Quick Messages */}
         {coupleData.partner && (
           <RecentMessages
-            coupleId={coupleData.coupleId}
-            userId={user!.id}
-            partnerName={coupleData.partner.full_name || "Partner"}
-          />
-        )}
-
-        {/* Craving Board - Displays desires sent by you and your partner */}
-        {coupleData.partner && (
-          <CravingBoard
             coupleId={coupleData.coupleId}
             userId={user!.id}
             partnerName={coupleData.partner.full_name || "Partner"}
