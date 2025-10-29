@@ -80,9 +80,11 @@ const Dashboard = () => {
   const [newDesiresCount, setNewDesiresCount] = useState(0);
   const [newFlirtsCount, setNewFlirtsCount] = useState(0);
   const [newVaultCount, setNewVaultCount] = useState(0);
+  const [newMessagesCount, setNewMessagesCount] = useState(0);
   const [lastViewedDesires, setLastViewedDesires] = useState<Date>(new Date());
   const [lastViewedFlirts, setLastViewedFlirts] = useState<Date>(new Date());
   const [lastViewedVault, setLastViewedVault] = useState<Date>(new Date());
+  const [lastViewedMessages, setLastViewedMessages] = useState<Date>(new Date());
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -90,6 +92,48 @@ const Dashboard = () => {
   useEffect(() => {
     checkUser();
   }, []);
+
+  // Fetch new messages count
+  useEffect(() => {
+    if (!coupleData?.coupleId || !coupleData.partner) return;
+
+    const fetchNewMessages = async () => {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('id')
+        .eq('couple_id', coupleData.coupleId)
+        .neq('sender_id', user!.id)
+        .gt('created_at', lastViewedMessages.toISOString());
+
+      if (!error && data) {
+        setNewMessagesCount(data.length);
+      }
+    };
+
+    fetchNewMessages();
+
+    const channel = supabase
+      .channel('new-messages-notification')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `couple_id=eq.${coupleData.coupleId}`,
+        },
+        (payload: any) => {
+          if (payload.new.sender_id !== user!.id) {
+            setNewMessagesCount(prev => prev + 1);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [coupleData?.coupleId, coupleData?.partner, user?.id, lastViewedMessages]);
 
   // Fetch pending games count
   useEffect(() => {
@@ -700,11 +744,18 @@ const Dashboard = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setShowMessenger(true)}
+            onClick={() => {
+              setShowMessenger(true);
+              setNewMessagesCount(0);
+              setLastViewedMessages(new Date());
+            }}
             disabled={!coupleData.partner}
-            className="text-foreground flex-shrink-0"
+            className="text-foreground flex-shrink-0 relative"
           >
             <MessageCircle className="w-7 h-7" />
+            {newMessagesCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full" />
+            )}
           </Button>
         </div>
       </div>
