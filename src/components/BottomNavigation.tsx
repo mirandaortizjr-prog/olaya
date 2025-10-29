@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Calendar, Flame, Home, Lock, Image, Heart } from "lucide-react";
+import { Calendar, Flame, Home, Lock, Image, Heart, Gamepad2 } from "lucide-react";
 
 interface BottomNavigationProps {
   activeView: string;
@@ -8,11 +8,10 @@ interface BottomNavigationProps {
 
 export const BottomNavigation = ({ activeView, onViewChange }: BottomNavigationProps) => {
   const navItems = [
-    { id: "calendar", icon: Calendar, label: "Calendar" },
     { id: "desires", icon: Heart, label: "Desires" },
-    { id: "flirt", icon: Flame, label: "Flirt" },
     { id: "home", icon: Home, label: "Home" },
     { id: "locked", icon: Lock, label: "Vault" },
+    { id: "games", icon: Gamepad2, label: "Games" },
   ];
 
   return (
