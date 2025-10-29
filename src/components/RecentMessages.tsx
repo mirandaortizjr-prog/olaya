@@ -87,11 +87,12 @@ export const RecentMessages = ({ coupleId, userId, partnerName }: RecentMessages
   }
 
   return (
-    <Card className="p-6">
-      <h3 className="text-lg font-semibold mb-4">
+    <Card className="p-3 bg-[#F5E6D3] border-gray-300 max-h-32">
+      <h3 className="text-xs font-semibold mb-2 text-gray-800 flex items-center gap-2">
+        <Mail className="w-3 h-3 text-pink-500" />
         {language === 'en' ? 'Recent Messages' : 'Mensajes Recientes'}
       </h3>
-      <div className="space-y-3">
+      <div className="space-y-1 overflow-y-auto max-h-20 pr-1">
         {messages.map((message) => {
           const Icon = messageIcons[message.message_type as keyof typeof messageIcons];
           const label = messageLabels[message.message_type as keyof typeof messageLabels];
@@ -100,32 +101,25 @@ export const RecentMessages = ({ coupleId, userId, partnerName }: RecentMessages
           return (
             <div
               key={message.id}
-              className={`flex items-start gap-3 p-3 rounded-lg transition-all ${
-                isFromPartner
-                  ? 'bg-gradient-to-r from-primary/10 to-accent/10 animate-fade-in'
-                  : 'bg-muted/50'
-              }`}
+              className="flex items-center gap-2 p-1.5 rounded-lg bg-white/60"
             >
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                isFromPartner ? 'bg-gradient-romantic' : 'bg-muted'
-              }`}>
-                <Icon className={`w-5 h-5 ${isFromPartner ? 'text-primary-foreground' : 'text-foreground'}`} />
-              </div>
+              <span className="text-sm">{Icon ? '💬' : '📱'}</span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium">
+                <p className="text-xs truncate">
                   {isFromPartner
                     ? language === 'en' ? 'Your partner' : 'Tu pareja'
                     : language === 'en' ? 'You' : 'Tú'}
                   {' '}
                   {label[language]}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-[10px] text-gray-600">
                   {formatDistanceToNow(new Date(message.created_at), {
                     addSuffix: true,
                     locale: language === 'es' ? es : undefined,
                   })}
                 </p>
               </div>
+              {Icon && <Icon className="w-3 h-3 text-pink-500 flex-shrink-0" />}
             </div>
           );
         })}
