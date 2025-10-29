@@ -79,11 +79,11 @@ export const CouplePictureUpload = ({
 
   return (
     <>
-      <div className="w-40 h-40 rounded-full border-8 border-black overflow-hidden bg-[#F5E6D3] flex items-center justify-center">
+      <div className="w-20 h-20 rounded-full border-4 border-black overflow-hidden bg-[#F5E6D3] flex items-center justify-center">
         {currentPictureUrl ? (
           <img src={currentPictureUrl} alt="Couple" className="w-full h-full object-cover" />
         ) : (
-          <span className="text-3xl">Photo</span>
+          <span className="text-sm">Photo</span>
         )}
       </div>
       <input
