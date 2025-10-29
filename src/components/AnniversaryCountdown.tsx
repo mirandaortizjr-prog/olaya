@@ -52,10 +52,10 @@ export const AnniversaryCountdown = ({ anniversaryDate }: AnniversaryCountdownPr
 
   if (!anniversaryDate) {
     return (
-      <Card className="p-3 bg-[#F5E6D3] border border-[#E5D6C3]">
+      <Card className="p-3 bg-anniversary-bg border border-anniversary-border">
         <div className="flex items-center justify-center gap-2">
-          <Heart className="w-4 h-4 text-[#8B6F47]" />
-          <p className="text-xs text-[#5C4A3A]">
+          <Heart className="w-4 h-4 text-anniversary-textLight" />
+          <p className="text-xs text-anniversary-textDark">
             {language === 'en' ? 'Set your anniversary in settings' : 'Establece tu aniversario en configuración'}
           </p>
         </div>
@@ -64,33 +64,33 @@ export const AnniversaryCountdown = ({ anniversaryDate }: AnniversaryCountdownPr
   }
 
   return (
-    <Card className="p-3 bg-[#F5E6D3] border border-[#E5D6C3]">
+    <Card className="p-3 bg-anniversary-bg border border-anniversary-border">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Heart className="w-4 h-4 text-[#8B6F47] fill-[#8B6F47] animate-pulse" />
-          <span className="text-xs font-semibold text-[#5C4A3A]">
+          <Heart className="w-4 h-4 text-anniversary-textLight fill-anniversary-textLight animate-pulse" />
+          <span className="text-xs font-semibold text-anniversary-textDark">
             {language === 'en' ? 'Anniversary' : 'Aniversario'}
           </span>
         </div>
         <div className="flex items-center gap-2 text-xs font-mono">
           <div className="flex flex-col items-center">
-            <span className="font-bold text-base text-[#5C4A3A]">{timeLeft.days}</span>
-            <span className="text-[10px] text-[#8B6F47]">{language === 'en' ? 'd' : 'd'}</span>
+            <span className="font-bold text-base text-anniversary-textDark">{timeLeft.days}</span>
+            <span className="text-[10px] text-anniversary-textLight">{language === 'en' ? 'd' : 'd'}</span>
           </div>
-          <span className="text-[#8B6F47]">:</span>
+          <span className="text-anniversary-textLight">:</span>
           <div className="flex flex-col items-center">
-            <span className="font-bold text-base text-[#5C4A3A]">{String(timeLeft.hours).padStart(2, '0')}</span>
-            <span className="text-[10px] text-[#8B6F47]">{language === 'en' ? 'h' : 'h'}</span>
+            <span className="font-bold text-base text-anniversary-textDark">{String(timeLeft.hours).padStart(2, '0')}</span>
+            <span className="text-[10px] text-anniversary-textLight">{language === 'en' ? 'h' : 'h'}</span>
           </div>
-          <span className="text-[#8B6F47]">:</span>
+          <span className="text-anniversary-textLight">:</span>
           <div className="flex flex-col items-center">
-            <span className="font-bold text-base text-[#5C4A3A]">{String(timeLeft.minutes).padStart(2, '0')}</span>
-            <span className="text-[10px] text-[#8B6F47]">{language === 'en' ? 'm' : 'm'}</span>
+            <span className="font-bold text-base text-anniversary-textDark">{String(timeLeft.minutes).padStart(2, '0')}</span>
+            <span className="text-[10px] text-anniversary-textLight">{language === 'en' ? 'm' : 'm'}</span>
           </div>
-          <span className="text-[#8B6F47]">:</span>
+          <span className="text-anniversary-textLight">:</span>
           <div className="flex flex-col items-center">
-            <span className="font-bold text-base text-[#5C4A3A]">{String(timeLeft.seconds).padStart(2, '0')}</span>
-            <span className="text-[10px] text-[#8B6F47]">{language === 'en' ? 's' : 's'}</span>
+            <span className="font-bold text-base text-anniversary-textDark">{String(timeLeft.seconds).padStart(2, '0')}</span>
+            <span className="text-[10px] text-anniversary-textLight">{language === 'en' ? 's' : 's'}</span>
           </div>
         </div>
       </div>

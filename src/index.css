@@ -43,6 +43,12 @@ All colors MUST be HSL.
 
     --radius: 0.75rem;
 
+    /* Anniversary beige colors */
+    --anniversary-bg: 30 45% 90%;
+    --anniversary-border: 30 40% 85%;
+    --anniversary-text-dark: 30 30% 35%;
+    --anniversary-text-light: 30 25% 50%;
+
     /* Sensual design tokens */
     --gradient-romantic: linear-gradient(135deg, hsl(330 65% 48%), hsl(280 55% 50%));
     --gradient-vibrant: linear-gradient(135deg, hsl(330 65% 48%), hsl(25 75% 55%));
@@ -85,6 +91,12 @@ All colors MUST be HSL.
     --border: 330 15% 18%;
     --input: 330 15% 16%;
     --ring: 330 60% 52%;
+
+    /* Anniversary colors stay the same in dark mode */
+    --anniversary-bg: 30 45% 90%;
+    --anniversary-border: 30 40% 85%;
+    --anniversary-text-dark: 30 30% 35%;
+    --anniversary-text-light: 30 25% 50%;
   }
 }
 

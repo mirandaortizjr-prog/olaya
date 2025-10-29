@@ -47,6 +47,12 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        anniversary: {
+          bg: "hsl(var(--anniversary-bg))",
+          border: "hsl(var(--anniversary-border))",
+          textDark: "hsl(var(--anniversary-text-dark))",
+          textLight: "hsl(var(--anniversary-text-light))",
+        },
       },
       backgroundImage: {
         'gradient-romantic': 'var(--gradient-romantic)',
