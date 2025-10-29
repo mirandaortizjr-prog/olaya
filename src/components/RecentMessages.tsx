@@ -88,7 +88,6 @@ export const RecentMessages = ({ coupleId, userId, partnerName }: RecentMessages
       .from('craving_board')
       .select('*')
       .eq('couple_id', coupleId)
-      .eq('fulfilled', false)
       .order('created_at', { ascending: false })
       .limit(5);
 
@@ -103,8 +102,8 @@ export const RecentMessages = ({ coupleId, userId, partnerName }: RecentMessages
 
   return (
     <Card className="p-3 bg-[#F5E6D3] border-gray-300 max-h-32">
-      <h3 className="text-xs font-semibold mb-2 text-gray-800 flex items-center gap-2">
-        <Heart className="w-3 h-3 text-pink-500" />
+      <h3 className="text-xs font-semibold mb-2 text-gray-900 flex items-center gap-2">
+        <Heart className="w-3 h-3 text-pink-600" />
         {language === 'en' ? 'Recent Desires' : 'Deseos Recientes'}
       </h3>
       <div className="space-y-1 overflow-y-auto max-h-20 pr-1">
@@ -116,25 +115,25 @@ export const RecentMessages = ({ coupleId, userId, partnerName }: RecentMessages
           return (
             <div
               key={desire.id}
-              className="flex items-center gap-2 p-1.5 rounded-lg bg-white/60"
+              className="flex items-center gap-2 p-1.5 rounded-lg bg-white/70"
             >
               <span className="text-sm">{emoji}</span>
               <div className="flex-1 min-w-0">
-                <p className="text-xs truncate">
+                <p className="text-xs truncate font-medium text-gray-900">
                   {isFromPartner
                     ? (partnerName || (language === 'en' ? 'Your partner' : 'Tu pareja'))
                     : (language === 'en' ? 'You' : 'Tú')}
                   {' '}
                   {desire.custom_message || label}
                 </p>
-                <p className="text-[10px] text-gray-600">
+                <p className="text-[10px] text-gray-700">
                   {formatDistanceToNow(new Date(desire.created_at), {
                     addSuffix: true,
                     locale: language === 'es' ? es : undefined,
                   })}
                 </p>
               </div>
-              <Heart className="w-3 h-3 text-pink-500 flex-shrink-0" />
+              <Heart className="w-3 h-3 text-pink-600 flex-shrink-0" />
             </div>
           );
         })}
