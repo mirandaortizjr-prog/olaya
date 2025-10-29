@@ -27,12 +27,14 @@ import { UnioGallery } from "@/components/UnioGallery";
 import { MemoryCalendar } from "@/components/MemoryCalendar";
 import { LoveMeter } from "@/components/LoveMeter";
 import { CoupleSongPlayer, CoupleSongPlayerEmbed } from "@/components/CoupleSongPlayer";
+import { AnniversaryCountdown } from "@/components/AnniversaryCountdown";
 
 interface CoupleData {
   coupleId: string;
   inviteCode: string;
   spaceName: string;
   couplePictureUrl?: string;
+  anniversaryDate?: string | null;
   partner: {
     user_id: string;
     full_name: string;
@@ -168,6 +170,7 @@ const Dashboard = () => {
       inviteCode: couple.invite_code,
       spaceName: couple.name || 'name your space',
       couplePictureUrl: couplePictureUrl || undefined,
+      anniversaryDate: couple.anniversary_date || null,
       partner: partnerData,
     });
     setSpaceName(couple.name || 'name your space');
@@ -545,6 +548,9 @@ const Dashboard = () => {
           )}
         </div>
 
+        {/* Anniversary Countdown */}
+        <AnniversaryCountdown anniversaryDate={coupleData.anniversaryDate || null} />
+
         {/* Flirt Notifications */}
         {coupleData.partner && (
           <FlirtNotifications
@@ -661,6 +667,27 @@ const Dashboard = () => {
               }}
             />
             <BackgroundUploadManager coupleId={coupleData.coupleId} />
+            <div>
+              <h3 className="font-semibold mb-2">Anniversary Date</h3>
+              <Input
+                type="date"
+                value={coupleData.anniversaryDate || ''}
+                onChange={async (e) => {
+                  const newDate = e.target.value;
+                  const { error } = await supabase
+                    .from('couples')
+                    .update({ anniversary_date: newDate })
+                    .eq('id', coupleData.coupleId);
+                  
+                  if (error) {
+                    toast({ title: "Error updating anniversary date", variant: "destructive" });
+                  } else {
+                    setCoupleData({ ...coupleData, anniversaryDate: newDate });
+                    toast({ title: "Anniversary date updated!" });
+                  }
+                }}
+              />
+            </div>
             <div>
               <h3 className="font-semibold mb-2">Language</h3>
               <LanguageSwitcher />
