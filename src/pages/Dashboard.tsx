@@ -76,6 +76,7 @@ const Dashboard = () => {
   const [showDesires, setShowDesires] = useState(false);
   const [editingSpaceName, setEditingSpaceName] = useState(false);
   const [spaceName, setSpaceName] = useState("");
+  const [pendingGamesCount, setPendingGamesCount] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -83,6 +84,32 @@ const Dashboard = () => {
   useEffect(() => {
     checkUser();
   }, []);
+
+  // Fetch pending games count
+  useEffect(() => {
+    if (!user?.id) return;
+
+    fetchPendingGames();
+
+    const channel = supabase
+      .channel('game-sessions-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'game_sessions',
+        },
+        () => {
+          fetchPendingGames();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
 
   // Subscribe to couple updates for real-time picture changes
   useEffect(() => {
@@ -215,6 +242,31 @@ const Dashboard = () => {
         setPartnerFeelingStatus(partnerStatus.status);
         setPartnerCustomMessage(partnerStatus.custom_message || "");
       }
+    }
+  };
+
+  const fetchPendingGames = async () => {
+    if (!user?.id) return;
+
+    // Get the user's couple_id first
+    const { data: membership } = await supabase
+      .from('couple_members')
+      .select('couple_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (!membership) return;
+
+    // Count game sessions where partner initiated and user hasn't responded yet
+    const { data: sessions, error } = await supabase
+      .from('game_sessions')
+      .select('id, initiated_by, game_type')
+      .eq('couple_id', membership.couple_id)
+      .eq('partner_id', user.id)
+      .eq('status', 'pending');
+
+    if (!error && sessions) {
+      setPendingGamesCount(sessions.length);
     }
   };
 
@@ -662,6 +714,7 @@ const Dashboard = () => {
 
       <BottomNavigation
         activeView={activeView}
+        pendingGamesCount={pendingGamesCount}
         onViewChange={(view) => {
           if (view === "desires") {
             setShowDesires(true);
