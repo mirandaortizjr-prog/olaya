@@ -14,7 +14,7 @@ interface HowWellGameProps {
   onBack: () => void;
 }
 
-const questions = [
+const allQuestions = [
   "What's my favorite comfort food?",
   "What's one thing I always forget?",
   "If I could teleport anywhere right now, where would I go?",
@@ -22,11 +22,34 @@ const questions = [
   "What song makes me happy every time?",
   "What's my dream vacation destination?",
   "What would I do if I won the lottery?",
-  "What's my favorite way to spend a lazy Sunday?"
+  "What's my favorite way to spend a lazy Sunday?",
+  "What's my go-to karaoke song?",
+  "What's the best gift I've ever received?",
+  "What makes me laugh the hardest?",
+  "What's my secret talent?",
+  "What would my perfect day look like?",
+  "What's my favorite childhood memory?",
+  "What's one thing that instantly improves my mood?",
+  "What's my biggest fear?",
+  "What's my favorite movie or TV show?",
+  "What's my ideal way to relax after a long day?",
+  "What's something I'm secretly proud of?",
+  "What's my favorite season and why?"
 ];
+
+// Shuffle array function
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
 
 export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGameProps) => {
   const [gameMode, setGameMode] = useState<"menu" | "answer" | "guess" | "results">("menu");
+  const [questions] = useState(() => shuffleArray(allQuestions).slice(0, 8));
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [myAnswer, setMyAnswer] = useState("");
   const [myGuess, setMyGuess] = useState("");
@@ -103,8 +126,8 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
       await supabase.functions.invoke('send-push-notification', {
         body: {
           userId: partnerId,
-          title: "Let's Play!",
-          body: "Your partner wants to play 'How Well Do You Know Me?' 🎮",
+          title: "How Well Do You Know Me? 🎮",
+          body: "Your partner wants to play 'How Well Do You Know Me?' - Answer questions about yourself!",
           data: { type: 'game_invitation', gameType: 'how-well', sessionId }
         }
       });
@@ -149,8 +172,8 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
           await supabase.functions.invoke('send-push-notification', {
             body: {
               userId: partnerId,
-              title: "Ready to Guess!",
-              body: "Your partner has finished answering. Time to guess their answers! 🎯",
+              title: "How Well Do You Know Me? 🎯",
+              body: "Your partner has finished answering 'How Well Do You Know Me?' - Time to guess their answers!",
               data: { type: 'game_ready', gameType: 'how-well' }
             }
           });
