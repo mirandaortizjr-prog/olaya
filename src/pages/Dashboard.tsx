@@ -557,6 +557,18 @@ const Dashboard = () => {
         {/* Anniversary Countdown */}
         <AnniversaryCountdown anniversaryDate={coupleData.anniversaryDate || null} />
 
+        {/* Song Player Button */}
+        <div className="flex justify-center">
+          <CoupleSongPlayer
+            coupleId={coupleData.coupleId}
+            songs={coupleSongs}
+            onUpdate={setCoupleSongs}
+            isPlaying={isSongPlaying}
+            onPlayingChange={setIsSongPlaying}
+            onEditClick={() => setShowSongSettings(true)}
+          />
+        </div>
+
         {/* Flirt Notifications */}
         {coupleData.partner && (
           <FlirtNotifications
