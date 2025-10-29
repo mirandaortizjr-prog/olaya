@@ -77,6 +77,12 @@ const Dashboard = () => {
   const [editingSpaceName, setEditingSpaceName] = useState(false);
   const [spaceName, setSpaceName] = useState("");
   const [pendingGamesCount, setPendingGamesCount] = useState(0);
+  const [newDesiresCount, setNewDesiresCount] = useState(0);
+  const [newFlirtsCount, setNewFlirtsCount] = useState(0);
+  const [newVaultCount, setNewVaultCount] = useState(0);
+  const [lastViewedDesires, setLastViewedDesires] = useState<Date>(new Date());
+  const [lastViewedFlirts, setLastViewedFlirts] = useState<Date>(new Date());
+  const [lastViewedVault, setLastViewedVault] = useState<Date>(new Date());
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -110,6 +116,84 @@ const Dashboard = () => {
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
+
+  // Track new desires
+  useEffect(() => {
+    if (!user?.id) return;
+
+    fetchNewDesires();
+
+    const channel = supabase
+      .channel('desires-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'craving_board',
+        },
+        () => {
+          fetchNewDesires();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, lastViewedDesires]);
+
+  // Track new flirts
+  useEffect(() => {
+    if (!user?.id) return;
+
+    fetchNewFlirts();
+
+    const channel = supabase
+      .channel('flirts-changes-notif')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'flirts',
+        },
+        () => {
+          fetchNewFlirts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, lastViewedFlirts]);
+
+  // Track new vault items
+  useEffect(() => {
+    if (!user?.id) return;
+
+    fetchNewVaultItems();
+
+    const channel = supabase
+      .channel('vault-changes-notif')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'private_content',
+        },
+        () => {
+          fetchNewVaultItems();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, lastViewedVault]);
 
   // Subscribe to couple updates for real-time picture changes
   useEffect(() => {
@@ -267,6 +351,77 @@ const Dashboard = () => {
 
     if (!error && sessions) {
       setPendingGamesCount(sessions.length);
+    }
+  };
+
+  const fetchNewDesires = async () => {
+    if (!user?.id) return;
+
+    const { data: membership } = await supabase
+      .from('couple_members')
+      .select('couple_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (!membership) return;
+
+    const { data, error } = await supabase
+      .from('craving_board')
+      .select('id')
+      .eq('couple_id', membership.couple_id)
+      .neq('user_id', user.id)
+      .eq('fulfilled', false)
+      .gt('created_at', lastViewedDesires.toISOString());
+
+    if (!error && data) {
+      setNewDesiresCount(data.length);
+    }
+  };
+
+  const fetchNewFlirts = async () => {
+    if (!user?.id) return;
+
+    const { data: membership } = await supabase
+      .from('couple_members')
+      .select('couple_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (!membership) return;
+
+    const { data, error } = await supabase
+      .from('flirts')
+      .select('id')
+      .eq('couple_id', membership.couple_id)
+      .neq('sender_id', user.id)
+      .gt('created_at', lastViewedFlirts.toISOString());
+
+    if (!error && data) {
+      setNewFlirtsCount(data.length);
+    }
+  };
+
+  const fetchNewVaultItems = async () => {
+    if (!user?.id) return;
+
+    const { data: membership } = await supabase
+      .from('couple_members')
+      .select('couple_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (!membership) return;
+
+    const { data, error } = await supabase
+      .from('private_content')
+      .select('id')
+      .eq('couple_id', membership.couple_id)
+      .neq('user_id', user.id)
+      .eq('is_shared', true)
+      .gt('created_at', lastViewedVault.toISOString());
+
+    if (!error && data) {
+      setNewVaultCount(data.length);
     }
   };
 
@@ -715,11 +870,22 @@ const Dashboard = () => {
       <BottomNavigation
         activeView={activeView}
         pendingGamesCount={pendingGamesCount}
+        newDesiresCount={newDesiresCount}
+        newFlirtsCount={newFlirtsCount}
+        newVaultCount={newVaultCount}
         onViewChange={(view) => {
           if (view === "desires") {
+            setLastViewedDesires(new Date());
+            setNewDesiresCount(0);
             setShowDesires(true);
           } else if (view === "flirt") {
+            setLastViewedFlirts(new Date());
+            setNewFlirtsCount(0);
             setShowFlirt(true);
+          } else if (view === "locked") {
+            setLastViewedVault(new Date());
+            setNewVaultCount(0);
+            setActiveView(view);
           } else {
             setActiveView(view);
           }

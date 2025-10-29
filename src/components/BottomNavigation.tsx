@@ -5,14 +5,24 @@ interface BottomNavigationProps {
   activeView: string;
   onViewChange: (view: string) => void;
   pendingGamesCount?: number;
+  newDesiresCount?: number;
+  newFlirtsCount?: number;
+  newVaultCount?: number;
 }
 
-export const BottomNavigation = ({ activeView, onViewChange, pendingGamesCount = 0 }: BottomNavigationProps) => {
+export const BottomNavigation = ({ 
+  activeView, 
+  onViewChange, 
+  pendingGamesCount = 0,
+  newDesiresCount = 0,
+  newFlirtsCount = 0,
+  newVaultCount = 0
+}: BottomNavigationProps) => {
   const navItems = [
-    { id: "desires", icon: Heart, label: "Desires" },
-    { id: "flirt", icon: Flame, label: "Flirt" },
+    { id: "desires", icon: Heart, label: "Desires", hasNotification: newDesiresCount > 0 },
+    { id: "flirt", icon: Flame, label: "Flirt", hasNotification: newFlirtsCount > 0 },
     { id: "home", icon: Home, label: "Home" },
-    { id: "locked", icon: Lock, label: "Vault" },
+    { id: "locked", icon: Lock, label: "Vault", hasNotification: newVaultCount > 0 },
     { id: "games", icon: Gamepad2, label: "Games", hasNotification: pendingGamesCount > 0 },
   ];
 
