@@ -109,3 +109,23 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Bold scrollbar for craving board */
+.scrollbar-bold::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-bold::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+.scrollbar-bold::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary));
+  border-radius: 10px;
+  border: 2px solid transparent;
+}
+
+.scrollbar-bold::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.8);
+}

@@ -172,25 +172,25 @@ export const CravingBoard = ({ coupleId, userId, partnerName }: CravingBoardProp
   const fulfilledCravings = cravings.filter(c => c.fulfilled).slice(0, 3);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Heart className="h-5 w-5 text-pink-500" />
+    <Card className="overflow-hidden">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Heart className="h-4 w-4 text-pink-500" />
           {t('cravingBoard')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-3 p-4 pt-0">
         {/* Quick Craving Buttons */}
         <div>
-          <p className="text-sm font-medium mb-3">{t('whatDoYouCrave')}</p>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+          <p className="text-xs font-medium mb-2">{t('whatDoYouCrave')}</p>
+          <div className="grid grid-cols-4 md:grid-cols-6 gap-1.5">
             {cravingTypes.map((craving) => {
-              const Icon = craving.icon;
               return (
                 <Button
                   key={craving.type}
                   variant="outline"
-                  className={cn("h-auto flex-col gap-2 py-3", craving.color)}
+                  size="sm"
+                  className={cn("h-auto flex-col gap-1 py-2 px-1", craving.color)}
                   onClick={() => {
                     if (craving.type === 'custom') {
                       setSelectedType(craving.type);
@@ -199,8 +199,8 @@ export const CravingBoard = ({ coupleId, userId, partnerName }: CravingBoardProp
                     }
                   }}
                 >
-                  <span className="text-2xl">{craving.emoji}</span>
-                  <span className="text-xs">{t(`craving_${craving.type}` as any)}</span>
+                  <span className="text-lg">{craving.emoji}</span>
+                  <span className="text-[10px] leading-tight">{t(`craving_${craving.type}` as any)}</span>
                 </Button>
               );
             })}
@@ -209,32 +209,39 @@ export const CravingBoard = ({ coupleId, userId, partnerName }: CravingBoardProp
 
         {/* Custom Message Input */}
         {selectedType === 'custom' && (
-          <div className="space-y-3 p-4 border rounded-lg animate-fade-in">
+          <div className="space-y-2 p-3 border rounded-lg animate-fade-in">
             <Input
               placeholder={t('enterCustomCraving')}
               value={customMessage}
               onChange={(e) => setCustomMessage(e.target.value)}
+              className="h-8 text-sm"
             />
             <div className="flex gap-2">
-              <Button onClick={() => addCraving('custom')} className="flex-1">
+              <Button onClick={() => addCraving('custom')} size="sm" className="flex-1 h-8 text-xs">
                 {t('addCraving')}
               </Button>
-              <Button variant="outline" onClick={() => { setSelectedType(null); setCustomMessage(""); }}>
+              <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => { setSelectedType(null); setCustomMessage(""); }}>
                 {t('cancel')}
               </Button>
             </div>
           </div>
         )}
 
-        {/* Active Cravings */}
-        <div className="space-y-3">
-          <p className="text-sm font-medium">{t('activeCravings')}</p>
+        {/* Active Cravings - Scrollable with Bold Scrollbar */}
+        <div className="space-y-2">
+          <p className="text-xs font-medium">{t('activeCravings')}</p>
           {activeCravings.length === 0 ? (
-            <div className="text-center py-6 text-muted-foreground text-sm">
+            <div className="text-center py-4 text-muted-foreground text-xs">
               {t('noCravingsYet')}
             </div>
           ) : (
-            <div className="space-y-2">
+            <div 
+              className="space-y-1.5 max-h-[200px] overflow-y-auto pr-2 scrollbar-bold"
+              style={{
+                scrollbarWidth: 'auto',
+                scrollbarColor: 'hsl(var(--primary)) transparent'
+              }}
+            >
               {activeCravings.map((craving) => {
                 const config = getCravingConfig(craving.craving_type);
                 const isMine = craving.user_id === userId;
@@ -242,40 +249,42 @@ export const CravingBoard = ({ coupleId, userId, partnerName }: CravingBoardProp
                   <div
                     key={craving.id}
                     className={cn(
-                      "p-4 rounded-lg border-2",
+                      "p-2.5 rounded-lg border",
                       config.color,
                       "transition-all"
                     )}
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-3 flex-1">
-                        <span className="text-2xl">{config.emoji}</span>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <span className="text-lg">{config.emoji}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium truncate">
                             {isMine ? t('you') : partnerName} {t('wants')}:
                           </p>
-                          <p className="text-sm">
+                          <p className="text-xs truncate">
                             {craving.custom_message || t(`craving_${craving.craving_type}` as any)}
                           </p>
                         </div>
                       </div>
-                      <div className="flex gap-1">
+                      <div className="flex gap-1 flex-shrink-0">
                         {!isMine && (
                           <Button
                             size="sm"
                             variant="default"
+                            className="h-7 w-7 p-0"
                             onClick={() => fulfillCraving(craving.id)}
                           >
-                            <Check className="h-4 w-4" />
+                            <Check className="h-3 w-3" />
                           </Button>
                         )}
                         {isMine && (
                           <Button
                             size="sm"
                             variant="ghost"
+                            className="h-7 w-7 p-0"
                             onClick={() => deleteCraving(craving.id)}
                           >
-                            <X className="h-4 w-4" />
+                            <X className="h-3 w-3" />
                           </Button>
                         )}
                       </div>
@@ -289,19 +298,19 @@ export const CravingBoard = ({ coupleId, userId, partnerName }: CravingBoardProp
 
         {/* Recently Fulfilled */}
         {fulfilledCravings.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">{t('recentlyFulfilled')}</p>
+          <div className="space-y-1.5 pt-2 border-t">
+            <p className="text-xs font-medium text-muted-foreground">{t('recentlyFulfilled')}</p>
             <div className="space-y-1">
               {fulfilledCravings.map((craving) => {
                 const config = getCravingConfig(craving.craving_type);
                 return (
                   <div
                     key={craving.id}
-                    className="p-2 rounded bg-muted/50 flex items-center gap-2 text-xs text-muted-foreground"
+                    className="p-1.5 rounded bg-muted/50 flex items-center gap-1.5 text-[10px] text-muted-foreground"
                   >
-                    <Check className="h-3 w-3 text-green-600" />
-                    <span>{config.emoji}</span>
-                    <span>{craving.custom_message || t(`craving_${craving.craving_type}` as any)}</span>
+                    <Check className="h-3 w-3 text-green-600 flex-shrink-0" />
+                    <span className="text-sm">{config.emoji}</span>
+                    <span className="truncate">{craving.custom_message || t(`craving_${craving.craving_type}` as any)}</span>
                   </div>
                 );
               })}
