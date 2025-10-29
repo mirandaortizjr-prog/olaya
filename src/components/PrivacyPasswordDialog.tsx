@@ -59,10 +59,9 @@ export const PrivacyPasswordDialog = ({
       }
 
       if (success) {
-        onSuccess();
         setPassword("");
         setConfirmPassword("");
-        onClose();
+        onSuccess();
       } else {
         toast({
           title: mode === 'verify' ? "Incorrect Password" : "Failed to Set Password",
