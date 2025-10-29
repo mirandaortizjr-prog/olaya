@@ -14,6 +14,7 @@ interface CoupleSongPlayerProps {
   autoplay?: boolean;
   isPlaying?: boolean;
   onPlayingChange?: (playing: boolean) => void;
+  onEditClick?: () => void;
 }
 
 const extractYouTubeId = (url: string): string | null => {
@@ -38,9 +39,10 @@ interface PlayerComponentProps {
   videoId: string | null;
   isPlaying: boolean;
   onClose: () => void;
+  onEditClick?: () => void;
 }
 
-export const CoupleSongPlayerEmbed = ({ videoId, isPlaying, onClose }: PlayerComponentProps) => {
+export const CoupleSongPlayerEmbed = ({ videoId, isPlaying, onClose, onEditClick }: PlayerComponentProps) => {
   if (!isPlaying || !videoId) return null;
   
   return (
@@ -49,6 +51,16 @@ export const CoupleSongPlayerEmbed = ({ videoId, isPlaying, onClose }: PlayerCom
         <div className="flex items-center gap-2">
           <Music className="w-4 h-4" />
           <span className="text-sm font-medium">Our Song 🎵</span>
+          {onEditClick && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onEditClick}
+              className="h-7 px-2 text-xs"
+            >
+              Edit
+            </Button>
+          )}
         </div>
         <Button
           variant="ghost"
@@ -70,7 +82,7 @@ export const CoupleSongPlayerEmbed = ({ videoId, isPlaying, onClose }: PlayerCom
   );
 };
 
-export const CoupleSongPlayer = ({ coupleId, songUrl, onUpdate, autoplay = false, isPlaying = false, onPlayingChange }: CoupleSongPlayerProps) => {
+export const CoupleSongPlayer = ({ coupleId, songUrl, onUpdate, autoplay = false, isPlaying = false, onPlayingChange, onEditClick }: CoupleSongPlayerProps) => {
   const [showDialog, setShowDialog] = useState(false);
   const [newSongUrl, setNewSongUrl] = useState(songUrl || "");
   const [saving, setSaving] = useState(false);
@@ -80,6 +92,13 @@ export const CoupleSongPlayer = ({ coupleId, songUrl, onUpdate, autoplay = false
   const togglePlay = () => {
     if (onPlayingChange) {
       onPlayingChange(!isPlaying);
+    }
+  };
+
+  const handleEditClick = () => {
+    setShowDialog(true);
+    if (onEditClick) {
+      onEditClick();
     }
   };
 
@@ -127,7 +146,7 @@ export const CoupleSongPlayer = ({ coupleId, songUrl, onUpdate, autoplay = false
           if (songUrl) {
             togglePlay();
           } else {
-            setShowDialog(true);
+            handleEditClick();
           }
         }}
         className="gap-1 text-xs sm:text-sm whitespace-nowrap"
@@ -136,17 +155,6 @@ export const CoupleSongPlayer = ({ coupleId, songUrl, onUpdate, autoplay = false
         <span className="hidden sm:inline">{songUrl ? (isPlaying ? "Pause Song" : "Our Song") : "Add Song"}</span>
         <span className="sm:hidden">{songUrl ? (isPlaying ? "⏸" : "Song") : "Add"}</span>
       </Button>
-
-      {songUrl && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowDialog(true)}
-          className="gap-2"
-        >
-          Edit Song
-        </Button>
-      )}
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="max-w-md">

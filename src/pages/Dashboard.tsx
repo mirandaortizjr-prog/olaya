@@ -51,6 +51,7 @@ const Dashboard = () => {
   const [userCustomMessage, setUserCustomMessage] = useState("");
   const [coupleSongUrl, setCoupleSongUrl] = useState<string | null>(null);
   const [isSongPlaying, setIsSongPlaying] = useState(false);
+  const [showSongDialog, setShowSongDialog] = useState(false);
 
   // Autoplay song when it's available
   useEffect(() => {
@@ -460,6 +461,7 @@ const Dashboard = () => {
               autoplay={false}
               isPlaying={isSongPlaying}
               onPlayingChange={setIsSongPlaying}
+              onEditClick={() => setShowSongDialog(true)}
             />
             <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="text-foreground">
               <Settings className="w-7 h-7" />
@@ -561,6 +563,7 @@ const Dashboard = () => {
             videoId={coupleSongUrl ? coupleSongUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/|music\.youtube\.com\/watch\?v=)([^&\n?#]+)/)?.[1] || null : null}
             isPlaying={isSongPlaying}
             onClose={() => setIsSongPlaying(false)}
+            onEditClick={() => setShowSongDialog(true)}
           />
         )}
 
