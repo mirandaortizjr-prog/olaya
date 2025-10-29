@@ -48,20 +48,29 @@ export const CoupleSongPlayerEmbed = ({ videoId, isPlaying, onClose, onEditClick
   return (
     <div className="w-full max-w-lg mx-auto shadow-2xl rounded-lg overflow-hidden bg-background border">
       <div className="flex items-center justify-between p-2 bg-muted">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onClose}
+          className="h-7 px-2"
+          aria-label={isPlaying ? "Pause song" : "Play song"}
+          title={isPlaying ? "Pause" : "Play"}
+        >
           <Music className="w-4 h-4" />
-          <span className="text-sm font-medium">Our Song 🎵</span>
-          {onEditClick && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onEditClick}
-              className="h-7 px-2 text-xs"
-            >
-              Edit
-            </Button>
-          )}
-        </div>
+        </Button>
+        <span className="text-sm font-medium">Our Song 🎵</span>
+        {onEditClick && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onEditClick}
+            className="h-7 px-2 text-xs"
+          >
+            Edit
+          </Button>
+        )}
+      </div>
         <Button
           variant="ghost"
           size="sm"

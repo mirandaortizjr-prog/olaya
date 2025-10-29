@@ -453,21 +453,10 @@ const Dashboard = () => {
       {/* Top Header Bar */}
       <div className="bg-muted p-4">
         <div className="flex items-center justify-between max-w-lg mx-auto gap-2">
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <CoupleSongPlayer
-              coupleId={coupleData.coupleId}
-              songUrl={coupleSongUrl}
-              onUpdate={setCoupleSongUrl}
-              autoplay={false}
-              isPlaying={isSongPlaying}
-              onPlayingChange={setIsSongPlaying}
-              onEditClick={() => setShowSongDialog(true)}
-            />
-            <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="text-foreground">
-              <Settings className="w-7 h-7" />
-            </Button>
-          </div>
-          
+          {/* Left spacer to balance layout (song button removed from header) */}
+          <div className="w-7 h-7" aria-hidden="true" />
+
+          {/* Center: Space name (editable) */}
           {editingSpaceName ? (
             <Input
               value={spaceName}
@@ -486,15 +475,21 @@ const Dashboard = () => {
             </h1>
           )}
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowMessenger(true)}
-            disabled={!coupleData.partner}
-            className="text-foreground flex-shrink-0"
-          >
-            <MessageCircle className="w-7 h-7" />
-          </Button>
+          {/* Right: Settings and Messenger */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="text-foreground">
+              <Settings className="w-7 h-7" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowMessenger(true)}
+              disabled={!coupleData.partner}
+              className="text-foreground flex-shrink-0"
+            >
+              <MessageCircle className="w-7 h-7" />
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -559,16 +554,6 @@ const Dashboard = () => {
 
         {/* YouTube Song Player - Centered between notifications and Love Meter */}
         <div className="w-full max-w-lg mx-auto">
-          <CoupleSongPlayer
-            coupleId={coupleData.coupleId}
-            songUrl={coupleSongUrl}
-            onUpdate={setCoupleSongUrl}
-            autoplay={false}
-            isPlaying={isSongPlaying}
-            onPlayingChange={setIsSongPlaying}
-            onEditClick={() => setShowSongDialog(true)}
-          />
-          
           {coupleSongUrl && (
             <CoupleSongPlayerEmbed
               videoId={coupleSongUrl ? coupleSongUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/|music\.youtube\.com\/watch\?v=)([^&\n?#]+)/)?.[1] || null : null}
