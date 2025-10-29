@@ -241,7 +241,10 @@ export const PrivateVault = ({ coupleId, userId, onClose }: PrivateVaultProps) =
             setShowPasswordDialog(false);
             onClose();
           }}
-          onSuccess={() => setIsUnlocked(true)}
+          onSuccess={() => {
+            setIsUnlocked(true);
+            setShowPasswordDialog(false);
+          }}
           mode={passwordMode}
           onVerify={verifyPassword}
           onSet={setPassword}
