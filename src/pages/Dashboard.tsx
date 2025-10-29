@@ -558,14 +558,26 @@ const Dashboard = () => {
         )}
 
         {/* YouTube Song Player - Centered between notifications and Love Meter */}
-        {coupleSongUrl && (
-          <CoupleSongPlayerEmbed
-            videoId={coupleSongUrl ? coupleSongUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/|music\.youtube\.com\/watch\?v=)([^&\n?#]+)/)?.[1] || null : null}
+        <div className="w-full max-w-lg mx-auto">
+          <CoupleSongPlayer
+            coupleId={coupleData.coupleId}
+            songUrl={coupleSongUrl}
+            onUpdate={setCoupleSongUrl}
+            autoplay={false}
             isPlaying={isSongPlaying}
-            onClose={() => setIsSongPlaying(false)}
+            onPlayingChange={setIsSongPlaying}
             onEditClick={() => setShowSongDialog(true)}
           />
-        )}
+          
+          {coupleSongUrl && (
+            <CoupleSongPlayerEmbed
+              videoId={coupleSongUrl ? coupleSongUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/|music\.youtube\.com\/watch\?v=)([^&\n?#]+)/)?.[1] || null : null}
+              isPlaying={isSongPlaying}
+              onClose={() => setIsSongPlaying(false)}
+              onEditClick={() => setShowSongDialog(true)}
+            />
+          )}
+        </div>
 
         {/* Love-O-Meter */}
         <LoveMeter coupleId={coupleData.coupleId} />
