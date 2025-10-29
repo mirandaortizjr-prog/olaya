@@ -101,7 +101,7 @@ export const BackgroundSlideshow = ({ coupleId }: BackgroundSlideshowProps) => {
           <img
             src={url}
             alt={`Background ${index + 1}`}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-center"
           />
         </div>
       ))}
