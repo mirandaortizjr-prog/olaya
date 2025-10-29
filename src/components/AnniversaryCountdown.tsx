@@ -52,10 +52,10 @@ export const AnniversaryCountdown = ({ anniversaryDate }: AnniversaryCountdownPr
 
   if (!anniversaryDate) {
     return (
-      <Card className="p-3 bg-gradient-to-r from-rose-500/10 to-pink-500/10 border border-rose-500/20">
+      <Card className="p-3 bg-[#F5E6D3] border border-[#E5D6C3]">
         <div className="flex items-center justify-center gap-2">
-          <Heart className="w-4 h-4 text-rose-500" />
-          <p className="text-xs text-muted-foreground">
+          <Heart className="w-4 h-4 text-[#C4A57B]" />
+          <p className="text-xs text-foreground/70">
             {language === 'en' ? 'Set your anniversary in settings' : 'Establece tu aniversario en configuración'}
           </p>
         </div>
@@ -64,33 +64,33 @@ export const AnniversaryCountdown = ({ anniversaryDate }: AnniversaryCountdownPr
   }
 
   return (
-    <Card className="p-3 bg-gradient-to-r from-rose-500/10 to-pink-500/10 border border-rose-500/20">
+    <Card className="p-3 bg-[#F5E6D3] border border-[#E5D6C3]">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Heart className="w-4 h-4 text-rose-500 fill-rose-500 animate-pulse" />
+          <Heart className="w-4 h-4 text-[#C4A57B] fill-[#C4A57B] animate-pulse" />
           <span className="text-xs font-semibold text-foreground">
             {language === 'en' ? 'Anniversary' : 'Aniversario'}
           </span>
         </div>
         <div className="flex items-center gap-2 text-xs font-mono">
           <div className="flex flex-col items-center">
-            <span className="font-bold text-base text-rose-500">{timeLeft.days}</span>
-            <span className="text-[10px] text-muted-foreground">{language === 'en' ? 'd' : 'd'}</span>
+            <span className="font-bold text-base text-[#8B6F47]">{timeLeft.days}</span>
+            <span className="text-[10px] text-foreground/60">{language === 'en' ? 'd' : 'd'}</span>
           </div>
-          <span className="text-muted-foreground">:</span>
+          <span className="text-foreground/60">:</span>
           <div className="flex flex-col items-center">
-            <span className="font-bold text-base text-rose-500">{String(timeLeft.hours).padStart(2, '0')}</span>
-            <span className="text-[10px] text-muted-foreground">{language === 'en' ? 'h' : 'h'}</span>
+            <span className="font-bold text-base text-[#8B6F47]">{String(timeLeft.hours).padStart(2, '0')}</span>
+            <span className="text-[10px] text-foreground/60">{language === 'en' ? 'h' : 'h'}</span>
           </div>
-          <span className="text-muted-foreground">:</span>
+          <span className="text-foreground/60">:</span>
           <div className="flex flex-col items-center">
-            <span className="font-bold text-base text-rose-500">{String(timeLeft.minutes).padStart(2, '0')}</span>
-            <span className="text-[10px] text-muted-foreground">{language === 'en' ? 'm' : 'm'}</span>
+            <span className="font-bold text-base text-[#8B6F47]">{String(timeLeft.minutes).padStart(2, '0')}</span>
+            <span className="text-[10px] text-foreground/60">{language === 'en' ? 'm' : 'm'}</span>
           </div>
-          <span className="text-muted-foreground">:</span>
+          <span className="text-foreground/60">:</span>
           <div className="flex flex-col items-center">
-            <span className="font-bold text-base text-rose-500">{String(timeLeft.seconds).padStart(2, '0')}</span>
-            <span className="text-[10px] text-muted-foreground">{language === 'en' ? 's' : 's'}</span>
+            <span className="font-bold text-base text-[#8B6F47]">{String(timeLeft.seconds).padStart(2, '0')}</span>
+            <span className="text-[10px] text-foreground/60">{language === 'en' ? 's' : 's'}</span>
           </div>
         </div>
       </div>
