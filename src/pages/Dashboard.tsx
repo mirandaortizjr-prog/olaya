@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MessageCircle, Settings, LogOut, Users, Link2, Calendar, Flame, Home, Lock, Clock, ThumbsUp, ThumbsDown, Heart, Bookmark, Gamepad2 } from "lucide-react";
+import { MessageCircle, Settings, LogOut, Users, Link2, Calendar, Flame, Home, Lock, Clock, ThumbsUp, ThumbsDown, Heart, Bookmark, Gamepad2, Music } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
@@ -28,6 +28,9 @@ import { MemoryCalendar } from "@/components/MemoryCalendar";
 import { LoveMeter } from "@/components/LoveMeter";
 import { CoupleSongPlayer, CoupleSongPlayerEmbed } from "@/components/CoupleSongPlayer";
 import { AnniversaryCountdown } from "@/components/AnniversaryCountdown";
+import { ThemeSettings } from "@/components/ThemeSettings";
+import { SongSettings } from "@/components/SongSettings";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface CoupleData {
   coupleId: string;
@@ -53,25 +56,28 @@ const Dashboard = () => {
   const [partnerCustomMessage, setPartnerCustomMessage] = useState("");
   const [userFeelingStatus, setUserFeelingStatus] = useState("");
   const [userCustomMessage, setUserCustomMessage] = useState("");
-  const [coupleSongUrl, setCoupleSongUrl] = useState<string | null>(null);
+  const [coupleSongs, setCoupleSongs] = useState<string[]>([]);
+  const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const [isSongPlaying, setIsSongPlaying] = useState(false);
   const [showSongDialog, setShowSongDialog] = useState(false);
 
   // Autoplay song when it's available
   useEffect(() => {
-    if (coupleSongUrl) {
+    if (coupleSongs.length > 0) {
       setIsSongPlaying(true);
     }
-  }, [coupleSongUrl]);
+  }, [coupleSongs]);
   const [activeView, setActiveView] = useState("home");
   const [showMessenger, setShowMessenger] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showSongSettings, setShowSongSettings] = useState(false);
   const [showFlirt, setShowFlirt] = useState(false);
   const [showDesires, setShowDesires] = useState(false);
   const [editingSpaceName, setEditingSpaceName] = useState(false);
   const [spaceName, setSpaceName] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   useEffect(() => {
     checkUser();
@@ -174,7 +180,7 @@ const Dashboard = () => {
       partner: partnerData,
     });
     setSpaceName(couple.name || 'name your space');
-    setCoupleSongUrl(couple.couple_song_url || null);
+    setCoupleSongs((couple.couple_songs as string[]) || []);
 
     loadFeelingStatuses(couple.id, userId, partnerData?.user_id);
   };
@@ -562,11 +568,16 @@ const Dashboard = () => {
 
         {/* YouTube Song Player - Centered between notifications and Love Meter */}
         <div className="w-full max-w-lg mx-auto">
-          {coupleSongUrl && (
+          {coupleSongs.length > 0 && (
             <CoupleSongPlayerEmbed
-              videoId={coupleSongUrl ? coupleSongUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/|music\.youtube\.com\/watch\?v=)([^&\n?#]+)/)?.[1] || null : null}
+              videoIds={coupleSongs.map(url => {
+                const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/|music\.youtube\.com\/watch\?v=)([^&\n?#]+)/);
+                return match ? match[1] : null;
+              }).filter(Boolean) as string[]}
+              currentIndex={currentSongIndex}
               isPlaying={isSongPlaying}
               onClose={() => setIsSongPlaying(false)}
+              onNext={() => setCurrentSongIndex(prev => (prev + 1) % coupleSongs.length)}
               onEditClick={() => setShowSongDialog(true)}
             />
           )}
@@ -693,6 +704,19 @@ const Dashboard = () => {
               <LanguageSwitcher />
             </div>
             <NotificationSettings />
+            
+            <Button 
+              variant="outline" 
+              className="w-full" 
+              onClick={() => {
+                setShowSettings(false);
+                setShowSongSettings(true);
+              }}
+            >
+              <Music className="w-4 h-4 mr-2" />
+              Manage Songs
+            </Button>
+            
             <Button variant="outline" className="w-full" onClick={() => navigate('/couple-profiles')}>
               <Users className="w-4 h-4 mr-2" />
               View Profiles
@@ -704,6 +728,15 @@ const Dashboard = () => {
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Song Settings Dialog */}
+      <SongSettings
+        open={showSongSettings}
+        onOpenChange={setShowSongSettings}
+        coupleId={coupleData.coupleId}
+        songs={coupleSongs}
+        onUpdate={setCoupleSongs}
+      />
     </div>
   );
 };

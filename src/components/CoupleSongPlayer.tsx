@@ -1,16 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Music, X, Play, Pause } from "lucide-react";
+import { Music, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useLanguage } from "@/contexts/LanguageContext";
 
 interface CoupleSongPlayerProps {
   coupleId: string;
-  songUrl: string | null;
-  onUpdate: (newUrl: string | null) => void;
+  songs: string[];
+  onUpdate: (newSongs: string[]) => void;
   autoplay?: boolean;
   isPlaying?: boolean;
   onPlayingChange?: (playing: boolean) => void;
@@ -36,41 +33,84 @@ const extractYouTubeId = (url: string): string | null => {
 };
 
 interface PlayerComponentProps {
-  videoId: string | null;
+  videoIds: string[];
+  currentIndex: number;
   isPlaying: boolean;
   onClose: () => void;
+  onNext: () => void;
   onEditClick?: () => void;
 }
 
-export const CoupleSongPlayerEmbed = ({ videoId, isPlaying, onClose, onEditClick }: PlayerComponentProps) => {
-  if (!isPlaying || !videoId) return null;
+export const CoupleSongPlayerEmbed = ({ videoIds, currentIndex, isPlaying, onClose, onNext, onEditClick }: PlayerComponentProps) => {
+  const [player, setPlayer] = useState<any>(null);
+
+  useEffect(() => {
+    if (!isPlaying || videoIds.length === 0) return;
+
+    // Load YouTube IFrame API
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+    // @ts-ignore
+    window.onYouTubeIframeAPIReady = () => {
+      // @ts-ignore
+      const newPlayer = new window.YT.Player('youtube-player', {
+        videoId: videoIds[currentIndex],
+        events: {
+          onStateChange: (event: any) => {
+            // @ts-ignore
+            if (event.data === window.YT.PlayerState.ENDED) {
+              onNext();
+            }
+          },
+        },
+      });
+      setPlayer(newPlayer);
+    };
+
+    return () => {
+      if (player) {
+        player.destroy();
+      }
+    };
+  }, [isPlaying]);
+
+  useEffect(() => {
+    if (player && videoIds[currentIndex]) {
+      player.loadVideoById(videoIds[currentIndex]);
+    }
+  }, [currentIndex, player, videoIds]);
+
+  if (!isPlaying || videoIds.length === 0) return null;
   
   return (
     <div className="w-full max-w-lg mx-auto shadow-2xl rounded-lg overflow-hidden bg-background border">
       <div className="flex items-center justify-between p-2 bg-muted">
-      <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onClose}
-          className="h-7 px-2"
-          aria-label={isPlaying ? "Pause song" : "Play song"}
-          title={isPlaying ? "Pause" : "Play"}
-        >
-          <Music className="w-4 h-4" />
-        </Button>
-        <span className="text-sm font-medium">Our Song 🎵</span>
-        {onEditClick && (
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="sm"
-            onClick={onEditClick}
-            className="h-7 px-2 text-xs"
+            onClick={onClose}
+            className="h-7 px-2"
           >
-            Edit
+            <Music className="w-4 h-4" />
           </Button>
-        )}
-      </div>
+          <span className="text-sm font-medium">
+            Our Playlist 🎵 ({currentIndex + 1}/{videoIds.length})
+          </span>
+          {onEditClick && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onEditClick}
+              className="h-7 px-2 text-xs"
+            >
+              Edit
+            </Button>
+          )}
+        </div>
         <Button
           variant="ghost"
           size="sm"
@@ -80,23 +120,17 @@ export const CoupleSongPlayerEmbed = ({ videoId, isPlaying, onClose, onEditClick
         </Button>
       </div>
       <div className="aspect-video">
-        <iframe
-          src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0`}
-          className="w-full h-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
+        <div id="youtube-player" className="w-full h-full"></div>
       </div>
     </div>
   );
 };
 
-export const CoupleSongPlayer = ({ coupleId, songUrl, onUpdate, autoplay = false, isPlaying = false, onPlayingChange, onEditClick }: CoupleSongPlayerProps) => {
-  const [showDialog, setShowDialog] = useState(false);
-  const [newSongUrl, setNewSongUrl] = useState(songUrl || "");
-  const [saving, setSaving] = useState(false);
+export const CoupleSongPlayer = ({ coupleId, songs, onUpdate, autoplay = false, isPlaying = false, onPlayingChange, onEditClick }: CoupleSongPlayerProps) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
   const { toast } = useToast();
-  const { t } = useLanguage();
+
+  const videoIds = songs.map(url => extractYouTubeId(url)).filter(Boolean) as string[];
 
   const togglePlay = () => {
     if (onPlayingChange) {
@@ -104,47 +138,19 @@ export const CoupleSongPlayer = ({ coupleId, songUrl, onUpdate, autoplay = false
     }
   };
 
+  const handleNext = () => {
+    if (currentIndex < videoIds.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      setCurrentIndex(0); // Loop back to start
+    }
+  };
+
   const handleEditClick = () => {
-    setShowDialog(true);
     if (onEditClick) {
       onEditClick();
     }
   };
-
-  const saveSongUrl = async () => {
-    setSaving(true);
-    try {
-      const urlToSave = newSongUrl.trim() || null;
-      
-      if (urlToSave && !extractYouTubeId(urlToSave)) {
-        toast({
-          title: "Invalid URL",
-          description: "Please enter a valid YouTube or YouTube Music link",
-          variant: "destructive",
-        });
-        setSaving(false);
-        return;
-      }
-
-      const { error } = await supabase
-        .from('couples')
-        .update({ couple_song_url: urlToSave })
-        .eq('id', coupleId);
-
-      if (error) throw error;
-
-      onUpdate(urlToSave);
-      toast({ title: "Success", description: urlToSave ? "Song updated!" : "Song removed" });
-      setShowDialog(false);
-    } catch (error: any) {
-      console.error('Error saving song:', error);
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const videoId = songUrl ? extractYouTubeId(songUrl) : null;
 
   return (
     <>
@@ -152,7 +158,7 @@ export const CoupleSongPlayer = ({ coupleId, songUrl, onUpdate, autoplay = false
         variant="outline"
         size="sm"
         onClick={() => {
-          if (songUrl) {
+          if (songs.length > 0) {
             togglePlay();
           } else {
             handleEditClick();
@@ -161,66 +167,18 @@ export const CoupleSongPlayer = ({ coupleId, songUrl, onUpdate, autoplay = false
         className="gap-1 text-xs sm:text-sm whitespace-nowrap"
       >
         <Music className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-        <span className="hidden sm:inline">{songUrl ? (isPlaying ? "Pause Song" : "Our Song") : "Add Song"}</span>
-        <span className="sm:hidden">{songUrl ? (isPlaying ? "⏸" : "Song") : "Add"}</span>
+        <span className="hidden sm:inline">{songs.length > 0 ? (isPlaying ? "Pause" : "Our Songs") : "Add Songs"}</span>
+        <span className="sm:hidden">{songs.length > 0 ? (isPlaying ? "⏸" : "♫") : "Add"}</span>
       </Button>
 
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Music className="w-5 h-5" />
-              Your Special Song
-            </DialogTitle>
-            <DialogDescription>
-              Paste a YouTube or YouTube Music link to your couple's special song
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div>
-              <Input
-                placeholder="https://youtube.com/watch?v=..."
-                value={newSongUrl}
-                onChange={(e) => setNewSongUrl(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground mt-2">
-                Works with YouTube, YouTube Music, and Shorts links
-              </p>
-            </div>
-
-            {newSongUrl && extractYouTubeId(newSongUrl) && (
-              <div className="aspect-video rounded-lg overflow-hidden bg-muted">
-                <iframe
-                  src={`https://www.youtube.com/embed/${extractYouTubeId(newSongUrl)}`}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-            )}
-
-            <div className="flex gap-2">
-              <Button onClick={saveSongUrl} disabled={saving} className="flex-1">
-                {saving ? "Saving..." : "Save Song"}
-              </Button>
-              {songUrl && (
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setNewSongUrl("");
-                    saveSongUrl();
-                  }}
-                  disabled={saving}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              )}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
+      <CoupleSongPlayerEmbed 
+        videoIds={videoIds}
+        currentIndex={currentIndex}
+        isPlaying={isPlaying}
+        onClose={() => togglePlay()}
+        onNext={handleNext}
+        onEditClick={handleEditClick}
+      />
     </>
   );
 };
