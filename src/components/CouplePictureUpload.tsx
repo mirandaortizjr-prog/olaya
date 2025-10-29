@@ -78,7 +78,7 @@ export const CouplePictureUpload = ({
   };
 
   return (
-    <div className="relative group">
+    <>
       <div className="w-40 h-40 rounded-full border-8 border-black overflow-hidden bg-[#F5E6D3] flex items-center justify-center">
         {currentPictureUrl ? (
           <img src={currentPictureUrl} alt="Couple" className="w-full h-full object-cover" />
@@ -86,23 +86,105 @@ export const CouplePictureUpload = ({
           <span className="text-3xl">Photo</span>
         )}
       </div>
+      <input
+        ref={fileInputRef}
+        id="couple-picture-upload"
+        type="file"
+        accept="image/*"
+        onChange={uploadCouplePicture}
+        className="hidden"
+      />
+    </>
+  );
+};
+
+// Export a button component for settings
+export const CouplePictureUploadButton = ({
+  coupleId,
+  currentPictureUrl,
+  onUploadComplete,
+}: CouplePictureUploadProps) => {
+  const [uploading, setUploading] = useState(false);
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const uploadCouplePicture = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      setUploading(true);
+
+      if (!event.target.files || event.target.files.length === 0) {
+        throw new Error("You must select an image to upload.");
+      }
+
+      const file = event.target.files[0];
+      const fileExt = file.name.split(".").pop();
+      const filePath = `${coupleId}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("couple_media")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: signedData } = await supabase.storage
+        .from("couple_media")
+        .createSignedUrl(filePath, 60 * 60 * 24 * 7);
+
+      const storagePath = `couple_media/${filePath}`;
+
+      const { error: updateError } = await supabase
+        .from("couples")
+        .update({ couple_picture_url: storagePath })
+        .eq("id", coupleId);
+
+      if (updateError) throw updateError;
+
+      onUploadComplete(signedData?.signedUrl || "");
+
+      toast({
+        title: "Success! 💕",
+        description: "Your couple picture has been updated",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-4">
+      <div className="flex-1">
+        <h3 className="font-medium">Couple Picture</h3>
+        <p className="text-sm text-muted-foreground">Upload a picture for your couple profile</p>
+      </div>
       <Button
-        type="button"
-        size="icon"
-        className="absolute bottom-2 right-2 h-10 w-10 rounded-full bg-white shadow-lg hover:bg-gray-100"
         onClick={handleClick}
         disabled={uploading}
-        aria-label="Upload couple picture"
+        variant="outline"
       >
         {uploading ? (
-          <Loader2 className="h-5 w-5 animate-spin" />
+          <>
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            Uploading...
+          </>
         ) : (
-          <Camera className="h-5 w-5" />
+          <>
+            <Camera className="h-4 w-4 mr-2" />
+            Upload Picture
+          </>
         )}
       </Button>
       <input
         ref={fileInputRef}
-        id="couple-picture-upload"
         type="file"
         accept="image/*"
         onChange={uploadCouplePicture}

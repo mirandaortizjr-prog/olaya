@@ -11,7 +11,7 @@ import { MessageCircle, Settings, LogOut, Users, Link2, Calendar, Flame, Home, L
 import { useToast } from "@/hooks/use-toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
-import { CouplePictureUpload } from "@/components/CouplePictureUpload";
+import { CouplePictureUpload, CouplePictureUploadButton } from "@/components/CouplePictureUpload";
 import { FeelingStatusSelector } from "@/components/FeelingStatusSelector";
 import { NotificationSettings } from "@/components/NotificationSettings";
 import { MessengerChat } from "@/components/MessengerChat";
@@ -651,6 +651,13 @@ const Dashboard = () => {
             <DialogTitle>Settings</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
+            <CouplePictureUploadButton
+              coupleId={coupleData.coupleId}
+              currentPictureUrl={coupleData.couplePictureUrl || userProfile?.avatar_url || undefined}
+              onUploadComplete={(url) => {
+                setCoupleData({ ...coupleData, couplePictureUrl: url });
+              }}
+            />
             <div>
               <h3 className="font-semibold mb-2">Language</h3>
               <LanguageSwitcher />
