@@ -72,6 +72,34 @@ const Dashboard = () => {
     checkUser();
   }, []);
 
+  // Subscribe to couple updates for real-time picture changes
+  useEffect(() => {
+    if (!coupleData?.coupleId || !user?.id) return;
+
+    const channel = supabase
+      .channel('couple-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'couples',
+          filter: `id=eq.${coupleData.coupleId}`,
+        },
+        async (payload) => {
+          // Reload couple data when picture is updated
+          if (payload.new.couple_picture_url !== payload.old.couple_picture_url) {
+            await loadCoupleData(user.id);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [coupleData?.coupleId, user?.id]);
+
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     

@@ -78,41 +78,37 @@ export const CouplePictureUpload = ({
   };
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="relative group">
-        <Avatar className="h-24 w-24 ring-4 ring-primary/20 transition-all group-hover:ring-primary/40">
-          <AvatarImage src={currentPictureUrl || undefined} alt="Couple" />
-          <AvatarFallback className="bg-gradient-romantic text-white text-3xl">
-            💑
-          </AvatarFallback>
-        </Avatar>
-        <Button
-          type="button"
-          size="icon"
-          className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-lg group-hover:scale-110"
-          onClick={handleClick}
-          disabled={uploading}
-          aria-label="Upload couple picture"
-        >
-          {uploading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Camera className="h-4 w-4" />
-          )}
-        </Button>
-        <input
-          ref={fileInputRef}
-          id="couple-picture-upload"
-          type="file"
-          accept="image/*"
-          onChange={uploadCouplePicture}
-          disabled={uploading}
-          className="hidden"
-        />
+    <div className="relative group">
+      <div className="w-40 h-40 rounded-full border-8 border-black overflow-hidden bg-[#F5E6D3] flex items-center justify-center">
+        {currentPictureUrl ? (
+          <img src={currentPictureUrl} alt="Couple" className="w-full h-full object-cover" />
+        ) : (
+          <span className="text-3xl">Photo</span>
+        )}
       </div>
-      <p className="text-sm text-muted-foreground text-center">
-        Click the camera icon to upload your couple picture
-      </p>
+      <Button
+        type="button"
+        size="icon"
+        className="absolute bottom-2 right-2 h-10 w-10 rounded-full bg-white shadow-lg hover:bg-gray-100"
+        onClick={handleClick}
+        disabled={uploading}
+        aria-label="Upload couple picture"
+      >
+        {uploading ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : (
+          <Camera className="h-5 w-5" />
+        )}
+      </Button>
+      <input
+        ref={fileInputRef}
+        id="couple-picture-upload"
+        type="file"
+        accept="image/*"
+        onChange={uploadCouplePicture}
+        disabled={uploading}
+        className="hidden"
+      />
     </div>
   );
 };
