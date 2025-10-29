@@ -11,6 +11,7 @@ import { MessageCircle, Settings, LogOut, Users, Link2, Calendar, Flame, Home, L
 import { useToast } from "@/hooks/use-toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
+import { CouplePictureUpload } from "@/components/CouplePictureUpload";
 import { FeelingStatusSelector } from "@/components/FeelingStatusSelector";
 import { NotificationSettings } from "@/components/NotificationSettings";
 import { MessengerChat } from "@/components/MessengerChat";
@@ -29,6 +30,7 @@ interface CoupleData {
   coupleId: string;
   inviteCode: string;
   spaceName: string;
+  couplePictureUrl?: string;
   partner: {
     user_id: string;
     full_name: string;
@@ -121,6 +123,7 @@ const Dashboard = () => {
       coupleId: couple.id,
       inviteCode: couple.invite_code,
       spaceName: couple.name || 'name your space',
+      couplePictureUrl: couple.couple_picture_url || undefined,
       partner: partnerData,
     });
     setSpaceName(couple.name || 'name your space');
@@ -456,15 +459,13 @@ const Dashboard = () => {
         {/* Single Couple Profile Photo */}
         <div className="flex flex-col items-center gap-4 mt-6">
           <div className="relative">
-            <div className="w-40 h-40 rounded-full border-8 border-black overflow-hidden bg-[#F5E6D3] flex items-center justify-center">
-              {coupleData.couplePictureUrl ? (
-                <img src={coupleData.couplePictureUrl} alt="Couple" className="w-full h-full object-cover" />
-              ) : userProfile?.avatar_url ? (
-                <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-3xl">Photo</span>
-              )}
-            </div>
+            <CouplePictureUpload
+              coupleId={coupleData.coupleId}
+              currentPictureUrl={coupleData.couplePictureUrl || userProfile?.avatar_url || null}
+              onUploadComplete={(url) => {
+                setCoupleData({ ...coupleData, couplePictureUrl: url });
+              }}
+            />
           </div>
 
           {/* Feeling Status with Names */}
