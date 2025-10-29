@@ -371,21 +371,21 @@ export const PostsFeed = ({ coupleId, userId }: PostsFeedProps) => {
                         return (
                           <div 
                             key={index} 
-                            className={`rounded-lg overflow-hidden ${
-                              post.media_urls!.length === 1 ? 'max-h-96' : 'h-48'
+                            className={`rounded-lg overflow-hidden bg-muted/30 flex items-center justify-center ${
+                              post.media_urls!.length === 1 ? 'max-h-[500px] min-h-[300px]' : 'h-56'
                             }`}
                           >
                             {isVideo ? (
                               <video 
                                 src={url} 
                                 controls 
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-contain"
                               />
                             ) : (
                               <img 
                                 src={url} 
                                 alt="Post media" 
-                                className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
+                                className="w-full h-full object-contain hover:opacity-90 transition-opacity cursor-pointer"
                                 onClick={() => window.open(url, '_blank')}
                               />
                             )}
