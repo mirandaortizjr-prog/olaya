@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Heart, Coffee, Hand, Sparkles, Calendar, Gift } from "lucide-react";
+import { Heart, Check } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -96,6 +97,20 @@ export const RecentMessages = ({ coupleId, userId, partnerName }: RecentMessages
     }
   };
 
+  const fulfillDesire = async (desireId: string) => {
+    const { error } = await supabase
+      .from('craving_board')
+      .update({
+        fulfilled: true,
+        fulfilled_at: new Date().toISOString()
+      })
+      .eq('id', desireId);
+
+    if (error) {
+      console.error('Error fulfilling desire:', error);
+    }
+  };
+
   if (desires.length === 0) {
     return null;
   }
@@ -133,7 +148,22 @@ export const RecentMessages = ({ coupleId, userId, partnerName }: RecentMessages
                   })}
                 </p>
               </div>
-              <Heart className="w-3 h-3 text-pink-600 flex-shrink-0" />
+              {isFromPartner && !desire.fulfilled && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 w-6 p-0 hover:bg-green-100"
+                  onClick={() => fulfillDesire(desire.id)}
+                >
+                  <Check className="h-3.5 w-3.5 text-green-600" />
+                </Button>
+              )}
+              {desire.fulfilled && (
+                <Check className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
+              )}
+              {!isFromPartner && !desire.fulfilled && (
+                <Heart className="w-3 h-3 text-pink-600 flex-shrink-0" />
+              )}
             </div>
           );
         })}
