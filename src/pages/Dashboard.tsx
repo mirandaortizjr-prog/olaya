@@ -578,9 +578,9 @@ const Dashboard = () => {
           />
         )}
 
-        {/* YouTube Song Player - Centered between notifications and Love Meter */}
-        <div className="w-full max-w-lg mx-auto">
-          {coupleSongs.length > 0 && (
+        {/* YouTube Song Player Embed - Always visible when songs exist */}
+        {coupleSongs.length > 0 && isSongPlaying && (
+          <div className="w-full max-w-lg mx-auto px-4 mb-4">
             <CoupleSongPlayerEmbed
               videoIds={coupleSongs.map(url => {
                 const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/|music\.youtube\.com\/watch\?v=)([^&\n?#]+)/);
@@ -590,10 +590,10 @@ const Dashboard = () => {
               isPlaying={isSongPlaying}
               onClose={() => setIsSongPlaying(false)}
               onNext={() => setCurrentSongIndex(prev => (prev + 1) % coupleSongs.length)}
-              onEditClick={() => setShowSongDialog(true)}
+              onEditClick={() => setShowSongSettings(true)}
             />
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Love-O-Meter */}
         <LoveMeter coupleId={coupleData.coupleId} />
