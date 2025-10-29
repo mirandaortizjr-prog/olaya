@@ -119,11 +119,24 @@ const Dashboard = () => {
     const { data: partner } = await supabase.rpc('get_partner_profile', { c_id: couple.id });
     const partnerData = partner && partner.length > 0 ? partner[0] : null;
 
+    // Load couple picture URL if it exists
+    let couplePictureUrl = couple.couple_picture_url;
+    if (couplePictureUrl && couplePictureUrl.startsWith('couple_media/')) {
+      // Extract the path from the storage path
+      const filePath = couplePictureUrl.replace('couple_media/', '');
+      const { data: signedData } = await supabase.storage
+        .from('couple_media')
+        .createSignedUrl(filePath, 60 * 60 * 24 * 7); // 7 days
+      if (signedData?.signedUrl) {
+        couplePictureUrl = signedData.signedUrl;
+      }
+    }
+
     setCoupleData({
       coupleId: couple.id,
       inviteCode: couple.invite_code,
       spaceName: couple.name || 'name your space',
-      couplePictureUrl: couple.couple_picture_url || undefined,
+      couplePictureUrl: couplePictureUrl || undefined,
       partner: partnerData,
     });
     setSpaceName(couple.name || 'name your space');
