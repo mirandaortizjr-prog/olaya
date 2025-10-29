@@ -87,8 +87,8 @@ export const FlirtNotifications = ({ coupleId, userId, partnerName }: FlirtNotif
 
   return (
     <Card className="p-3 bg-[#F5E6D3] border-gray-300 max-h-32">
-      <h3 className="text-xs font-semibold mb-2 text-gray-800 flex items-center gap-2">
-        <Flame className="w-3 h-3 text-red-500" />
+      <h3 className="text-xs font-semibold mb-2 text-gray-900 flex items-center gap-2">
+        <Flame className="w-3 h-3 text-red-600" />
         Flirts from {partnerName}
       </h3>
       <div className="space-y-1.5 overflow-y-auto max-h-20 pr-1">
@@ -101,16 +101,16 @@ export const FlirtNotifications = ({ coupleId, userId, partnerName }: FlirtNotif
           return (
             <div
               key={flirt.id}
-              className="flex items-center gap-2 p-1.5 rounded-lg bg-white/60"
+              className="flex items-center gap-2 p-1.5 rounded-lg bg-white/70"
             >
               <span className="text-lg">{flirtInfo.emoji}</span>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium truncate">{flirtInfo.label}</p>
-                <p className="text-[10px] text-gray-600">
+                <p className="text-xs font-medium truncate text-gray-900">{flirtInfo.label}</p>
+                <p className="text-[10px] text-gray-700">
                   {formatDistanceToNow(new Date(flirt.created_at), { addSuffix: true })}
                 </p>
               </div>
-              <FlirtIcon className="w-3 h-3 text-red-500 flex-shrink-0" />
+              <FlirtIcon className="w-3 h-3 text-red-600 flex-shrink-0" />
             </div>
           );
         })}
