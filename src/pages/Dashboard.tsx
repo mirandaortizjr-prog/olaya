@@ -12,6 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
 import { CouplePictureUpload, CouplePictureUploadButton } from "@/components/CouplePictureUpload";
+import { BackgroundSlideshow } from "@/components/BackgroundSlideshow";
+import { BackgroundUploadManager } from "@/components/BackgroundUploadManager";
 import { FeelingStatusSelector } from "@/components/FeelingStatusSelector";
 import { NotificationSettings } from "@/components/NotificationSettings";
 import { MessengerChat } from "@/components/MessengerChat";
@@ -491,8 +493,23 @@ const Dashboard = () => {
       </div>
 
       <div className="max-w-lg mx-auto px-4 space-y-4">
-        {/* Single Couple Profile Photo */}
-        <div className="flex flex-col items-center gap-4 mt-6">
+        {/* Hero Section with background slideshow */}
+        <div className="relative h-64 overflow-hidden rounded-2xl mt-4">
+          <BackgroundSlideshow coupleId={coupleData.coupleId} />
+          
+          {/* Profile picture as circular overlay - smaller size */}
+          <div className="absolute bottom-4 left-4">
+            <Avatar className="w-20 h-20 border-4 border-background shadow-lg">
+              <AvatarImage src={userProfile?.avatar_url} />
+              <AvatarFallback className="bg-primary text-primary-foreground text-xl">
+                {user?.email?.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+        </div>
+
+        {/* Couple Profile Photo */}
+        <div className="flex flex-col items-center gap-4">
           <div className="relative">
             <CouplePictureUpload
               coupleId={coupleData.coupleId}
@@ -655,6 +672,7 @@ const Dashboard = () => {
                 setCoupleData({ ...coupleData, couplePictureUrl: url });
               }}
             />
+            <BackgroundUploadManager coupleId={coupleData.coupleId} />
             <div>
               <h3 className="font-semibold mb-2">Language</h3>
               <LanguageSwitcher />

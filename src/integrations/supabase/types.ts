@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      couple_background_images: {
+        Row: {
+          couple_id: string
+          created_at: string
+          display_order: number
+          id: string
+          image_path: string
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_path: string
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_path?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "couple_background_images_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       couple_members: {
         Row: {
           couple_id: string
