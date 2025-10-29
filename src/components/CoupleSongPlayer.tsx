@@ -42,48 +42,7 @@ interface PlayerComponentProps {
 }
 
 export const CoupleSongPlayerEmbed = ({ videoIds, currentIndex, isPlaying, onClose, onNext, onEditClick }: PlayerComponentProps) => {
-  const [player, setPlayer] = useState<any>(null);
-
-  useEffect(() => {
-    if (!isPlaying || videoIds.length === 0) return;
-
-    // Load YouTube IFrame API
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-
-    // @ts-ignore
-    window.onYouTubeIframeAPIReady = () => {
-      // @ts-ignore
-      const newPlayer = new window.YT.Player('youtube-player', {
-        videoId: videoIds[currentIndex],
-        events: {
-          onStateChange: (event: any) => {
-            // @ts-ignore
-            if (event.data === window.YT.PlayerState.ENDED) {
-              onNext();
-            }
-          },
-        },
-      });
-      setPlayer(newPlayer);
-    };
-
-    return () => {
-      if (player) {
-        player.destroy();
-      }
-    };
-  }, [isPlaying]);
-
-  useEffect(() => {
-    if (player && videoIds[currentIndex]) {
-      player.loadVideoById(videoIds[currentIndex]);
-    }
-  }, [currentIndex, player, videoIds]);
-
-  if (!isPlaying || videoIds.length === 0) return null;
+  if (videoIds.length === 0) return null;
   
   return (
     <div className="w-full max-w-lg mx-auto shadow-2xl rounded-lg overflow-hidden bg-background border">
@@ -120,7 +79,24 @@ export const CoupleSongPlayerEmbed = ({ videoIds, currentIndex, isPlaying, onClo
         </Button>
       </div>
       <div className="aspect-video">
-        <div id="youtube-player" className="w-full h-full"></div>
+        <iframe
+          key={videoIds[currentIndex]}
+          src={`https://www.youtube.com/embed/${videoIds[currentIndex]}?autoplay=1&enablejsapi=1`}
+          className="w-full h-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          onLoad={(e) => {
+            // Listen for video end to play next
+            const iframe = e.currentTarget;
+            const checkEnded = setInterval(() => {
+              try {
+                iframe.contentWindow?.postMessage('{"event":"listening"}', '*');
+              } catch (err) {
+                clearInterval(checkEnded);
+              }
+            }, 1000);
+          }}
+        />
       </div>
     </div>
   );
