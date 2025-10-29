@@ -453,8 +453,10 @@ const Dashboard = () => {
       {/* Top Header Bar */}
       <div className="bg-muted p-4">
         <div className="flex items-center justify-between max-w-lg mx-auto gap-2">
-          {/* Left spacer to balance layout (song button removed from header) */}
-          <div className="w-7 h-7" aria-hidden="true" />
+          {/* Left: Settings */}
+          <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="text-foreground flex-shrink-0">
+            <Settings className="w-7 h-7" />
+          </Button>
 
           {/* Center: Space name (editable) */}
           {editingSpaceName ? (
@@ -475,21 +477,16 @@ const Dashboard = () => {
             </h1>
           )}
 
-          {/* Right: Settings and Messenger */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="text-foreground">
-              <Settings className="w-7 h-7" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowMessenger(true)}
-              disabled={!coupleData.partner}
-              className="text-foreground flex-shrink-0"
-            >
-              <MessageCircle className="w-7 h-7" />
-            </Button>
-          </div>
+          {/* Right: Messenger */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowMessenger(true)}
+            disabled={!coupleData.partner}
+            className="text-foreground flex-shrink-0"
+          >
+            <MessageCircle className="w-7 h-7" />
+          </Button>
         </div>
       </div>
 
