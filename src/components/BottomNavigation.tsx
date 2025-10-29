@@ -9,6 +9,7 @@ interface BottomNavigationProps {
 export const BottomNavigation = ({ activeView, onViewChange }: BottomNavigationProps) => {
   const navItems = [
     { id: "desires", icon: Heart, label: "Desires" },
+    { id: "flirt", icon: Flame, label: "Flirt" },
     { id: "home", icon: Home, label: "Home" },
     { id: "locked", icon: Lock, label: "Vault" },
     { id: "games", icon: Gamepad2, label: "Games" },
