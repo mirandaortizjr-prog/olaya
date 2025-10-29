@@ -39,20 +39,20 @@ const desireEmojis: Record<string, string> = {
   custom: "💝",
 };
 
-const desireLabels: Record<string, { en: string; es: string }> = {
-  kiss: { en: "wants a kiss", es: "quiere un beso" },
-  hug: { en: "wants a hug", es: "quiere un abrazo" },
-  qualityTime: { en: "wants quality time", es: "quiere tiempo de calidad" },
-  massage: { en: "wants a massage", es: "quiere un masaje" },
-  videoGames: { en: "wants to play games", es: "quiere jugar" },
-  yumyum: { en: "is feeling frisky", es: "está juguetón" },
-  oralSex: { en: "wants intimacy", es: "quiere intimidad" },
-  coffee: { en: "wants coffee", es: "quiere café" },
-  date: { en: "wants a date", es: "quiere una cita" },
-  adventure: { en: "wants an adventure", es: "quiere una aventura" },
-  chocolate: { en: "wants chocolate", es: "quiere chocolate" },
-  cuddle: { en: "wants to cuddle", es: "quiere acurrucarse" },
-  surprise: { en: "wants a surprise", es: "quiere una sorpresa" },
+const desireLabels: Record<string, { en: { thirdPerson: string; firstPerson: string }; es: { thirdPerson: string; firstPerson: string } }> = {
+  kiss: { en: { thirdPerson: "wants a kiss", firstPerson: "want a kiss" }, es: { thirdPerson: "quiere un beso", firstPerson: "quiero un beso" } },
+  hug: { en: { thirdPerson: "wants a hug", firstPerson: "want a hug" }, es: { thirdPerson: "quiere un abrazo", firstPerson: "quiero un abrazo" } },
+  qualityTime: { en: { thirdPerson: "wants quality time", firstPerson: "want quality time" }, es: { thirdPerson: "quiere tiempo de calidad", firstPerson: "quiero tiempo de calidad" } },
+  massage: { en: { thirdPerson: "wants a massage", firstPerson: "want a massage" }, es: { thirdPerson: "quiere un masaje", firstPerson: "quiero un masaje" } },
+  videoGames: { en: { thirdPerson: "wants to play games", firstPerson: "want to play games" }, es: { thirdPerson: "quiere jugar", firstPerson: "quiero jugar" } },
+  yumyum: { en: { thirdPerson: "is feeling frisky", firstPerson: "am feeling frisky" }, es: { thirdPerson: "está juguetón", firstPerson: "estoy juguetón" } },
+  oralSex: { en: { thirdPerson: "wants intimacy", firstPerson: "want intimacy" }, es: { thirdPerson: "quiere intimidad", firstPerson: "quiero intimidad" } },
+  coffee: { en: { thirdPerson: "wants coffee", firstPerson: "want coffee" }, es: { thirdPerson: "quiere café", firstPerson: "quiero café" } },
+  date: { en: { thirdPerson: "wants a date", firstPerson: "want a date" }, es: { thirdPerson: "quiere una cita", firstPerson: "quiero una cita" } },
+  adventure: { en: { thirdPerson: "wants an adventure", firstPerson: "want an adventure" }, es: { thirdPerson: "quiere una aventura", firstPerson: "quiero una aventura" } },
+  chocolate: { en: { thirdPerson: "wants chocolate", firstPerson: "want chocolate" }, es: { thirdPerson: "quiere chocolate", firstPerson: "quiero chocolate" } },
+  cuddle: { en: { thirdPerson: "wants to cuddle", firstPerson: "want to cuddle" }, es: { thirdPerson: "quiere acurrucarse", firstPerson: "quiero acurrucarse" } },
+  surprise: { en: { thirdPerson: "wants a surprise", firstPerson: "want a surprise" }, es: { thirdPerson: "quiere una sorpresa", firstPerson: "quiero una sorpresa" } },
 };
 
 export const RecentMessages = ({ coupleId, userId, partnerName }: RecentMessagesProps) => {
@@ -124,8 +124,11 @@ export const RecentMessages = ({ coupleId, userId, partnerName }: RecentMessages
       <div className="space-y-1 overflow-y-auto max-h-20 pr-1">
         {desires.map((desire) => {
           const emoji = desireEmojis[desire.craving_type] || desireEmojis.custom;
-          const label = desireLabels[desire.craving_type]?.[language] || desire.craving_type;
           const isFromPartner = desire.user_id !== userId;
+          const labelObj = desireLabels[desire.craving_type]?.[language];
+          const label = isFromPartner 
+            ? labelObj?.thirdPerson 
+            : labelObj?.firstPerson;
 
           return (
             <div
@@ -136,10 +139,10 @@ export const RecentMessages = ({ coupleId, userId, partnerName }: RecentMessages
               <div className="flex-1 min-w-0">
                 <p className="text-xs truncate font-medium text-gray-900">
                   {isFromPartner
-                    ? (partnerName || (language === 'en' ? 'Your partner' : 'Tu pareja'))
-                    : (language === 'en' ? 'You' : 'Tú')}
+                    ? partnerName || (language === 'en' ? 'Your partner' : 'Tu pareja')
+                    : (language === 'en' ? 'You' : 'Yo')}
                   {' '}
-                  {desire.custom_message || label}
+                  {desire.custom_message || label || desire.craving_type}
                 </p>
                 <p className="text-[10px] text-gray-700">
                   {formatDistanceToNow(new Date(desire.created_at), {
