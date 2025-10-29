@@ -557,18 +557,6 @@ const Dashboard = () => {
         {/* Anniversary Countdown */}
         <AnniversaryCountdown anniversaryDate={coupleData.anniversaryDate || null} />
 
-        {/* Song Player Button */}
-        <div className="flex justify-center">
-          <CoupleSongPlayer
-            coupleId={coupleData.coupleId}
-            songs={coupleSongs}
-            onUpdate={setCoupleSongs}
-            isPlaying={isSongPlaying}
-            onPlayingChange={setIsSongPlaying}
-            onEditClick={() => setShowSongSettings(true)}
-          />
-        </div>
-
         {/* Flirt Notifications */}
         {coupleData.partner && (
           <FlirtNotifications
@@ -578,8 +566,8 @@ const Dashboard = () => {
           />
         )}
 
-        {/* YouTube Song Player Embed - Always visible when songs exist */}
-        {coupleSongs.length > 0 && isSongPlaying && (
+        {/* YouTube Song Player Embed - Auto-plays on home screen */}
+        {coupleSongs.length > 0 && (
           <div className="w-full max-w-lg mx-auto px-4 mb-4">
             <CoupleSongPlayerEmbed
               videoIds={coupleSongs.map(url => {
@@ -587,8 +575,8 @@ const Dashboard = () => {
                 return match ? match[1] : null;
               }).filter(Boolean) as string[]}
               currentIndex={currentSongIndex}
-              isPlaying={isSongPlaying}
-              onClose={() => setIsSongPlaying(false)}
+              isPlaying={true}
+              onClose={() => {}}
               onNext={() => setCurrentSongIndex(prev => (prev + 1) % coupleSongs.length)}
               onEditClick={() => setShowSongSettings(true)}
             />
