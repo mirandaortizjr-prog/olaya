@@ -499,9 +499,9 @@ const Dashboard = () => {
           
           {/* Profile picture as circular overlay - smaller size */}
           <div className="absolute bottom-4 left-4">
-            <Avatar className="w-20 h-20 border-4 border-background shadow-lg">
+            <Avatar className="w-16 h-16 border-4 border-background shadow-lg">
               <AvatarImage src={userProfile?.avatar_url} />
-              <AvatarFallback className="bg-primary text-primary-foreground text-xl">
+              <AvatarFallback className="bg-primary text-primary-foreground text-base">
                 {user?.email?.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
