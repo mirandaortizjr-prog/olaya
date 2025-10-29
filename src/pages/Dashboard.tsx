@@ -453,67 +453,53 @@ const Dashboard = () => {
       </div>
 
       <div className="max-w-lg mx-auto px-4 space-y-4">
-        {/* Large Profile Photos */}
-        <div className="flex justify-around items-start gap-8 mt-6">
-          <div className="flex flex-col items-center">
-            <div className="relative">
-              <div className="w-40 h-40 rounded-full border-8 border-black overflow-hidden bg-[#F5E6D3] flex items-center justify-center">
-                {userProfile?.avatar_url ? (
-                  <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-3xl">Photo</span>
-                )}
-              </div>
-            </div>
-            <div className="mt-3">
-              {user && (
-                <div className="bg-gradient-to-r from-gray-400 to-gray-500 rounded-full px-8 py-2 shadow-lg">
-                  <FeelingStatusSelector
-                    coupleId={coupleData.coupleId}
-                    userId={user.id}
-                    currentStatus={userFeelingStatus}
-                    currentCustomMessage={userCustomMessage}
-                    onStatusChange={(status, customMsg) => {
-                      setUserFeelingStatus(status);
-                      setUserCustomMessage(customMsg || "");
-                    }}
-                  />
-                </div>
+        {/* Single Couple Profile Photo */}
+        <div className="flex flex-col items-center gap-4 mt-6">
+          <div className="relative">
+            <div className="w-40 h-40 rounded-full border-8 border-black overflow-hidden bg-[#F5E6D3] flex items-center justify-center">
+              {coupleData.couplePictureUrl ? (
+                <img src={coupleData.couplePictureUrl} alt="Couple" className="w-full h-full object-cover" />
+              ) : userProfile?.avatar_url ? (
+                <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-3xl">Photo</span>
               )}
             </div>
           </div>
 
-          <div className="flex flex-col items-center">
-            {coupleData.partner ? (
-              <>
-                <div className="w-40 h-40 rounded-full border-8 border-black overflow-hidden bg-[#F5E6D3] flex items-center justify-center">
-                  {coupleData.partner.avatar_url ? (
-                    <img src={coupleData.partner.avatar_url} alt="Partner" className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-3xl">Photo</span>
-                  )}
-                </div>
-                <div className="mt-3">
-                  <div className="bg-gradient-to-r from-gray-400 to-gray-500 rounded-full px-8 py-2 shadow-lg">
-                    <span className="text-sm">
-                      {partnerFeelingStatus === "custom" && partnerCustomMessage 
-                        ? partnerCustomMessage 
-                        : partnerFeelingStatus || "Feeling"}
-                    </span>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="w-40 h-40 rounded-full border-8 border-black bg-[#F5E6D3] flex items-center justify-center">
-                  <span className="text-3xl">Photo</span>
-                </div>
-                <div className="mt-3">
-                  <div className="bg-gradient-to-r from-gray-400 to-gray-500 rounded-full px-8 py-2 shadow-lg">
-                    <span className="text-sm">Feeling</span>
-                  </div>
-                </div>
-              </>
+          {/* Feeling Status with Names */}
+          <div className="w-full space-y-3">
+            {/* User Status */}
+            <div className="flex items-center justify-between bg-gradient-to-r from-gray-400 to-gray-500 rounded-full px-6 py-2 shadow-lg">
+              <span className="text-sm font-medium text-white">
+                {userProfile?.full_name || 'You'}
+              </span>
+              {user && (
+                <FeelingStatusSelector
+                  coupleId={coupleData.coupleId}
+                  userId={user.id}
+                  currentStatus={userFeelingStatus}
+                  currentCustomMessage={userCustomMessage}
+                  onStatusChange={(status, customMsg) => {
+                    setUserFeelingStatus(status);
+                    setUserCustomMessage(customMsg || "");
+                  }}
+                />
+              )}
+            </div>
+
+            {/* Partner Status */}
+            {coupleData.partner && (
+              <div className="flex items-center justify-between bg-gradient-to-r from-gray-400 to-gray-500 rounded-full px-6 py-2 shadow-lg">
+                <span className="text-sm font-medium text-white">
+                  {coupleData.partner.full_name || 'Partner'}
+                </span>
+                <span className="text-sm text-white">
+                  {partnerFeelingStatus === "custom" && partnerCustomMessage 
+                    ? partnerCustomMessage 
+                    : partnerFeelingStatus || "Feeling"}
+                </span>
+              </div>
             )}
           </div>
         </div>
