@@ -32,6 +32,7 @@ import { AnniversaryCountdown } from "@/components/AnniversaryCountdown";
 import { ThemeSettings } from "@/components/ThemeSettings";
 import { SongSettings } from "@/components/SongSettings";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { PremiumFeatures } from "@/components/PremiumFeatures";
 
 interface CoupleData {
   coupleId: string;
@@ -660,12 +661,43 @@ const Dashboard = () => {
   if (activeView === "locked") {
     return (
       <>
-        <PrivateVault
-          coupleId={coupleData.coupleId}
-          userId={user!.id}
-          onClose={() => setActiveView("home")}
-          lastViewedTimestamp={lastViewedVault}
-        />
+        <div className="min-h-screen bg-muted pb-24">
+          <div className="bg-muted p-4">
+            <div className="flex items-center justify-between max-w-lg mx-auto">
+              <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="text-foreground">
+                <Settings className="w-7 h-7" />
+              </Button>
+              <h1 className="text-xl font-normal">Private</h1>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowMessenger(true)}
+                disabled={!coupleData.partner}
+                className="text-foreground"
+              >
+                <MessageCircle className="w-7 h-7" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="max-w-lg mx-auto px-4 space-y-4">
+            <PremiumFeatures
+              coupleId={coupleData.coupleId}
+              userId={user!.id}
+              userEmail={userProfile?.email || ''}
+              partnerUserId={coupleData.partner?.user_id}
+              lastViewedTimestamp={lastViewedVault}
+            />
+            
+            <PrivateVault
+              coupleId={coupleData.coupleId}
+              userId={user!.id}
+              onClose={() => setActiveView("home")}
+              lastViewedTimestamp={lastViewedVault}
+            />
+          </div>
+        </div>
+        
         <div className="fixed bottom-0 left-0 right-0 bg-muted/80 backdrop-blur border-t">
           <div className="flex justify-around items-center h-20 max-w-lg mx-auto px-4">
             <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("calendar")}>
@@ -677,8 +709,11 @@ const Dashboard = () => {
             <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("home")}>
               <Home className="w-7 h-7 text-muted-foreground" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("locked")}>
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col relative" onClick={() => setActiveView("locked")}>
               <Lock className="w-7 h-7 text-foreground" />
+              {newVaultCount > 0 && (
+                <span className="absolute top-2 right-2 w-3 h-3 bg-green-500 rounded-full" />
+              )}
             </Button>
           </div>
         </div>
@@ -899,8 +934,11 @@ const Dashboard = () => {
           <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("home")}>
             <Home className="w-7 h-7 text-foreground" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("locked")}>
+          <Button variant="ghost" size="icon" className="h-16 w-16 flex-col relative" onClick={() => setActiveView("locked")}>
             <Lock className="w-7 h-7 text-muted-foreground" />
+            {newVaultCount > 0 && (
+              <span className="absolute top-2 right-2 w-3 h-3 bg-green-500 rounded-full" />
+            )}
           </Button>
           <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("games")}>
             <Gamepad2 className="w-7 h-7 text-muted-foreground" />

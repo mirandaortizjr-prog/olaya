@@ -12,11 +12,31 @@ interface LoveLanguageSelectorProps {
 }
 
 const loveLanguages = [
-  { value: 'words_of_affirmation', label: 'Words of Affirmation' },
-  { value: 'quality_time', label: 'Quality Time' },
-  { value: 'receiving_gifts', label: 'Receiving Gifts' },
-  { value: 'acts_of_service', label: 'Acts of Service' },
-  { value: 'physical_touch', label: 'Physical Touch' },
+  { 
+    value: 'words_of_affirmation', 
+    label: 'Words of Affirmation',
+    description: 'You feel most loved when your partner expresses affection through words, compliments, and verbal encouragement.'
+  },
+  { 
+    value: 'quality_time', 
+    label: 'Quality Time',
+    description: 'You feel most loved when your partner gives you their undivided attention and spends meaningful time together.'
+  },
+  { 
+    value: 'receiving_gifts', 
+    label: 'Receiving Gifts',
+    description: 'You feel most loved when your partner gives you thoughtful gifts that show they were thinking of you.'
+  },
+  { 
+    value: 'acts_of_service', 
+    label: 'Acts of Service',
+    description: 'You feel most loved when your partner does things to help you or make your life easier.'
+  },
+  { 
+    value: 'physical_touch', 
+    label: 'Physical Touch',
+    description: 'You feel most loved through physical expressions of affection like hugs, kisses, and holding hands.'
+  },
 ];
 
 export const LoveLanguageSelector = ({ userId, partnerUserId }: LoveLanguageSelectorProps) => {
@@ -92,8 +112,13 @@ export const LoveLanguageSelector = ({ userId, partnerUserId }: LoveLanguageSele
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div>
-          <label className="text-sm font-medium mb-2 block">Your Primary Love Language</label>
+        <div className="space-y-3">
+          <label className="text-sm font-medium block">Your Primary Love Language</label>
+          {primaryLanguage && (
+            <div className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-lg mb-2">
+              {loveLanguages.find(l => l.value === primaryLanguage)?.description}
+            </div>
+          )}
           <Select value={primaryLanguage} onValueChange={setPrimaryLanguage}>
             <SelectTrigger>
               <SelectValue placeholder="Select your primary love language" />
@@ -108,8 +133,13 @@ export const LoveLanguageSelector = ({ userId, partnerUserId }: LoveLanguageSele
           </Select>
         </div>
 
-        <div>
-          <label className="text-sm font-medium mb-2 block">Your Secondary Love Language</label>
+        <div className="space-y-3">
+          <label className="text-sm font-medium block">Your Secondary Love Language</label>
+          {secondaryLanguage && (
+            <div className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-lg mb-2">
+              {loveLanguages.find(l => l.value === secondaryLanguage)?.description}
+            </div>
+          )}
           <Select value={secondaryLanguage} onValueChange={setSecondaryLanguage}>
             <SelectTrigger>
               <SelectValue placeholder="Select your secondary love language" />
