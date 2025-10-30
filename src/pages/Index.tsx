@@ -87,9 +87,6 @@ const Index = () => {
               alt="OLAYA Logo" 
               className="w-80 h-80 mb-6 drop-shadow-2xl"
             />
-            <h1 className="text-5xl lg:text-7xl font-bold text-white">
-              {t("indexTitle")}
-            </h1>
             <p className="text-xl lg:text-2xl text-slate-300 max-w-lg">
               {t("indexSubtitle")}
             </p>
