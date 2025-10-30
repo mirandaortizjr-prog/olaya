@@ -680,7 +680,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="max-w-lg mx-auto px-4 space-y-4">
+          <div className="max-w-lg mx-auto px-4 space-y-4 mt-4">
             <PremiumFeatures
               coupleId={coupleData.coupleId}
               userId={user!.id}
