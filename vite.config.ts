@@ -20,8 +20,8 @@ export default defineConfig(({ mode }) => ({
         name: 'OLAYA',
         short_name: 'OLAYA',
         description: 'Your Sacred Space for Connection',
-        theme_color: '#9b87f5',
-        background_color: '#ffffff',
+        theme_color: '#000000',
+        background_color: '#000000',
         display: 'standalone',
         icons: [
           {

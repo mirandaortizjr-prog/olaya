@@ -74,9 +74,9 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-700">
+    <div className="min-h-screen bg-black">
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden bg-black">
         <div className="absolute top-4 right-4 z-10">
           <LanguageSwitcher />
         </div>
@@ -85,7 +85,7 @@ const Index = () => {
             <img 
               src={olayaLogo} 
               alt="OLAYA Logo" 
-              className="w-64 h-64 mb-6 drop-shadow-2xl"
+              className="w-80 h-80 mb-6 drop-shadow-2xl"
             />
             <h1 className="text-5xl lg:text-7xl font-bold text-white">
               {t("indexTitle")}
