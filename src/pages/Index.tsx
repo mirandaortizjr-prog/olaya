@@ -57,16 +57,11 @@ const Index = () => {
   ];
 
   const premiumFeatures = [
-    "Desire Vault: Share intimate fantasies, fetishes & desires with 10 categories",
-    "Privacy Controls: Toggle between private desires and shared with partner",
-    "Fulfilled Tracking: Mark desires as completed with timestamps",
-    "Love Language Selector: Discover and share your love languages",
-    "Shared Journal: Write reflections and thoughts together with mood tracking",
-    "Relationship Timeline: Document milestones with photos and rich descriptions",
-    "Posts Feed: Share moments with likes, comments, and media galleries",
-    "Calming Tools: Breathing exercises, meditation timers, and soothing sounds",
-    "Enhanced Categories: 10 intimate desire categories with custom emojis",
-    "Priority Support: Get help when you need it most",
+    "All Free Features included",
+    "Unlimited storage for memories and media",
+    "Advanced privacy controls",
+    "Priority customer support",
+    "Early access to new features",
   ];
 
   return (
