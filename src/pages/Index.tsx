@@ -48,16 +48,12 @@ const Index = () => {
   ];
 
   const freeFeatures = [
-    "Daily Notes: Morning whispers, evening blessings, shared reflections",
-    "Love Notes: Flirtation, devotion, and affirmations between partners",
-    "Mood Tracker: Share emotional states with 13 moods including intimate feelings",
-    "Craving Board: Request hugs, chocolate, emotional support, and intimate desires",
-    "Memory Calendar: Track anniversaries, special dates, and recurring events",
-    "Quick Actions: Send instant messages like winks, kisses, and love notes",
-    "Love Meter: Track daily interactions and weekly connection strength",
-    "Basic Media Sharing: Share private photos and videos with your partner",
-    "Profile Management: Customize avatars and personal information",
-    "Real-time Sync: Instant updates when your partner adds content",
+    "Daily Notes: Morning whispers, evening blessings",
+    "Love Notes: Share your deepest affections",
+    "Memory Calendar: Cherish special moments together",
+    "Mood Check-in: Express how you're feeling today",
+    "Gratitude Wall: Celebrate what you appreciate",
+    "Shared Journal: Grow together through reflection",
   ];
 
   const premiumFeatures = [
