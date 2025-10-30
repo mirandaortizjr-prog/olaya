@@ -16,6 +16,7 @@ interface FlirtNotificationsProps {
   coupleId: string;
   userId: string;
   partnerName: string;
+  lastViewedTimestamp?: Date;
 }
 
 const FLIRT_ICONS: Record<string, { icon: any; emoji: string; label: string }> = {
@@ -27,9 +28,14 @@ const FLIRT_ICONS: Record<string, { icon: any; emoji: string; label: string }> =
   fire: { icon: Flame, emoji: "🔥", label: "Is feeling fire" },
 };
 
-export const FlirtNotifications = ({ coupleId, userId, partnerName }: FlirtNotificationsProps) => {
+export const FlirtNotifications = ({ coupleId, userId, partnerName, lastViewedTimestamp }: FlirtNotificationsProps) => {
   const [recentFlirts, setRecentFlirts] = useState<Flirt[]>([]);
   const { toast } = useToast();
+
+  const isNewFlirt = (createdAt: string) => {
+    if (!lastViewedTimestamp) return false;
+    return new Date(createdAt) > lastViewedTimestamp;
+  };
 
   useEffect(() => {
     fetchRecentFlirts();
@@ -97,15 +103,24 @@ export const FlirtNotifications = ({ coupleId, userId, partnerName }: FlirtNotif
           if (!flirtInfo) return null;
 
           const FlirtIcon = flirtInfo.icon;
+          const isNew = isNewFlirt(flirt.created_at);
           
           return (
             <div
               key={flirt.id}
-              className="flex items-center gap-2 p-1.5 rounded-lg bg-white/70"
+              className={`flex items-center gap-2 p-1.5 rounded-lg relative ${
+                isNew ? 'bg-green-50 ring-2 ring-green-500' : 'bg-white/70'
+              }`}
             >
+              {isNew && (
+                <span className="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              )}
               <span className="text-lg">{flirtInfo.emoji}</span>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium truncate text-gray-900">{flirtInfo.label}</p>
+                <p className="text-xs font-medium truncate text-gray-900">
+                  {flirtInfo.label}
+                  {isNew && <span className="ml-1 text-green-600">• New!</span>}
+                </p>
                 <p className="text-[10px] text-gray-700">
                   {formatDistanceToNow(new Date(flirt.created_at), { addSuffix: true })}
                 </p>

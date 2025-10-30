@@ -77,6 +77,7 @@ const Dashboard = () => {
   const [editingSpaceName, setEditingSpaceName] = useState(false);
   const [spaceName, setSpaceName] = useState("");
   const [pendingGamesCount, setPendingGamesCount] = useState(0);
+  const [pendingGameSessions, setPendingGameSessions] = useState<any[]>([]);
   const [newDesiresCount, setNewDesiresCount] = useState(0);
   const [newFlirtsCount, setNewFlirtsCount] = useState(0);
   const [newVaultCount, setNewVaultCount] = useState(0);
@@ -388,13 +389,14 @@ const Dashboard = () => {
     // Count game sessions where partner initiated and user hasn't responded yet
     const { data: sessions, error } = await supabase
       .from('game_sessions')
-      .select('id, initiated_by, game_type')
+      .select('id, initiated_by, game_type, partner_id, status')
       .eq('couple_id', membership.couple_id)
       .eq('partner_id', user.id)
       .eq('status', 'pending');
 
     if (!error && sessions) {
       setPendingGamesCount(sessions.length);
+      setPendingGameSessions(sessions);
     }
   };
 
@@ -644,6 +646,7 @@ const Dashboard = () => {
         userId={user!.id}
         partnerId={coupleData.partner?.user_id || null}
         onClose={() => setActiveView("home")}
+        pendingGameSessions={pendingGameSessions}
       />
     );
   }
@@ -661,6 +664,7 @@ const Dashboard = () => {
           coupleId={coupleData.coupleId}
           userId={user!.id}
           onClose={() => setActiveView("home")}
+          lastViewedTimestamp={lastViewedVault}
         />
         <div className="fixed bottom-0 left-0 right-0 bg-muted/80 backdrop-blur border-t">
           <div className="flex justify-around items-center h-20 max-w-lg mx-auto px-4">
@@ -689,6 +693,7 @@ const Dashboard = () => {
           coupleId={coupleData.coupleId}
           userId={user!.id}
           onClose={() => setActiveView("home")}
+          lastViewedTimestamp={lastViewedVault}
         />
         <div className="fixed bottom-0 left-0 right-0 bg-muted/80 backdrop-blur border-t">
           <div className="flex justify-around items-center h-20 max-w-lg mx-auto px-4">
@@ -822,6 +827,7 @@ const Dashboard = () => {
             coupleId={coupleData.coupleId}
             userId={user!.id}
             partnerName={coupleData.partner.full_name || "Partner"}
+            lastViewedTimestamp={lastViewedFlirts}
           />
         )}
 
@@ -915,6 +921,7 @@ const Dashboard = () => {
           userId={user!.id}
           open={showDesires}
           onClose={() => setShowDesires(false)}
+          lastViewedTimestamp={lastViewedDesires}
         />
       )}
 

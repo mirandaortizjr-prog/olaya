@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 interface DesireVaultProps {
   coupleId: string;
   userId: string;
+  lastViewedTimestamp?: Date;
 }
 
 const categoryConfig = {
@@ -32,7 +33,7 @@ const categoryConfig = {
   experience: { color: 'bg-indigo-500/10 border-indigo-500/30 text-indigo-600', emoji: '💫' },
 };
 
-export const DesireVault = ({ coupleId, userId }: DesireVaultProps) => {
+export const DesireVault = ({ coupleId, userId, lastViewedTimestamp }: DesireVaultProps) => {
   const [desires, setDesires] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState('');
@@ -42,6 +43,11 @@ export const DesireVault = ({ coupleId, userId }: DesireVaultProps) => {
   const [showFulfilled, setShowFulfilled] = useState(false);
   const { toast } = useToast();
   const { t } = useLanguage();
+
+  const isNewDesire = (createdAt: string) => {
+    if (!lastViewedTimestamp) return false;
+    return new Date(createdAt) > lastViewedTimestamp;
+  };
 
   useEffect(() => {
     fetchDesires();
@@ -267,20 +273,31 @@ export const DesireVault = ({ coupleId, userId }: DesireVaultProps) => {
 
               if (!canView) return null;
 
+              const isNew = isNewDesire(desire.created_at) && desire.user_id !== userId;
+              
               return (
                 <Card 
                   key={desire.id} 
                   className={cn(
-                    "transition-all hover:shadow-md",
-                    desire.fulfilled && "opacity-60"
+                    "transition-all hover:shadow-md relative",
+                    desire.fulfilled && "opacity-60",
+                    isNew && !desire.fulfilled && "ring-2 ring-green-500"
                   )}
                 >
+                  {isNew && !desire.fulfilled && (
+                    <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-card animate-pulse" />
+                  )}
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
                           <span className="text-xl">{config?.emoji}</span>
-                          <h4 className="font-medium truncate">{desire.title}</h4>
+                          <h4 className="font-medium truncate">
+                            {desire.title}
+                            {isNew && !desire.fulfilled && (
+                              <span className="ml-2 text-xs text-green-500 font-normal">• New!</span>
+                            )}
+                          </h4>
                           {desire.is_private && (
                             <Badge variant="secondary" className="text-xs">
                               <Lock className="h-3 w-3 mr-1" />

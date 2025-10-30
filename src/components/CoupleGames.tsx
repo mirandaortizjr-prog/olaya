@@ -17,13 +17,23 @@ interface CoupleGamesProps {
   userId: string;
   partnerId: string | null;
   onClose: () => void;
+  pendingGameSessions?: any[];
 }
 
 
-export const CoupleGames = ({ coupleId, userId, partnerId, onClose }: CoupleGamesProps) => {
+export const CoupleGames = ({ coupleId, userId, partnerId, onClose, pendingGameSessions = [] }: CoupleGamesProps) => {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const { language } = useLanguage();
   const t = translations[language];
+
+  // Helper function to check if a game has pending invitations
+  const hasPendingGame = (gameId: string) => {
+    return pendingGameSessions.some(session => {
+      const gameTypeMatch = session.game_type === gameId || 
+                           session.game_type === gameId.replace('-', '_');
+      return gameTypeMatch && session.partner_id === userId && session.status === 'pending';
+    });
+  };
 
   const gamesList = [
     {
@@ -119,18 +129,29 @@ export const CoupleGames = ({ coupleId, userId, partnerId, onClose }: CoupleGame
           <div className="grid md:grid-cols-2 gap-4">
             {gamesList.map((game) => {
               const Icon = game.icon;
+              const isPending = hasPendingGame(game.id);
               return (
                 <Card
                   key={game.id}
-                  className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                  className={`p-6 hover:shadow-lg transition-shadow cursor-pointer relative ${
+                    isPending ? 'ring-2 ring-green-500' : ''
+                  }`}
                   onClick={() => setSelectedGame(game.id)}
                 >
+                  {isPending && (
+                    <span className="absolute top-3 right-3 w-3 h-3 bg-green-500 rounded-full border-2 border-card animate-pulse" />
+                  )}
                   <div className="flex items-start gap-4">
                     <div className={`p-3 rounded-full bg-muted ${game.color}`}>
                       <Icon className="w-6 h-6" />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-semibold mb-1">{game.name}</h4>
+                      <h4 className="font-semibold mb-1">
+                        {game.name}
+                        {isPending && (
+                          <span className="ml-2 text-xs text-green-500 font-normal">• Waiting for you!</span>
+                        )}
+                      </h4>
                       <p className="text-sm text-muted-foreground">{game.description}</p>
                     </div>
                   </div>

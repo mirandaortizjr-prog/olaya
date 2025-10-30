@@ -55,9 +55,10 @@ interface DesireActionsProps {
   userId: string;
   open: boolean;
   onClose: () => void;
+  lastViewedTimestamp?: Date;
 }
 
-export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActionsProps) => {
+export const DesireActions = ({ coupleId, userId, open, onClose, lastViewedTimestamp }: DesireActionsProps) => {
   const [sending, setSending] = useState(false);
   const [showCustom, setShowCustom] = useState(false);
   const [customDesire, setCustomDesire] = useState("");
@@ -75,6 +76,12 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
     console.error('Error loading desires translations:', error);
     desires = translations.en.desires; // fallback
   }
+
+  const isNewCraving = (createdAt: string, cravingUserId: string) => {
+    if (!lastViewedTimestamp) return false;
+    // Only mark as new if it's from partner (not from self) and created after last view
+    return cravingUserId !== userId && new Date(createdAt) > lastViewedTimestamp;
+  };
 
   // Fetch cravings when dialog opens
   useEffect(() => {
@@ -328,15 +335,22 @@ export const DesireActions = ({ coupleId, userId, open, onClose }: DesireActions
                 <div className="space-y-1.5 max-h-[200px] overflow-y-auto pr-1 scrollbar-bold">
                   {activeCravings.map((craving) => {
                     const isMine = craving.user_id === userId;
+                    const isNew = isNewCraving(craving.created_at, craving.user_id);
                     return (
                       <div
                         key={craving.id}
-                        className="flex items-center gap-2 p-2 rounded-lg bg-white/60"
+                        className={`flex items-center gap-2 p-2 rounded-lg relative ${
+                          isNew ? 'bg-green-50 ring-2 ring-green-500' : 'bg-white/60'
+                        }`}
                       >
+                        {isNew && (
+                          <span className="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                        )}
                         <span className="text-lg">{getCravingEmoji(craving.craving_type)}</span>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-medium truncate">
                             {isMine ? "You" : "Partner"} want: {getCravingLabel(craving)}
+                            {isNew && <span className="ml-1 text-green-600">• New!</span>}
                           </p>
                         </div>
                         <div className="flex gap-1 flex-shrink-0">

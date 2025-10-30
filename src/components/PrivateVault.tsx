@@ -31,9 +31,10 @@ interface PrivateVaultProps {
   coupleId: string;
   userId: string;
   onClose: () => void;
+  lastViewedTimestamp?: Date;
 }
 
-export const PrivateVault = ({ coupleId, userId, onClose }: PrivateVaultProps) => {
+export const PrivateVault = ({ coupleId, userId, onClose, lastViewedTimestamp }: PrivateVaultProps) => {
   const [photos, setPhotos] = useState<PrivatePhoto[]>([]);
   const [journalEntries, setJournalEntries] = useState<PrivateJournalEntry[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -46,6 +47,11 @@ export const PrivateVault = ({ coupleId, userId, onClose }: PrivateVaultProps) =
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [passwordMode, setPasswordMode] = useState<'set' | 'verify'>('verify');
   const { toast } = useToast();
+
+  const isNewItem = (createdAt: string) => {
+    if (!lastViewedTimestamp) return false;
+    return new Date(createdAt) > lastViewedTimestamp;
+  };
 
   useEffect(() => {
     checkPassword();
@@ -339,11 +345,19 @@ export const PrivateVault = ({ coupleId, userId, onClose }: PrivateVaultProps) =
               </Button>
 
               <div className="space-y-3">
-                {journalEntries.map((entry) => (
-                  <Card key={entry.id} className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="font-semibold">{entry.title}</h3>
+                {journalEntries.map((entry) => {
+                  const isNew = isNewItem(entry.created_at);
+                  return (
+                    <Card key={entry.id} className={`p-4 relative ${isNew ? 'ring-2 ring-green-500' : ''}`}>
+                      {isNew && (
+                        <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-card animate-pulse" />
+                      )}
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h3 className="font-semibold">
+                            {entry.title}
+                            {isNew && <span className="ml-2 text-xs text-green-500">• New!</span>}
+                          </h3>
                         {entry.description && (
                           <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">
                             {entry.description}
@@ -363,7 +377,8 @@ export const PrivateVault = ({ coupleId, userId, onClose }: PrivateVaultProps) =
                       </Button>
                     </div>
                   </Card>
-                ))}
+                  );
+                })}
                 {journalEntries.length === 0 && (
                   <div className="text-center text-muted-foreground py-8">
                     <Lock className="w-12 h-12 mx-auto mb-2 opacity-50" />
