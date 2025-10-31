@@ -17,8 +17,8 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'apple-touch-icon.png'],
       manifest: {
-        name: 'OLAYA',
-        short_name: 'OLAYA',
+        name: 'Olaya Forever',
+        short_name: 'Olaya Forever',
         description: 'Your Sacred Space for Connection',
         theme_color: '#000000',
         background_color: '#000000',
