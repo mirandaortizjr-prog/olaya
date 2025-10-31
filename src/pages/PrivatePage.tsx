@@ -77,24 +77,24 @@ const PrivatePage = ({ coupleId, userId }: PrivatePageProps) => {
       <div className="p-2 bg-gradient-to-b from-red-900 to-red-800">
         <div className="bg-black p-6 pb-24 space-y-4 min-h-[calc(100vh-10rem)] border-4 border-red-900/50">
           {/* Notification Cards */}
-          <Card className="p-6 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-200 dark:border-amber-900 rounded-3xl">
-            <h3 className="text-lg font-semibold text-center text-foreground">
+          <Card className="p-3 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-200 dark:border-amber-900 rounded-2xl">
+            <h3 className="text-base font-semibold text-center text-amber-900 dark:text-amber-100">
               Desires Notifications
             </h3>
           </Card>
 
-          <Card className="p-6 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-200 dark:border-amber-900 rounded-3xl">
-            <h3 className="text-lg font-semibold text-center text-foreground">
+          <Card className="p-3 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-200 dark:border-amber-900 rounded-2xl">
+            <h3 className="text-base font-semibold text-center text-amber-900 dark:text-amber-100">
               Flirts Notification
             </h3>
           </Card>
 
-          <Card className="p-6 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-200 dark:border-amber-900 rounded-3xl">
-            <h3 className="text-lg font-semibold text-center text-foreground mb-4">
+          <Card className="p-3 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-200 dark:border-amber-900 rounded-2xl">
+            <h3 className="text-base font-semibold text-center text-amber-900 dark:text-amber-100 mb-2">
               Lust - O - Meter
             </h3>
-            <Progress value={score} className="h-3 bg-red-200" />
-            <p className="text-center text-sm text-muted-foreground mt-2">{score}% Heat Level</p>
+            <Progress value={score} className="h-2 bg-red-200" />
+            <p className="text-center text-xs text-amber-800 dark:text-amber-200 mt-1">{score}% Heat Level</p>
           </Card>
 
           {/* Grid of Private Items */}
