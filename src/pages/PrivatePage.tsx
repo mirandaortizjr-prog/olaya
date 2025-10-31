@@ -105,10 +105,13 @@ const PrivatePage = ({ coupleId, userId }: PrivatePageProps) => {
                 }}
               >
                 <div className="relative">
-                  <div 
-                    className="w-24 h-24 rounded-full border-4 border-red-600 overflow-hidden bg-cover bg-center transition-transform group-hover:scale-105"
-                    style={{ backgroundImage: `url(${item.image})` }}
-                  />
+                  <div className="w-24 h-24 rounded-full border-4 border-red-600 overflow-hidden transition-transform group-hover:scale-105">
+                    <img 
+                      src={typeof item.image === 'string' ? item.image : item.image}
+                      alt={item.label}
+                      className="w-full h-full object-cover object-center"
+                    />
+                  </div>
                   <div className="absolute bottom-0 right-0 w-8 h-8 bg-amber-50 dark:bg-amber-950 rounded-full border-2 border-red-600 flex items-center justify-center">
                     <Lock className="w-4 h-4 text-foreground" />
                   </div>
