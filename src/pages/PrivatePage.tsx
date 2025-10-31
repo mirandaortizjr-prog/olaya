@@ -4,6 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import tenderDaresImage from "@/assets/tender-dares.png";
+import sexLustLanguagesImage from "@/assets/sex-lust-languages.png";
 
 interface PrivatePageProps {
   coupleId?: string;
@@ -42,7 +43,7 @@ const PrivatePage = ({ coupleId, userId }: PrivatePageProps) => {
     { 
       id: 'sex-lust-languages', 
       label: 'Sex & Lust Languages',
-      image: 'https://images.unsplash.com/photo-1518568814500-bf0f8d125f46?w=200&h=200&fit=crop'
+      image: sexLustLanguagesImage
     },
   ];
 
