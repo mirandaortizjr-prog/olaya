@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import tenderDaresImage from "@/assets/tender-dares.png";
 
 interface PrivatePageProps {
   coupleId?: string;
@@ -21,7 +22,7 @@ const PrivatePage = ({ coupleId, userId }: PrivatePageProps) => {
     { 
       id: 'tender-dares', 
       label: 'Tender Dares',
-      image: 'https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?w=200&h=200&fit=crop'
+      image: tenderDaresImage
     },
     { 
       id: 'videos', 
