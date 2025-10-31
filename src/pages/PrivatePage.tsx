@@ -46,14 +46,14 @@ const PrivatePage = ({ coupleId, userId }: PrivatePageProps) => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-black">
       {/* Header */}
-      <div className="relative h-24 bg-gradient-to-r from-red-900 to-red-800 flex items-center justify-center border-b-4 border-red-950">
+      <div className="relative h-24 bg-gradient-to-r from-red-900 to-red-800 flex items-center justify-center border-b-8 border-black">
         <div 
-          className="absolute inset-0 opacity-30"
+          className="absolute inset-0 opacity-40"
           style={{
-            backgroundImage: 'linear-gradient(45deg, transparent 48%, rgba(0,0,0,0.3) 49%, rgba(0,0,0,0.3) 51%, transparent 52%), linear-gradient(-45deg, transparent 48%, rgba(0,0,0,0.3) 49%, rgba(0,0,0,0.3) 51%, transparent 52%)',
-            backgroundSize: '20px 20px'
+            backgroundImage: 'radial-gradient(circle at 20% 50%, transparent 0%, transparent 20%, rgba(139, 0, 0, 0.3) 21%, transparent 22%), radial-gradient(circle at 60% 30%, transparent 0%, transparent 15%, rgba(139, 0, 0, 0.3) 16%, transparent 17%), radial-gradient(circle at 80% 70%, transparent 0%, transparent 18%, rgba(139, 0, 0, 0.3) 19%, transparent 20%), linear-gradient(135deg, transparent 48%, rgba(0,0,0,0.4) 49%, rgba(0,0,0,0.4) 51%, transparent 52%), linear-gradient(-135deg, transparent 48%, rgba(0,0,0,0.4) 49%, rgba(0,0,0,0.4) 51%, transparent 52%)',
+            backgroundSize: '100% 100%, 100% 100%, 100% 100%, 15px 15px, 15px 15px'
           }}
         />
         <Button 
@@ -64,63 +64,65 @@ const PrivatePage = ({ coupleId, userId }: PrivatePageProps) => {
         >
           <ArrowLeft className="w-6 h-6" />
         </Button>
-        <h1 className="text-4xl font-bold text-red-600 relative z-10 tracking-wider">
+        <h1 className="text-4xl font-bold text-red-600 relative z-10 tracking-wider drop-shadow-lg">
           Private
         </h1>
       </div>
 
-      {/* Main Content */}
-      <div className="p-6 pb-24 max-w-2xl mx-auto space-y-4">
-        {/* Notification Cards */}
-        <Card className="p-6 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-200 dark:border-amber-900">
-          <h3 className="text-lg font-semibold text-center text-foreground">
-            Desires Notifications
-          </h3>
-        </Card>
+      {/* Main Content with red border frame */}
+      <div className="p-2 bg-gradient-to-b from-red-900 to-red-800">
+        <div className="bg-black p-6 pb-24 space-y-4 min-h-[calc(100vh-10rem)] border-4 border-red-900/50">
+          {/* Notification Cards */}
+          <Card className="p-6 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-200 dark:border-amber-900 rounded-3xl">
+            <h3 className="text-lg font-semibold text-center text-foreground">
+              Desires Notifications
+            </h3>
+          </Card>
 
-        <Card className="p-6 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-200 dark:border-amber-900">
-          <h3 className="text-lg font-semibold text-center text-foreground">
-            Flirts Notification
-          </h3>
-        </Card>
+          <Card className="p-6 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-200 dark:border-amber-900 rounded-3xl">
+            <h3 className="text-lg font-semibold text-center text-foreground">
+              Flirts Notification
+            </h3>
+          </Card>
 
-        <Card className="p-6 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-200 dark:border-amber-900">
-          <h3 className="text-lg font-semibold text-center text-foreground mb-4">
-            Lust - O - Meter
-          </h3>
-          <Progress value={75} className="h-3 bg-red-200" />
-        </Card>
+          <Card className="p-6 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-200 dark:border-amber-900 rounded-3xl">
+            <h3 className="text-lg font-semibold text-center text-foreground mb-4">
+              Lust - O - Meter
+            </h3>
+            <Progress value={75} className="h-3 bg-red-200" />
+          </Card>
 
-        {/* Grid of Private Items */}
-        <div className="grid grid-cols-3 gap-6 pt-4">
-          {privateItems.map((item) => (
-            <button
-              key={item.id}
-              className="flex flex-col items-center gap-2 group"
-              onClick={() => {
-                // Placeholder for future functionality
-                console.log(`Opening ${item.id}`);
-              }}
-            >
-              <div className="relative">
-                <div 
-                  className="w-24 h-24 rounded-full border-4 border-red-600 overflow-hidden bg-cover bg-center transition-transform group-hover:scale-105"
-                  style={{ backgroundImage: `url(${item.image})` }}
-                />
-                <div className="absolute bottom-0 right-0 w-8 h-8 bg-amber-50 dark:bg-amber-950 rounded-full border-2 border-red-600 flex items-center justify-center">
-                  <Lock className="w-4 h-4 text-foreground" />
+          {/* Grid of Private Items */}
+          <div className="grid grid-cols-3 gap-6 pt-4">
+            {privateItems.map((item) => (
+              <button
+                key={item.id}
+                className="flex flex-col items-center gap-2 group"
+                onClick={() => {
+                  // Placeholder for future functionality
+                  console.log(`Opening ${item.id}`);
+                }}
+              >
+                <div className="relative">
+                  <div 
+                    className="w-24 h-24 rounded-full border-4 border-red-600 overflow-hidden bg-cover bg-center transition-transform group-hover:scale-105"
+                    style={{ backgroundImage: `url(${item.image})` }}
+                  />
+                  <div className="absolute bottom-0 right-0 w-8 h-8 bg-amber-50 dark:bg-amber-950 rounded-full border-2 border-red-600 flex items-center justify-center">
+                    <Lock className="w-4 h-4 text-foreground" />
+                  </div>
                 </div>
-              </div>
-              <span className="text-sm font-medium text-center text-foreground leading-tight">
-                {item.label}
-              </span>
-            </button>
-          ))}
+                <span className="text-sm font-medium text-center text-white leading-tight">
+                  {item.label}
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-red-900 to-red-800 border-t-4 border-red-950 z-40">
+      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-red-900 to-red-800 border-t-8 border-black z-40">
         <div className="flex justify-around items-center h-16 max-w-lg mx-auto px-4">
           <Button
             variant="ghost"
