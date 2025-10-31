@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import olayaLogo from "@/assets/olaya-logo.png";
+import olayaLogo from "@/assets/olaya-logo-v2.png";
 
 interface SplashScreenProps {
   onFinish: () => void;
