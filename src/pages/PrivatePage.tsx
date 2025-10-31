@@ -5,6 +5,7 @@ import { ArrowLeft, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import tenderDaresImage from "@/assets/tender-dares.png";
 import sexLustLanguagesImage from "@/assets/sex-lust-languages.png";
+import { useLustMeter } from "@/hooks/useLustMeter";
 
 interface PrivatePageProps {
   coupleId?: string;
@@ -13,6 +14,7 @@ interface PrivatePageProps {
 
 const PrivatePage = ({ coupleId, userId }: PrivatePageProps) => {
   const navigate = useNavigate();
+  const { score, trackInteraction } = useLustMeter(coupleId);
 
   const privateItems = [
     { 
@@ -91,7 +93,8 @@ const PrivatePage = ({ coupleId, userId }: PrivatePageProps) => {
             <h3 className="text-lg font-semibold text-center text-foreground mb-4">
               Lust - O - Meter
             </h3>
-            <Progress value={75} className="h-3 bg-red-200" />
+            <Progress value={score} className="h-3 bg-red-200" />
+            <p className="text-center text-sm text-muted-foreground mt-2">{score}% Heat Level</p>
           </Card>
 
           {/* Grid of Private Items */}
@@ -101,7 +104,7 @@ const PrivatePage = ({ coupleId, userId }: PrivatePageProps) => {
                 key={item.id}
                 className="flex flex-col items-center gap-2 group"
                 onClick={() => {
-                  // Placeholder for future functionality
+                  trackInteraction(item.id);
                   console.log(`Opening ${item.id}`);
                 }}
               >

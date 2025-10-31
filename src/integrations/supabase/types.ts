@@ -708,6 +708,30 @@ export type Database = {
         }
         Relationships: []
       }
+      private_interactions: {
+        Row: {
+          couple_id: string | null
+          created_at: string
+          id: string
+          interaction_type: string
+          user_id: string
+        }
+        Insert: {
+          couple_id?: string | null
+          created_at?: string
+          id?: string
+          interaction_type: string
+          user_id: string
+        }
+        Update: {
+          couple_id?: string | null
+          created_at?: string
+          id?: string
+          interaction_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -976,6 +1000,7 @@ export type Database = {
           is_used: boolean
         }[]
       }
+      get_lust_meter_score: { Args: { p_user_id: string }; Returns: number }
       get_own_email: { Args: never; Returns: string }
       get_partner_profile: {
         Args: { c_id: string }
