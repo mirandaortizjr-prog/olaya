@@ -106,7 +106,7 @@ const PrivatePage = ({ coupleId, userId }: PrivatePageProps) => {
                 }}
               >
                 <div className="relative">
-                  {item.id === 'tender-dares' ? (
+                  {item.id === 'tender-dares' || item.id === 'sex-lust-languages' ? (
                     <div className="w-24 h-24 transition-transform group-hover:scale-105 flex items-center justify-center bg-black">
                       <img 
                         src={typeof item.image === 'string' ? item.image : item.image}
