@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import olayaLogo from "@/assets/olaya-logo-v2.png";
+import splashImage from "@/assets/splash-image.png";
 
 interface SplashScreenProps {
   onFinish: () => void;
@@ -27,8 +27,8 @@ export const SplashScreen = ({ onFinish }: SplashScreenProps) => {
     >
       <div className="flex flex-col items-center gap-6 animate-fade-in">
         <img
-          src={olayaLogo}
-          alt="OLAYA Together"
+          src={splashImage}
+          alt="OLAYA Together splash"
           className="w-64 h-64 md:w-80 md:h-80 drop-shadow-2xl animate-scale-in"
         />
       </div>
