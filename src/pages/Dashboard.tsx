@@ -659,6 +659,12 @@ const Dashboard = () => {
 
 
   if (activeView === "locked") {
+    navigate('/private');
+    setActiveView("home");
+    return null;
+  }
+
+  if (false) {
     return (
       <>
         <div className="min-h-screen bg-muted pb-24">

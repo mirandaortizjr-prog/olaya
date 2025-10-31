@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import DailyNotesPage from "./pages/DailyNotesPage";
 import CoupleProfiles from "./pages/CoupleProfiles";
+import PrivatePage from "./pages/PrivatePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,7 @@ const App = () => {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/daily-notes" element={<DailyNotesPage />} />
                 <Route path="/couple-profiles" element={<CoupleProfiles />} />
+                <Route path="/private" element={<PrivatePage />} />
                 <Route path="/404" element={<NotFound />} />
                 <Route path="*" element={<Navigate to="/404" replace />} />
               </Routes>
