@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Card } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Eye, Heart, Sparkles, Wind, Flame } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -89,47 +89,47 @@ export const FlirtNotifications = ({ coupleId, userId, partnerName, lastViewedTi
     }
   };
 
-  if (recentFlirts.length === 0) return null;
-
   return (
-    <Card className="p-3 bg-[#F5E6D3] border-gray-300 max-h-32">
-      <h3 className="text-xs font-semibold mb-2 text-gray-900 flex items-center gap-2">
-        <Flame className="w-3 h-3 text-red-600" />
-        Flirts from {partnerName}
-      </h3>
-      <div className="space-y-1.5 overflow-y-auto max-h-20 pr-1">
-        {recentFlirts.map((flirt) => {
-          const flirtInfo = FLIRT_ICONS[flirt.flirt_type];
-          if (!flirtInfo) return null;
+    <ScrollArea className="h-24">
+      <div className="space-y-1.5 pr-2">
+        {recentFlirts.length === 0 ? (
+          <p className="text-xs text-amber-700 dark:text-amber-300 text-center py-4">
+            No recent flirts
+          </p>
+        ) : (
+          recentFlirts.map((flirt) => {
+            const flirtInfo = FLIRT_ICONS[flirt.flirt_type];
+            if (!flirtInfo) return null;
 
-          const FlirtIcon = flirtInfo.icon;
-          const isNew = isNewFlirt(flirt.created_at);
-          
-          return (
-            <div
-              key={flirt.id}
-              className={`flex items-center gap-2 p-1.5 rounded-lg relative ${
-                isNew ? 'bg-green-50 ring-2 ring-green-500' : 'bg-white/70'
-              }`}
-            >
-              {isNew && (
-                <span className="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              )}
-              <span className="text-lg">{flirtInfo.emoji}</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium truncate text-gray-900">
-                  {flirtInfo.label}
-                  {isNew && <span className="ml-1 text-green-600">• New!</span>}
-                </p>
-                <p className="text-[10px] text-gray-700">
-                  {formatDistanceToNow(new Date(flirt.created_at), { addSuffix: true })}
-                </p>
+            const FlirtIcon = flirtInfo.icon;
+            const isNew = isNewFlirt(flirt.created_at);
+            
+            return (
+              <div
+                key={flirt.id}
+                className={`flex items-center gap-2 p-1.5 rounded-lg relative ${
+                  isNew ? 'bg-green-50 dark:bg-green-950/30 ring-2 ring-green-500' : 'bg-white/70 dark:bg-white/10'
+                }`}
+              >
+                {isNew && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                )}
+                <span className="text-lg">{flirtInfo.emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium truncate text-amber-900 dark:text-amber-100">
+                    {flirtInfo.label}
+                    {isNew && <span className="ml-1 text-green-600">• New!</span>}
+                  </p>
+                  <p className="text-[10px] text-amber-800 dark:text-amber-200">
+                    {formatDistanceToNow(new Date(flirt.created_at), { addSuffix: true })}
+                  </p>
+                </div>
+                <FlirtIcon className="w-3 h-3 text-red-600 flex-shrink-0" />
               </div>
-              <FlirtIcon className="w-3 h-3 text-red-600 flex-shrink-0" />
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
-    </Card>
+    </ScrollArea>
   );
 };

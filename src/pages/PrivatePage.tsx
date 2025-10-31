@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import tenderDaresImage from "@/assets/tender-dares.png";
 import sexLustLanguagesImage from "@/assets/sex-lust-languages.png";
 import { useLustMeter } from "@/hooks/useLustMeter";
+import { FlirtNotifications } from "@/components/FlirtNotifications";
+import { DesireNotifications } from "@/components/DesireNotifications";
 
 interface PrivatePageProps {
   coupleId?: string;
@@ -78,15 +80,25 @@ const PrivatePage = ({ coupleId, userId }: PrivatePageProps) => {
         <div className="bg-black p-6 pb-24 space-y-4 min-h-[calc(100vh-10rem)] border-4 border-red-900/50">
           {/* Notification Cards */}
           <Card className="p-3 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-200 dark:border-amber-900 rounded-2xl">
-            <h3 className="text-base font-semibold text-center text-amber-900 dark:text-amber-100">
+            <h3 className="text-base font-semibold text-center text-amber-900 dark:text-amber-100 mb-2">
               Desires Notifications
             </h3>
+            <DesireNotifications 
+              coupleId={coupleId || ''} 
+              userId={userId || ''} 
+              partnerName="Partner"
+            />
           </Card>
 
           <Card className="p-3 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-200 dark:border-amber-900 rounded-2xl">
-            <h3 className="text-base font-semibold text-center text-amber-900 dark:text-amber-100">
+            <h3 className="text-base font-semibold text-center text-amber-900 dark:text-amber-100 mb-2">
               Flirts Notification
             </h3>
+            <FlirtNotifications 
+              coupleId={coupleId || ''} 
+              userId={userId || ''} 
+              partnerName="Partner"
+            />
           </Card>
 
           <Card className="p-3 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-200 dark:border-amber-900 rounded-2xl">
