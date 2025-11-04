@@ -78,6 +78,33 @@ export type Database = {
           },
         ]
       }
+      couple_preferences: {
+        Row: {
+          couple_id: string
+          created_at: string
+          enabled_items: Json
+          id: string
+          preference_type: string
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          enabled_items?: Json
+          id?: string
+          preference_type: string
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          enabled_items?: Json
+          id?: string
+          preference_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       couples: {
         Row: {
           anniversary_date: string | null

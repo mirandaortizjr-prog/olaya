@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Trophy, Bell } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface HowWellGameProps {
   coupleId: string;
@@ -58,6 +59,7 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
   const [partnerAnswers, setPartnerAnswers] = useState<Record<string, string>>({});
   const [pendingInvitation, setPendingInvitation] = useState<any>(null);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const loadPartnerAnswers = async () => {
     if (!partnerId) return;
@@ -117,7 +119,7 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
       .single();
 
     if (error) {
-      toast({ title: "Error sending invitation", variant: "destructive" });
+      toast({ title: t('error'), variant: "destructive" });
       return;
     }
 
@@ -126,8 +128,8 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
       await supabase.functions.invoke('send-push-notification', {
         body: {
           userId: partnerId,
-          title: "How Well Do You Know Me? 🎮",
-          body: "Your partner wants to play 'How Well Do You Know Me?' - Answer questions about yourself!",
+          title: t('gameInvitationTitle'),
+          body: t('gameInvitationBody'),
           data: { type: 'game_invitation', gameType: 'how-well', sessionId }
         }
       });
@@ -135,7 +137,7 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
       console.error('Failed to send notification:', e);
     }
 
-    toast({ title: "Invitation sent! 💌" });
+    toast({ title: t('invitationSent') });
   };
 
   const acceptInvitation = async () => {
@@ -172,8 +174,8 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
           await supabase.functions.invoke('send-push-notification', {
             body: {
               userId: partnerId,
-              title: "How Well Do You Know Me? 🎯",
-              body: "Your partner has finished answering 'How Well Do You Know Me?' - Time to guess their answers!",
+              title: t('gameReadyTitle'),
+              body: t('gameReadyBody'),
               data: { type: 'game_ready', gameType: 'how-well' }
             }
           });
@@ -181,7 +183,7 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
           console.error('Failed to send notification:', e);
         }
       }
-      toast({ title: "Answers saved! Partner notified." });
+      toast({ title: t('answersSaved') });
       onBack();
     }
   };
@@ -194,11 +196,11 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
 
     if (isCorrect) {
       setScore(score + 1);
-      toast({ title: "Correct! 🎉", description: "+1 point" });
+      toast({ title: t('correctAnswer'), description: "+1 " + t('point') });
     } else {
       toast({ 
-        title: "Not quite!", 
-        description: `Their answer: ${partnerAnswer}`,
+        title: t('notQuite'), 
+        description: `${t('theirAnswer')}: ${partnerAnswer}`,
         variant: "destructive" 
       });
     }
@@ -229,7 +231,7 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h2 className="text-xl font-semibold">How Well Do You Know Me?</h2>
+          <h2 className="text-xl font-semibold">{t('howWellGame')}</h2>
         </div>
 
         <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
@@ -239,20 +241,20 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
                 <div className="flex items-start gap-3 mb-4">
                   <Bell className="w-5 h-5 text-primary mt-1" />
                   <div>
-                    <h3 className="font-semibold">Game Invitation!</h3>
-                    <p className="text-sm text-muted-foreground">Your partner invited you to play</p>
+                    <h3 className="font-semibold">{t('gameInvitation')}</h3>
+                    <p className="text-sm text-muted-foreground">{t('partnerInvitedYou')}</p>
                   </div>
                 </div>
                 <Button onClick={acceptInvitation} className="w-full">
-                  Accept & Start Answering
+                  {t('acceptAndStart')}
                 </Button>
               </Card>
             )}
 
             <Card className="p-6 text-center">
-              <h3 className="text-lg font-semibold mb-2">Choose Your Role</h3>
+              <h3 className="text-lg font-semibold mb-2">{t('chooseYourRole')}</h3>
               <p className="text-sm text-muted-foreground mb-6">
-                One partner answers questions about themselves, the other guesses
+                {t('chooseRoleDescription')}
               </p>
               <div className="space-y-3">
                 <Button 
@@ -262,7 +264,7 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
                     setGameMode("answer");
                   }}
                 >
-                  I'll Answer Questions
+                  {t('illAnswerQuestions')}
                 </Button>
                 <Button 
                   className="w-full" 
@@ -270,16 +272,16 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
                   onClick={() => setGameMode("guess")}
                   disabled={!partnerId}
                 >
-                  I'll Guess Their Answers
+                  {t('illGuessAnswers')}
                 </Button>
                 {!partnerId && (
                   <p className="text-xs text-muted-foreground text-center">
-                    Waiting for partner to join
+                    {t('waitingForPartner')}
                   </p>
                 )}
                 {partnerId && Object.keys(partnerAnswers).length === 0 && (
                   <p className="text-xs text-muted-foreground text-center">
-                    Waiting for partner to answer questions first
+                    {t('waitingPartnerAnswers')}
                   </p>
                 )}
               </div>
@@ -297,7 +299,7 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
           <Button variant="ghost" size="icon" onClick={() => setGameMode("menu")}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h2 className="text-xl font-semibold">Question {currentQuestionIndex + 1}/{questions.length}</h2>
+          <h2 className="text-xl font-semibold">{t('question')} {currentQuestionIndex + 1}/{questions.length}</h2>
         </div>
 
         <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
@@ -306,16 +308,16 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
               <h3 className="text-lg font-semibold mb-4">{questions[currentQuestionIndex]}</h3>
               <div className="space-y-4">
                 <div>
-                  <Label>Your Answer</Label>
+                  <Label>{t('yourAnswer')}</Label>
                   <Input
                     value={myAnswer}
                     onChange={(e) => setMyAnswer(e.target.value)}
-                    placeholder="Type your answer..."
+                    placeholder={t('typeYourAnswer')}
                     onKeyPress={(e) => e.key === 'Enter' && saveAnswer()}
                   />
                 </div>
                 <Button onClick={saveAnswer} className="w-full" disabled={!myAnswer.trim()}>
-                  {currentQuestionIndex < questions.length - 1 ? "Next Question" : "Finish"}
+                  {currentQuestionIndex < questions.length - 1 ? t('nextQuestion') : t('finish')}
                 </Button>
               </div>
             </Card>
@@ -332,28 +334,28 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
           <Button variant="ghost" size="icon" onClick={() => setGameMode("menu")}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h2 className="text-xl font-semibold">Guess {currentQuestionIndex + 1}/{questions.length}</h2>
+          <h2 className="text-xl font-semibold">{t('guess')} {currentQuestionIndex + 1}/{questions.length}</h2>
         </div>
 
         <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
           <div className="max-w-md w-full">
             <Card className="p-6">
               <div className="text-center mb-4">
-                <p className="text-sm text-muted-foreground mb-2">Score: {score}/{currentQuestionIndex}</p>
+                <p className="text-sm text-muted-foreground mb-2">{t('score')}: {score}/{currentQuestionIndex}</p>
               </div>
               <h3 className="text-lg font-semibold mb-4">{questions[currentQuestionIndex]}</h3>
               <div className="space-y-4">
                 <div>
-                  <Label>Your Guess</Label>
+                  <Label>{t('yourGuess')}</Label>
                   <Input
                     value={myGuess}
                     onChange={(e) => setMyGuess(e.target.value)}
-                    placeholder="What do you think they said?"
+                    placeholder={t('guessPlaceholder')}
                     onKeyPress={(e) => e.key === 'Enter' && checkGuess()}
                   />
                 </div>
                 <Button onClick={checkGuess} className="w-full" disabled={!myGuess.trim()}>
-                  Submit Guess
+                  {t('submitGuess')}
                 </Button>
               </div>
             </Card>
@@ -369,21 +371,21 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
         <Button variant="ghost" size="icon" onClick={onBack}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <h2 className="text-xl font-semibold">Results</h2>
+        <h2 className="text-xl font-semibold">{t('results')}</h2>
       </div>
 
       <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
         <div className="max-w-md w-full text-center">
           <Card className="p-8">
             <Trophy className="w-16 h-16 mx-auto mb-4 text-yellow-500" />
-            <h3 className="text-2xl font-bold mb-2">Game Complete!</h3>
+            <h3 className="text-2xl font-bold mb-2">{t('gameComplete')}</h3>
             <p className="text-4xl font-bold text-primary mb-4">{score}/{questions.length}</p>
             <p className="text-muted-foreground mb-6">
-              {score >= 7 ? "Amazing! You know each other so well! 💖" :
-               score >= 5 ? "Great job! Keep learning about each other! 😊" :
-               "Keep playing to know each other better! 💑"}
+              {score >= 7 ? t('amazing') :
+               score >= 5 ? t('greatJob') :
+               t('keepPlaying')}
             </p>
-            <Button onClick={onBack} className="w-full">Play Again</Button>
+            <Button onClick={onBack} className="w-full">{t('playAgain')}</Button>
           </Card>
         </div>
       </div>

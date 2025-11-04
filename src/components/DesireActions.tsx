@@ -3,11 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Heart, Coffee, MessageCircle, Hand, Flame, Sparkles, Calendar, Star, Check, X } from "lucide-react";
+import { Heart, Coffee, MessageCircle, Hand, Flame, Sparkles, Calendar, Star, Check, X, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/lib/translations";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { PreferencesSettings } from "./PreferencesSettings";
 
 const DESIRE_ACTIONS = [
   { value: "kiss", labelKey: "kiss", icon: Heart, emoji: "💋" },
@@ -24,7 +25,6 @@ const DESIRE_ACTIONS = [
 ];
 
 // Map local DesireActions values to canonical craving_board types used across the app
-// This prevents DB check-constraint errors and keeps UI labels flexible
 const CANONICAL_CRAVING_TYPES: Record<string, string> = {
   kiss: "kiss",
   hug: "hug",
@@ -63,30 +63,23 @@ export const DesireActions = ({ coupleId, userId, open, onClose, lastViewedTimes
   const [showCustom, setShowCustom] = useState(false);
   const [customDesire, setCustomDesire] = useState("");
   const [cravings, setCravings] = useState<Craving[]>([]);
+  const [showSettings, setShowSettings] = useState(false);
+  const [enabledDesires, setEnabledDesires] = useState<string[]>([]);
   const { toast } = useToast();
   const { t, language } = useLanguage();
-  
-  console.log('DesireActions render:', { coupleId, userId, language });
   
   let desires;
   try {
     desires = translations[language]?.desires ?? translations.en.desires;
-    console.log('Desires loaded successfully:', desires);
   } catch (error) {
     console.error('Error loading desires translations:', error);
-    desires = translations.en.desires; // fallback
+    desires = translations.en.desires;
   }
 
-  const isNewCraving = (createdAt: string, cravingUserId: string) => {
-    if (!lastViewedTimestamp) return false;
-    // Only mark as new if it's from partner (not from self) and created after last view
-    return cravingUserId !== userId && new Date(createdAt) > lastViewedTimestamp;
-  };
-
-  // Fetch cravings when dialog opens
   useEffect(() => {
     if (open) {
       fetchCravings();
+      loadPreferences();
       
       const channel = supabase
         .channel('desire_craving_board_channel')
@@ -109,6 +102,22 @@ export const DesireActions = ({ coupleId, userId, open, onClose, lastViewedTimes
       };
     }
   }, [open, coupleId]);
+
+  const loadPreferences = async () => {
+    const { data } = await supabase
+      .from('couple_preferences')
+      .select('enabled_items')
+      .eq('couple_id', coupleId)
+      .eq('preference_type', 'desire')
+      .maybeSingle();
+
+    if (data && data.enabled_items) {
+      setEnabledDesires(data.enabled_items as string[]);
+    } else {
+      // Enable all by default
+      setEnabledDesires([...DESIRE_ACTIONS.map(d => d.value), 'custom']);
+    }
+  };
 
   const fetchCravings = async () => {
     const { data, error } = await supabase
@@ -178,13 +187,11 @@ export const DesireActions = ({ coupleId, userId, open, onClose, lastViewedTimes
     return action ? desires[action.labelKey as keyof typeof desires] : craving.craving_type;
   };
 
-  const activeCravings = cravings.filter(c => !c.fulfilled);
   const fulfilledCravings = cravings.filter(c => c.fulfilled).slice(0, 3);
 
   const sendDesire = async (desireType: string, customMessage?: string) => {
     setSending(true);
     const mappedType = CANONICAL_CRAVING_TYPES[desireType] || desireType;
-    console.log('Sending desire:', { desireType, mappedType, customMessage, coupleId, userId });
     
     try {
       const { data: authData, error: authError } = await supabase.auth.getUser();
@@ -205,8 +212,6 @@ export const DesireActions = ({ coupleId, userId, open, onClose, lastViewedTimes
           custom_message: customMessage || null
         })
         .select();
-
-      console.log('Desire response:', { data, error });
 
       if (error) {
         console.error('Desire error:', error);
@@ -260,149 +265,118 @@ export const DesireActions = ({ coupleId, userId, open, onClose, lastViewedTimes
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md max-h-[90vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Heart className="w-5 h-5 text-pink-500" />
-            {desires?.title || "Desires"}
-          </DialogTitle>
-          <DialogDescription className="sr-only">Send a desire to your partner</DialogDescription>
-        </DialogHeader>
-        
-        <ScrollArea className="flex-1 -mx-6 px-6">
-          <div className="space-y-4">
-            {/* Send Desires Section */}
-            {!showCustom ? (
-              <div className="grid grid-cols-2 gap-2">
-                {DESIRE_ACTIONS.map((desire) => {
-                  const labelText = desires?.[desire.labelKey as keyof typeof desires] || desire.labelKey;
-                  return (
-                    <Button
-                      key={desire.value}
-                      variant="outline"
-                      className="h-20 flex-col gap-1 text-sm"
-                      onClick={() => sendDesire(desire.value)}
-                      disabled={sending}
-                    >
-                      <span className="text-2xl">{desire.emoji}</span>
-                      <span className="text-xs">{labelText}</span>
-                    </Button>
-                  );
-                })}
-                <Button
-                  variant="outline"
-                  className="h-20 flex-col gap-1 text-sm col-span-2"
-                  onClick={() => setShowCustom(true)}
-                  disabled={sending}
-                >
-                  <span className="text-2xl">✍️</span>
-                  <span className="text-xs">{desires?.custom || "Custom"}</span>
-                </Button>
+    <>
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent className="max-w-md max-h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Heart className="w-5 h-5 text-pink-500" />
+                {desires?.title || "Desires"}
               </div>
-            ) : (
-              <div className="space-y-4">
-                <Input
-                  placeholder={desires?.customPlaceholder || "Enter your desire..."}
-                  value={customDesire}
-                  onChange={(e) => setCustomDesire(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleCustomSubmit()}
-                  autoFocus
-                />
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowCustom(false)}
-                    className="flex-1"
-                  >
-                    {t("back")}
-                  </Button>
-                  <Button
-                    onClick={handleCustomSubmit}
-                    disabled={!customDesire.trim() || sending}
-                    className="flex-1"
-                  >
-                    {t("send")}
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Active Cravings */}
-            {activeCravings.length > 0 && (
-              <div className="space-y-2 p-3 bg-[#F5E6D3] border border-gray-300 rounded-lg">
-                <p className="text-xs font-semibold text-gray-800">Active Desires</p>
-                <div className="space-y-1.5 max-h-[200px] overflow-y-auto pr-1 scrollbar-bold">
-                  {activeCravings.map((craving) => {
-                    const isMine = craving.user_id === userId;
-                    const isNew = isNewCraving(craving.created_at, craving.user_id);
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowSettings(true)}
+              >
+                <Settings className="w-4 h-4" />
+              </Button>
+            </DialogTitle>
+            <DialogDescription className="sr-only">Send a desire to your partner</DialogDescription>
+          </DialogHeader>
+          
+          <ScrollArea className="flex-1 -mx-6 px-6">
+            <div className="space-y-4">
+              {/* Send Desires Section */}
+              {!showCustom ? (
+                <div className="grid grid-cols-2 gap-2">
+                  {DESIRE_ACTIONS.filter(desire => enabledDesires.includes(desire.value)).map((desire) => {
+                    const labelText = desires?.[desire.labelKey as keyof typeof desires] || desire.labelKey;
                     return (
-                      <div
-                        key={craving.id}
-                        className={`flex items-center gap-2 p-2 rounded-lg relative ${
-                          isNew ? 'bg-green-50 ring-2 ring-green-500' : 'bg-white/60'
-                        }`}
+                      <Button
+                        key={desire.value}
+                        variant="outline"
+                        className="h-20 flex-col gap-1 text-sm"
+                        onClick={() => sendDesire(desire.value)}
+                        disabled={sending}
                       >
-                        {isNew && (
-                          <span className="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                        )}
-                        <span className="text-lg">{getCravingEmoji(craving.craving_type)}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium truncate">
-                            {isMine ? "You" : "Partner"} want: {getCravingLabel(craving)}
-                            {isNew && <span className="ml-1 text-green-600">• New!</span>}
-                          </p>
-                        </div>
-                        <div className="flex gap-1 flex-shrink-0">
-                          {!isMine && (
-                            <Button
-                              size="sm"
-                              variant="default"
-                              className="h-7 w-7 p-0"
-                              onClick={() => fulfillCraving(craving.id)}
-                            >
-                              <Check className="h-3 w-3" />
-                            </Button>
-                          )}
-                          {isMine && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-7 w-7 p-0"
-                              onClick={() => deleteCraving(craving.id)}
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
+                        <span className="text-2xl">{desire.emoji}</span>
+                        <span className="text-xs">{labelText}</span>
+                      </Button>
                     );
                   })}
-                </div>
-              </div>
-            )}
-
-            {/* Recently Fulfilled */}
-            {fulfilledCravings.length > 0 && (
-              <div className="space-y-2 p-3 bg-[#F5E6D3] border border-gray-300 rounded-lg">
-                <p className="text-xs font-semibold text-gray-800">Recently Fulfilled</p>
-                <div className="space-y-1">
-                  {fulfilledCravings.map((craving) => (
-                    <div
-                      key={craving.id}
-                      className="flex items-center gap-2 p-1.5 rounded-lg bg-white/60"
+                  {enabledDesires.includes("custom") && (
+                    <Button
+                      variant="outline"
+                      className="h-20 flex-col gap-1 text-sm col-span-2"
+                      onClick={() => setShowCustom(true)}
+                      disabled={sending}
                     >
-                      <Check className="h-3 w-3 text-green-600 flex-shrink-0" />
-                      <span className="text-sm">{getCravingEmoji(craving.craving_type)}</span>
-                      <span className="text-[10px] text-gray-600 truncate">{getCravingLabel(craving)}</span>
-                    </div>
-                  ))}
+                      <span className="text-2xl">✍️</span>
+                      <span className="text-xs">{desires?.custom || "Custom"}</span>
+                    </Button>
+                  )}
                 </div>
-              </div>
-            )}
-          </div>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+              ) : (
+                <div className="space-y-4">
+                  <Input
+                    placeholder={desires?.customPlaceholder || "Enter your desire..."}
+                    value={customDesire}
+                    onChange={(e) => setCustomDesire(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleCustomSubmit()}
+                    autoFocus
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowCustom(false)}
+                      className="flex-1"
+                    >
+                      {t("back")}
+                    </Button>
+                    <Button
+                      onClick={handleCustomSubmit}
+                      disabled={!customDesire.trim() || sending}
+                      className="flex-1"
+                    >
+                      {t("send")}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Recently Fulfilled */}
+              {fulfilledCravings.length > 0 && (
+                <div className="space-y-2 p-3 bg-[#F5E6D3] border border-gray-300 rounded-lg">
+                  <p className="text-xs font-semibold text-gray-800">Recently Fulfilled</p>
+                  <div className="space-y-1">
+                    {fulfilledCravings.map((craving) => (
+                      <div
+                        key={craving.id}
+                        className="flex items-center gap-2 p-1.5 rounded-lg bg-white/60"
+                      >
+                        <Check className="h-3 w-3 text-green-600 flex-shrink-0" />
+                        <span className="text-sm">{getCravingEmoji(craving.craving_type)}</span>
+                        <span className="text-[10px] text-gray-600 truncate">{getCravingLabel(craving)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+      
+      <PreferencesSettings
+        coupleId={coupleId}
+        type="desire"
+        open={showSettings}
+        onClose={() => {
+          setShowSettings(false);
+          loadPreferences();
+        }}
+      />
+    </>
   );
 };
