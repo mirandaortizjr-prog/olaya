@@ -27,21 +27,21 @@ export const BottomNavigation = ({
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-b from-purple-900 to-black z-40">
-      <div className="flex justify-around items-center h-[72px] max-w-lg mx-auto px-4">
+    <div className="fixed bottom-0 left-0 right-0 z-40" style={{ background: 'linear-gradient(180deg, hsl(270 50% 15%), hsl(0 0% 0%))' }}>
+      <div className="flex justify-around items-center h-[72px] max-w-lg mx-auto" style={{ gap: '40px' }}>
         {navItems.map((item) => (
           <Button
             key={item.id}
             variant="ghost"
             size="icon"
-            className={`w-7 h-7 p-0 relative ${
-              activeView === item.id ? 'text-white' : 'text-gray-400'
+            className={`w-7 h-7 p-0 relative hover:bg-transparent ${
+              activeView === item.id ? 'text-white' : 'text-gray-500'
             }`}
             onClick={() => onViewChange(item.id)}
           >
-            <item.icon className="w-7 h-7" />
+            <item.icon className="w-7 h-7" strokeWidth={1.5} />
             {item.hasNotification && (
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-black" />
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full border border-black" />
             )}
           </Button>
         ))}

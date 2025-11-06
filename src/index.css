@@ -8,14 +8,14 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Sensual intimate palette */
-    --background: 215 16% 47%;
+    /* Dark slate-blue palette matching the reference image */
+    --background: 220 18% 20%;  /* Dark slate background */
     --foreground: 0 0% 98%;
 
-    --card: 217 19% 40%;
+    --card: 220 15% 25%;  /* Slightly lighter slate for cards */
     --card-foreground: 0 0% 98%;
 
-    --popover: 217 19% 40%;
+    --popover: 220 15% 25%;
     --popover-foreground: 0 0% 98%;
 
     /* Deep passionate magenta */
@@ -27,7 +27,7 @@ All colors MUST be HSL.
     --secondary-foreground: 0 0% 100%;
 
     /* Warm muted tones */
-    --muted: 215 14% 34%;
+    --muted: 220 15% 30%;
     --muted-foreground: 0 0% 85%;
 
     /* Warm amber accent */
@@ -37,8 +37,8 @@ All colors MUST be HSL.
     --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 15% 30%;
-    --input: 217 19% 35%;
+    --border: 220 15% 35%;
+    --input: 220 15% 28%;
     --ring: 330 65% 48%;
 
     --radius: 0.75rem;
@@ -54,6 +54,7 @@ All colors MUST be HSL.
     --gradient-vibrant: linear-gradient(135deg, hsl(330 65% 48%), hsl(25 75% 55%));
     --gradient-cool: linear-gradient(180deg, hsl(330 20% 97%), hsl(330 15% 94%));
     --gradient-glow: linear-gradient(135deg, hsl(330 65% 55% / 0.25), hsl(280 55% 50% / 0.25));
+    --gradient-purple-black: linear-gradient(180deg, hsl(270 50% 20%), hsl(0 0% 0%));
     
     --shadow-soft: 0 2px 16px -4px hsl(330 20% 35% / 0.12);
     --shadow-medium: 0 4px 24px -8px hsl(330 20% 30% / 0.18);
