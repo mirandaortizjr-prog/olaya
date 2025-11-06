@@ -760,25 +760,24 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen pb-20" style={{ backgroundColor: 'hsl(210 12% 28%)' }}>
       {/* Hero Section - Gray-blue background with full background images */}
-      <div style={{ backgroundColor: 'hsl(210 15% 45%)' }} className="relative">
-        {/* Header */}
-        <div className="h-16 flex items-center justify-between px-4 max-w-lg mx-auto relative z-10">
-          <div className="flex-1" />
+      <div style={{ backgroundColor: 'hsl(210 15% 45%)' }} className="relative pt-4">
+        {/* Title centered at top, settings button on top right - no rectangle background */}
+        <div className="absolute top-4 left-0 right-0 z-20 flex items-center justify-center px-4 max-w-lg mx-auto">
           {editingSpaceName ? (
             <Input
               value={spaceName}
               onChange={(e) => setSpaceName(e.target.value)}
               onBlur={updateSpaceName}
               onKeyPress={(e) => e.key === 'Enter' && updateSpaceName()}
-              className="text-center bg-transparent border-0 text-xl font-light text-white flex-1"
+              className="text-center bg-white/10 border-white/20 text-xl font-light text-white max-w-[200px]"
               autoFocus
             />
           ) : (
-            <h1 className="text-xl font-light text-white cursor-pointer flex-1 text-center" onClick={() => setEditingSpaceName(true)}>
+            <h1 className="text-xl font-light text-white cursor-pointer" onClick={() => setEditingSpaceName(true)}>
               {coupleData.spaceName}
             </h1>
           )}
-          <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="w-10 h-10 hover:bg-white/10">
+          <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="absolute right-4 w-10 h-10 hover:bg-white/10">
             <Settings className="w-6 h-6 text-white/70" />
           </Button>
         </div>
