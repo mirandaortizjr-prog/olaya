@@ -756,153 +756,195 @@ const Dashboard = () => {
     );
   }
 
-  // Main Home View - matches the image layout exactly
+  // Main Home View - redesigned with exact specifications
   return (
-    <div className="min-h-screen bg-muted pb-24">
-      {/* Top Header Bar */}
-      <div className="bg-muted p-4">
-        <div className="flex items-center justify-between max-w-lg mx-auto gap-2">
-          {/* Left: Settings */}
-          <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="text-foreground flex-shrink-0">
-            <Settings className="w-7 h-7" />
-          </Button>
-
-          {/* Center: Space name (editable) */}
+    <div className="min-h-screen bg-background pb-20">
+      {/* Top Header Bar - 64-72pt height */}
+      <div className="h-[68px] bg-card border-b flex items-center px-4">
+        <div className="flex items-center justify-between w-full max-w-lg mx-auto">
+          {/* Center: Space name (editable) - 20pt font */}
           {editingSpaceName ? (
             <Input
               value={spaceName}
               onChange={(e) => setSpaceName(e.target.value)}
               onBlur={updateSpaceName}
               onKeyPress={(e) => e.key === 'Enter' && updateSpaceName()}
-              className="text-center bg-transparent border-0 text-lg sm:text-xl font-normal flex-1 min-w-0"
+              className="text-center bg-transparent border-0 text-[20px] font-normal flex-1"
               autoFocus
             />
           ) : (
             <h1
-              className="text-lg sm:text-xl font-normal cursor-pointer flex-1 text-center truncate"
+              className="text-[20px] font-normal cursor-pointer flex-1 text-center"
               onClick={() => setEditingSpaceName(true)}
             >
               {coupleData.spaceName}
             </h1>
           )}
 
-          {/* Right: Messenger */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              setShowMessenger(true);
-              setNewMessagesCount(0);
-              setLastViewedMessages(new Date());
-            }}
-            disabled={!coupleData.partner}
-            className="text-foreground flex-shrink-0 relative"
-          >
-            <MessageCircle className="w-7 h-7" />
-            {newMessagesCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full" />
-            )}
+          {/* Right: Gear icon - 24x24pt */}
+          <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="w-6 h-6 p-0">
+            <Settings className="w-6 h-6" />
           </Button>
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 space-y-4">
-        {/* Hero Section with background slideshow */}
-        <div className="relative h-64 overflow-hidden rounded-2xl mt-4">
-          <BackgroundSlideshow coupleId={coupleData.coupleId} />
-          
-          {/* Couple picture as circular overlay in bottom-left corner */}
-          <div className="absolute bottom-4 left-4">
-            <CouplePictureUpload
-              coupleId={coupleData.coupleId}
-              currentPictureUrl={coupleData.couplePictureUrl || userProfile?.avatar_url || null}
-              onUploadComplete={(url) => {
-                setCoupleData({ ...coupleData, couplePictureUrl: url });
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Feeling Status with Names */}
-        <div className="w-full space-y-3">
-          {/* User Status */}
-          <div className="flex items-center justify-between bg-gradient-to-r from-gray-400 to-gray-500 rounded-full px-6 py-2 shadow-lg">
-            <span className="text-sm font-medium text-white">
-              {userProfile?.full_name || 'You'}
-            </span>
-            {user && (
-              <FeelingStatusSelector
+      <div className="max-w-lg mx-auto px-4 space-y-4 mt-4">
+        {/* Upload instruction text - 14pt font + Profile picture button 80x80pt circular */}
+        <div className="text-center">
+          <p className="text-[14px] text-muted-foreground mb-2">Tap to upload couple picture</p>
+          <div className="flex justify-center">
+            <div className="w-20 h-20">
+              <CouplePictureUpload
                 coupleId={coupleData.coupleId}
-                userId={user.id}
-                currentStatus={userFeelingStatus}
-                currentCustomMessage={userCustomMessage}
-                onStatusChange={(status, customMsg) => {
-                  setUserFeelingStatus(status);
-                  setUserCustomMessage(customMsg || "");
+                currentPictureUrl={coupleData.couplePictureUrl || userProfile?.avatar_url || null}
+                onUploadComplete={(url) => {
+                  setCoupleData({ ...coupleData, couplePictureUrl: url });
                 }}
               />
-            )}
-          </div>
-
-          {/* Partner Status */}
-          {coupleData.partner && (
-            <div className="flex items-center justify-between bg-gradient-to-r from-gray-400 to-gray-500 rounded-full px-6 py-2 shadow-lg">
-              <span className="text-sm font-medium text-white">
-                {coupleData.partner.full_name || 'Partner'}
-              </span>
-              <span className="text-sm text-white">
-                {partnerFeelingStatus === "custom" && partnerCustomMessage 
-                  ? partnerCustomMessage 
-                  : partnerFeelingStatus || "Feeling"}
-              </span>
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Anniversary Countdown */}
-        <AnniversaryCountdown anniversaryDate={coupleData.anniversaryDate || null} />
+        {/* 💑 Couple Information Section */}
+        {/* Name of couple text - 18pt font */}
+        <div className="text-center">
+          <h2 className="text-[18px] font-semibold mb-3">{coupleData.spaceName}</h2>
+          
+          {/* Mood toggles - 60x32pt */}
+          <div className="space-y-2">
+            {user && (
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-sm min-w-[80px] text-right">{userProfile?.full_name || 'You'}</span>
+                <div className="w-[60px] h-8">
+                  <FeelingStatusSelector
+                    coupleId={coupleData.coupleId}
+                    userId={user.id}
+                    currentStatus={userFeelingStatus}
+                    currentCustomMessage={userCustomMessage}
+                    onStatusChange={(status, customMsg) => {
+                      setUserFeelingStatus(status);
+                      setUserCustomMessage(customMsg || "");
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+            
+            {coupleData.partner && (
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-sm min-w-[80px] text-right">{coupleData.partner.full_name || 'Partner'}</span>
+                <div className="w-[60px] h-8 flex items-center justify-center bg-muted rounded-full px-2">
+                  <span className="text-xs truncate">
+                    {partnerFeelingStatus === "custom" && partnerCustomMessage 
+                      ? partnerCustomMessage 
+                      : partnerFeelingStatus || "😊"}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
-        {/* Flirt Notifications */}
-        {coupleData.partner && (
-          <FlirtNotifications
-            coupleId={coupleData.coupleId}
-            userId={user!.id}
-            partnerName={coupleData.partner.full_name || "Partner"}
-            lastViewedTimestamp={lastViewedFlirts}
-          />
-        )}
+        {/* Anniversary countdown container - 100pt height, 20pt font, 8pt spacing */}
+        <div className="h-[100px]">
+          <AnniversaryCountdown anniversaryDate={coupleData.anniversaryDate || null} />
+        </div>
 
-        {/* Recent Quick Messages */}
-        {coupleData.partner && (
-          <RecentMessages
-            coupleId={coupleData.coupleId}
-            userId={user!.id}
-            partnerName={coupleData.partner.full_name || "Partner"}
-          />
-        )}
-
-        {/* YouTube Song Player Embed - Auto-plays on home screen */}
-        {coupleSongs.length > 0 && (
-          <div className="w-full max-w-lg mx-auto px-4 mb-4">
+        {/* 🎥 Video Section - 280x48pt button, 16pt font, 12pt corner radius */}
+        {coupleSongs.length > 0 ? (
+          <div className="w-full">
             <CoupleSongPlayerEmbed
               videoIds={coupleSongs.map(url => {
                 const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/|music\.youtube\.com\/watch\?v=)([^&\n?#]+)/);
                 return match ? match[1] : null;
               }).filter(Boolean) as string[]}
               currentIndex={currentSongIndex}
-              isPlaying={true}
-              onClose={() => {}}
+              isPlaying={isSongPlaying}
+              onClose={() => setIsSongPlaying(false)}
               onNext={() => setCurrentSongIndex(prev => (prev + 1) % coupleSongs.length)}
               onEditClick={() => setShowSongSettings(true)}
             />
           </div>
+        ) : (
+          <Button 
+            onClick={() => setShowSongSettings(true)}
+            className="w-[280px] h-12 mx-auto block text-[16px] rounded-[12px]"
+          >
+            <Music className="w-5 h-5 mr-2" />
+            Add Your Song
+          </Button>
         )}
 
-        {/* Love-O-Meter */}
-        <LoveMeter coupleId={coupleData.coupleId} />
+        {/* 🔥❤️🎮 Navigation Icons - 32x32pt icons, 24pt spacing, 64pt container height */}
+        <div className="h-16 flex items-center justify-center gap-6">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="w-8 h-8 relative"
+            onClick={() => {
+              setShowDesires(true);
+              setNewDesiresCount(0);
+              setLastViewedDesires(new Date());
+            }}
+          >
+            <Heart className="w-8 h-8 text-pink-500" />
+            {newDesiresCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full" />
+            )}
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="w-8 h-8 relative"
+            onClick={() => {
+              setShowFlirt(true);
+              setNewFlirtsCount(0);
+              setLastViewedFlirts(new Date());
+            }}
+          >
+            <Flame className="w-8 h-8 text-orange-500" />
+            {newFlirtsCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full" />
+            )}
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="w-8 h-8 relative"
+            onClick={() => setActiveView("games")}
+          >
+            <Gamepad2 className="w-8 h-8 text-purple-500" />
+            {pendingGamesCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full" />
+            )}
+          </Button>
+        </div>
 
-        {/* Feed Section - Large beige card */}
-        <div className="bg-[#F5E6D3] rounded-3xl p-6 shadow-xl h-[600px] flex flex-col">
+        {/* 💬 Comment Section - 320x48pt text box, 14pt font, 12pt padding, 8pt corner radius */}
+        {coupleData.partner && (
+          <div className="flex justify-center">
+            <Button
+              onClick={() => {
+                setShowMessenger(true);
+                setNewMessagesCount(0);
+                setLastViewedMessages(new Date());
+              }}
+              variant="outline"
+              className="w-[320px] h-12 text-[14px] px-3 rounded-lg relative"
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Send a message
+              {newMessagesCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full" />
+              )}
+            </Button>
+          </div>
+        )}
+
+        {/* Gallery/Feed Section */}
+        <div className="bg-[#F5E6D3] rounded-3xl p-6 shadow-xl min-h-[400px]">
           <UnioGallery
             coupleId={coupleData.coupleId}
             userId={user!.id}
@@ -928,29 +970,29 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* Bottom Navigation - matches image */}
-      <div className="fixed bottom-0 left-0 right-0 bg-muted/80 backdrop-blur border-t">
-        <div className="flex justify-around items-center h-20 max-w-lg mx-auto px-4">
-          <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("calendar")}>
-            <Calendar className="w-7 h-7 text-muted-foreground" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setShowFlirt(true)}>
-            <Flame className="w-7 h-7 text-red-500" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("home")}>
-            <Home className="w-7 h-7 text-foreground" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-16 w-16 flex-col relative" onClick={() => setActiveView("locked")}>
-            <Lock className="w-7 h-7 text-muted-foreground" />
-            {newVaultCount > 0 && (
-              <span className="absolute top-2 right-2 w-3 h-3 bg-green-500 rounded-full" />
-            )}
-          </Button>
-          <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("games")}>
-            <Gamepad2 className="w-7 h-7 text-muted-foreground" />
-          </Button>
-        </div>
-      </div>
+      {/* ⬇️ Bottom Navigation Bar - 72pt height, 28x28pt icons, 40pt spacing, gradient background */}
+      <BottomNavigation
+        activeView={activeView}
+        onViewChange={(view) => {
+          setActiveView(view);
+          if (view === "desires") {
+            setShowDesires(true);
+            setNewDesiresCount(0);
+            setLastViewedDesires(new Date());
+          } else if (view === "flirt") {
+            setShowFlirt(true);
+            setNewFlirtsCount(0);
+            setLastViewedFlirts(new Date());
+          } else if (view === "locked") {
+            setNewVaultCount(0);
+            setLastViewedVault(new Date());
+          }
+        }}
+        pendingGamesCount={pendingGamesCount}
+        newDesiresCount={newDesiresCount}
+        newFlirtsCount={newFlirtsCount}
+        newVaultCount={newVaultCount}
+      />
 
       <FlirtActions
         coupleId={coupleData.coupleId}
