@@ -863,16 +863,11 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Comment Section */}
-      <div style={{ background: 'var(--feed-bg)' }} className="py-4">
-        <div className="max-w-lg mx-auto px-4">
+      {/* Comment and Feed Section - Combined */}
+      <div style={{ background: 'var(--feed-bg)' }} className="py-4 px-4 pb-4">
+        <div className="max-w-lg mx-auto space-y-4">
           <p className="text-white/70 text-sm">comment to post or picture or both</p>
-        </div>
-      </div>
-
-      {/* Feed Section */}
-      <div style={{ backgroundColor: 'hsl(210 12% 28%)' }} className="px-4 pb-4">
-        <div className="max-w-lg mx-auto">
+          
           <div style={{ backgroundColor: 'hsl(210 12% 45%)' }} className="rounded-3xl p-4 min-h-[500px]">
             <UnioGallery
               coupleId={coupleData.coupleId}
