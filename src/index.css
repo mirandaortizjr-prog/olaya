@@ -8,56 +8,46 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Exact colors from reference image - dark slate-blue palette */
-    --background: 216 20% 35%;  /* Main dark slate-blue background #495a6f */
+    /* Exact colors from reference images */
+    --background: 210 15% 45%;  /* Top section gray-blue #677685 */
     --foreground: 0 0% 100%;
 
-    --card: 218 18% 32%;  /* Slightly darker slate for header/cards */
+    --card: 210 12% 28%;  /* Dark charcoal #404750 */
     --card-foreground: 0 0% 100%;
 
-    --popover: 218 18% 32%;
+    --popover: 210 12% 28%;
     --popover-foreground: 0 0% 100%;
 
-    /* Deep passionate magenta */
-    --primary: 330 65% 48%;
+    --primary: 280 60% 35%;  /* Deep purple for video section */
     --primary-foreground: 0 0% 100%;
 
-    /* Rich seductive purple */
-    --secondary: 280 55% 45%;
+    --secondary: 210 15% 35%;  /* Medium gray-blue */
     --secondary-foreground: 0 0% 100%;
 
-    /* Muted slate tones */
-    --muted: 216 18% 40%;
-    --muted-foreground: 0 0% 90%;
+    --muted: 210 10% 50%;  /* Icon muted blue-gray */
+    --muted-foreground: 0 0% 100%;
 
-    /* Warm amber accent */
-    --accent: 25 75% 55%;
+    --accent: 280 60% 35%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 216 18% 40%;
-    --input: 218 18% 28%;
-    --ring: 330 65% 48%;
+    --border: 0 0% 100% / 0.1;
+    --input: 210 12% 28%;
+    --ring: 280 60% 35%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    /* Anniversary beige colors */
-    --anniversary-bg: 30 45% 90%;
-    --anniversary-border: 30 40% 85%;
-    --anniversary-text-dark: 30 30% 35%;
-    --anniversary-text-light: 30 25% 50%;
-
-    /* Gradients */
-    --gradient-romantic: linear-gradient(135deg, hsl(330 65% 48%), hsl(280 55% 50%));
-    --gradient-vibrant: linear-gradient(135deg, hsl(330 65% 48%), hsl(25 75% 55%));
-    --gradient-purple-black: linear-gradient(180deg, hsl(270 50% 15%), hsl(0 0% 0%));
+    /* Section-specific backgrounds */
+    --hero-bg: 210 15% 45%;  /* Top hero section */
+    --info-bg: 210 12% 28%;  /* Info/anniversary section */
+    --video-bg: 280 60% 20%;  /* Video section purple */
+    --icons-bg: 210 10% 20%;  /* Icon row dark */
+    --feed-bg: 210 12% 45%;  /* Feed card gray */
+    --nav-gradient: linear-gradient(180deg, hsl(280 60% 15%), hsl(0 0% 0%));
     
-    --shadow-soft: 0 2px 16px -4px rgba(0, 0, 0, 0.2);
-    --shadow-medium: 0 4px 24px -8px rgba(0, 0, 0, 0.3);
-    
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.3s ease;
   }
 
   .dark {
