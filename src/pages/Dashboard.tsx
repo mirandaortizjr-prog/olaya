@@ -802,7 +802,7 @@ const Dashboard = () => {
       </div>
 
       {/* Info Section */}
-      <div style={{ backgroundColor: 'hsl(210 12% 28%)' }} className="py-4">
+      <div style={{ background: 'var(--info-bg)' }} className="py-4">
         <div className="max-w-lg mx-auto px-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-normal text-white">
@@ -846,7 +846,7 @@ const Dashboard = () => {
       </div>
 
       {/* Icon Row */}
-      <div style={{ backgroundColor: 'hsl(210 10% 20%)' }} className="py-6">
+      <div style={{ background: 'var(--icons-bg)' }} className="py-6">
         <div className="max-w-lg mx-auto px-4 flex items-center justify-center gap-12">
           <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => { setShowFlirt(true); setNewFlirtsCount(0); setLastViewedFlirts(new Date()); }}>
             <Flame className="w-10 h-10 text-[hsl(200_30%_60%)]" strokeWidth={1.5} />
@@ -864,7 +864,7 @@ const Dashboard = () => {
       </div>
 
       {/* Comment Section */}
-      <div style={{ backgroundColor: 'hsl(210 12% 28%)' }} className="py-4">
+      <div style={{ background: 'var(--feed-bg)' }} className="py-4">
         <div className="max-w-lg mx-auto px-4">
           <p className="text-white/70 text-sm">comment to post or picture or both</p>
         </div>
