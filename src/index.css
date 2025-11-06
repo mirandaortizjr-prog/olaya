@@ -8,15 +8,15 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Dark slate-blue palette matching the reference image */
-    --background: 220 18% 20%;  /* Dark slate background */
-    --foreground: 0 0% 98%;
+    /* Exact colors from reference image - dark slate-blue palette */
+    --background: 216 20% 35%;  /* Main dark slate-blue background #495a6f */
+    --foreground: 0 0% 100%;
 
-    --card: 220 15% 25%;  /* Slightly lighter slate for cards */
-    --card-foreground: 0 0% 98%;
+    --card: 218 18% 32%;  /* Slightly darker slate for header/cards */
+    --card-foreground: 0 0% 100%;
 
-    --popover: 220 15% 25%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 218 18% 32%;
+    --popover-foreground: 0 0% 100%;
 
     /* Deep passionate magenta */
     --primary: 330 65% 48%;
@@ -26,9 +26,9 @@ All colors MUST be HSL.
     --secondary: 280 55% 45%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Warm muted tones */
-    --muted: 220 15% 30%;
-    --muted-foreground: 0 0% 85%;
+    /* Muted slate tones */
+    --muted: 216 18% 40%;
+    --muted-foreground: 0 0% 90%;
 
     /* Warm amber accent */
     --accent: 25 75% 55%;
@@ -37,8 +37,8 @@ All colors MUST be HSL.
     --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 35%;
-    --input: 220 15% 28%;
+    --border: 216 18% 40%;
+    --input: 218 18% 28%;
     --ring: 330 65% 48%;
 
     --radius: 0.75rem;
@@ -49,19 +49,15 @@ All colors MUST be HSL.
     --anniversary-text-dark: 30 30% 35%;
     --anniversary-text-light: 30 25% 50%;
 
-    /* Sensual design tokens */
+    /* Gradients */
     --gradient-romantic: linear-gradient(135deg, hsl(330 65% 48%), hsl(280 55% 50%));
     --gradient-vibrant: linear-gradient(135deg, hsl(330 65% 48%), hsl(25 75% 55%));
-    --gradient-cool: linear-gradient(180deg, hsl(330 20% 97%), hsl(330 15% 94%));
-    --gradient-glow: linear-gradient(135deg, hsl(330 65% 55% / 0.25), hsl(280 55% 50% / 0.25));
-    --gradient-purple-black: linear-gradient(180deg, hsl(270 50% 20%), hsl(0 0% 0%));
+    --gradient-purple-black: linear-gradient(180deg, hsl(270 50% 15%), hsl(0 0% 0%));
     
-    --shadow-soft: 0 2px 16px -4px hsl(330 20% 35% / 0.12);
-    --shadow-medium: 0 4px 24px -8px hsl(330 20% 30% / 0.18);
-    --shadow-glow: 0 8px 32px -8px hsl(330 65% 48% / 0.35);
+    --shadow-soft: 0 2px 16px -4px rgba(0, 0, 0, 0.2);
+    --shadow-medium: 0 4px 24px -8px rgba(0, 0, 0, 0.3);
     
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   }
 
   .dark {

@@ -756,25 +756,25 @@ const Dashboard = () => {
     );
   }
 
-  // Main Home View - redesigned with exact specifications
+  // Main Home View - exact match to reference image
   return (
     <div className="min-h-screen bg-background pb-20">
-      {/* Top Header Bar - 64-72pt height */}
-      <div className="h-[68px] bg-card border-b flex items-center px-4">
+      {/* Top Header Bar - 68pt height, dark slate background */}
+      <div className="h-[68px] bg-card flex items-center px-4 border-b border-border">
         <div className="flex items-center justify-between w-full max-w-lg mx-auto">
-          {/* Center: Space name (editable) - 20pt font */}
+          {/* Center: Space name - 20pt font */}
           {editingSpaceName ? (
             <Input
               value={spaceName}
               onChange={(e) => setSpaceName(e.target.value)}
               onBlur={updateSpaceName}
               onKeyPress={(e) => e.key === 'Enter' && updateSpaceName()}
-              className="text-center bg-transparent border-0 text-[20px] font-normal flex-1"
+              className="text-center bg-transparent border-0 text-[20px] font-normal flex-1 text-foreground"
               autoFocus
             />
           ) : (
             <h1
-              className="text-[20px] font-normal cursor-pointer flex-1 text-center"
+              className="text-[20px] font-normal cursor-pointer flex-1 text-center text-foreground"
               onClick={() => setEditingSpaceName(true)}
             >
               {coupleData.spaceName}
@@ -782,105 +782,102 @@ const Dashboard = () => {
           )}
 
           {/* Right: Gear icon - 24x24pt */}
-          <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="w-6 h-6 p-0">
-            <Settings className="w-6 h-6" />
+          <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="w-6 h-6 p-0 hover:bg-transparent">
+            <Settings className="w-6 h-6 text-foreground" />
           </Button>
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 space-y-4 mt-4">
-        {/* Upload instruction text - 14pt font + Profile picture button 80x80pt circular */}
-        <div className="text-center">
-          <p className="text-[14px] text-muted-foreground mb-2">Tap to upload couple picture</p>
-          <div className="flex justify-center">
-            <div className="w-20 h-20">
-              <CouplePictureUpload
-                coupleId={coupleData.coupleId}
-                currentPictureUrl={coupleData.couplePictureUrl || userProfile?.avatar_url || null}
-                onUploadComplete={(url) => {
-                  setCoupleData({ ...coupleData, couplePictureUrl: url });
-                }}
-              />
+      {/* Main content with exact spacing */}
+      <div className="max-w-lg mx-auto px-4 space-y-6 mt-6">
+        {/* Profile picture - 80x80pt circular */}
+        <div className="flex justify-center">
+          <div className="w-20 h-20">
+            <CouplePictureUpload
+              coupleId={coupleData.coupleId}
+              currentPictureUrl={coupleData.couplePictureUrl || userProfile?.avatar_url || null}
+              onUploadComplete={(url) => {
+                setCoupleData({ ...coupleData, couplePictureUrl: url });
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Couple name - 18pt font */}
+        <h2 className="text-[18px] font-semibold text-center text-foreground">{coupleData.spaceName}</h2>
+        
+        {/* Mood toggles - 60x32pt */}
+        <div className="space-y-3">
+          {user && (
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-sm text-foreground min-w-[100px] text-right">{userProfile?.full_name || 'You'}</span>
+              <div className="w-[60px] h-8">
+                <FeelingStatusSelector
+                  coupleId={coupleData.coupleId}
+                  userId={user.id}
+                  currentStatus={userFeelingStatus}
+                  currentCustomMessage={userCustomMessage}
+                  onStatusChange={(status, customMsg) => {
+                    setUserFeelingStatus(status);
+                    setUserCustomMessage(customMsg || "");
+                  }}
+                />
+              </div>
             </div>
-          </div>
-        </div>
-
-        {/* 💑 Couple Information Section */}
-        {/* Name of couple text - 18pt font */}
-        <div className="text-center">
-          <h2 className="text-[18px] font-semibold mb-3">{coupleData.spaceName}</h2>
+          )}
           
-          {/* Mood toggles - 60x32pt */}
-          <div className="space-y-2">
-            {user && (
-              <div className="flex items-center justify-center gap-2">
-                <span className="text-sm min-w-[80px] text-right">{userProfile?.full_name || 'You'}</span>
-                <div className="w-[60px] h-8">
-                  <FeelingStatusSelector
-                    coupleId={coupleData.coupleId}
-                    userId={user.id}
-                    currentStatus={userFeelingStatus}
-                    currentCustomMessage={userCustomMessage}
-                    onStatusChange={(status, customMsg) => {
-                      setUserFeelingStatus(status);
-                      setUserCustomMessage(customMsg || "");
-                    }}
-                  />
-                </div>
+          {coupleData.partner && (
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-sm text-foreground min-w-[100px] text-right">{coupleData.partner.full_name || 'Partner'}</span>
+              <div className="w-[60px] h-8 flex items-center justify-center bg-muted rounded-full px-2">
+                <span className="text-xs text-foreground truncate">
+                  {partnerFeelingStatus === "custom" && partnerCustomMessage 
+                    ? partnerCustomMessage 
+                    : partnerFeelingStatus || "😊"}
+                </span>
               </div>
-            )}
-            
-            {coupleData.partner && (
-              <div className="flex items-center justify-center gap-2">
-                <span className="text-sm min-w-[80px] text-right">{coupleData.partner.full_name || 'Partner'}</span>
-                <div className="w-[60px] h-8 flex items-center justify-center bg-muted rounded-full px-2">
-                  <span className="text-xs truncate">
-                    {partnerFeelingStatus === "custom" && partnerCustomMessage 
-                      ? partnerCustomMessage 
-                      : partnerFeelingStatus || "😊"}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
-        {/* Anniversary countdown container - 100pt height, 20pt font, 8pt spacing */}
+        {/* Anniversary countdown - 100pt height */}
         <div className="h-[100px]">
           <AnniversaryCountdown anniversaryDate={coupleData.anniversaryDate || null} />
         </div>
 
-        {/* 🎥 Video Section - 280x48pt button, 16pt font, 12pt corner radius */}
-        {coupleSongs.length > 0 ? (
-          <div className="w-full">
-            <CoupleSongPlayerEmbed
-              videoIds={coupleSongs.map(url => {
-                const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/|music\.youtube\.com\/watch\?v=)([^&\n?#]+)/);
-                return match ? match[1] : null;
-              }).filter(Boolean) as string[]}
-              currentIndex={currentSongIndex}
-              isPlaying={isSongPlaying}
-              onClose={() => setIsSongPlaying(false)}
-              onNext={() => setCurrentSongIndex(prev => (prev + 1) % coupleSongs.length)}
-              onEditClick={() => setShowSongSettings(true)}
-            />
-          </div>
-        ) : (
-          <Button 
-            onClick={() => setShowSongSettings(true)}
-            className="w-[280px] h-12 mx-auto block text-[16px] rounded-[12px]"
-          >
-            <Music className="w-5 h-5 mr-2" />
-            Add Your Song
-          </Button>
-        )}
+        {/* Video Section - 280x48pt button */}
+        <div className="flex justify-center">
+          {coupleSongs.length > 0 ? (
+            <div className="w-full max-w-[280px]">
+              <CoupleSongPlayerEmbed
+                videoIds={coupleSongs.map(url => {
+                  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/|music\.youtube\.com\/watch\?v=)([^&\n?#]+)/);
+                  return match ? match[1] : null;
+                }).filter(Boolean) as string[]}
+                currentIndex={currentSongIndex}
+                isPlaying={isSongPlaying}
+                onClose={() => setIsSongPlaying(false)}
+                onNext={() => setCurrentSongIndex(prev => (prev + 1) % coupleSongs.length)}
+                onEditClick={() => setShowSongSettings(true)}
+              />
+            </div>
+          ) : (
+            <Button 
+              onClick={() => setShowSongSettings(true)}
+              className="w-[280px] h-12 text-[16px] rounded-[12px]"
+            >
+              <Music className="w-5 h-5 mr-2" />
+              Video Player Closed
+            </Button>
+          )}
+        </div>
 
-        {/* 🔥❤️🎮 Navigation Icons - 32x32pt icons, 24pt spacing, 64pt container height */}
-        <div className="h-16 flex items-center justify-center gap-6">
+        {/* Navigation Icons - 32x32pt icons, 24pt spacing, 64pt container */}
+        <div className="h-16 flex items-center justify-center" style={{ gap: '24px' }}>
           <Button 
             variant="ghost" 
             size="icon" 
-            className="w-8 h-8 relative"
+            className="w-8 h-8 p-0 relative hover:bg-transparent"
             onClick={() => {
               setShowDesires(true);
               setNewDesiresCount(0);
@@ -896,7 +893,7 @@ const Dashboard = () => {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="w-8 h-8 relative"
+            className="w-8 h-8 p-0 relative hover:bg-transparent"
             onClick={() => {
               setShowFlirt(true);
               setNewFlirtsCount(0);
@@ -912,7 +909,7 @@ const Dashboard = () => {
           <Button 
             variant="ghost" 
             size="icon" 
-            className="w-8 h-8 relative"
+            className="w-8 h-8 p-0 relative hover:bg-transparent"
             onClick={() => setActiveView("games")}
           >
             <Gamepad2 className="w-8 h-8 text-purple-500" />
@@ -922,7 +919,7 @@ const Dashboard = () => {
           </Button>
         </div>
 
-        {/* 💬 Comment Section - 320x48pt text box, 14pt font, 12pt padding, 8pt corner radius */}
+        {/* Message Section - 320x48pt */}
         {coupleData.partner && (
           <div className="flex justify-center">
             <Button
@@ -932,7 +929,7 @@ const Dashboard = () => {
                 setLastViewedMessages(new Date());
               }}
               variant="outline"
-              className="w-[320px] h-12 text-[14px] px-3 rounded-lg relative"
+              className="w-[320px] h-12 text-[14px] rounded-lg relative border-muted"
             >
               <MessageCircle className="w-4 h-4 mr-2" />
               Send a message
@@ -943,7 +940,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* Gallery/Feed Section */}
+        {/* Gallery/Feed Section - removed custom features */}
         <div className="bg-[#F5E6D3] rounded-3xl p-6 shadow-xl min-h-[400px]">
           <UnioGallery
             coupleId={coupleData.coupleId}
@@ -956,7 +953,7 @@ const Dashboard = () => {
         {/* Invite Code if no partner */}
         {!coupleData.partner && (
           <Card className="p-4 bg-card">
-            <h3 className="font-semibold mb-2">Invite Your Partner</h3>
+            <h3 className="font-semibold mb-2 text-foreground">Invite Your Partner</h3>
             <div className="flex gap-2">
               <Input value={coupleData.inviteCode} readOnly className="font-mono" />
               <Button onClick={() => {
@@ -970,7 +967,7 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* ⬇️ Bottom Navigation Bar - 72pt height, 28x28pt icons, 40pt spacing, gradient background */}
+      {/* Bottom Navigation - 72pt height, exact gradient */}
       <BottomNavigation
         activeView={activeView}
         onViewChange={(view) => {
