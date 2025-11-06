@@ -785,13 +785,10 @@ const Dashboard = () => {
         {/* Background slideshow - full size */}
         <div className="relative h-64 max-w-lg mx-auto overflow-hidden">
           <BackgroundSlideshow coupleId={coupleData.coupleId} />
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-            <p className="text-white text-sm">Upload up to 10 pictures</p>
-          </div>
           
           {/* Profile Picture - bottom-left corner, overlapping */}
           <div className="absolute bottom-4 left-4 z-20">
-            <div className="w-24 h-24 rounded-full border-4 border-white/30 overflow-hidden">
+            <div className="w-24 h-24 rounded-full overflow-hidden">
               <CouplePictureUpload
                 coupleId={coupleData.coupleId}
                 currentPictureUrl={coupleData.couplePictureUrl || userProfile?.avatar_url || null}
@@ -803,10 +800,14 @@ const Dashboard = () => {
       </div>
 
       {/* Info Section */}
-      <div style={{ backgroundColor: 'hsl(210 12% 28%)' }} className="py-4 border-y border-white/10">
+      <div style={{ backgroundColor: 'hsl(210 12% 28%)' }} className="py-4">
         <div className="max-w-lg mx-auto px-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-normal text-white">{coupleData.spaceName}</h2>
+            <h2 className="text-lg font-normal text-white">
+              {coupleData.partner && userProfile?.full_name 
+                ? `${userProfile.full_name} & ${coupleData.partner.full_name}` 
+                : 'Couple Names'}
+            </h2>
             {user && (
               <div className="w-24 h-9 bg-muted/50 rounded-full flex items-center justify-center">
                 <span className="text-white text-sm">{userFeelingStatus || "Happy"}</span>
@@ -821,14 +822,14 @@ const Dashboard = () => {
       </div>
 
       {/* Video Section */}
-      <div style={{ backgroundColor: 'hsl(280 60% 20%)' }} className="py-6 border-y border-white/10">
+      <div style={{ backgroundColor: 'hsl(280 60% 20%)' }} className="py-6">
         <div className="max-w-lg mx-auto flex justify-center">
-          <span className="text-white/90 text-base">Video Player Closed</span>
+          {/* Video player will be added here */}
         </div>
       </div>
 
       {/* Icon Row */}
-      <div style={{ backgroundColor: 'hsl(210 10% 20%)' }} className="py-6 border-y border-white/10">
+      <div style={{ backgroundColor: 'hsl(210 10% 20%)' }} className="py-6">
         <div className="max-w-lg mx-auto px-4 flex items-center justify-center gap-12">
           <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => { setShowFlirt(true); setNewFlirtsCount(0); setLastViewedFlirts(new Date()); }}>
             <Flame className="w-10 h-10 text-[hsl(200_30%_60%)]" strokeWidth={1.5} />
