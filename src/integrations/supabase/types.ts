@@ -119,6 +119,7 @@ export type Database = {
           name: string | null
           theme: string | null
           updated_at: string
+          video_url: string | null
         }
         Insert: {
           anniversary_date?: string | null
@@ -133,6 +134,7 @@ export type Database = {
           name?: string | null
           theme?: string | null
           updated_at?: string
+          video_url?: string | null
         }
         Update: {
           anniversary_date?: string | null
@@ -147,6 +149,7 @@ export type Database = {
           name?: string | null
           theme?: string | null
           updated_at?: string
+          video_url?: string | null
         }
         Relationships: []
       }

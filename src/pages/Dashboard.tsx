@@ -829,13 +829,17 @@ const Dashboard = () => {
           <YouTubePlayer
             coupleId={coupleData.coupleId}
             videoUrl={coupleData.videoUrl}
-            onVideoUrlChange={(url) => {
+            onVideoUrlChange={async (url) => {
               setCoupleData({ ...coupleData, videoUrl: url });
               // Save to database
-              supabase
+              const { error } = await supabase
                 .from('couples')
-                .update({ video_url: url })
+                .update({ video_url: url } as any)
                 .eq('id', coupleData.coupleId);
+              
+              if (error) {
+                console.error('Error saving video URL:', error);
+              }
             }}
           />
         </div>
