@@ -31,6 +31,7 @@ import { CoupleSongPlayer, CoupleSongPlayerEmbed } from "@/components/CoupleSong
 import { AnniversaryCountdown } from "@/components/AnniversaryCountdown";
 import { ThemeSettings } from "@/components/ThemeSettings";
 import { SongSettings } from "@/components/SongSettings";
+import { YouTubePlayer } from "@/components/YouTubePlayer";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PremiumFeatures } from "@/components/PremiumFeatures";
 
@@ -40,6 +41,7 @@ interface CoupleData {
   spaceName: string;
   couplePictureUrl?: string;
   anniversaryDate?: string | null;
+  videoUrl?: string;
   partner: {
     user_id: string;
     full_name: string;
@@ -823,8 +825,19 @@ const Dashboard = () => {
 
       {/* Video Section */}
       <div style={{ backgroundColor: 'hsl(280 60% 20%)' }} className="py-6">
-        <div className="max-w-lg mx-auto flex justify-center">
-          {/* Video player will be added here */}
+        <div className="max-w-lg mx-auto px-4">
+          <YouTubePlayer
+            coupleId={coupleData.coupleId}
+            videoUrl={coupleData.videoUrl}
+            onVideoUrlChange={(url) => {
+              setCoupleData({ ...coupleData, videoUrl: url });
+              // Save to database
+              supabase
+                .from('couples')
+                .update({ video_url: url })
+                .eq('id', coupleData.coupleId);
+            }}
+          />
         </div>
       </div>
 
