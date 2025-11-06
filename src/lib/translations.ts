@@ -259,11 +259,14 @@ export const translations = {
     truthOrTenderDesc: "Deep questions or acts of affection",
     
     // Game play
+    chooseRole: "Choose Your Role",
+    chooseRoleDescription: "One partner answers questions about themselves, the other guesses",
     chooseYourRole: "Choose Your Role",
     onePartnerAnswers: "One partner answers questions about themselves, the other guesses",
     illAnswerQuestions: "I'll Answer Questions",
     illGuessAnswers: "I'll Guess Their Answers",
     waitingForPartnerToJoin: "Waiting for partner to join",
+    waitingPartnerAnswers: "Waiting for partner's answers...",
     waitingForPartnerAnswers: "Waiting for partner to answer questions first",
     gameInvitation: "Game Invitation!",
     partnerInvitedYou: "Your partner invited you to play",
@@ -587,11 +590,14 @@ export const translations = {
     truthOrTenderDesc: "Preguntas profundas o actos de afecto",
     
     // Game play
+    chooseRole: "Elige Tu Rol",
+    chooseRoleDescription: "Una pareja responde preguntas sobre sí misma, la otra adivina",
     chooseYourRole: "Elige Tu Rol",
     onePartnerAnswers: "Una pareja responde preguntas sobre sí misma, la otra adivina",
     illAnswerQuestions: "Yo Responderé Preguntas",
     illGuessAnswers: "Yo Adivinaré Sus Respuestas",
     waitingForPartnerToJoin: "Esperando a la pareja",
+    waitingPartnerAnswers: "Esperando las respuestas de tu pareja...",
     waitingForPartnerAnswers: "Esperando a que la pareja responda primero",
     gameInvitation: "¡Invitación de Juego!",
     partnerInvitedYou: "Tu pareja te invitó a jugar",
