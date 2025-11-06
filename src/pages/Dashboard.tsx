@@ -760,9 +760,9 @@ const Dashboard = () => {
 
   // Main Home View - exact match to reference images
   return (
-    <div className="min-h-screen pb-20" style={{ backgroundColor: 'hsl(210 12% 28%)' }}>
-      {/* Hero Section - Gray-blue background with full background images */}
-      <div style={{ backgroundColor: 'hsl(210 15% 45%)' }} className="relative pt-4">
+    <div className="min-h-screen pb-20" style={{ background: 'var(--hero-bg)' }}>
+      {/* Hero Section - Dark gradient background with full background images */}
+      <div style={{ background: 'var(--hero-bg)' }} className="relative pt-4">
         {/* Title centered at top, settings button on top right - no rectangle background */}
         <div className="absolute top-4 left-0 right-0 z-20 flex items-center justify-center px-4 max-w-lg mx-auto">
           {editingSpaceName ? (
