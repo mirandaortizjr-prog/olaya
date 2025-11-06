@@ -12,9 +12,9 @@ All colors MUST be HSL.
     --background: 0 0% 10%;  /* Very dark neutral background */
     --foreground: 0 0% 100%;
 
-    --card: 210 12% 28%;  /* Dark charcoal #404750 */
+    --card: 200 9% 34%;  /* #4F585E blue-gray charcoal */
     --card-foreground: 0 0% 100%;
-    --card-gradient: linear-gradient(180deg, hsl(210 12% 32%), hsl(210 12% 24%));  /* Card gradient #404750 range */
+    --card-gradient: linear-gradient(180deg, hsl(200 9% 34%), hsl(0 0% 0%));  /* #4F585E to black gradient */
 
     --popover: 210 12% 28%;
     --popover-foreground: 0 0% 100%;
@@ -42,10 +42,10 @@ All colors MUST be HSL.
 
     /* Section-specific backgrounds */
     --hero-bg: linear-gradient(180deg, hsl(0 0% 6%), hsl(0 0% 16%));  /* Dark neutral gradient - no blue tint */
-    --info-bg: linear-gradient(180deg, hsl(210 12% 32%), hsl(210 12% 24%));  /* Info section charcoal gradient */
+    --info-bg: linear-gradient(180deg, hsl(200 9% 34%), hsl(0 0% 0%));  /* #4F585E to black */
     --video-gradient: linear-gradient(180deg, hsl(280 50% 25%), hsl(280 60% 15%));  /* Purple gradient */
-    --icons-bg: linear-gradient(180deg, hsl(210 12% 32%), hsl(210 12% 24%));  /* Icon row charcoal gradient */
-    --feed-bg: linear-gradient(180deg, hsl(210 12% 32%), hsl(210 12% 24%));  /* Feed card charcoal gradient */
+    --icons-bg: linear-gradient(180deg, hsl(200 9% 34%), hsl(0 0% 0%));  /* #4F585E to black */
+    --feed-bg: linear-gradient(180deg, hsl(200 9% 34%), hsl(0 0% 0%));  /* #4F585E to black */
     --nav-gradient: linear-gradient(180deg, hsl(280 60% 15%), hsl(0 0% 0%));
     
     --transition-smooth: all 0.3s ease;
