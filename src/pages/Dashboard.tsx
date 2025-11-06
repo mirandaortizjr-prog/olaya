@@ -824,7 +824,7 @@ const Dashboard = () => {
       </div>
 
       {/* Video Section */}
-      <div style={{ backgroundColor: 'hsl(280 60% 20%)' }} className="py-6">
+      <div style={{ background: 'var(--video-gradient)' }} className="py-6">
         <div className="max-w-lg mx-auto px-4">
           <YouTubePlayer
             coupleId={coupleData.coupleId}

@@ -9,7 +9,7 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Exact colors from reference images */
-    --background: 210 15% 45%;  /* Top section gray-blue #677685 */
+    --background: 210 20% 15%;  /* Darker background matching reference */
     --foreground: 0 0% 100%;
 
     --card: 210 12% 28%;  /* Dark charcoal #404750 */
@@ -40,9 +40,9 @@ All colors MUST be HSL.
     --radius: 1rem;
 
     /* Section-specific backgrounds */
-    --hero-bg: 210 15% 45%;  /* Top hero section */
+    --hero-bg: 210 20% 15%;  /* Darker hero section matching reference */
     --info-bg: 210 12% 28%;  /* Info/anniversary section */
-    --video-bg: 280 60% 20%;  /* Video section purple */
+    --video-gradient: linear-gradient(180deg, hsl(280 50% 25%), hsl(280 60% 15%));  /* Purple gradient */
     --icons-bg: 210 10% 20%;  /* Icon row dark */
     --feed-bg: 210 12% 45%;  /* Feed card gray */
     --nav-gradient: linear-gradient(180deg, hsl(280 60% 15%), hsl(0 0% 0%));
