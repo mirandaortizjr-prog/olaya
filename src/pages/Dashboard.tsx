@@ -759,10 +759,10 @@ const Dashboard = () => {
   // Main Home View - exact match to reference images
   return (
     <div className="min-h-screen pb-20" style={{ backgroundColor: 'hsl(210 12% 28%)' }}>
-      {/* Hero Section - Gray-blue background */}
-      <div style={{ backgroundColor: 'hsl(210 15% 45%)' }} className="pb-6">
+      {/* Hero Section - Gray-blue background with full background images */}
+      <div style={{ backgroundColor: 'hsl(210 15% 45%)' }} className="relative">
         {/* Header */}
-        <div className="h-16 flex items-center justify-between px-4 max-w-lg mx-auto">
+        <div className="h-16 flex items-center justify-between px-4 max-w-lg mx-auto relative z-10">
           <div className="flex-1" />
           {editingSpaceName ? (
             <Input
@@ -783,22 +783,22 @@ const Dashboard = () => {
           </Button>
         </div>
 
-        {/* Background slideshow */}
-        <div className="relative h-32 max-w-lg mx-auto">
+        {/* Background slideshow - full size */}
+        <div className="relative h-64 max-w-lg mx-auto overflow-hidden">
           <BackgroundSlideshow coupleId={coupleData.coupleId} />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-white/90 text-sm">Upload up to 10 pictures</p>
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+            <p className="text-white text-sm">Upload up to 10 pictures</p>
           </div>
-        </div>
-
-        {/* Profile Picture */}
-        <div className="flex justify-center -mt-10">
-          <div className="w-24 h-24">
-            <CouplePictureUpload
-              coupleId={coupleData.coupleId}
-              currentPictureUrl={coupleData.couplePictureUrl || userProfile?.avatar_url || null}
-              onUploadComplete={(url) => setCoupleData({ ...coupleData, couplePictureUrl: url })}
-            />
+          
+          {/* Profile Picture - bottom-left corner, overlapping */}
+          <div className="absolute bottom-4 left-4 z-20">
+            <div className="w-24 h-24 rounded-full border-4 border-white/30 overflow-hidden">
+              <CouplePictureUpload
+                coupleId={coupleData.coupleId}
+                currentPictureUrl={coupleData.couplePictureUrl || userProfile?.avatar_url || null}
+                onUploadComplete={(url) => setCoupleData({ ...coupleData, couplePictureUrl: url })}
+              />
+            </div>
           </div>
         </div>
       </div>
