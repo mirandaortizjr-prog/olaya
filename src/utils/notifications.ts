@@ -8,7 +8,7 @@ export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration
   }
 
   try {
-    const registration = await navigator.serviceWorker.register('/sw.js');
+    const registration = await navigator.serviceWorker.register('/push-sw.js');
     console.log('Service Worker registered:', registration);
     return registration;
   } catch (error) {

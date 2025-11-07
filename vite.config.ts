@@ -14,10 +14,11 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     mode === "production" && VitePWA({
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       workbox: {
         cleanupOutdatedCaches: true,
-        skipWaiting: false,
+        clientsClaim: true,
+        skipWaiting: true,
       },
       includeAssets: ['favicon.png', 'apple-touch-icon.png'],
       manifest: {
