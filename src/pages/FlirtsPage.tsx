@@ -95,8 +95,8 @@ useEffect(() => {
   }
 
   return (
-    <div className="min-h-screen bg-muted pb-10">
-      <header className="p-4 border-b bg-card flex items-center justify-between max-w-lg mx-auto">
+    <div className="min-h-screen pb-10" style={{ background: 'linear-gradient(to bottom, #672487, #000000)' }}>
+      <header className="p-4 border-b bg-black/20 backdrop-blur-sm flex items-center justify-between max-w-lg mx-auto">
         <h1 className="text-xl font-semibold flex items-center gap-2">
           <Flame className="w-5 h-5 text-orange-500" />
           Flirts
@@ -117,7 +117,7 @@ useEffect(() => {
 
       {/* Flirts history */}
       <main className="max-w-lg mx-auto p-4">
-        <section aria-labelledby="flirts-history-heading" className="bg-card rounded-lg border">
+        <section aria-labelledby="flirts-history-heading" className="bg-black/30 backdrop-blur-sm rounded-lg border border-white/10">
           <header className="flex items-center justify-between p-4 border-b">
             <h2 id="flirts-history-heading" className="text-base font-semibold">Recent Flirts</h2>
             <span className="text-xs text-muted-foreground">{flirts.length} total</span>

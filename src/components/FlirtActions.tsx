@@ -252,8 +252,8 @@ export const FlirtActions = ({ coupleId, senderId, open = false, onClose = () =>
   return (
     <>
       {inline ? (
-        <section className="bg-card rounded-lg border">
-          <div className="flex items-center justify-between p-4 border-b">
+        <section className="bg-black/30 backdrop-blur-sm rounded-lg border border-white/10">
+          <div className="flex items-center justify-between p-4 border-b border-white/10">
             <div className="text-base font-semibold flex items-center gap-2">
               <Flame className="w-5 h-5 text-orange-500" />
               Instant Flirt
