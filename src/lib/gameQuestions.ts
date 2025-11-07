@@ -123,6 +123,12 @@ export const generateWouldYouRatherQuestions = (level: number, language: 'en' | 
   return shuffled.slice(0, 8).map(q => q[language]);
 };
 
+export const getDailySyncQuestions = (level: number, language: 'en' | 'es') => getQuestionsByCategory('daily', level, language);
+export const getFutureForecastQuestions = (level: number, language: 'en' | 'es') => getQuestionsByCategory('future', level, language);
+export const getLoveLanguageQuestions = (level: number, language: 'en' | 'es') => getQuestionsByCategory('love_language', level, language);
+export const getWouldYouRatherQuestions = (level: number, language: 'en' | 'es') => getQuestionsByCategory('would_you_rather', level, language);
+export const getTruthOrTenderQuestions = (level: number, language: 'en' | 'es') => getQuestionsByCategory('truth_or_tender', level, language);
+
 export const generateTruthOrDareQuestions = (level: number, language: 'en' | 'es'): Array<{truth: string, dare: string}> => {
   const questions: Array<{id: string, en: {truth: string, dare: string}, es: {truth: string, dare: string}, minLevel: number, maxLevel: number}> = [
     // Level 1-100: Playful
