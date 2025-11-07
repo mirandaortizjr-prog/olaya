@@ -430,12 +430,6 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
 
   return (
     <div className="relative h-full flex flex-col">
-      <div className="mb-3">
-        <Button size="sm" onClick={() => setShowNewPost(true)} className="w-full">
-          New Post
-        </Button>
-      </div>
-
       {showNewPost && (
         <Card className="p-4 mb-4 animate-scale-in">
           <Textarea
