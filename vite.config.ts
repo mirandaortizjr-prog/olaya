@@ -13,8 +13,12 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === "development" && componentTagger(),
-    VitePWA({
-      registerType: 'autoUpdate',
+    mode === "production" && VitePWA({
+      registerType: 'prompt',
+      workbox: {
+        cleanupOutdatedCaches: true,
+        skipWaiting: false,
+      },
       includeAssets: ['favicon.png', 'apple-touch-icon.png'],
       manifest: {
         name: 'Olaya Together',
