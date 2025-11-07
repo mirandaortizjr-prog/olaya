@@ -864,7 +864,7 @@ const Dashboard = () => {
       </div>
 
       {/* Feed Section */}
-      <div style={{ background: 'linear-gradient(180deg, hsl(200 9% 34%), hsl(0 0% 0%))' }} className="px-2 pb-4">
+      <div style={{ backgroundColor: '#000000' }} className="px-2 pb-4">
         <div className="max-w-lg mx-auto">
           <div style={{ background: 'linear-gradient(180deg, hsl(200 9% 34%), hsl(0 0% 0%))' }} className="rounded-3xl p-4 min-h-[500px]">
             <UnioGallery
