@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, ArrowLeft, Plus, Camera, Image as ImageIcon, Smile, FileText, X } from "lucide-react";
@@ -16,7 +15,7 @@ interface Message {
   sender_id: string;
   content: string;
   media_url?: string;
-  media_type?: 'image' | 'video';
+  media_type?: 'image' | 'video' | string | null;
   created_at: string;
   read_at: string | null;
 }
@@ -429,7 +428,7 @@ export const MessengerPage = ({ coupleId, currentUserId, partnerName, onClose }:
   );
 };
 
-const MessageMedia = ({ mediaUrl, mediaType }: { mediaUrl: string; mediaType?: 'image' | 'video' }) => {
+const MessageMedia = ({ mediaUrl, mediaType }: { mediaUrl: string; mediaType?: string | null }) => {
   const [url, setUrl] = useState('');
 
   useEffect(() => {
