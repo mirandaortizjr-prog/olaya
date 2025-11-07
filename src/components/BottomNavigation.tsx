@@ -19,14 +19,14 @@ export const BottomNavigation = ({
   newVaultCount = 0
 }: BottomNavigationProps) => {
   const navItems = [
-    { id: "new", icon: Heart, label: "New" },
+    { id: "new", icon: Plus, label: "New" },
     { id: "home", icon: Home, label: "Home" },
     { id: "messages", icon: MessageCircle, label: "Messages" },
     { id: "settings", icon: Settings, label: "Settings" },
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40" style={{ background: 'linear-gradient(180deg, hsl(200 9% 34%), hsl(0 0% 0%))' }}>
+    <div className="fixed bottom-0 left-0 right-0 z-40" style={{ background: 'linear-gradient(180deg, hsl(280 60% 15%), hsl(0 0% 0%))' }}>
       <div className="flex justify-around items-center h-20 max-w-lg mx-auto px-8">
         {navItems.map((item) => (
           <Button
