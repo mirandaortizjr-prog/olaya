@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Flame, Heart, Eye, Sparkles, Wind, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PreferencesSettings } from "./PreferencesSettings";
+import { haptics } from "@/utils/haptics";
 
 const FLIRT_ACTIONS = [
   // Classic Physical Flirts
@@ -131,6 +132,9 @@ export const FlirtActions = ({ coupleId, senderId, open, onClose }: FlirtActions
 
   const sendFlirt = async (flirtType: string, label: string, emoji: string) => {
     try {
+      // Haptic feedback for sending flirt
+      await haptics.medium();
+      
       console.log('=== SENDING FLIRT ===');
       console.log('Flirt details:', { flirtType, label, emoji, coupleId, senderId });
       setSending(true);

@@ -4,12 +4,46 @@ import { Bell, BellOff } from "lucide-react";
 import { subscribeToPushNotifications } from "@/utils/notifications";
 import { useToast } from "@/hooks/use-toast";
 import { NotificationPreferences } from "./NotificationPreferences";
+import { LocalNotificationSettings } from "./LocalNotificationSettings";
 import { Separator } from "./ui/separator";
+import { supabase } from "@/integrations/supabase/client";
 
 export const NotificationSettings = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [anniversaryDate, setAnniversaryDate] = useState<Date | undefined>();
   const { toast } = useToast();
+
+  useEffect(() => {
+    loadAnniversaryDate();
+  }, []);
+
+  const loadAnniversaryDate = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: members } = await supabase
+        .from('couple_members')
+        .select('couple_id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (members) {
+        const { data: couple } = await supabase
+          .from('couples')
+          .select('anniversary_date')
+          .eq('id', members.couple_id)
+          .single();
+
+        if (couple?.anniversary_date) {
+          setAnniversaryDate(new Date(couple.anniversary_date));
+        }
+      }
+    } catch (error) {
+      console.error('Error loading anniversary date:', error);
+    }
+  };
 
   useEffect(() => {
     // Check current notification permission status
@@ -98,6 +132,8 @@ export const NotificationSettings = () => {
         <>
           <Separator />
           <NotificationPreferences />
+          <Separator />
+          <LocalNotificationSettings anniversaryDate={anniversaryDate} />
         </>
       )}
     </div>

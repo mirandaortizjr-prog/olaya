@@ -13,9 +13,19 @@ const config: CapacitorConfig = {
       presentationOptions: ["badge", "sound", "alert"]
     },
     Badge: {
-      // Enable badge count updates
       persist: true,
       autoClear: false
+    },
+    LocalNotifications: {
+      smallIcon: "ic_stat_icon_config_sample",
+      iconColor: "#488AFF",
+      sound: "beep.wav",
+    },
+    Camera: {
+      saveToGallery: true,
+    },
+    SplashScreen: {
+      launchShowDuration: 0
     }
   }
 };
