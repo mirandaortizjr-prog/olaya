@@ -20,6 +20,7 @@ export const BottomNavigation = ({
 }: BottomNavigationProps) => {
   const navItems = [
     { id: "flirt", icon: Flame, label: "Flirt" },
+    { id: "new", icon: Plus, label: "New" },
     { id: "home", icon: Home, label: "Home" },
     { id: "desires", icon: Heart, label: "Desires" },
     { id: "settings", icon: Settings, label: "Settings" },
@@ -27,7 +28,7 @@ export const BottomNavigation = ({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40" style={{ background: 'linear-gradient(180deg, hsl(280 60% 15%), hsl(0 0% 0%))' }}>
-      <div className="flex justify-around items-center h-20 max-w-lg mx-auto px-8">
+      <div className="flex justify-around items-center h-20 max-w-lg mx-auto px-4">
         {navItems.map((item) => (
           <Button
             key={item.id}
