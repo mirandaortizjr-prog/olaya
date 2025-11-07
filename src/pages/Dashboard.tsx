@@ -628,7 +628,7 @@ const Dashboard = () => {
             <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("calendar")}>
               <Calendar className="w-7 h-7 text-foreground" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => navigate('/flirts')}>
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => navigate('/flirt-customization')}>
               <Flame className="w-7 h-7 text-red-500" />
             </Button>
             <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("home")}>
