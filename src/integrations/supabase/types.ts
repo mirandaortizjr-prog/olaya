@@ -105,6 +105,36 @@ export type Database = {
         }
         Relationships: []
       }
+      couple_progress: {
+        Row: {
+          couple_id: string
+          created_at: string | null
+          current_level: number
+          id: string
+          level_started_at: string | null
+          total_experience: number
+          updated_at: string | null
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string | null
+          current_level?: number
+          id?: string
+          level_started_at?: string | null
+          total_experience?: number
+          updated_at?: string | null
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string | null
+          current_level?: number
+          id?: string
+          level_started_at?: string | null
+          total_experience?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       couples: {
         Row: {
           anniversary_date: string | null
@@ -333,8 +363,10 @@ export type Database = {
           answer: string
           couple_id: string
           created_at: string
+          experience_earned: number | null
           game_type: string
           id: string
+          level_earned: number | null
           question_id: string
           session_id: string
           user_id: string
@@ -343,8 +375,10 @@ export type Database = {
           answer: string
           couple_id: string
           created_at?: string
+          experience_earned?: number | null
           game_type: string
           id?: string
+          level_earned?: number | null
           question_id: string
           session_id: string
           user_id: string
@@ -353,8 +387,10 @@ export type Database = {
           answer?: string
           couple_id?: string
           created_at?: string
+          experience_earned?: number | null
           game_type?: string
           id?: string
+          level_earned?: number | null
           question_id?: string
           session_id?: string
           user_id?: string
@@ -1059,6 +1095,14 @@ export type Database = {
         Returns: undefined
       }
       refresh_invite_code: { Args: { couple_uuid: string }; Returns: string }
+      update_couple_progress: {
+        Args: { p_couple_id: string; p_experience_gained: number }
+        Returns: {
+          leveled_up: boolean
+          new_experience: number
+          new_level: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

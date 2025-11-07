@@ -355,6 +355,18 @@ export const translations = {
     gameReadyBody: "Your partner has finished answering 'How Well Do You Know Me?' - Time to guess their answers!",
     dailySyncGame: "The Daily Sync",
     
+    // Level System
+    level: "Level",
+    experience: "XP",
+    levelUp: "Level Up!",
+    youReachedLevel: "You reached level",
+    experienceGained: "Experience gained",
+    nextLevel: "Next Level",
+    coupleLevel: "Couple Level",
+    totalExperience: "Total Experience",
+    progressToNextLevel: "Progress to Next Level",
+    keepPlayingToLevel: "Keep playing games together to level up!",
+    
     // Mood Customization
     moodCustomizeTitle: "Customize",
     moodCustomizeInstructions: "Choose up to 20 moods by pressing the personalize button (yellow star), or choose one to update status",
@@ -907,6 +919,18 @@ export const translations = {
     gameReadyTitle: "¿Qué Tan Bien Me Conoces? 🎯",
     gameReadyBody: "¡Tu pareja ha terminado de responder '¿Qué Tan Bien Me Conoces?' - ¡Es hora de adivinar sus respuestas!",
     dailySyncGame: "La Sincronización Diaria",
+    
+    // Level System
+    level: "Nivel",
+    experience: "XP",
+    levelUp: "¡Subiste de Nivel!",
+    youReachedLevel: "Alcanzaste el nivel",
+    experienceGained: "Experiencia ganada",
+    nextLevel: "Próximo Nivel",
+    coupleLevel: "Nivel de Pareja",
+    totalExperience: "Experiencia Total",
+    progressToNextLevel: "Progreso al Próximo Nivel",
+    keepPlayingToLevel: "¡Sigan jugando juntos para subir de nivel!",
     
     // Mood Customization
     moodCustomizeTitle: "Personalizar",

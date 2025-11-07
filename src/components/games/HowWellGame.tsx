@@ -4,9 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Trophy, Bell } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { ArrowLeft, Trophy, Bell, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { generateHowWellQuestions, calculateExperienceGain } from "@/lib/gameQuestions";
+import { useCoupleProgress } from "@/hooks/useCoupleProgress";
 
 interface HowWellGameProps {
   coupleId: string;
@@ -15,42 +18,9 @@ interface HowWellGameProps {
   onBack: () => void;
 }
 
-const allQuestions = [
-  "What's my favorite comfort food?",
-  "What's one thing I always forget?",
-  "If I could teleport anywhere right now, where would I go?",
-  "What's my biggest pet peeve?",
-  "What song makes me happy every time?",
-  "What's my dream vacation destination?",
-  "What would I do if I won the lottery?",
-  "What's my favorite way to spend a lazy Sunday?",
-  "What's my go-to karaoke song?",
-  "What's the best gift I've ever received?",
-  "What makes me laugh the hardest?",
-  "What's my secret talent?",
-  "What would my perfect day look like?",
-  "What's my favorite childhood memory?",
-  "What's one thing that instantly improves my mood?",
-  "What's my biggest fear?",
-  "What's my favorite movie or TV show?",
-  "What's my ideal way to relax after a long day?",
-  "What's something I'm secretly proud of?",
-  "What's my favorite season and why?"
-];
-
-// Shuffle array function
-const shuffleArray = <T,>(array: T[]): T[] => {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-};
-
 export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGameProps) => {
   const [gameMode, setGameMode] = useState<"menu" | "answer" | "guess" | "results">("menu");
-  const [questions] = useState(() => shuffleArray(allQuestions).slice(0, 8));
+  const [questions, setQuestions] = useState<string[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [myAnswer, setMyAnswer] = useState("");
   const [myGuess, setMyGuess] = useState("");
@@ -59,7 +29,14 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
   const [partnerAnswers, setPartnerAnswers] = useState<Record<string, string>>({});
   const [pendingInvitation, setPendingInvitation] = useState<any>(null);
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { progress, addExperience } = useCoupleProgress(coupleId);
+
+  useEffect(() => {
+    // Generate questions based on current level
+    const levelQuestions = generateHowWellQuestions(progress.currentLevel, language);
+    setQuestions(levelQuestions);
+  }, [progress.currentLevel, language]);
 
   const loadPartnerAnswers = async () => {
     if (!partnerId) return;
@@ -104,8 +81,7 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
   const sendGameInvitation = async () => {
     if (!partnerId) return;
 
-    // Create game session
-    const { data: session, error } = await supabase
+    const { error } = await supabase
       .from('game_sessions')
       .insert({
         couple_id: coupleId,
@@ -114,16 +90,13 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
         partner_id: partnerId,
         session_id: sessionId,
         status: 'pending'
-      })
-      .select()
-      .single();
+      });
 
     if (error) {
       toast({ title: t('error'), variant: "destructive" });
       return;
     }
 
-    // Send push notification
     try {
       await supabase.functions.invoke('send-push-notification', {
         body: {
@@ -168,7 +141,6 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      // All answers complete - notify partner
       if (partnerId) {
         try {
           await supabase.functions.invoke('send-push-notification', {
@@ -209,6 +181,9 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
+      // Calculate experience based on score
+      const expGained = calculateExperienceGain('how-well', score + (isCorrect ? 1 : 0), questions.length);
+      await addExperience(expGained);
       setGameMode("results");
     }
   };
@@ -231,11 +206,28 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h2 className="text-xl font-semibold">{t('howWellGame')}</h2>
+          <div className="flex-1">
+            <h2 className="text-xl font-semibold">{t('howWellGame')}</h2>
+          </div>
+          <div className="flex items-center gap-2 text-sm">
+            <Star className="w-4 h-4 text-yellow-500" />
+            <span className="font-semibold">{t('level')} {progress.currentLevel}</span>
+          </div>
         </div>
 
         <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
           <div className="max-w-md w-full space-y-4">
+            {/* Level Progress Card */}
+            <Card className="p-4 bg-gradient-to-br from-primary/10 to-accent/10">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>{t('coupleLevel')}: {progress.currentLevel}</span>
+                  <span>{progress.totalExperience}/{progress.experienceForNextLevel} {t('experience')}</span>
+                </div>
+                <Progress value={(progress.totalExperience / progress.experienceForNextLevel) * 100} />
+              </div>
+            </Card>
+
             {pendingInvitation && (
               <Card className="p-6 border-primary bg-primary/5">
                 <div className="flex items-start gap-3 mb-4">
@@ -270,7 +262,7 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
                   className="w-full" 
                   variant="outline"
                   onClick={() => setGameMode("guess")}
-                  disabled={!partnerId}
+                  disabled={!partnerId || Object.keys(partnerAnswers).length === 0}
                 >
                   {t('illGuessAnswers')}
                 </Button>
@@ -300,6 +292,10 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h2 className="text-xl font-semibold">{t('question')} {currentQuestionIndex + 1}/{questions.length}</h2>
+          <div className="flex items-center gap-1 text-sm ml-auto">
+            <Star className="w-4 h-4 text-yellow-500" />
+            <span>{t('level')} {progress.currentLevel}</span>
+          </div>
         </div>
 
         <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
