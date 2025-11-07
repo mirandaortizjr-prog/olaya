@@ -762,31 +762,31 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen pb-20" style={{ background: 'var(--hero-bg)' }}>
       {/* Hero Section - Dark gradient background with full background images */}
-      <div style={{ background: 'var(--hero-bg)' }} className="relative pt-4">
-        {/* Title centered at top, settings button on top right - no rectangle background */}
-        <div className="absolute top-4 left-0 right-0 z-20 flex items-center justify-center px-4 max-w-lg mx-auto">
-          {editingSpaceName ? (
-            <Input
-              value={spaceName}
-              onChange={(e) => setSpaceName(e.target.value)}
-              onBlur={updateSpaceName}
-              onKeyPress={(e) => e.key === 'Enter' && updateSpaceName()}
-              className="text-center bg-white/10 border-white/20 text-xl font-light text-white max-w-[200px]"
-              autoFocus
-            />
-          ) : (
-            <h1 className="text-xl font-light text-white cursor-pointer" onClick={() => setEditingSpaceName(true)}>
-              {coupleData.spaceName}
-            </h1>
-          )}
-          <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="absolute right-4 w-10 h-10 hover:bg-white/10">
-            <Settings className="w-6 h-6 text-white/70" />
-          </Button>
-        </div>
-
-        {/* Background slideshow - full size */}
-        <div className="relative h-64 max-w-lg mx-auto overflow-hidden">
+      <div style={{ background: 'var(--hero-bg)' }} className="relative">
+        {/* Background slideshow - extends to top */}
+        <div className="relative h-80 max-w-lg mx-auto overflow-hidden">
           <BackgroundSlideshow coupleId={coupleData.coupleId} />
+          
+          {/* Title centered at top, settings button on top right */}
+          <div className="absolute top-4 left-0 right-0 z-20 flex items-center justify-center px-4">
+            {editingSpaceName ? (
+              <Input
+                value={spaceName}
+                onChange={(e) => setSpaceName(e.target.value)}
+                onBlur={updateSpaceName}
+                onKeyPress={(e) => e.key === 'Enter' && updateSpaceName()}
+                className="text-center bg-white/10 border-white/20 text-xl font-light text-white max-w-[200px]"
+                autoFocus
+              />
+            ) : (
+              <h1 className="text-xl font-light text-white cursor-pointer" onClick={() => setEditingSpaceName(true)}>
+                {coupleData.spaceName}
+              </h1>
+            )}
+            <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="absolute right-4 w-10 h-10 hover:bg-white/10">
+              <Settings className="w-6 h-6 text-white/70" />
+            </Button>
+          </div>
           
           {/* Profile Picture - bottom-left corner, overlapping */}
           <div className="absolute bottom-4 left-4 z-20">
@@ -864,9 +864,9 @@ const Dashboard = () => {
       </div>
 
       {/* Feed Section */}
-      <div style={{ backgroundColor: '#000000' }} className="px-2 pb-4">
-        <div className="max-w-lg mx-auto">
-          <div style={{ background: 'linear-gradient(180deg, #000000, #4F585E)' }} className="rounded-3xl p-4 min-h-[500px]">
+      <div style={{ backgroundColor: '#000000' }} className="pb-4">
+        <div className="max-w-2xl mx-auto px-4">
+          <div style={{ background: 'linear-gradient(180deg, #000000, #4F585E)' }} className="rounded-3xl p-6 min-h-[500px]">
             <UnioGallery
               coupleId={coupleData.coupleId}
               userId={user!.id}
