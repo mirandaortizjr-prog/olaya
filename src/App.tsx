@@ -16,6 +16,7 @@ import { MoodCustomization } from "./pages/MoodCustomization";
 import { FlirtCustomization } from "./pages/FlirtCustomization";
 import NotFound from "./pages/NotFound";
 import FlirtsPage from "./pages/FlirtsPage";
+import DesiresPage from "./pages/DesiresPage";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const App = () => {
               <Route path="/auth" element={<Auth />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/flirts" element={<FlirtsPage />} />
+              <Route path="/desires" element={<DesiresPage />} />
               <Route path="/daily-notes" element={<DailyNotesPage />} />
               <Route path="/couple-profiles" element={<CoupleProfiles />} />
               <Route path="/private" element={<PrivatePage />} />

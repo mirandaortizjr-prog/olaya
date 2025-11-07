@@ -808,7 +808,7 @@ const Dashboard = () => {
           <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => navigate('/flirts')}>
             <Flame className="w-10 h-10 text-[hsl(200_30%_60%)]" strokeWidth={1.5} />
           </Button>
-          <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" disabled>
+          <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => navigate('/desires')}>
             <Heart className="w-10 h-10 text-[hsl(200_30%_60%)]" strokeWidth={1.5} />
           </Button>
           <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => setActiveView("locked")}>
