@@ -430,7 +430,15 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
   };
 
   return (
-    <div className="relative h-full flex flex-col">
+    <div className="relative h-full flex flex-col unio-gallery-container">
+      {/* Hidden trigger button for external access */}
+      <button 
+        data-new-post-trigger
+        className="hidden"
+        onClick={() => setShowNewPost(true)}
+        aria-hidden="true"
+      />
+      
       {showNewPost && (
         <Card className="p-4 mb-4 animate-scale-in">
           <Textarea
@@ -469,15 +477,15 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
               {uploadedFiles.map((file, index) => (
                 <div key={index} className="relative group">
                   {file.type.startsWith('image/') ? (
-                    <img
-                      src={URL.createObjectURL(file)}
-                      alt="preview"
-                      className="w-full h-20 object-cover rounded"
+                    <img 
+                      src={URL.createObjectURL(file)} 
+                      alt={`Upload ${index + 1}`}
+                      className="w-full h-24 object-cover rounded"
                     />
                   ) : (
-                    <video
-                      src={URL.createObjectURL(file)}
-                      className="w-full h-20 object-cover rounded"
+                    <video 
+                      src={URL.createObjectURL(file)} 
+                      className="w-full h-24 object-cover rounded"
                     />
                   )}
                   <button
@@ -503,8 +511,8 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
               onClick={() => {
                 setShowNewPost(false);
                 setUploadedFiles([]);
+                setNewPost("");
               }}
-              disabled={uploading}
             >
               Cancel
             </Button>

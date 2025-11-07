@@ -869,7 +869,14 @@ const Dashboard = () => {
         newFlirtsCount={newFlirtsCount}
         newVaultCount={newVaultCount}
         onViewChange={(view) => {
-          if (view === "flirt") {
+          if (view === "new") {
+            // Scroll to gallery and trigger new post
+            const gallerySection = document.querySelector('.unio-gallery-container');
+            gallerySection?.scrollIntoView({ behavior: 'smooth' });
+            // Trigger the new post dialog in UnioGallery
+            const newPostButton = document.querySelector('[data-new-post-trigger]') as HTMLButtonElement;
+            newPostButton?.click();
+          } else if (view === "flirt") {
             setLastViewedFlirts(new Date());
             setNewFlirtsCount(0);
             navigate('/flirts');
