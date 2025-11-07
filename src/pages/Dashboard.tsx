@@ -721,7 +721,7 @@ const Dashboard = () => {
         <div className="relative h-80 max-w-lg mx-auto overflow-hidden">
           <BackgroundSlideshow coupleId={coupleData.coupleId} />
           
-          {/* Title centered at top, settings button on top right */}
+          {/* Title centered at top */}
           <div className="absolute top-4 left-0 right-0 z-20 flex items-center justify-center px-4">
             {editingSpaceName ? (
               <Input
@@ -737,9 +737,6 @@ const Dashboard = () => {
                 {coupleData.spaceName}
               </h1>
             )}
-            <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)} className="absolute right-4 w-10 h-10 hover:bg-white/10">
-              <Settings className="w-6 h-6 text-white/70" />
-            </Button>
           </div>
           
           {/* Profile Picture - bottom-left corner, overlapping */}
@@ -845,29 +842,7 @@ const Dashboard = () => {
 
       <BottomNavigation
         activeView={activeView}
-        onViewChange={(view) => {
-          setActiveView(view);
-          if (view === "flirt") { navigate('/flirts'); setNewFlirtsCount(0); setLastViewedFlirts(new Date()); }
-          else if (view === "locked") { setNewVaultCount(0); setLastViewedVault(new Date()); }
-        }}
-        pendingGamesCount={pendingGamesCount}
-        newFlirtsCount={newFlirtsCount}
-        newVaultCount={newVaultCount}
-      />
-
-      <FlirtActions
-        coupleId={coupleData.coupleId}
-        senderId={user!.id}
-        open={showFlirt}
-        onClose={() => setShowFlirt(false)}
-      />
-
-
-      <BottomNavigation
-        activeView={activeView}
-        pendingGamesCount={pendingGamesCount}
-        newFlirtsCount={newFlirtsCount}
-        newVaultCount={newVaultCount}
+        onSettingsClick={() => setShowSettings(true)}
         onViewChange={(view) => {
           if (view === "new") {
             // Scroll to gallery and trigger new post
@@ -888,6 +863,16 @@ const Dashboard = () => {
             setActiveView(view);
           }
         }}
+        pendingGamesCount={pendingGamesCount}
+        newFlirtsCount={newFlirtsCount}
+        newVaultCount={newVaultCount}
+      />
+
+      <FlirtActions
+        coupleId={coupleData.coupleId}
+        senderId={user!.id}
+        open={showFlirt}
+        onClose={() => setShowFlirt(false)}
       />
 
       {/* Settings Dialog */}

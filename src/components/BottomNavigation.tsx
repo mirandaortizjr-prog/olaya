@@ -4,6 +4,7 @@ import { Home, MessageCircle, Settings, Plus } from "lucide-react";
 interface BottomNavigationProps {
   activeView: string;
   onViewChange: (view: string) => void;
+  onSettingsClick: () => void;
   pendingGamesCount?: number;
   newDesiresCount?: number;
   newFlirtsCount?: number;
@@ -12,7 +13,8 @@ interface BottomNavigationProps {
 
 export const BottomNavigation = ({ 
   activeView, 
-  onViewChange, 
+  onViewChange,
+  onSettingsClick,
   pendingGamesCount = 0,
   newDesiresCount = 0,
   newFlirtsCount = 0,
@@ -22,7 +24,7 @@ export const BottomNavigation = ({
     { id: "new", icon: Plus, label: "New" },
     { id: "home", icon: Home, label: "Home" },
     { id: "messages", icon: MessageCircle, label: "Messages" },
-    { id: "settings", icon: Settings, label: "Settings" },
+    { id: "settings", icon: Settings, label: "Settings", isAction: true },
   ];
 
   return (
@@ -35,7 +37,11 @@ export const BottomNavigation = ({
             size="icon"
             className="w-12 h-12 p-0 hover:bg-white/5"
             onClick={() => {
-              onViewChange(item.id);
+              if (item.isAction) {
+                onSettingsClick();
+              } else {
+                onViewChange(item.id);
+              }
             }}
           >
             <item.icon 
