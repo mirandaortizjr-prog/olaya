@@ -73,7 +73,6 @@ const Dashboard = () => {
     }
   }, [coupleSongs]);
   const [activeView, setActiveView] = useState("home");
-  const [showMessenger, setShowMessenger] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showSongSettings, setShowSongSettings] = useState(false);
   const [showFlirt, setShowFlirt] = useState(false);
@@ -558,13 +557,13 @@ const Dashboard = () => {
     );
   }
 
-  if (showMessenger && coupleData.partner) {
+  if (activeView === "messages" && coupleData.partner) {
     return (
       <MessengerChat
         coupleId={coupleData.coupleId}
         currentUserId={user!.id}
         partnerName={coupleData.partner.full_name}
-        onClose={() => setShowMessenger(false)}
+        onClose={() => setActiveView("home")}
       />
     );
   }
@@ -613,10 +612,6 @@ const Dashboard = () => {
 
   // desires navigation disabled - starting fresh
 
-  if (activeView === "messages") {
-    setActiveView("messages");
-    return null;
-  }
 
 
   if (activeView === "locked") {
@@ -638,7 +633,7 @@ const Dashboard = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setShowMessenger(true)}
+                onClick={() => setActiveView("messages")}
                 disabled={!coupleData.partner}
                 className="text-foreground"
               >
