@@ -42,7 +42,7 @@ interface PlayerComponentProps {
 }
 
 export const CoupleSongPlayerEmbed = ({ videoIds, currentIndex, isPlaying, onClose, onNext, onEditClick }: PlayerComponentProps) => {
-  if (videoIds.length === 0) return null;
+  if (videoIds.length === 0 || !isPlaying) return null;
   
   return (
     <div className="w-full max-w-lg mx-auto shadow-2xl rounded-lg overflow-hidden bg-background border">
@@ -80,22 +80,13 @@ export const CoupleSongPlayerEmbed = ({ videoIds, currentIndex, isPlaying, onClo
       </div>
       <div className="aspect-video">
         <iframe
-          key={videoIds[currentIndex]}
-          src={`https://www.youtube.com/embed/${videoIds[currentIndex]}?autoplay=1&enablejsapi=1`}
+          key={`yt-${videoIds[currentIndex]}-${Date.now()}`}
+          src={`https://www.youtube.com/embed/${videoIds[currentIndex]}?autoplay=1&enablejsapi=1&origin=${window.location.origin}`}
           className="w-full h-full"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
-          onLoad={(e) => {
-            // Listen for video end to play next
-            const iframe = e.currentTarget;
-            const checkEnded = setInterval(() => {
-              try {
-                iframe.contentWindow?.postMessage('{"event":"listening"}', '*');
-              } catch (err) {
-                clearInterval(checkEnded);
-              }
-            }, 1000);
-          }}
+          title="YouTube Music Player"
+          onEnded={onNext}
         />
       </div>
     </div>
