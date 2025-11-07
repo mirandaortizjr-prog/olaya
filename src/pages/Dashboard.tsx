@@ -790,13 +790,11 @@ const Dashboard = () => {
           
           {/* Profile Picture - bottom-left corner, overlapping */}
           <div className="absolute bottom-4 left-4 z-20">
-            <div className="w-24 h-24 rounded-full overflow-hidden">
-              <CouplePictureUpload
-                coupleId={coupleData.coupleId}
-                currentPictureUrl={coupleData.couplePictureUrl || userProfile?.avatar_url || null}
-                onUploadComplete={(url) => setCoupleData({ ...coupleData, couplePictureUrl: url })}
-              />
-            </div>
+            <CouplePictureUpload
+              coupleId={coupleData.coupleId}
+              currentPictureUrl={coupleData.couplePictureUrl || userProfile?.avatar_url || null}
+              onUploadComplete={(url) => setCoupleData({ ...coupleData, couplePictureUrl: url })}
+            />
           </div>
         </div>
       </div>
