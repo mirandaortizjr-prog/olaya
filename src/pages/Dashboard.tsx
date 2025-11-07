@@ -34,6 +34,7 @@ import { SongSettings } from "@/components/SongSettings";
 import { YouTubePlayer } from "@/components/YouTubePlayer";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PremiumFeatures } from "@/components/PremiumFeatures";
+import { useCoupleProgress } from "@/hooks/useCoupleProgress";
 
 interface CoupleData {
   coupleId: string;
@@ -95,6 +96,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
+  const { progress } = useCoupleProgress(coupleData?.coupleId || null);
 
   useEffect(() => {
     checkUser();
@@ -813,8 +815,11 @@ const Dashboard = () => {
           <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => setActiveView("locked")}>
             <Lock className="w-10 h-10 text-[hsl(200_30%_60%)]" strokeWidth={1.5} />
           </Button>
-          <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => setActiveView("games")}>
+          <Button variant="ghost" size="icon" className="relative w-12 h-12 p-0 hover:bg-white/5" onClick={() => setActiveView("games")}>
             <Gamepad2 className="w-10 h-10 text-[hsl(200_30%_60%)]" strokeWidth={1.5} />
+            <span className="absolute -top-1 -right-1 text-xs font-bold text-purple-300 bg-purple-500/30 px-1.5 py-0.5 rounded-full border border-purple-400/40">
+              {progress.currentLevel}
+            </span>
           </Button>
         </div>
       </div>
