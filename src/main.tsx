@@ -2,7 +2,35 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
-const rootElement = document.getElementById("root");
-if (!rootElement) throw new Error("Root element not found");
+const swCleanup = async () => {
+  try {
+    const isPreviewHost = location.hostname.endsWith("lovableproject.com");
+    const shouldUnregister = import.meta.env.MODE !== "production" || isPreviewHost;
+    if (shouldUnregister && "serviceWorker" in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.unregister()));
+      if ("caches" in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+      if (!sessionStorage.getItem("reloadedAfterSWCleanup")) {
+        sessionStorage.setItem("reloadedAfterSWCleanup", "true");
+        location.reload();
+        return false;
+      }
+    }
+  } catch (e) {
+    console.warn("SW cleanup skipped:", e);
+  }
+  return true;
+};
 
-createRoot(rootElement).render(<App />);
+const start = async () => {
+  const proceed = await swCleanup();
+  if (!proceed) return;
+  const rootElement = document.getElementById("root");
+  if (!rootElement) throw new Error("Root element not found");
+  createRoot(rootElement).render(<App />);
+};
+
+start();
