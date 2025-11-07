@@ -592,6 +592,8 @@ export type Database = {
           couple_id: string
           created_at: string | null
           id: string
+          media_type: string | null
+          media_url: string | null
           read_at: string | null
           sender_id: string
         }
@@ -600,6 +602,8 @@ export type Database = {
           couple_id: string
           created_at?: string | null
           id?: string
+          media_type?: string | null
+          media_url?: string | null
           read_at?: string | null
           sender_id: string
         }
@@ -608,6 +612,8 @@ export type Database = {
           couple_id?: string
           created_at?: string | null
           id?: string
+          media_type?: string | null
+          media_url?: string | null
           read_at?: string | null
           sender_id?: string
         }
