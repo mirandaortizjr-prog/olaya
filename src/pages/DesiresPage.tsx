@@ -267,11 +267,11 @@ export default function DesiresPage() {
                 <div key={index} className="relative group">
                   <Button
                     variant="outline"
-                    className="w-full bg-white/5 border-white/20 hover:bg-white/10 text-white h-auto py-3 justify-start"
+                    className="w-full bg-white/5 border-white/20 hover:bg-white/10 text-white h-auto py-3 justify-start break-words text-left whitespace-normal"
                     onClick={() => sendDesire(desire)}
                   >
-                    <span className="text-2xl mr-2">{desire.emoji}</span>
-                    <span className="text-sm">{desire.label}</span>
+                    <span className="text-2xl mr-2 flex-shrink-0">{desire.emoji}</span>
+                    <span className="text-sm leading-tight">{desire.label}</span>
                   </Button>
                   <Button
                     variant="ghost"
@@ -304,11 +304,11 @@ export default function DesiresPage() {
                   <Button
                     key={index}
                     variant="outline"
-                    className="bg-white/5 border-white/20 hover:bg-white/10 text-white h-auto py-3 justify-start"
+                    className="bg-white/5 border-white/20 hover:bg-white/10 text-white h-auto py-3 justify-start break-words text-left whitespace-normal"
                     onClick={() => sendDesire(desire)}
                   >
-                    <span className="text-2xl mr-2">{desire.emoji}</span>
-                    <span className="text-sm">{desire.label}</span>
+                    <span className="text-2xl mr-2 flex-shrink-0">{desire.emoji}</span>
+                    <span className="text-sm leading-tight">{desire.label}</span>
                   </Button>
                 ))}
             </div>
