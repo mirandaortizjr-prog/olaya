@@ -15,7 +15,7 @@ export default function FlirtsPage() {
   const [loading, setLoading] = useState(true);
   const [coupleId, setCoupleId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
+  // inline mode no modal needed
   type FlirtRow = { id: string; flirt_type: string; sender_id: string; created_at: string };
   const [flirts, setFlirts] = useState<FlirtRow[]>([]);
   const FLIRT_ICONS: Record<string, { emoji: string; label: string }> = {
@@ -102,20 +102,18 @@ useEffect(() => {
           Flirts
         </h1>
         <div className="flex items-center gap-2">
-          <Button variant="secondary" onClick={() => setOpen(true)}>
-            <Flame className="w-4 h-4 mr-2" /> Send
-          </Button>
           <Button variant="ghost" onClick={() => navigate("/dashboard")}>Close</Button>
         </div>
       </header>
 
-      {/* Send dialog (opens when tapping "Send") */}
-      <FlirtActions
-        coupleId={coupleId}
-        senderId={userId}
-        open={open}
-        onClose={() => setOpen(false)}
-      />
+      {/* Inline flirts grid */}
+      <main className="max-w-lg mx-auto p-4">
+        <FlirtActions
+          coupleId={coupleId}
+          senderId={userId}
+          inline
+        />
+      </main>
 
       {/* Flirts history */}
       <main className="max-w-lg mx-auto p-4">

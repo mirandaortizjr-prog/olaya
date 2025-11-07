@@ -93,21 +93,22 @@ const FLIRT_ACTIONS = [
 interface FlirtActionsProps {
   coupleId: string;
   senderId: string;
-  open: boolean;
-  onClose: () => void;
+  open?: boolean;
+  onClose?: () => void;
+  inline?: boolean;
 }
 
-export const FlirtActions = ({ coupleId, senderId, open, onClose }: FlirtActionsProps) => {
+export const FlirtActions = ({ coupleId, senderId, open = false, onClose = () => {}, inline = false }: FlirtActionsProps) => {
   const [sending, setSending] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [enabledFlirts, setEnabledFlirts] = useState<string[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (open) {
+    if (open || inline) {
       loadPreferences();
     }
-  }, [open, coupleId]);
+  }, [open, coupleId, inline]);
 
   const loadPreferences = async () => {
     const { data } = await supabase
@@ -200,7 +201,7 @@ export const FlirtActions = ({ coupleId, senderId, open, onClose }: FlirtActions
         title: `${emoji} ${label} sent!`,
         description: "Your partner will feel the love!"
       });
-      onClose();
+      if (!inline) onClose();
     } catch (err) {
       console.error('Unexpected error in sendFlirt:', err);
       toast({
@@ -213,62 +214,77 @@ export const FlirtActions = ({ coupleId, senderId, open, onClose }: FlirtActions
     }
   };
 
+  const grid = (
+    <div className={inline ? "space-y-4" : "max-h-[60vh] overflow-y-auto space-y-4 px-1"}>
+      {['physical', 'sensual', 'playful', 'verbal'].map((category) => {
+        const categoryFlirts = FLIRT_ACTIONS.filter(
+          flirt => flirt.category === category && enabledFlirts.includes(flirt.value)
+        );
+        if (categoryFlirts.length === 0) return null;
+        return (
+          <div key={category} className="space-y-2">
+            <h3 className="text-sm font-semibold capitalize text-muted-foreground">
+              {category === 'physical' && '💋 Classic Physical'}
+              {category === 'sensual' && '🔥 Sensual / Suggestive'}
+              {category === 'playful' && '😏 Playful / Coy'}
+              {category === 'verbal' && '🧠 Verbal / Emotional'}
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
+              {categoryFlirts.map((flirt) => (
+                <Button
+                  key={flirt.value}
+                  variant="outline"
+                  className="h-20 flex-col gap-1 text-sm"
+                  onClick={() => sendFlirt(flirt.value, flirt.label, flirt.emoji)}
+                  disabled={sending}
+                >
+                  <span className="text-2xl">{flirt.emoji}</span>
+                  <span className="text-xs text-center">{flirt.label}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
   return (
     <>
-      <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Flame className="w-5 h-5 text-orange-500" />
-                Instant Flirt
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowSettings(true)}
-              >
-                <Settings className="w-4 h-4" />
-              </Button>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="max-h-[60vh] overflow-y-auto space-y-4 px-1">
-            {['physical', 'sensual', 'playful', 'verbal'].map((category) => {
-              const categoryFlirts = FLIRT_ACTIONS.filter(
-                flirt => flirt.category === category && enabledFlirts.includes(flirt.value)
-              );
-              
-              if (categoryFlirts.length === 0) return null;
-              
-              return (
-                <div key={category} className="space-y-2">
-                  <h3 className="text-sm font-semibold capitalize text-muted-foreground">
-                    {category === 'physical' && '💋 Classic Physical'}
-                    {category === 'sensual' && '🔥 Sensual / Suggestive'}
-                    {category === 'playful' && '😏 Playful / Coy'}
-                    {category === 'verbal' && '🧠 Verbal / Emotional'}
-                  </h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {categoryFlirts.map((flirt) => (
-                      <Button
-                        key={flirt.value}
-                        variant="outline"
-                        className="h-20 flex-col gap-1 text-sm"
-                        onClick={() => sendFlirt(flirt.value, flirt.label, flirt.emoji)}
-                        disabled={sending}
-                      >
-                        <span className="text-2xl">{flirt.emoji}</span>
-                        <span className="text-xs text-center">{flirt.label}</span>
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+      {inline ? (
+        <section className="bg-card rounded-lg border">
+          <div className="flex items-center justify-between p-4 border-b">
+            <div className="text-base font-semibold flex items-center gap-2">
+              <Flame className="w-5 h-5 text-orange-500" />
+              Instant Flirt
+            </div>
+            <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)}>
+              <Settings className="w-4 h-4" />
+            </Button>
           </div>
-        </DialogContent>
-      </Dialog>
-      
+          <div className="p-4">
+            {grid}
+          </div>
+        </section>
+      ) : (
+        <Dialog open={open} onOpenChange={onClose}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Flame className="w-5 h-5 text-orange-500" />
+                  Instant Flirt
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => setShowSettings(true)}>
+                  <Settings className="w-4 h-4" />
+                </Button>
+              </DialogTitle>
+            </DialogHeader>
+            {grid}
+          </DialogContent>
+        </Dialog>
+      )}
+
       <PreferencesSettings
         coupleId={coupleId}
         type="flirt"
