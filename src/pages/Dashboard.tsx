@@ -864,7 +864,7 @@ const Dashboard = () => {
       </div>
 
       {/* Comment and Feed Section - Combined */}
-      <div style={{ background: 'var(--feed-bg)' }} className="py-4 px-4 pb-4">
+      <div style={{ background: 'linear-gradient(180deg, hsl(200 9% 34%), hsl(0 0% 0%))' }} className="py-4 px-4 pb-4">
         <div className="max-w-lg mx-auto space-y-4">
           <p className="text-white/70 text-sm">comment to post or picture or both</p>
           
