@@ -6,65 +6,120 @@ import { X, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-// Comprehensive mood configuration from reference image
-const MOOD_CATEGORIES = [
+// Mood configuration with translation keys
+const getMoodCategories = (t: any) => [
   {
-    title: "Positive Moods",
-    subtitle: "High Energy / Joyful",
+    titleKey: "moodCategoryPositive",
+    subtitleKey: "moodSubtitleHighEnergy",
     color: "text-yellow-400",
     moods: [
-      "Ecstatic", "Elated", "Euphoric", "Giddy", "Playful", 
-      "Flirtatious", "Excited", "Jubilant", "Triumphant", "Inspired"
+      { key: "mood_ecstatic", label: t("mood_ecstatic") },
+      { key: "mood_elated", label: t("mood_elated") },
+      { key: "mood_euphoric", label: t("mood_euphoric") },
+      { key: "mood_giddy", label: t("mood_giddy") },
+      { key: "mood_playful", label: t("mood_playful") },
+      { key: "mood_flirtatious", label: t("mood_flirtatious") },
+      { key: "mood_excited", label: t("mood_excited") },
+      { key: "mood_jubilant", label: t("mood_jubilant") },
+      { key: "mood_triumphant", label: t("mood_triumphant") },
+      { key: "mood_inspired", label: t("mood_inspired") }
     ]
   },
   {
-    title: "Warm / Content",
+    titleKey: "moodCategoryWarmContent",
     color: "text-pink-400",
     moods: [
-      "Loved", "Grateful", "Peaceful", "Safe", "Cozy",
-      "Affectionate", "Fulfilled", "Hopeful", "Proud", "Serene"
+      { key: "mood_loved", label: t("mood_loved") },
+      { key: "mood_grateful", label: t("mood_grateful") },
+      { key: "mood_peaceful", label: t("mood_peaceful") },
+      { key: "mood_safe", label: t("mood_safe") },
+      { key: "mood_cozy", label: t("mood_cozy") },
+      { key: "mood_affectionate", label: t("mood_affectionate") },
+      { key: "mood_fulfilled", label: t("mood_fulfilled") },
+      { key: "mood_hopeful", label: t("mood_hopeful") },
+      { key: "mood_proud", label: t("mood_proud") },
+      { key: "mood_serene", label: t("mood_serene") }
     ]
   },
   {
-    title: "Romantic / Intimate",
+    titleKey: "moodCategoryRomantic",
     color: "text-rose-400",
     moods: [
-      "In love", "Tender", "Passionate", "Longing", "Connected",
-      "Turned on", "Vulnerable (in a good way)", "Craving closeness"
+      { key: "mood_inLove", label: t("mood_inLove") },
+      { key: "mood_tender", label: t("mood_tender") },
+      { key: "mood_passionate", label: t("mood_passionate") },
+      { key: "mood_longing", label: t("mood_longing") },
+      { key: "mood_connected", label: t("mood_connected") },
+      { key: "mood_turnedOn", label: t("mood_turnedOn") },
+      { key: "mood_vulnerable", label: t("mood_vulnerable") },
+      { key: "mood_cravingCloseness", label: t("mood_cravingCloseness") }
     ]
   },
   {
-    title: "Neutral / Reflective Moods",
+    titleKey: "moodCategoryNeutral",
     color: "text-gray-300",
     moods: [
-      "Curious", "Thoughtful", "Pensive", "Dreamy", "Nostalgic",
-      "Indifferent", "Distracted", "Ambivalent", "Observant", "Open"
+      { key: "mood_curious", label: t("mood_curious") },
+      { key: "mood_thoughtful", label: t("mood_thoughtful") },
+      { key: "mood_pensive", label: t("mood_pensive") },
+      { key: "mood_dreamy", label: t("mood_dreamy") },
+      { key: "mood_nostalgic", label: t("mood_nostalgic") },
+      { key: "mood_indifferent", label: t("mood_indifferent") },
+      { key: "mood_distracted", label: t("mood_distracted") },
+      { key: "mood_ambivalent", label: t("mood_ambivalent") },
+      { key: "mood_observant", label: t("mood_observant") },
+      { key: "mood_open", label: t("mood_open") }
     ]
   },
   {
-    title: "Negative Moods",
-    subtitle: "Low Energy / Sad",
+    titleKey: "moodCategoryNegative",
+    subtitleKey: "moodSubtitleLowEnergy",
     color: "text-blue-400",
     moods: [
-      "Lonely", "Disappointed", "Hurt", "Melancholy", "Numb",
-      "Rejected", "Insecure", "Discouraged", "Homesick", "Drained"
+      { key: "mood_lonely", label: t("mood_lonely") },
+      { key: "mood_disappointed", label: t("mood_disappointed") },
+      { key: "mood_hurt", label: t("mood_hurt") },
+      { key: "mood_melancholy", label: t("mood_melancholy") },
+      { key: "mood_numb", label: t("mood_numb") },
+      { key: "mood_rejected", label: t("mood_rejected") },
+      { key: "mood_insecure", label: t("mood_insecure") },
+      { key: "mood_discouraged", label: t("mood_discouraged") },
+      { key: "mood_homesick", label: t("mood_homesick") },
+      { key: "mood_drained", label: t("mood_drained") }
     ]
   },
   {
-    title: "High Energy / Distressed",
+    titleKey: "moodCategoryDistressed",
     color: "text-red-400",
     moods: [
-      "Anxious", "Frustrated", "Angry", "Jealous", "Overwhelmed",
-      "Defensive", "Irritated", "Resentful", "Restless", "Misunderstood"
+      { key: "mood_anxious", label: t("mood_anxious") },
+      { key: "mood_frustrated", label: t("mood_frustrated") },
+      { key: "mood_angry", label: t("mood_angry") },
+      { key: "mood_jealous", label: t("mood_jealous") },
+      { key: "mood_overwhelmed", label: t("mood_overwhelmed") },
+      { key: "mood_defensive", label: t("mood_defensive") },
+      { key: "mood_irritated", label: t("mood_irritated") },
+      { key: "mood_resentful", label: t("mood_resentful") },
+      { key: "mood_restless", label: t("mood_restless") },
+      { key: "mood_misunderstood", label: t("mood_misunderstood") }
     ]
   },
   {
-    title: "Sexual Moods",
+    titleKey: "moodCategorySexual",
     color: "text-fuchsia-400",
     moods: [
-      "Horny", "Ravenous", "Thirsty", "Lustful", "Feral",
-      "Needy", "Overheated", "Starved", "Obsessed", "Frisky"
+      { key: "mood_horny", label: t("mood_horny") },
+      { key: "mood_ravenous", label: t("mood_ravenous") },
+      { key: "mood_thirsty", label: t("mood_thirsty") },
+      { key: "mood_lustful", label: t("mood_lustful") },
+      { key: "mood_feral", label: t("mood_feral") },
+      { key: "mood_needy", label: t("mood_needy") },
+      { key: "mood_overheated", label: t("mood_overheated") },
+      { key: "mood_starved", label: t("mood_starved") },
+      { key: "mood_obsessed", label: t("mood_obsessed") },
+      { key: "mood_frisky", label: t("mood_frisky") }
     ]
   }
 ];
@@ -72,6 +127,7 @@ const MOOD_CATEGORIES = [
 export const MoodCustomization = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [customMood, setCustomMood] = useState("");
   const [showCustomInput, setShowCustomInput] = useState(false);
@@ -80,6 +136,8 @@ export const MoodCustomization = () => {
   const [userId, setUserId] = useState<string>("");
   const [coupleId, setCoupleId] = useState<string>("");
   const [saving, setSaving] = useState(false);
+
+  const MOOD_CATEGORIES = getMoodCategories(t);
 
   useEffect(() => {
     loadUserData();
@@ -214,19 +272,19 @@ export const MoodCustomization = () => {
           >
             <X className="w-6 h-6" />
           </Button>
-          <h1 className="text-2xl font-bold">Customize</h1>
+          <h1 className="text-2xl font-bold">{t('moodCustomizeTitle')}</h1>
           <div className="w-10" />
         </div>
 
         {/* Instructions */}
         <p className="text-center text-gray-300 mb-8">
-          Choose up to 20 moods by pressing the personalize button (yellow star), or choose one to update status
+          {t('moodCustomizeInstructions')}
         </p>
 
         {/* Current Mood Display */}
         {currentMood && (
           <Card className="bg-gray-800/50 border-gray-700 p-4 mb-6 text-center">
-            <p className="text-sm text-gray-400 mb-1">Your current mood:</p>
+            <p className="text-sm text-gray-400 mb-1">{t('moodCurrentMood')}</p>
             <p className="text-lg font-semibold text-purple-300">{currentMood}</p>
           </Card>
         )}
@@ -234,7 +292,7 @@ export const MoodCustomization = () => {
         {/* Personalized Moods Section */}
         {personalizedMoods.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-4 text-purple-300">Your Personalized Moods</h2>
+            <h2 className="text-xl font-semibold mb-4 text-purple-300">{t('moodPersonalizedMoods')}</h2>
             <div className="grid grid-cols-2 gap-2">
               {personalizedMoods.map((mood) => (
                 <Button
@@ -254,21 +312,21 @@ export const MoodCustomization = () => {
         {/* Selection Mode Controls */}
         {selectedMoods.length > 0 && (
           <div className="mb-6 bg-purple-600/20 border border-purple-500/50 rounded-lg p-4">
-            <p className="text-sm mb-2">Selected: {selectedMoods.length}/20</p>
+            <p className="text-sm mb-2">{t('moodSelected')}: {selectedMoods.length}/20</p>
             <div className="flex gap-2">
               <Button
                 onClick={savePersonalizedMoods}
                 disabled={saving}
                 className="flex-1 bg-purple-600 hover:bg-purple-700"
               >
-                Save Personalized Moods
+                {t('moodSavePersonalized')}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => setSelectedMoods([])}
                 disabled={saving}
               >
-                Clear
+                {t('moodClear')}
               </Button>
             </div>
           </div>
@@ -279,35 +337,35 @@ export const MoodCustomization = () => {
           {MOOD_CATEGORIES.map((category, idx) => (
             <div key={idx}>
               <h2 className={`text-lg font-semibold mb-2 ${category.color}`}>
-                {category.title}
-                {category.subtitle && <span className="text-sm ml-2">/ {category.subtitle}</span>}
+                {t(category.titleKey as any)}
+                {category.subtitleKey && <span className="text-sm ml-2">/ {t(category.subtitleKey as any)}</span>}
               </h2>
               <div className="grid grid-cols-2 gap-2">
                 {category.moods.map((mood) => (
-                  <div key={mood} className="relative">
+                  <div key={mood.key} className="relative">
                     <Button
                       variant="outline"
                       className={`w-full justify-start ${
-                        selectedMoods.includes(mood)
+                        selectedMoods.includes(mood.label)
                           ? 'bg-yellow-500/30 border-yellow-400'
                           : 'bg-gray-800/50 border-gray-700 hover:bg-gray-700/50'
                       }`}
-                      onClick={() => updateCurrentMood(mood)}
+                      onClick={() => updateCurrentMood(mood.label)}
                       disabled={saving}
                     >
-                      - {mood}
+                      - {mood.label}
                     </Button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        toggleMoodSelection(mood);
+                        toggleMoodSelection(mood.label);
                       }}
                       className={`absolute right-2 top-1/2 -translate-y-1/2 ${
-                        selectedMoods.includes(mood) ? 'text-yellow-400' : 'text-gray-500 hover:text-yellow-400'
+                        selectedMoods.includes(mood.label) ? 'text-yellow-400' : 'text-gray-500 hover:text-yellow-400'
                       }`}
                       disabled={saving}
                     >
-                      <Star className="w-4 h-4" fill={selectedMoods.includes(mood) ? "currentColor" : "none"} />
+                      <Star className="w-4 h-4" fill={selectedMoods.includes(mood.label) ? "currentColor" : "none"} />
                     </button>
                   </div>
                 ))}
@@ -318,19 +376,19 @@ export const MoodCustomization = () => {
 
         {/* Customize Section */}
         <div className="mt-8">
-          <h2 className="text-lg font-semibold mb-4 text-gray-300">Customize</h2>
+          <h2 className="text-lg font-semibold mb-4 text-gray-300">{t('moodCustomize')}</h2>
           {!showCustomInput ? (
             <Button
               variant="outline"
               className="w-full bg-gray-800/50 border-gray-700 hover:bg-gray-700/50"
               onClick={() => setShowCustomInput(true)}
             >
-              Write your own mood
+              {t('moodWriteOwn')}
             </Button>
           ) : (
             <div className="space-y-3">
               <Input
-                placeholder="Enter your mood..."
+                placeholder={t('moodEnterYourMood')}
                 value={customMood}
                 onChange={(e) => setCustomMood(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && saveCustomMood()}
@@ -339,7 +397,7 @@ export const MoodCustomization = () => {
               />
               <div className="flex gap-2">
                 <Button onClick={saveCustomMood} disabled={saving || !customMood.trim()} className="flex-1">
-                  Set Mood
+                  {t('moodSetMood')}
                 </Button>
                 <Button
                   variant="outline"
@@ -349,7 +407,7 @@ export const MoodCustomization = () => {
                   }}
                   disabled={saving}
                 >
-                  Cancel
+                  {t('cancel')}
                 </Button>
               </div>
             </div>

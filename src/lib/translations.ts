@@ -354,6 +354,104 @@ export const translations = {
     gameReadyTitle: "How Well Do You Know Me? 🎯",
     gameReadyBody: "Your partner has finished answering 'How Well Do You Know Me?' - Time to guess their answers!",
     dailySyncGame: "The Daily Sync",
+    
+    // Mood Customization
+    moodCustomizeTitle: "Customize",
+    moodCustomizeInstructions: "Choose up to 20 moods by pressing the personalize button (yellow star), or choose one to update status",
+    moodCurrentMood: "Your current mood:",
+    moodPersonalizedMoods: "Your Personalized Moods",
+    moodSelected: "Selected",
+    moodSavePersonalized: "Save Personalized Moods",
+    moodClear: "Clear",
+    moodCustomize: "Customize",
+    moodWriteOwn: "Write your own mood",
+    moodEnterYourMood: "Enter your mood...",
+    moodSetMood: "Set Mood",
+    
+    // Mood Categories
+    moodCategoryPositive: "Positive Moods",
+    moodSubtitleHighEnergy: "High Energy / Joyful",
+    moodCategoryWarmContent: "Warm / Content",
+    moodCategoryRomantic: "Romantic / Intimate",
+    moodCategoryNeutral: "Neutral / Reflective Moods",
+    moodCategoryNegative: "Negative Moods",
+    moodSubtitleLowEnergy: "Low Energy / Sad",
+    moodCategoryDistressed: "High Energy / Distressed",
+    moodCategorySexual: "Sexual Moods",
+    
+    // All Moods - Positive
+    mood_ecstatic: "Ecstatic",
+    mood_elated: "Elated",
+    mood_euphoric: "Euphoric",
+    mood_giddy: "Giddy",
+    mood_flirtatious: "Flirtatious",
+    mood_jubilant: "Jubilant",
+    mood_triumphant: "Triumphant",
+    mood_inspired: "Inspired",
+    
+    // Warm/Content
+    mood_loved: "Loved",
+    mood_safe: "Safe",
+    mood_cozy: "Cozy",
+    mood_affectionate: "Affectionate",
+    mood_fulfilled: "Fulfilled",
+    mood_hopeful: "Hopeful",
+    mood_proud: "Proud",
+    mood_serene: "Serene",
+    
+    // Romantic
+    mood_inLove: "In love",
+    mood_passionate: "Passionate",
+    mood_longing: "Longing",
+    mood_connected: "Connected",
+    mood_turnedOn: "Turned on",
+    mood_vulnerable: "Vulnerable (in a good way)",
+    mood_cravingCloseness: "Craving closeness",
+    
+    // Neutral
+    mood_curious: "Curious",
+    mood_thoughtful: "Thoughtful",
+    mood_pensive: "Pensive",
+    mood_dreamy: "Dreamy",
+    mood_nostalgic: "Nostalgic",
+    mood_indifferent: "Indifferent",
+    mood_distracted: "Distracted",
+    mood_ambivalent: "Ambivalent",
+    mood_observant: "Observant",
+    mood_open: "Open",
+    
+    // Negative
+    mood_lonely: "Lonely",
+    mood_disappointed: "Disappointed",
+    mood_hurt: "Hurt",
+    mood_melancholy: "Melancholy",
+    mood_numb: "Numb",
+    mood_rejected: "Rejected",
+    mood_insecure: "Insecure",
+    mood_discouraged: "Discouraged",
+    mood_homesick: "Homesick",
+    mood_drained: "Drained",
+    
+    // Distressed
+    mood_angry: "Angry",
+    mood_jealous: "Jealous",
+    mood_overwhelmed: "Overwhelmed",
+    mood_defensive: "Defensive",
+    mood_irritated: "Irritated",
+    mood_resentful: "Resentful",
+    mood_restless: "Restless",
+    mood_misunderstood: "Misunderstood",
+    
+    // Sexual
+    mood_ravenous: "Ravenous",
+    mood_thirsty: "Thirsty",
+    mood_lustful: "Lustful",
+    mood_feral: "Feral",
+    mood_needy: "Needy",
+    mood_overheated: "Overheated",
+    mood_starved: "Starved",
+    mood_obsessed: "Obsessed",
+    mood_frisky: "Frisky",
   },
   es: {
     // Index page
@@ -705,6 +803,104 @@ export const translations = {
     gameReadyTitle: "¿Qué Tan Bien Me Conoces? 🎯",
     gameReadyBody: "¡Tu pareja ha terminado de responder '¿Qué Tan Bien Me Conoces?' - ¡Es hora de adivinar sus respuestas!",
     dailySyncGame: "La Sincronización Diaria",
+    
+    // Mood Customization
+    moodCustomizeTitle: "Personalizar",
+    moodCustomizeInstructions: "Elige hasta 20 estados de ánimo presionando el botón de personalización (estrella amarilla), o elige uno para actualizar tu estado",
+    moodCurrentMood: "Tu estado de ánimo actual:",
+    moodPersonalizedMoods: "Tus Estados de Ánimo Personalizados",
+    moodSelected: "Seleccionados",
+    moodSavePersonalized: "Guardar Estados Personalizados",
+    moodClear: "Limpiar",
+    moodCustomize: "Personalizar",
+    moodWriteOwn: "Escribe tu propio estado de ánimo",
+    moodEnterYourMood: "Ingresa tu estado de ánimo...",
+    moodSetMood: "Establecer Estado",
+    
+    // Mood Categories
+    moodCategoryPositive: "Estados de Ánimo Positivos",
+    moodSubtitleHighEnergy: "Alta Energía / Alegre",
+    moodCategoryWarmContent: "Cálido / Contento",
+    moodCategoryRomantic: "Romántico / Íntimo",
+    moodCategoryNeutral: "Estados de Ánimo Neutrales / Reflexivos",
+    moodCategoryNegative: "Estados de Ánimo Negativos",
+    moodSubtitleLowEnergy: "Baja Energía / Triste",
+    moodCategoryDistressed: "Alta Energía / Angustiado",
+    moodCategorySexual: "Estados de Ánimo Sexuales",
+    
+    // All Moods - Positive
+    mood_ecstatic: "Extasiado",
+    mood_elated: "Eufórico",
+    mood_euphoric: "Exultante",
+    mood_giddy: "Mareado de felicidad",
+    mood_flirtatious: "Coqueto",
+    mood_jubilant: "Jubiloso",
+    mood_triumphant: "Triunfante",
+    mood_inspired: "Inspirado",
+    
+    // Warm/Content
+    mood_loved: "Amado",
+    mood_safe: "Seguro",
+    mood_cozy: "Acogedor",
+    mood_affectionate: "Cariñoso",
+    mood_fulfilled: "Realizado",
+    mood_hopeful: "Esperanzado",
+    mood_proud: "Orgulloso",
+    mood_serene: "Sereno",
+    
+    // Romantic
+    mood_inLove: "Enamorado",
+    mood_passionate: "Apasionado",
+    mood_longing: "Añorante",
+    mood_connected: "Conectado",
+    mood_turnedOn: "Excitado",
+    mood_vulnerable: "Vulnerable (de buena manera)",
+    mood_cravingCloseness: "Anhelando cercanía",
+    
+    // Neutral
+    mood_curious: "Curioso",
+    mood_thoughtful: "Pensativo",
+    mood_pensive: "Reflexivo",
+    mood_dreamy: "Soñador",
+    mood_nostalgic: "Nostálgico",
+    mood_indifferent: "Indiferente",
+    mood_distracted: "Distraído",
+    mood_ambivalent: "Ambivalente",
+    mood_observant: "Observador",
+    mood_open: "Abierto",
+    
+    // Negative
+    mood_lonely: "Solitario",
+    mood_disappointed: "Decepcionado",
+    mood_hurt: "Herido",
+    mood_melancholy: "Melancólico",
+    mood_numb: "Entumecido",
+    mood_rejected: "Rechazado",
+    mood_insecure: "Inseguro",
+    mood_discouraged: "Desanimado",
+    mood_homesick: "Nostálgico del hogar",
+    mood_drained: "Agotado",
+    
+    // Distressed
+    mood_angry: "Enojado",
+    mood_jealous: "Celoso",
+    mood_overwhelmed: "Abrumado",
+    mood_defensive: "Defensivo",
+    mood_irritated: "Irritado",
+    mood_resentful: "Resentido",
+    mood_restless: "Inquieto",
+    mood_misunderstood: "Incomprendido",
+    
+    // Sexual
+    mood_ravenous: "Voraz",
+    mood_thirsty: "Sediento",
+    mood_lustful: "Lujurioso",
+    mood_feral: "Salvaje",
+    mood_needy: "Necesitado",
+    mood_overheated: "Sobrecalentado",
+    mood_starved: "Hambriento",
+    mood_obsessed: "Obsesionado",
+    mood_frisky: "Juguetón",
   },
 };
 
