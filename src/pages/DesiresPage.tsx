@@ -197,7 +197,8 @@ export default function DesiresPage() {
   const sendDesire = async (desire: Desire) => {
     if (!coupleId || !user) return;
 
-    const { error } = await supabase
+    // Insert into craving_board
+    const { error: cravingError } = await supabase
       .from("craving_board")
       .insert({
         couple_id: coupleId,
@@ -206,11 +207,25 @@ export default function DesiresPage() {
         custom_message: desire.emoji,
       });
 
-    if (error) {
+    if (cravingError) {
       toast({ title: "Error sending desire", variant: "destructive" });
-    } else {
-      toast({ title: `${desire.emoji} ${desire.label} sent!` });
+      return;
     }
+
+    // Create post for the desire
+    const { error: postError } = await supabase
+      .from("posts")
+      .insert({
+        couple_id: coupleId,
+        author_id: user.id,
+        content: `${desire.emoji} ${desire.label}`,
+      });
+
+    if (postError) {
+      console.error("Error creating post:", postError);
+    }
+
+    toast({ title: `${desire.emoji} ${desire.label} sent!` });
   };
 
   const categories = [
