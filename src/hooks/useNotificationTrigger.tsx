@@ -189,7 +189,7 @@ async function sendNotification({
       .from('notification_preferences')
       .select('*')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     // Check if this notification type is enabled
     const typeKey = `${type}s_enabled` as keyof typeof prefs;

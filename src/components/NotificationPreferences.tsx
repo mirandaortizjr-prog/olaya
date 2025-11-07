@@ -29,7 +29,7 @@ export const NotificationPreferences = () => {
         .from('notification_preferences')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error loading preferences:', error);
