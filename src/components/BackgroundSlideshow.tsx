@@ -23,17 +23,31 @@ export const BackgroundSlideshow = ({ coupleId }: BackgroundSlideshowProps) => {
         if (error) throw error;
 
         if (data && data.length > 0) {
-          // Generate signed URLs for all images
-          const urls = await Promise.all(
-            data.map(async (img) => {
-              const { data: signedUrl } = await supabase.storage
+          // Generate signed URLs for all images with better error handling
+          const urlPromises = data.map(async (img) => {
+            try {
+              const { data: signedUrl, error } = await supabase.storage
                 .from("couple_media")
-                .createSignedUrl(img.image_path, 3600);
-              return signedUrl?.signedUrl || "";
-            })
-          );
+                .createSignedUrl(img.image_path, 86400); // 24 hours
+              
+              if (error) {
+                console.error(`Failed to get signed URL for ${img.image_path}:`, error);
+                return null;
+              }
+              
+              return signedUrl?.signedUrl || null;
+            } catch (error) {
+              console.error(`Error generating signed URL for ${img.image_path}:`, error);
+              return null;
+            }
+          });
           
-          setBackgroundImages(urls.filter(url => url !== ""));
+          const urls = await Promise.allSettled(urlPromises);
+          const validUrls = urls
+            .filter(result => result.status === 'fulfilled' && result.value)
+            .map(result => (result as PromiseFulfilledResult<string>).value);
+          
+          setBackgroundImages(validUrls);
         }
       } catch (error) {
         console.error("Error loading background images:", error);
