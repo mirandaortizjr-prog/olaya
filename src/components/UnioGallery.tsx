@@ -100,17 +100,18 @@ const PostCard = ({
                 return (
                   <div 
                     key={index} 
-                    className={`${post.media_urls.length > 1 ? 'flex-shrink-0 w-[85vw]' : 'w-full'}`}
+                    className={`${post.media_urls.length > 1 ? 'flex-shrink-0 w-[85vw]' : 'w-full'} flex justify-center`}
+                    style={{ background: 'linear-gradient(180deg, #000000, #4F585E)' }}
                   >
                     {isVideo ? (
-                      <video controls className="w-full h-[70vh] object-cover rounded">
+                      <video controls className="max-w-full max-h-[70vh] object-contain rounded">
                         <source src={url} />
                       </video>
                     ) : (
                       <img 
                         src={url} 
                         alt="post media" 
-                        className="w-full h-[70vh] object-cover rounded" 
+                        className="max-w-full max-h-[70vh] object-contain rounded" 
                       />
                     )}
                   </div>
