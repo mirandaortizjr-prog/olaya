@@ -14,7 +14,6 @@ import DailyNotesPage from "./pages/DailyNotesPage";
 import CoupleProfiles from "./pages/CoupleProfiles";
 import PrivatePage from "./pages/PrivatePage";
 import { MoodCustomization } from "./pages/MoodCustomization";
-import { FlirtCustomization } from "./pages/FlirtCustomization";
 import NotFound from "./pages/NotFound";
 import FlirtsPage from "./pages/FlirtsPage";
 
@@ -52,8 +51,7 @@ const App = () => {
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/flirts" element={<FlirtsPage />} />
-                <Route path="/flirt-customization" element={<FlirtCustomization />} />
+          <Route path="/flirts" element={<FlirtsPage />} />
                 <Route path="/daily-notes" element={<DailyNotesPage />} />
                 <Route path="/couple-profiles" element={<CoupleProfiles />} />
                 <Route path="/private" element={<PrivatePage />} />
