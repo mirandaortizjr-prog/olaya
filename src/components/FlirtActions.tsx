@@ -125,36 +125,49 @@ export const FlirtActions = ({ coupleId, senderId, open, onClose }: FlirtActions
   };
 
   const sendFlirt = async (flirtType: string, label: string, emoji: string) => {
-    setSending(true);
-    console.log('Sending flirt:', { couple_id: coupleId, sender_id: senderId, flirt_type: flirtType });
-    
-    const { data, error } = await supabase
-      .from('flirts')
-      .insert({
-        couple_id: coupleId,
-        sender_id: senderId,
-        flirt_type: flirtType
-      })
-      .select();
+    try {
+      console.log('=== SENDING FLIRT ===');
+      console.log('Flirt details:', { flirtType, label, emoji, coupleId, senderId });
+      setSending(true);
+      
+      const { data, error } = await supabase
+        .from('flirts')
+        .insert({
+          couple_id: coupleId,
+          sender_id: senderId,
+          flirt_type: flirtType
+        })
+        .select();
 
-    console.log('Flirt response:', { data, error });
+      console.log('Flirt insert result:', { data, error });
 
-    if (error) {
-      console.error('Flirt error:', error);
-      toast({ 
-        title: "Error sending flirt", 
-        description: error.message,
-        variant: "destructive" 
-      });
-    } else {
+      if (error) {
+        console.error('Flirt error:', error);
+        toast({ 
+          title: "Error sending flirt", 
+          description: error.message,
+          variant: "destructive" 
+        });
+        setSending(false);
+        return;
+      }
+
       // Create a post with the flirt
-      await supabase
+      console.log('Creating post for flirt...');
+      const { data: postData, error: postError } = await supabase
         .from('posts')
         .insert({
           couple_id: coupleId,
           author_id: senderId,
           content: `${emoji} ${label}`
-        });
+        })
+        .select();
+
+      console.log('Post insert result:', { postData, postError });
+
+      if (postError) {
+        console.error('Post error:', postError);
+      }
 
       // Send push notification to partner
       const { data: partner } = await supabase
@@ -179,8 +192,16 @@ export const FlirtActions = ({ coupleId, senderId, open, onClose }: FlirtActions
         description: "Your partner will feel the love!"
       });
       onClose();
+    } catch (err) {
+      console.error('Unexpected error in sendFlirt:', err);
+      toast({
+        title: "Error",
+        description: "Failed to send flirt. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setSending(false);
     }
-    setSending(false);
   };
 
   return (
