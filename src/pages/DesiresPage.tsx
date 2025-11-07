@@ -6,6 +6,7 @@ import { ArrowLeft, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Desire {
   emoji: string;
@@ -97,6 +98,7 @@ const allDesires: Desire[] = [
 export default function DesiresPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [user, setUser] = useState<any>(null);
   const [coupleId, setCoupleId] = useState<string | null>(null);
   const [customDesires, setCustomDesires] = useState<Desire[]>([]);
@@ -158,20 +160,20 @@ export default function DesiresPage() {
       );
 
     if (error) {
-      toast({ title: "Error saving custom desires", variant: "destructive" });
+      toast({ title: t('error'), variant: "destructive" });
     } else {
-      toast({ title: "Custom desires saved!" });
+      toast({ title: t('success') });
     }
   };
 
   const addCustomDesire = () => {
     if (!newDesireEmoji || !newDesireLabel) {
-      toast({ title: "Please add both emoji and label", variant: "destructive" });
+      toast({ title: t('pleaseFillRequiredFields'), variant: "destructive" });
       return;
     }
 
     if (customDesires.length >= 10) {
-      toast({ title: "Maximum 10 personalized desires", variant: "destructive" });
+      toast({ title: t('maxPersonalizedDesires'), variant: "destructive" });
       return;
     }
 
@@ -208,7 +210,7 @@ export default function DesiresPage() {
       });
 
     if (cravingError) {
-      toast({ title: "Error sending desire", variant: "destructive" });
+      toast({ title: t('error'), variant: "destructive" });
       return;
     }
 
@@ -229,10 +231,10 @@ export default function DesiresPage() {
   };
 
   const categories = [
-    { name: "Emotional & Relational", icon: "💗" },
-    { name: "Sensory & Physical", icon: "🧡" },
-    { name: "Comfort & Care", icon: "🤎" },
-    { name: "Playful & Mischievous", icon: "💛" },
+    { name: "Emotional & Relational", translationKey: "categoryEmotional", icon: "💗" },
+    { name: "Sensory & Physical", translationKey: "categorySensory", icon: "🧡" },
+    { name: "Comfort & Care", translationKey: "categoryComfort", icon: "🤎" },
+    { name: "Playful & Mischievous", translationKey: "categoryPlayful", icon: "💛" },
   ];
 
   return (
@@ -248,7 +250,7 @@ export default function DesiresPage() {
           >
             <ArrowLeft className="w-6 h-6 text-white" />
           </Button>
-          <h1 className="text-2xl font-bold text-white">Desires</h1>
+          <h1 className="text-2xl font-bold text-white">{t('desiresTitle')}</h1>
           <div className="w-10" />
         </div>
       </header>
@@ -260,7 +262,7 @@ export default function DesiresPage() {
           <section className="bg-black/30 backdrop-blur-sm rounded-lg border border-white/10 p-4">
             <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
               <Sparkles className="w-5 h-5" />
-              Personalized
+              {t('personalized')}
             </h2>
             <div className="grid grid-cols-2 gap-3">
               {customDesires.map((desire, index) => (
@@ -295,7 +297,7 @@ export default function DesiresPage() {
           >
             <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
               <span className="text-2xl">{category.icon}</span>
-              {category.name} Desires
+              {t(category.translationKey)} {t('desiresLabel')}
             </h2>
             <div className="grid grid-cols-2 gap-3">
               {allDesires
@@ -322,7 +324,7 @@ export default function DesiresPage() {
             onClick={() => setShowPersonalize(true)}
           >
             <Sparkles className="w-5 h-5 mr-2" />
-            Personalize (Add up to 10 custom desires)
+            {t('personalizeButton')}
           </Button>
         </div>
       </div>
@@ -331,11 +333,11 @@ export default function DesiresPage() {
       <Dialog open={showPersonalize} onOpenChange={setShowPersonalize}>
         <DialogContent className="bg-black/90 text-white border-white/20">
           <DialogHeader>
-            <DialogTitle className="text-white">Add Custom Desire</DialogTitle>
+            <DialogTitle className="text-white">{t('addCustomDesire')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="text-sm text-white/70 mb-2 block">Emoji</label>
+              <label className="text-sm text-white/70 mb-2 block">{t('emoji')}</label>
               <Input
                 placeholder="💖"
                 value={newDesireEmoji}
@@ -345,9 +347,9 @@ export default function DesiresPage() {
               />
             </div>
             <div>
-              <label className="text-sm text-white/70 mb-2 block">Label</label>
+              <label className="text-sm text-white/70 mb-2 block">{t('label')}</label>
               <Input
-                placeholder="Your custom desire"
+                placeholder={t('customDesirePlaceholder')}
                 value={newDesireLabel}
                 onChange={(e) => setNewDesireLabel(e.target.value)}
                 maxLength={30}
@@ -355,19 +357,19 @@ export default function DesiresPage() {
               />
             </div>
             <p className="text-xs text-white/50">
-              {customDesires.length}/10 custom desires
+              {customDesires.length}/10 {t('customDesiresCount')}
             </p>
             <Button
               className="w-full bg-white/20 hover:bg-white/30 text-white"
               onClick={addCustomDesire}
             >
-              Add Desire
+              {t('addDesire')}
             </Button>
           </div>
 
           {customDesires.length > 0 && (
             <div className="mt-4 space-y-2">
-              <h3 className="text-sm font-semibold text-white/70">Your Custom Desires:</h3>
+              <h3 className="text-sm font-semibold text-white/70">{t('yourCustomDesires')}</h3>
               {customDesires.map((desire, index) => (
                 <div
                   key={index}
@@ -382,7 +384,7 @@ export default function DesiresPage() {
                     onClick={() => deleteCustomDesire(index)}
                     className="text-red-400 hover:text-red-300 hover:bg-white/10"
                   >
-                    Remove
+                    {t('remove')}
                   </Button>
                 </div>
               ))}
