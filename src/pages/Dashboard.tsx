@@ -660,6 +660,12 @@ const Dashboard = () => {
     setActiveView("home");
   }
 
+  if (activeView === "love") {
+    navigate('/love');
+    setActiveView("home");
+    return null;
+  }
+
 
   if (activeView === "locked") {
     navigate('/private');

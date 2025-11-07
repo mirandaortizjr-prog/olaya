@@ -15,6 +15,7 @@ import CoupleProfiles from "./pages/CoupleProfiles";
 import PrivatePage from "./pages/PrivatePage";
 import { MoodCustomization } from "./pages/MoodCustomization";
 import { FlirtCustomization } from "./pages/FlirtCustomization";
+import { LovePage } from "./pages/LovePage";
 import NotFound from "./pages/NotFound";
 import FlirtsPage from "./pages/FlirtsPage";
 
@@ -58,6 +59,7 @@ const App = () => {
                 <Route path="/private" element={<PrivatePage />} />
                 <Route path="/mood-customization" element={<MoodCustomization />} />
                 <Route path="/flirt-customization" element={<FlirtCustomization />} />
+                <Route path="/love" element={<LovePage />} />
                 <Route path="/404" element={<NotFound />} />
                 <Route path="*" element={<Navigate to="/404" replace />} />
               </Routes>
