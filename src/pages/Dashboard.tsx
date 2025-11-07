@@ -774,8 +774,8 @@ const Dashboard = () => {
             )}
           </div>
           <div className="flex items-center justify-between">
-            <LoveMeter coupleId={coupleData.coupleId} />
-            <AnniversaryCountdown anniversaryDate={coupleData.anniversaryDate || null} coupleId={coupleData.coupleId} />
+            <span className="text-white text-base">Anniversary</span>
+            <AnniversaryCountdown anniversaryDate={coupleData.anniversaryDate || null} />
           </div>
         </div>
       </div>

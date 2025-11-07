@@ -5,10 +5,9 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 interface AnniversaryCountdownProps {
   anniversaryDate: string | null;
-  coupleId: string;
 }
 
-export const AnniversaryCountdown = ({ anniversaryDate, coupleId }: AnniversaryCountdownProps) => {
+export const AnniversaryCountdown = ({ anniversaryDate }: AnniversaryCountdownProps) => {
   const { language } = useLanguage();
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
