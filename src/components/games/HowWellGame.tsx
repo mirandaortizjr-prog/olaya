@@ -182,7 +182,9 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
       // Calculate experience based on score
-      const expGained = calculateExperienceGain('how-well', score + (isCorrect ? 1 : 0), questions.length);
+      const accuracy = (score + (isCorrect ? 1 : 0)) / questions.length;
+      const resultType = accuracy >= 0.8 ? 'correct' : accuracy >= 0.5 ? 'partial' : 'incorrect';
+      const expGained = calculateExperienceGain(progress.currentLevel, resultType);
       await addExperience(expGained);
       setGameMode("results");
     }

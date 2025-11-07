@@ -129,6 +129,59 @@ export const getLoveLanguageQuestions = (level: number, language: 'en' | 'es') =
 export const getWouldYouRatherQuestions = (level: number, language: 'en' | 'es') => getQuestionsByCategory('would_you_rather', level, language);
 export const getTruthOrTenderQuestions = (level: number, language: 'en' | 'es') => getQuestionsByCategory('truth_or_tender', level, language);
 
+// Generic question generator by category
+const getQuestionsByCategory = (category: string, level: number, language: 'en' | 'es'): Array<{ question: string; options?: string[]; type?: string }> => {
+  const questionData: Record<string, Array<any>> = {
+    'daily': [
+      { id: 'd1', en: "How are you feeling today?", es: "¿Cómo te sientes hoy?", minLevel: 1, maxLevel: 10000 },
+      { id: 'd2', en: "What made you smile today?", es: "¿Qué te hizo sonreír hoy?", minLevel: 1, maxLevel: 10000 },
+      { id: 'd3', en: "What's on your mind right now?", es: "¿Qué tienes en mente ahora mismo?", minLevel: 1, maxLevel: 10000 },
+      { id: 'd4', en: "What are you grateful for today?", es: "¿Por qué estás agradecido/a hoy?", minLevel: 1, maxLevel: 10000 },
+      { id: 'd5', en: "What's something you'd like to share with me?", es: "¿Qué es algo que te gustaría compartir conmigo?", minLevel: 100, maxLevel: 10000 },
+    ],
+    'future': [
+      { id: 'f1', en: "Where do you see us in 5 years?", es: "¿Dónde nos ves en 5 años?", minLevel: 1, maxLevel: 5000 },
+      { id: 'f2', en: "What's one dream you have for our future?", es: "¿Cuál es un sueño que tienes para nuestro futuro?", minLevel: 1, maxLevel: 5000 },
+      { id: 'f3', en: "What kind of home would you like us to have?", es: "¿Qué tipo de hogar te gustaría que tuviéramos?", minLevel: 500, maxLevel: 10000 },
+      { id: 'f4', en: "What adventures do you want us to experience together?", es: "¿Qué aventuras quieres que experimentemos juntos?", minLevel: 1000, maxLevel: 10000 },
+      { id: 'f5', en: "How do you imagine us growing old together?", es: "¿Cómo nos imaginas envejeciendo juntos?", minLevel: 2000, maxLevel: 10000 },
+    ],
+    'love_language': [
+      { id: 'll1', en: "How do you prefer to receive love?", es: "¿Cómo prefieres recibir amor?", minLevel: 1, maxLevel: 10000, options: ["Words of Affirmation", "Quality Time", "Physical Touch", "Acts of Service", "Receiving Gifts"] },
+      { id: 'll2', en: "What makes you feel most appreciated?", es: "¿Qué te hace sentir más apreciado/a?", minLevel: 1, maxLevel: 10000, options: ["Verbal compliments", "Spending time together", "Hugs and kisses", "Help with tasks", "Thoughtful gifts"] },
+      { id: 'll3', en: "When you're upset, what helps you feel better?", es: "Cuando estás molesto/a, ¿qué te ayuda a sentirte mejor?", minLevel: 100, maxLevel: 10000, options: ["Talking it through", "Just being together", "Physical comfort", "Practical help", "A small surprise"] },
+      { id: 'll4', en: "How do you show love to others?", es: "¿Cómo demuestras amor a los demás?", minLevel: 500, maxLevel: 10000, options: ["Saying kind words", "Making time for them", "Affectionate gestures", "Doing things for them", "Giving presents"] },
+    ],
+    'would_you_rather': [
+      { id: 'wyr1', en: "Adventure vacation or relaxing beach getaway?", es: "¿Vacaciones de aventura o escapada relajante a la playa?", minLevel: 1, maxLevel: 5000, options: ["Adventure vacation", "Relaxing beach getaway"] },
+      { id: 'wyr2', en: "Cook dinner together or go out to eat?", es: "¿Cocinar la cena juntos o salir a comer?", minLevel: 1, maxLevel: 5000, options: ["Cook dinner together", "Go out to eat"] },
+      { id: 'wyr3', en: "Movie night at home or concert out?", es: "¿Noche de películas en casa o concierto fuera?", minLevel: 100, maxLevel: 5000, options: ["Movie night at home", "Concert out"] },
+      { id: 'wyr4', en: "City life or countryside living?", es: "¿Vida en la ciudad o vivir en el campo?", minLevel: 500, maxLevel: 10000, options: ["City life", "Countryside living"] },
+      { id: 'wyr5', en: "Know my past or see my future?", es: "¿Conocer mi pasado o ver mi futuro?", minLevel: 2000, maxLevel: 10000, options: ["Know my past", "See my future"] },
+    ],
+    'truth_or_tender': [
+      { id: 'tt1', en: "What's the silliest thing that makes you laugh?", es: "¿Qué es lo más tonto que te hace reír?", minLevel: 1, maxLevel: 10000, type: 'truth' },
+      { id: 'tt2', en: "Tell me your favorite memory of us", es: "Cuéntame tu recuerdo favorito de nosotros", minLevel: 1, maxLevel: 10000, type: 'truth' },
+      { id: 'tt3', en: "Share something you've been too shy to say", es: "Comparte algo que has tenido demasiada timidez para decir", minLevel: 500, maxLevel: 10000, type: 'truth' },
+      { id: 'tt4', en: "Give me a 10-second hug", es: "Dame un abrazo de 10 segundos", minLevel: 1, maxLevel: 10000, type: 'tender' },
+      { id: 'tt5', en: "Do your best impression of me", es: "Haz tu mejor imitación de mí", minLevel: 1, maxLevel: 10000, type: 'tender' },
+      { id: 'tt6', en: "Write me a short love note", es: "Escríbeme una nota de amor corta", minLevel: 500, maxLevel: 10000, type: 'tender' },
+      { id: 'tt7', en: "Kiss me in a new way", es: "Bésame de una forma nueva", minLevel: 1000, maxLevel: 10000, type: 'tender' },
+    ]
+  };
+
+  const questions = questionData[category] || [];
+  const levelQuestions = questions.filter((q: any) => level >= q.minLevel && level <= q.maxLevel);
+  const shuffled = [...levelQuestions].sort(() => Math.random() - 0.5);
+  const selected = shuffled.slice(0, 5);
+  
+  return selected.map((q: any) => ({
+    question: q[language],
+    options: q.options,
+    type: q.type
+  }));
+};
+
 export const generateTruthOrDareQuestions = (level: number, language: 'en' | 'es'): Array<{truth: string, dare: string}> => {
   const questions: Array<{id: string, en: {truth: string, dare: string}, es: {truth: string, dare: string}, minLevel: number, maxLevel: number}> = [
     // Level 1-100: Playful
@@ -169,20 +222,14 @@ export const generateTruthOrDareQuestions = (level: number, language: 'en' | 'es
   return shuffled.slice(0, 10).map(q => q[language]);
 };
 
-export const calculateExperienceGain = (gameType: string, correctAnswers: number, totalQuestions: number): number => {
-  const baseExp = {
-    'how-well': 50,
-    'would-you-rather': 30,
-    'truth-or-tender': 40,
-    'memory-lane': 60,
-    'daily-sync': 25,
-    'love-language': 45,
-    'future-forecast': 35
-  };
-
-  const base = baseExp[gameType as keyof typeof baseExp] || 30;
-  const accuracy = correctAnswers / totalQuestions;
-  const bonusMultiplier = accuracy >= 0.8 ? 1.5 : accuracy >= 0.5 ? 1.2 : 1;
+export const calculateExperienceGain = (level: number, result: 'correct' | 'partial' | 'incorrect'): number => {
+  const baseExp = Math.floor(10 + (level / 10)); // Scales with level
   
-  return Math.floor(base * bonusMultiplier);
+  const multipliers = {
+    'correct': 1.0,
+    'partial': 0.5,
+    'incorrect': 0.25
+  };
+  
+  return Math.floor(baseExp * multipliers[result]);
 };
