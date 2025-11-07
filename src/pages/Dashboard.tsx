@@ -20,7 +20,6 @@ import { NotificationSettings } from "@/components/NotificationSettings";
 import { MessengerChat } from "@/components/MessengerChat";
 import { FlirtActions } from "@/components/FlirtActions";
 import { FlirtNotifications } from "@/components/FlirtNotifications";
-import { DesireActions } from "@/components/DesireActions";
 import { RecentMessages } from "@/components/RecentMessages";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import { PrivateVault } from "@/components/PrivateVault";
@@ -77,18 +76,21 @@ const Dashboard = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [showSongSettings, setShowSongSettings] = useState(false);
   const [showFlirt, setShowFlirt] = useState(false);
-  const [showDesires, setShowDesires] = useState(false);
   const [editingSpaceName, setEditingSpaceName] = useState(false);
   const [spaceName, setSpaceName] = useState("");
   const [pendingGamesCount, setPendingGamesCount] = useState(0);
   const [pendingGameSessions, setPendingGameSessions] = useState<any[]>([]);
-  const [newDesiresCount, setNewDesiresCount] = useState(0);
   const [newFlirtsCount, setNewFlirtsCount] = useState(0);
   const [newVaultCount, setNewVaultCount] = useState(0);
   const [newMessagesCount, setNewMessagesCount] = useState(0);
-  const [lastViewedDesires, setLastViewedDesires] = useState<Date>(new Date());
-  const [lastViewedFlirts, setLastViewedFlirts] = useState<Date>(new Date());
-  const [lastViewedVault, setLastViewedVault] = useState<Date>(new Date());
+  const [lastViewedFlirts, setLastViewedFlirts] = useState<Date>(() => {
+    const stored = localStorage.getItem('lastViewedFlirts');
+    return stored ? new Date(stored) : new Date();
+  });
+  const [lastViewedVault, setLastViewedVault] = useState<Date>(() => {
+    const stored = localStorage.getItem('lastViewedVault');
+    return stored ? new Date(stored) : new Date();
+  });
   const [lastViewedMessages, setLastViewedMessages] = useState<Date>(new Date());
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -166,31 +168,6 @@ const Dashboard = () => {
     };
   }, [user?.id]);
 
-  // Track new desires
-  useEffect(() => {
-    if (!user?.id) return;
-
-    fetchNewDesires();
-
-    const channel = supabase
-      .channel('desires-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'craving_board',
-        },
-        () => {
-          fetchNewDesires();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user?.id, lastViewedDesires]);
 
   // Track new flirts
   useEffect(() => {
@@ -404,29 +381,6 @@ const Dashboard = () => {
     }
   };
 
-  const fetchNewDesires = async () => {
-    if (!user?.id) return;
-
-    const { data: membership } = await supabase
-      .from('couple_members')
-      .select('couple_id')
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    if (!membership) return;
-
-    const { data, error } = await supabase
-      .from('craving_board')
-      .select('id')
-      .eq('couple_id', membership.couple_id)
-      .neq('user_id', user.id)
-      .eq('fulfilled', false)
-      .gt('created_at', lastViewedDesires.toISOString());
-
-    if (!error && data) {
-      setNewDesiresCount(data.length);
-    }
-  };
 
   const fetchNewFlirts = async () => {
     if (!user?.id) return;
@@ -897,7 +851,6 @@ const Dashboard = () => {
           else if (view === "locked") { setNewVaultCount(0); setLastViewedVault(new Date()); }
         }}
         pendingGamesCount={pendingGamesCount}
-        newDesiresCount={newDesiresCount}
         newFlirtsCount={newFlirtsCount}
         newVaultCount={newVaultCount}
       />
@@ -909,20 +862,10 @@ const Dashboard = () => {
         onClose={() => setShowFlirt(false)}
       />
 
-      {coupleData && (
-        <DesireActions
-          coupleId={coupleData.coupleId}
-          userId={user!.id}
-          open={false}
-          onClose={() => setShowDesires(false)}
-          lastViewedTimestamp={lastViewedDesires}
-        />
-      )}
 
       <BottomNavigation
         activeView={activeView}
         pendingGamesCount={pendingGamesCount}
-        newDesiresCount={newDesiresCount}
         newFlirtsCount={newFlirtsCount}
         newVaultCount={newVaultCount}
         onViewChange={(view) => {
