@@ -117,3 +117,38 @@ All colors MUST be HSL.
 .scrollbar-bold::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--primary) / 0.8);
 }
+
+/* Seasonal Animations */
+@keyframes walk-turkey {
+  0% {
+    transform: translateX(-100px);
+  }
+  50% {
+    transform: translateX(calc(100vw + 100px));
+  }
+  50.01% {
+    transform: translateX(calc(100vw + 100px)) scaleX(-1);
+  }
+  100% {
+    transform: translateX(-100px) scaleX(-1);
+  }
+}
+
+@keyframes fall-leaf {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0.3;
+  }
+}
+
+.animate-walk-turkey {
+  animation: walk-turkey 20s linear infinite;
+}
+
+.animate-fall-leaf {
+  animation: fall-leaf linear infinite;
+}

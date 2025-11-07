@@ -26,6 +26,7 @@ import { BottomNavigation } from "@/components/BottomNavigation";
 import { PrivateVault } from "@/components/PrivateVault";
 import { CoupleGames } from "@/components/CoupleGames";
 import { UnioGallery } from "@/components/UnioGallery";
+import { SeasonalAnimations } from "@/components/SeasonalAnimations";
 import { MemoryCalendar } from "@/components/MemoryCalendar";
 import { LoveMeter } from "@/components/LoveMeter";
 import { CoupleSongPlayer, CoupleSongPlayerEmbed } from "@/components/CoupleSongPlayer";
@@ -822,6 +823,9 @@ const Dashboard = () => {
           </Button>
         </div>
       </div>
+
+      {/* Seasonal Animations Overlay */}
+      <SeasonalAnimations />
 
       {/* Feed Section */}
       <div style={{ backgroundColor: '#000000' }} className="pb-4 px-1">
