@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Bell, BellOff } from "lucide-react";
 import { subscribeToPushNotifications } from "@/utils/notifications";
 import { useToast } from "@/hooks/use-toast";
+import { NotificationPreferences } from "./NotificationPreferences";
+import { Separator } from "./ui/separator";
 
 export const NotificationSettings = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
@@ -64,30 +66,39 @@ export const NotificationSettings = () => {
   };
 
   return (
-    <div className="space-y-2">
-      <h3 className="font-semibold">Notifications</h3>
-      <Button
-        variant={notificationsEnabled ? "default" : "outline"}
-        className="w-full"
-        onClick={handleToggleNotifications}
-        disabled={loading}
-      >
-        {notificationsEnabled ? (
-          <>
-            <Bell className="w-4 h-4 mr-2" />
-            Notifications Enabled
-          </>
-        ) : (
-          <>
-            <BellOff className="w-4 h-4 mr-2" />
-            Enable Notifications
-          </>
+    <div className="space-y-4">
+      <div>
+        <h3 className="font-semibold">Push Notifications</h3>
+        <Button
+          variant={notificationsEnabled ? "default" : "outline"}
+          className="w-full mt-2"
+          onClick={handleToggleNotifications}
+          disabled={loading}
+        >
+          {notificationsEnabled ? (
+            <>
+              <Bell className="w-4 h-4 mr-2" />
+              Notifications Enabled
+            </>
+          ) : (
+            <>
+              <BellOff className="w-4 h-4 mr-2" />
+              Enable Notifications
+            </>
+          )}
+        </Button>
+        {notificationsEnabled && (
+          <p className="text-xs text-muted-foreground mt-2">
+            You're all set to receive notifications from Olaya!
+          </p>
         )}
-      </Button>
+      </div>
+
       {notificationsEnabled && (
-        <p className="text-xs text-muted-foreground">
-          You're all set to receive notifications from Olaya!
-        </p>
+        <>
+          <Separator />
+          <NotificationPreferences />
+        </>
       )}
     </div>
   );

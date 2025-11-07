@@ -195,9 +195,15 @@ export function initializeNativePushListeners() {
     console.log('Push notification received: ', notification);
   });
 
-  // Handle notification action
-  PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
-    console.log('Push notification action performed', notification.actionId, notification.inputValue);
+  // Handle notification action - deep linking
+  PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+    console.log('Push notification action performed', action);
+    
+    const data = action.notification.data;
+    if (data?.route) {
+      // Navigate to the specified route
+      window.location.href = data.route;
+    }
   });
 }
 

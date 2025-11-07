@@ -11,6 +11,11 @@ const config: CapacitorConfig = {
   plugins: {
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"]
+    },
+    Badge: {
+      // Enable badge count updates
+      persist: true,
+      autoClear: false
     }
   }
 };

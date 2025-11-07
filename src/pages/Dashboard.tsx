@@ -17,6 +17,7 @@ import { BackgroundSlideshow } from "@/components/BackgroundSlideshow";
 import { BackgroundUploadManager } from "@/components/BackgroundUploadManager";
 import { FeelingStatusSelector } from "@/components/FeelingStatusSelector";
 import { NotificationSettings } from "@/components/NotificationSettings";
+import { useNotificationTrigger } from "@/hooks/useNotificationTrigger";
 import { MessengerChat } from "@/components/MessengerChat";
 import { FlirtActions } from "@/components/FlirtActions";
 import { FlirtNotifications } from "@/components/FlirtNotifications";
@@ -96,6 +97,12 @@ const Dashboard = () => {
   const { toast } = useToast();
   const { t } = useLanguage();
   const { progress } = useCoupleProgress(coupleData?.coupleId || null);
+
+  // Enable auto-notifications
+  useNotificationTrigger({
+    coupleId: coupleData?.coupleId,
+    userId: user?.id,
+  });
 
   useEffect(() => {
     checkUser();

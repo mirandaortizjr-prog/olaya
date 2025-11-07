@@ -21,6 +21,12 @@ interface NotificationPayload {
   userId: string;
   title: string;
   body: string;
+  data?: {
+    type: string;
+    id: string;
+    route: string;
+    badge?: number;
+  };
 }
 
 // Function to send web push using native Deno APIs
@@ -40,15 +46,21 @@ async function sendWebPush(subscription: PushSubscription, payload: string) {
 }
 
 // Function to send native push via FCM/APNs
-async function sendNativePush(subscription: PushSubscription, title: string, body: string) {
+async function sendNativePush(subscription: PushSubscription, title: string, body: string, data?: any) {
   const token = subscription.endpoint.replace('native:', '');
   const platform = subscription.platform || 'unknown';
   
   console.log(`Sending native push to ${platform} device, token: ${token.substring(0, 20)}...`);
   
-  // In production, you would integrate with FCM for Android and APNs for iOS
-  // For now, we'll log it
-  console.log('Native push notification:', { title, body, token, platform });
+  // Include deep link and badge data in push notification
+  const pushData = {
+    title,
+    body,
+    ...data,
+    badge: data?.badge || 0,
+  };
+  
+  console.log('Native push notification:', pushData);
   
   // TODO: Implement actual FCM/APNs integration
   // For Android (FCM):
@@ -57,9 +69,31 @@ async function sendNativePush(subscription: PushSubscription, title: string, bod
   
   // For iOS (APNs):
   // - Use APNs certificates
-  // - Send to APNs servers
+  // - Send to APNs servers with badge count
   
   return { success: true };
+}
+
+// Get unread count for badge
+async function getUnreadCount(supabase: any, userId: string): Promise<number> {
+  try {
+    const { count: unreadMessages } = await supabase
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .is('read_at', null)
+      .neq('sender_id', userId);
+
+    const { count: unreadNotes } = await supabase
+      .from('love_notes')
+      .select('*', { count: 'exact', head: true })
+      .is('read_at', null)
+      .neq('sender_id', userId);
+
+    return (unreadMessages || 0) + (unreadNotes || 0);
+  } catch (error) {
+    console.error('Error getting unread count:', error);
+    return 0;
+  }
 }
 
 serve(async (req) => {
@@ -73,9 +107,16 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { userId, title, body }: NotificationPayload = await req.json();
+    const { userId, title, body, data }: NotificationPayload = await req.json();
 
     console.log('Sending push notification to user:', userId);
+
+    // Get unread count for badge
+    const badgeCount = await getUnreadCount(supabase, userId);
+    const notificationData = {
+      ...data,
+      badge: badgeCount,
+    };
 
     // Get user's push subscriptions
     const { data: subscriptions, error: subError } = await supabase
@@ -101,12 +142,16 @@ serve(async (req) => {
         const isNative = sub.endpoint.startsWith('native:');
         
         if (isNative) {
-          // Send native push
-          await sendNativePush(sub, title, body);
+          // Send native push with deep link data
+          await sendNativePush(sub, title, body, notificationData);
           console.log(`Native push notification sent to ${sub.platform} device`);
         } else {
-          // Send web push
-          const payload = JSON.stringify({ title, body });
+          // Send web push with deep link data
+          const payload = JSON.stringify({
+            title,
+            body,
+            data: notificationData,
+          });
           const response = await sendWebPush(sub, payload);
 
           if (!response.ok) {
@@ -130,7 +175,7 @@ serve(async (req) => {
     await Promise.all(pushPromises);
 
     return new Response(
-      JSON.stringify({ message: 'Push notifications sent' }),
+      JSON.stringify({ message: 'Push notifications sent', badgeCount }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     );
 

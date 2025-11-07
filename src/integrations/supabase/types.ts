@@ -657,6 +657,42 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          created_at: string | null
+          flirts_enabled: boolean | null
+          id: string
+          love_notes_enabled: boolean | null
+          messages_enabled: boolean | null
+          mood_updates_enabled: boolean | null
+          posts_enabled: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          flirts_enabled?: boolean | null
+          id?: string
+          love_notes_enabled?: boolean | null
+          messages_enabled?: boolean | null
+          mood_updates_enabled?: boolean | null
+          posts_enabled?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          flirts_enabled?: boolean | null
+          id?: string
+          love_notes_enabled?: boolean | null
+          messages_enabled?: boolean | null
+          mood_updates_enabled?: boolean | null
+          posts_enabled?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       post_comments: {
         Row: {
           comment: string
