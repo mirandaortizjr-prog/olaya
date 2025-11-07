@@ -6,8 +6,9 @@ import { initializeNativePushListeners } from "@/utils/notifications";
 
 const swCleanup = async () => {
   try {
-    const isPreviewHost = location.hostname.endsWith("lovableproject.com");
-    const shouldUnregister = import.meta.env.MODE !== "production" || isPreviewHost;
+    const host = location.hostname;
+    const isLovableHost = host.includes("lovable");
+    const shouldUnregister = import.meta.env.MODE !== "production" || isLovableHost;
     if (shouldUnregister && "serviceWorker" in navigator) {
       const regs = await navigator.serviceWorker.getRegistrations();
       await Promise.all(regs.map((r) => r.unregister()));

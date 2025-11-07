@@ -109,26 +109,51 @@ useEffect(() => {
         </div>
       </header>
 
-      {/* Open the same Flirt dialog UI so users get identical experience */}
+      {/* Send dialog (opens when tapping "Send") */}
       <FlirtActions
         coupleId={coupleId}
         senderId={userId}
         open={open}
-        onClose={() => {
-          setOpen(false);
-          navigate("/dashboard");
-        }}
+        onClose={() => setOpen(false)}
       />
 
-      {/* Fallback instructions if dialog is closed */}
-      {!open && (
-        <main className="max-w-lg mx-auto p-4">
-          <p className="text-muted-foreground">Tap the flame button to send a flirt.</p>
-          <Button className="mt-4" onClick={() => setOpen(true)}>
-            <Flame className="w-4 h-4 mr-2" /> Open Instant Flirt
-          </Button>
-        </main>
-      )}
+      {/* Flirts history */}
+      <main className="max-w-lg mx-auto p-4">
+        <section aria-labelledby="flirts-history-heading" className="bg-card rounded-lg border">
+          <header className="flex items-center justify-between p-4 border-b">
+            <h2 id="flirts-history-heading" className="text-base font-semibold">Recent Flirts</h2>
+            <span className="text-xs text-muted-foreground">{flirts.length} total</span>
+          </header>
+          <ScrollArea className="max-h-[70vh]">
+            <ul className="divide-y">
+              {flirts.length === 0 ? (
+                <li className="p-4 text-sm text-muted-foreground">
+                  No flirts yet. Tap “Send” to start flirting.
+                </li>
+              ) : (
+                flirts.map(f => {
+                  const meta = FLIRT_ICONS[f.flirt_type] || { emoji: "💌", label: f.flirt_type };
+                  const isYou = f.sender_id === userId;
+                  return (
+                    <li key={f.id} className="p-4 flex items-center gap-3">
+                      <span className="text-xl" aria-hidden>{meta.emoji}</span>
+                      <div className="flex-1">
+                        <p className="text-sm">
+                          <span className="font-medium">{isYou ? "You" : "Partner"}</span>{" "}
+                          sent <span className="font-medium">{meta.label}</span>
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDistanceToNow(new Date(f.created_at), { addSuffix: true })}
+                        </p>
+                      </div>
+                    </li>
+                  );
+                })
+              )}
+            </ul>
+          </ScrollArea>
+        </section>
+      </main>
     </div>
   );
 }
