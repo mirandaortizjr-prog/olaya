@@ -38,15 +38,24 @@ export const NotificationSettings = () => {
       } else {
         toast({
           title: "Unable to Enable Notifications",
-          description: "Please check your browser settings and try again.",
+          description: "Please check your browser settings and allow notifications.",
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error enabling notifications:', error);
+      
+      // More specific error messages
+      let description = "Failed to enable notifications. Please try again.";
+      if (error?.message?.includes('not supported')) {
+        description = "Your browser doesn't support push notifications.";
+      } else if (error?.message?.includes('denied')) {
+        description = "Notification permission was denied. Please enable it in browser settings.";
+      }
+      
       toast({
         title: "Error",
-        description: "Failed to enable notifications. Please try again.",
+        description,
         variant: "destructive",
       });
     } finally {

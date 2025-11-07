@@ -875,21 +875,10 @@ const Dashboard = () => {
         onClose={() => setShowFlirt(false)}
       />
 
-      {/* Settings Dialog */}
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
         <DialogContent className="max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
-              <span>{t('settings')}</span>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setShowSettings(false)}
-                className="h-8 w-8"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </DialogTitle>
+            <DialogTitle>{t('settings')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pr-2">{/* Added pr-2 for scrollbar spacing */}
             <CouplePictureUploadButton
