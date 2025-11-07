@@ -866,7 +866,7 @@ const Dashboard = () => {
       {/* Feed Section */}
       <div style={{ backgroundColor: '#000000' }} className="px-2 pb-4">
         <div className="max-w-lg mx-auto">
-          <div style={{ background: 'linear-gradient(180deg, hsl(200 9% 34%), hsl(0 0% 0%))' }} className="rounded-3xl p-4 min-h-[500px]">
+          <div style={{ background: 'linear-gradient(180deg, #000000, #4F585E)' }} className="rounded-3xl p-4 min-h-[500px]">
             <UnioGallery
               coupleId={coupleData.coupleId}
               userId={user!.id}
