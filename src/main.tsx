@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
 const swCleanup = async () => {
   try {
@@ -30,7 +31,11 @@ const start = async () => {
   if (!proceed) return;
   const rootElement = document.getElementById("root");
   if (!rootElement) throw new Error("Root element not found");
-  createRoot(rootElement).render(<App />);
+  createRoot(rootElement).render(
+    <LanguageProvider>
+      <App />
+    </LanguageProvider>
+  );
 };
 
 start();
