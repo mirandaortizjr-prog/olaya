@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MessageCircle, Settings, LogOut, Users, Link2, Calendar, Flame, Home, Lock, Clock, ThumbsUp, ThumbsDown, Heart, Bookmark, Gamepad2, Music } from "lucide-react";
+import { MessageCircle, Settings, LogOut, Users, Link2, Calendar, Flame, Home, Lock, Clock, ThumbsUp, ThumbsDown, Heart, Bookmark, Gamepad2, Music, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
@@ -945,11 +945,21 @@ const Dashboard = () => {
 
       {/* Settings Dialog */}
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent>
+        <DialogContent className="max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{t('settings')}</DialogTitle>
+            <DialogTitle className="flex items-center justify-between">
+              <span>{t('settings')}</span>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setShowSettings(false)}
+                className="h-8 w-8"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-4 pr-2">{/* Added pr-2 for scrollbar spacing */}
             <CouplePictureUploadButton
               coupleId={coupleData.coupleId}
               currentPictureUrl={coupleData.couplePictureUrl || userProfile?.avatar_url || undefined}
