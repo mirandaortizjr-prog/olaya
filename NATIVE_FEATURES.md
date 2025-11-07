@@ -83,7 +83,21 @@ This document outlines all the native mobile features that have been integrated 
 - `public/push-sw.js` - Service worker for web
 - `src/utils/notifications.ts` - Core notification logic
 
-## Advanced Features
+## 13. ✅ QR Code Scanner 📱
+
+**Location:** `src/utils/qrScanner.ts`
+
+**Features:**
+- Scan QR codes using device camera
+- Web fallback with html5-qrcode
+- Native barcode scanning support
+- Permission management
+- Multiple format support
+
+**Usage:** Partner pairing, quick connections, sharing profile codes.
+
+**Permissions:** Camera access
+
 
 ## 7. ✅ Voice Messages 🎤
 

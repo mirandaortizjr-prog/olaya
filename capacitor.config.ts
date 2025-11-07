@@ -26,6 +26,9 @@ const config: CapacitorConfig = {
     },
     SplashScreen: {
       launchShowDuration: 0
+    },
+    BarcodeScanner: {
+      // QR Code scanner configuration
     }
   }
 };
