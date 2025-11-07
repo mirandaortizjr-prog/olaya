@@ -775,7 +775,7 @@ const Dashboard = () => {
           </div>
           <div className="flex items-center justify-between">
             <span className="text-white text-base">Anniversary</span>
-            <AnniversaryCountdown anniversaryDate={coupleData.anniversaryDate || null} />
+            <AnniversaryCountdown anniversaryDate={coupleData.anniversaryDate || null} coupleId={coupleData.coupleId} />
           </div>
         </div>
       </div>
