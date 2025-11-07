@@ -116,11 +116,16 @@ export const FlirtActions = ({ coupleId, senderId, open, onClose }: FlirtActions
       .eq('preference_type', 'flirt')
       .maybeSingle();
 
+    const allFlirtValues = FLIRT_ACTIONS.map(f => f.value);
+    
     if (data && data.enabled_items) {
-      setEnabledFlirts(data.enabled_items as string[]);
+      const saved = data.enabled_items as string[];
+      // Check if saved prefs match current flirts, otherwise reset
+      const hasValidFlirts = saved.some(s => allFlirtValues.includes(s));
+      setEnabledFlirts(hasValidFlirts ? saved : allFlirtValues);
     } else {
       // Enable all by default
-      setEnabledFlirts(FLIRT_ACTIONS.map(f => f.value));
+      setEnabledFlirts(allFlirtValues);
     }
   };
 
