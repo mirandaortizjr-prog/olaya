@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
+import { MoodTracker } from "@/components/MoodTracker";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Heart, Calendar, MapPin, Mail, Edit2, Check, X, Lock, Link2 } from "lucide-react";
 
@@ -404,6 +405,15 @@ export default function CoupleProfiles() {
             </p>
           </div>
         </div>
+
+        {/* Mood Tracker */}
+        {coupleId && user && partnerProfile && (
+          <MoodTracker 
+            coupleId={coupleId} 
+            userId={user.id} 
+            partnerName={partnerProfile.full_name}
+          />
+        )}
 
         {/* Profiles Grid */}
         <div className="grid md:grid-cols-2 gap-6">
