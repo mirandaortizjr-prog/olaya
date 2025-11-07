@@ -58,6 +58,14 @@ const MOOD_CATEGORIES = [
       "Anxious", "Frustrated", "Angry", "Jealous", "Overwhelmed",
       "Defensive", "Irritated", "Resentful", "Restless", "Misunderstood"
     ]
+  },
+  {
+    title: "Sexual Moods",
+    color: "text-fuchsia-400",
+    moods: [
+      "Horny", "Ravenous", "Thirsty", "Lustful", "Feral",
+      "Needy", "Overheated", "Starved", "Obsessed", "Frisky"
+    ]
   }
 ];
 
