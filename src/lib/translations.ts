@@ -234,6 +234,19 @@ export const translations = {
     clickToEditName: "Click to edit sanctuary name",
     save: "Save",
     
+    // Settings
+    settings: "Settings",
+    nestName: "Nest Name",
+    enterYourNestName: "Enter your nest name",
+    nestNameDescription: "This is the name displayed at the top of your shared space",
+    anniversaryDate: "Anniversary Date",
+    errorUpdatingAnniversaryDate: "Error updating anniversary date",
+    anniversaryDateUpdated: "Anniversary date updated!",
+    language: "Language",
+    manageSongs: "Manage Songs",
+    viewProfiles: "View Profiles",
+    
+    
     // Games
     games: "Games",
     coupleGames: "Couples Games",
@@ -564,6 +577,19 @@ export const translations = {
     sanctuaryNameUpdated: "Nombre del santuario actualizado exitosamente",
     clickToEditName: "Haz clic para editar el nombre del santuario",
     save: "Guardar",
+    
+    // Settings
+    settings: "Configuración",
+    nestName: "Nombre del Nido",
+    enterYourNestName: "Ingresa el nombre de tu nido",
+    nestNameDescription: "Este es el nombre que se muestra en la parte superior de tu espacio compartido",
+    anniversaryDate: "Fecha de Aniversario",
+    errorUpdatingAnniversaryDate: "Error al actualizar la fecha de aniversario",
+    anniversaryDateUpdated: "¡Fecha de aniversario actualizada!",
+    language: "Idioma",
+    manageSongs: "Administrar Canciones",
+    viewProfiles: "Ver Perfiles",
+    
     
     // Games
     games: "Juegos",

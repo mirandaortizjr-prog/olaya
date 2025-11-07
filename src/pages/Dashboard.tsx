@@ -947,7 +947,7 @@ const Dashboard = () => {
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Settings</DialogTitle>
+            <DialogTitle>{t('settings')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <CouplePictureUploadButton
@@ -959,18 +959,18 @@ const Dashboard = () => {
             />
             <BackgroundUploadManager coupleId={coupleData.coupleId} />
             <div>
-              <h3 className="font-semibold mb-2">Nest Name</h3>
+              <h3 className="font-semibold mb-2">{t('nestName')}</h3>
               <Input
                 value={spaceName}
                 onChange={(e) => setSpaceName(e.target.value)}
                 onBlur={updateSpaceName}
-                placeholder="Enter your nest name"
+                placeholder={t('enterYourNestName')}
                 className="mb-2"
               />
-              <p className="text-xs text-muted-foreground">This is the name displayed at the top of your shared space</p>
+              <p className="text-xs text-muted-foreground">{t('nestNameDescription')}</p>
             </div>
             <div>
-              <h3 className="font-semibold mb-2">Anniversary Date</h3>
+              <h3 className="font-semibold mb-2">{t('anniversaryDate')}</h3>
               <Input
                 type="date"
                 value={coupleData.anniversaryDate || ''}
@@ -982,16 +982,16 @@ const Dashboard = () => {
                     .eq('id', coupleData.coupleId);
                   
                   if (error) {
-                    toast({ title: "Error updating anniversary date", variant: "destructive" });
+                    toast({ title: t('errorUpdatingAnniversaryDate'), variant: "destructive" });
                   } else {
                     setCoupleData({ ...coupleData, anniversaryDate: newDate });
-                    toast({ title: "Anniversary date updated!" });
+                    toast({ title: t('anniversaryDateUpdated') });
                   }
                 }}
               />
             </div>
             <div>
-              <h3 className="font-semibold mb-2">Language</h3>
+              <h3 className="font-semibold mb-2">{t('language')}</h3>
               <LanguageSwitcher />
             </div>
             <NotificationSettings />
@@ -1005,16 +1005,16 @@ const Dashboard = () => {
               }}
             >
               <Music className="w-4 h-4 mr-2" />
-              Manage Songs
+              {t('manageSongs')}
             </Button>
             
             <Button variant="outline" className="w-full" onClick={() => navigate('/couple-profiles')}>
               <Users className="w-4 h-4 mr-2" />
-              View Profiles
+              {t('viewProfiles')}
             </Button>
             <Button variant="destructive" className="w-full" onClick={handleSignOut}>
               <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
+              {t('signOut')}
             </Button>
           </div>
         </DialogContent>
