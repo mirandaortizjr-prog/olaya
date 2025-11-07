@@ -134,7 +134,7 @@ export default function DesiresPage() {
       .select("enabled_items")
       .eq("couple_id", coupleId)
       .eq("preference_type", "custom_desires")
-      .single();
+      .maybeSingle();
 
     if (data?.enabled_items && Array.isArray(data.enabled_items)) {
       setCustomDesires(data.enabled_items as unknown as Desire[]);
