@@ -28,6 +28,7 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
   const [score, setScore] = useState(0);
   const [partnerAnswers, setPartnerAnswers] = useState<Record<string, string>>({});
   const [pendingInvitation, setPendingInvitation] = useState<any>(null);
+  const [partnerScores, setPartnerScores] = useState<Array<{ score: number; total: number; date: string }>>([]);
   const { toast } = useToast();
   const { t, language } = useLanguage();
   const { progress, addExperience } = useCoupleProgress(coupleId);
@@ -76,6 +77,62 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
     if (data) {
       setPendingInvitation(data);
     }
+  };
+
+  const loadPartnerScores = async () => {
+    if (!partnerId) return;
+
+    // Get my answers
+    const { data: myAnswers } = await supabase
+      .from('game_responses')
+      .select('*')
+      .eq('couple_id', coupleId)
+      .eq('game_type', 'how-well')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (!myAnswers || myAnswers.length === 0) return;
+
+    // Get partner's guesses (their answers to the same session)
+    const uniqueSessions = [...new Set(myAnswers.map(a => a.session_id))].slice(0, 3);
+    
+    const scores: Array<{ score: number; total: number; date: string }> = [];
+
+    for (const sessionId of uniqueSessions) {
+      const mySessionAnswers = myAnswers.filter(a => a.session_id === sessionId);
+      
+      const { data: partnerGuesses } = await supabase
+        .from('game_responses')
+        .select('*')
+        .eq('couple_id', coupleId)
+        .eq('game_type', 'how-well')
+        .eq('user_id', partnerId)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (partnerGuesses && partnerGuesses.length > 0) {
+        let correctCount = 0;
+        mySessionAnswers.forEach(myAnswer => {
+          const partnerGuess = partnerGuesses.find(pg => 
+            pg.question_id === myAnswer.question_id
+          );
+          if (partnerGuess && 
+              partnerGuess.answer.toLowerCase().trim() === myAnswer.answer.toLowerCase().trim()) {
+            correctCount++;
+          }
+        });
+
+        if (correctCount > 0 || mySessionAnswers.length > 0) {
+          scores.push({
+            score: correctCount,
+            total: mySessionAnswers.length,
+            date: mySessionAnswers[0].created_at
+          });
+        }
+      }
+    }
+
+    setPartnerScores(scores);
   };
 
   const sendGameInvitation = async () => {
@@ -193,6 +250,7 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
   useEffect(() => {
     loadPartnerAnswers();
     checkPendingInvitations();
+    loadPartnerScores();
   }, []);
 
   useEffect(() => {
@@ -242,6 +300,37 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
                 <Button onClick={acceptInvitation} className="w-full">
                   {t('acceptAndStart')}
                 </Button>
+              </Card>
+            )}
+
+            {partnerScores.length > 0 && (
+              <Card className="p-6">
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-primary" />
+                  {t('partnerRecentScores')}
+                </h3>
+                <div className="space-y-2">
+                  {partnerScores.map((scoreData, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                      <div>
+                        <p className="font-semibold text-lg">
+                          {scoreData.score}/{scoreData.total}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(scoreData.date).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium">
+                          {Math.round((scoreData.score / scoreData.total) * 100)}%
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {t('accuracy')}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </Card>
             )}
 
