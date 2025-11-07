@@ -666,6 +666,12 @@ const Dashboard = () => {
     return null;
   }
 
+  if (activeView === "desires") {
+    navigate('/desire-customization');
+    setActiveView("home");
+    return null;
+  }
+
 
   if (activeView === "locked") {
     navigate('/private');
