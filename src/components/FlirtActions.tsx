@@ -9,7 +9,7 @@ import { PreferencesSettings } from "./PreferencesSettings";
 const FLIRT_ACTIONS = [
   // Classic Physical Flirts
   { value: "kiss", label: "Kiss", icon: Heart, emoji: "💋", category: "physical" },
-  { value: "wink", label: "Wink", icon: Eye, emoji: "😘", category: "physical" },
+  { value: "wink", label: "Wink", icon: Eye, emoji: "😉", category: "physical" },
   { value: "lick", label: "Lick", icon: Wind, emoji: "👅", category: "physical" },
   { value: "bite", label: "Bite", icon: Sparkles, emoji: "🦷", category: "physical" },
   { value: "hug", label: "Hug", icon: Heart, emoji: "🤗", category: "physical" },

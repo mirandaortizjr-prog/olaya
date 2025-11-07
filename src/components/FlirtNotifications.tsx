@@ -20,7 +20,7 @@ interface FlirtNotificationsProps {
 }
 
 const FLIRT_ICONS: Record<string, { icon: any; emoji: string; label: string }> = {
-  wink: { icon: Eye, emoji: "😘", label: "Winked at you" },
+  wink: { icon: Eye, emoji: "😉", label: "Winked at you" },
   kiss: { icon: Heart, emoji: "💋", label: "Sent you a kiss" },
   bite: { icon: Sparkles, emoji: "🦷", label: "Playfully bit you" },
   lick: { icon: Wind, emoji: "👅", label: "Licked you" },
