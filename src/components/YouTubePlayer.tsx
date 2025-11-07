@@ -113,6 +113,17 @@ export const YouTubePlayer = ({ coupleId, videoUrl, onVideoUrlChange }: YouTubeP
 
   return (
     <div className="w-full">
+      {/* Hidden iframe for background playback */}
+      {currentVideoId && !isOpen && (
+        <div className="hidden">
+          <iframe
+            src={`https://www.youtube.com/embed/${currentVideoId}?autoplay=1&enablejsapi=1`}
+            title="YouTube background player"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          />
+        </div>
+      )}
+
       {/* Collapsed state - just a button to open */}
       {!isOpen && (
         <div className="flex items-center justify-center gap-4">
@@ -121,8 +132,17 @@ export const YouTubePlayer = ({ coupleId, videoUrl, onVideoUrlChange }: YouTubeP
             onClick={togglePlayer}
             className="text-white/90 hover:text-white hover:bg-white/10"
           >
-            <Play className="w-5 h-5 mr-2" />
-            {playlist.length > 0 ? `Play Playlist (${playlist.length} songs)` : 'Open Music Player'}
+            {isPlaying ? (
+              <>
+                <Pause className="w-5 h-5 mr-2" />
+                Now Playing ({currentSongIndex + 1}/{playlist.length})
+              </>
+            ) : (
+              <>
+                <Play className="w-5 h-5 mr-2" />
+                {playlist.length > 0 ? `Play Playlist (${playlist.length} songs)` : 'Open Music Player'}
+              </>
+            )}
           </Button>
           <Button
             variant="ghost"
@@ -188,7 +208,7 @@ export const YouTubePlayer = ({ coupleId, videoUrl, onVideoUrlChange }: YouTubeP
               <div className="relative w-full pt-[56.25%] bg-black rounded-lg overflow-hidden mb-3">
                 <iframe
                   className="absolute top-0 left-0 w-full h-full"
-                  src={`https://www.youtube.com/embed/${currentVideoId}?autoplay=${isPlaying ? 1 : 0}`}
+                  src={`https://www.youtube.com/embed/${currentVideoId}?autoplay=${isPlaying ? 1 : 0}&enablejsapi=1`}
                   title="YouTube video player"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
