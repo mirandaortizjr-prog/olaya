@@ -35,6 +35,27 @@ export const PostsFeed = ({ coupleId, userId }: PostsFeedProps) => {
   useEffect(() => {
     fetchPosts();
     fetchCurrentUserName();
+    
+    // Subscribe to realtime updates for posts
+    const channel = supabase
+      .channel('posts-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'posts',
+          filter: `couple_id=eq.${coupleId}`
+        },
+        () => {
+          fetchPosts(); // Refresh posts when any change occurs
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [coupleId, userId]);
 
   const fetchCurrentUserName = async () => {
