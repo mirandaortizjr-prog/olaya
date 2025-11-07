@@ -809,10 +809,11 @@ const Dashboard = () => {
                 ? `${userProfile.display_name || userProfile.full_name || 'You'} & ${coupleData.partner.full_name || 'Partner'}` 
                 : 'Couple Names'}
             </h2>
-            {user && (
-              <div className="w-24 h-9 bg-muted/50 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm">{userFeelingStatus || "Happy"}</span>
-              </div>
+            {user && coupleData.partner && (
+              <FeelingStatusSelector
+                currentStatus={partnerFeelingStatus}
+                currentCustomMessage={partnerCustomMessage}
+              />
             )}
           </div>
           <div className="flex items-center justify-between">
