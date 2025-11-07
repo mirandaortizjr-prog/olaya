@@ -853,7 +853,7 @@ const Dashboard = () => {
           <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => navigate('/flirt-customization')}>
             <Flame className="w-10 h-10 text-[hsl(200_30%_60%)]" strokeWidth={1.5} />
           </Button>
-          <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => { setShowDesires(true); setNewDesiresCount(0); setLastViewedDesires(new Date()); }}>
+          <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" disabled>
             <Heart className="w-10 h-10 text-[hsl(200_30%_60%)]" strokeWidth={1.5} />
           </Button>
           <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => setActiveView("locked")}>
@@ -893,8 +893,7 @@ const Dashboard = () => {
         activeView={activeView}
         onViewChange={(view) => {
           setActiveView(view);
-          if (view === "desires") { setShowDesires(true); setNewDesiresCount(0); setLastViewedDesires(new Date()); }
-          else if (view === "flirt") { navigate('/flirts'); setNewFlirtsCount(0); setLastViewedFlirts(new Date()); }
+          if (view === "flirt") { navigate('/flirts'); setNewFlirtsCount(0); setLastViewedFlirts(new Date()); }
           else if (view === "locked") { setNewVaultCount(0); setLastViewedVault(new Date()); }
         }}
         pendingGamesCount={pendingGamesCount}
@@ -914,7 +913,7 @@ const Dashboard = () => {
         <DesireActions
           coupleId={coupleData.coupleId}
           userId={user!.id}
-          open={showDesires}
+          open={false}
           onClose={() => setShowDesires(false)}
           lastViewedTimestamp={lastViewedDesires}
         />
@@ -927,11 +926,7 @@ const Dashboard = () => {
         newFlirtsCount={newFlirtsCount}
         newVaultCount={newVaultCount}
         onViewChange={(view) => {
-          if (view === "desires") {
-            setLastViewedDesires(new Date());
-            setNewDesiresCount(0);
-            setShowDesires(true);
-          } else if (view === "flirt") {
+          if (view === "flirt") {
             setLastViewedFlirts(new Date());
             setNewFlirtsCount(0);
             navigate('/flirts');
