@@ -19,7 +19,6 @@ export const BottomNavigation = ({
   newVaultCount = 0
 }: BottomNavigationProps) => {
   const navItems = [
-    { id: "flirt", icon: Flame, label: "Flirt" },
     { id: "new", icon: Plus, label: "New" },
     { id: "home", icon: Home, label: "Home" },
     { id: "desires", icon: Heart, label: "Desires" },
