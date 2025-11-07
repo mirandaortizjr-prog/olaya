@@ -102,13 +102,49 @@ export const FlirtActions = ({ coupleId, senderId, open = false, onClose = () =>
   const [sending, setSending] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [enabledFlirts, setEnabledFlirts] = useState<string[]>([]);
+  const [showPersonalize, setShowPersonalize] = useState(false);
+  const [customFlirts, setCustomFlirts] = useState<Array<{ label: string; emoji: string }>>([]);
   const { toast } = useToast();
 
   useEffect(() => {
     if (open || inline) {
       loadPreferences();
+      loadCustomFlirts();
     }
   }, [open, coupleId, inline]);
+
+  const loadCustomFlirts = async () => {
+    const { data } = await supabase
+      .from('couple_preferences')
+      .select('enabled_items')
+      .eq('couple_id', coupleId)
+      .eq('preference_type', 'custom_flirts')
+      .maybeSingle();
+    
+    if (data && data.enabled_items) {
+      setCustomFlirts(data.enabled_items as Array<{ label: string; emoji: string }>);
+    }
+  };
+
+  const saveCustomFlirts = async (flirts: Array<{ label: string; emoji: string }>) => {
+    const { error } = await supabase
+      .from('couple_preferences')
+      .upsert({
+        couple_id: coupleId,
+        preference_type: 'custom_flirts',
+        enabled_items: flirts
+      }, {
+        onConflict: 'couple_id,preference_type'
+      });
+
+    if (error) {
+      toast({
+        title: "Error saving custom flirts",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
 
   const loadPreferences = async () => {
     const { data } = await supabase
@@ -246,6 +282,36 @@ export const FlirtActions = ({ coupleId, senderId, open = false, onClose = () =>
           </div>
         );
       })}
+      
+      {customFlirts.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold capitalize text-muted-foreground">
+            ✨ Personalized
+          </h3>
+          <div className="grid grid-cols-2 gap-2">
+            {customFlirts.map((flirt, index) => (
+              <Button
+                key={`custom-${index}`}
+                variant="outline"
+                className="h-20 flex-col gap-1 text-sm"
+                onClick={() => sendFlirt(`custom_${index}`, flirt.label, flirt.emoji)}
+                disabled={sending}
+              >
+                <span className="text-2xl">{flirt.emoji}</span>
+                <span className="text-xs text-center">{flirt.label}</span>
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <Button
+        variant="outline"
+        className="w-full"
+        onClick={() => setShowPersonalize(true)}
+      >
+        ✨ Personalize ({customFlirts.length}/10)
+      </Button>
     </div>
   );
 
@@ -294,6 +360,77 @@ export const FlirtActions = ({ coupleId, senderId, open = false, onClose = () =>
           loadPreferences();
         }}
       />
+
+      <Dialog open={showPersonalize} onOpenChange={setShowPersonalize}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Personalize Flirts (Up to 10)</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+            {customFlirts.map((flirt, index) => (
+              <div key={index} className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  value={flirt.emoji}
+                  onChange={(e) => {
+                    const updated = [...customFlirts];
+                    updated[index].emoji = e.target.value;
+                    setCustomFlirts(updated);
+                  }}
+                  placeholder="Emoji"
+                  className="w-16 px-2 py-2 text-center text-2xl bg-background border rounded"
+                  maxLength={2}
+                />
+                <input
+                  type="text"
+                  value={flirt.label}
+                  onChange={(e) => {
+                    const updated = [...customFlirts];
+                    updated[index].label = e.target.value;
+                    setCustomFlirts(updated);
+                  }}
+                  placeholder="Flirt label"
+                  className="flex-1 px-3 py-2 bg-background border rounded"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    const updated = customFlirts.filter((_, i) => i !== index);
+                    setCustomFlirts(updated);
+                  }}
+                >
+                  ✕
+                </Button>
+              </div>
+            ))}
+            {customFlirts.length < 10 && (
+              <Button
+                variant="outline"
+                onClick={() => setCustomFlirts([...customFlirts, { emoji: '💖', label: '' }])}
+                className="w-full"
+              >
+                + Add Custom Flirt
+              </Button>
+            )}
+          </div>
+          <div className="flex gap-2 pt-4">
+            <Button variant="outline" onClick={() => setShowPersonalize(false)} className="flex-1">
+              Cancel
+            </Button>
+            <Button
+              onClick={async () => {
+                await saveCustomFlirts(customFlirts);
+                toast({ title: "Custom flirts saved!" });
+                setShowPersonalize(false);
+              }}
+              className="flex-1"
+            >
+              Save
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
