@@ -628,7 +628,7 @@ const Dashboard = () => {
             <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("calendar")}>
               <Calendar className="w-7 h-7 text-foreground" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setShowFlirt(true)}>
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col">
               <Flame className="w-7 h-7 text-red-500" />
             </Button>
             <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("home")}>
@@ -712,7 +712,7 @@ const Dashboard = () => {
             <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("calendar")}>
               <Calendar className="w-7 h-7 text-muted-foreground" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => navigate('/flirts')}>
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col">
               <Flame className="w-7 h-7 text-red-500" />
             </Button>
             <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("home")}>
@@ -744,7 +744,7 @@ const Dashboard = () => {
             <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("calendar")}>
               <Calendar className="w-7 h-7 text-muted-foreground" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => navigate('/flirts')}>
+            <Button variant="ghost" size="icon" className="h-16 w-16 flex-col">
               <Flame className="w-7 h-7 text-red-500" />
             </Button>
             <Button variant="ghost" size="icon" className="h-16 w-16 flex-col" onClick={() => setActiveView("home")}>
@@ -848,7 +848,7 @@ const Dashboard = () => {
       {/* Icon Row */}
       <div style={{ background: 'var(--icons-bg)' }} className="py-6">
         <div className="max-w-lg mx-auto px-4 flex items-center justify-center gap-12">
-          <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => { navigate('/flirts'); setNewFlirtsCount(0); setLastViewedFlirts(new Date()); }}>
+          <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5">
             <Flame className="w-10 h-10 text-[hsl(200_30%_60%)]" strokeWidth={1.5} />
           </Button>
           <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => { setShowDesires(true); setNewDesiresCount(0); setLastViewedDesires(new Date()); }}>
