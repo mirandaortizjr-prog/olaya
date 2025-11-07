@@ -959,6 +959,17 @@ const Dashboard = () => {
             />
             <BackgroundUploadManager coupleId={coupleData.coupleId} />
             <div>
+              <h3 className="font-semibold mb-2">Nest Name</h3>
+              <Input
+                value={spaceName}
+                onChange={(e) => setSpaceName(e.target.value)}
+                onBlur={updateSpaceName}
+                placeholder="Enter your nest name"
+                className="mb-2"
+              />
+              <p className="text-xs text-muted-foreground">This is the name displayed at the top of your shared space</p>
+            </div>
+            <div>
               <h3 className="font-semibold mb-2">Anniversary Date</h3>
               <Input
                 type="date"
