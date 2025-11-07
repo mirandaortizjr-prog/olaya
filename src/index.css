@@ -121,12 +121,12 @@ All colors MUST be HSL.
 /* Seasonal Animations */
 @keyframes walk-turkey {
   0% {
-    transform: translateX(-100px);
+    transform: translateX(-100px) scaleX(1);
+  }
+  49.9% {
+    transform: translateX(calc(100vw + 100px)) scaleX(1);
   }
   50% {
-    transform: translateX(calc(100vw + 100px));
-  }
-  50.01% {
     transform: translateX(calc(100vw + 100px)) scaleX(-1);
   }
   100% {
