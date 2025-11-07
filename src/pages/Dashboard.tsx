@@ -864,16 +864,14 @@ const Dashboard = () => {
       </div>
 
       {/* Feed Section */}
-      <div style={{ backgroundColor: '#000000' }} className="pb-4">
-        <div className="mx-auto px-2">
-          <div style={{ background: 'linear-gradient(180deg, #000000, #4F585E)' }} className="rounded-3xl p-6 min-h-[500px]">
-            <UnioGallery
-              coupleId={coupleData.coupleId}
-              userId={user!.id}
-              userFullName={userProfile?.full_name || "You"}
-              partnerFullName={coupleData.partner?.full_name || "Partner"}
-            />
-          </div>
+      <div style={{ backgroundColor: '#000000' }} className="pb-4 px-1">
+        <div style={{ background: 'linear-gradient(180deg, #000000, #4F585E)' }} className="rounded-3xl p-3 min-h-[500px]">
+          <UnioGallery
+            coupleId={coupleData.coupleId}
+            userId={user!.id}
+            userFullName={userProfile?.full_name || "You"}
+            partnerFullName={coupleData.partner?.full_name || "Partner"}
+          />
         </div>
       </div>
 
