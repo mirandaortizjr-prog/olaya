@@ -655,10 +655,7 @@ const Dashboard = () => {
     );
   }
 
-  if (activeView === "desires") {
-    setShowDesires(true);
-    setActiveView("home");
-  }
+  // desires navigation disabled - starting fresh
 
   if (activeView === "messages") {
     setActiveView("messages");
