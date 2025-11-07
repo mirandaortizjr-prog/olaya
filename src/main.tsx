@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { initializeNativePushListeners } from "@/utils/notifications";
 
 const swCleanup = async () => {
   try {
@@ -29,6 +30,10 @@ const swCleanup = async () => {
 const start = async () => {
   const proceed = await swCleanup();
   if (!proceed) return;
+  
+  // Initialize native push notification listeners
+  initializeNativePushListeners();
+  
   const rootElement = document.getElementById("root");
   if (!rootElement) throw new Error("Root element not found");
   createRoot(rootElement).render(

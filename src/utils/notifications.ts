@@ -1,9 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
+import { PushNotifications } from '@capacitor/push-notifications';
+import { Capacitor } from '@capacitor/core';
 
-// Register service worker for push notifications
-export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration | null> => {
+// Register service worker for push notifications (web only)
+async function registerServiceWorker(): Promise<ServiceWorkerRegistration | null> {
   if (!('serviceWorker' in navigator)) {
-    console.log('Service Worker not supported');
+    console.log('Service workers are not supported');
     return null;
   }
 
@@ -15,51 +17,137 @@ export const registerServiceWorker = async (): Promise<ServiceWorkerRegistration
     console.error('Service Worker registration failed:', error);
     return null;
   }
-};
+}
 
 // Subscribe to push notifications
-export const subscribeToPushNotifications = async (): Promise<boolean> => {
+export async function subscribeToPushNotifications(): Promise<boolean> {
+  try {
+    const isNative = Capacitor.isNativePlatform();
+    
+    if (isNative) {
+      // Native app push notifications
+      return await subscribeToNativePush();
+    } else {
+      // Web push notifications
+      return await subscribeToWebPush();
+    }
+  } catch (error) {
+    console.error('Error subscribing to push notifications:', error);
+    throw error;
+  }
+}
+
+// Native push notification subscription
+async function subscribeToNativePush(): Promise<boolean> {
+  try {
+    // Request permission
+    let permStatus = await PushNotifications.checkPermissions();
+    
+    if (permStatus.receive === 'prompt') {
+      permStatus = await PushNotifications.requestPermissions();
+    }
+    
+    if (permStatus.receive !== 'granted') {
+      throw new Error('User denied permissions!');
+    }
+    
+    // Register with APNs/FCM
+    await PushNotifications.register();
+    
+    // Listen for registration
+    return new Promise((resolve) => {
+      PushNotifications.addListener('registration', async (token) => {
+        console.log('Push registration success, token: ' + token.value);
+        
+        // Save token to database
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          const { error } = await supabase
+            .from('push_subscriptions')
+            .upsert({
+              user_id: user.id,
+              endpoint: `native:${token.value}`,
+              p256dh: 'native',
+              auth: 'native',
+              platform: Capacitor.getPlatform()
+            });
+          
+          if (error) {
+            console.error('Error saving push subscription:', error);
+            resolve(false);
+          } else {
+            resolve(true);
+          }
+        } else {
+          resolve(false);
+        }
+      });
+      
+      PushNotifications.addListener('registrationError', (error) => {
+        console.error('Error on registration: ' + JSON.stringify(error));
+        resolve(false);
+      });
+    });
+  } catch (error) {
+    console.error('Error in native push setup:', error);
+    return false;
+  }
+}
+
+// Web push notification subscription
+async function subscribeToWebPush(): Promise<boolean> {
   try {
     const registration = await registerServiceWorker();
-    if (!registration) return false;
+    if (!registration) {
+      throw new Error('Service Worker not supported');
+    }
 
     const permission = await requestNotificationPermission();
-    if (!permission) return false;
+    if (!permission) {
+      throw new Error('Notification permission denied');
+    }
 
-    // Get the push subscription
     let subscription = await registration.pushManager.getSubscription();
     
     if (!subscription) {
-      // Create new subscription with VAPID key
+      const publicKey = 'BEl62iUYgUivxIkv69yViEuiBIa-Ib37J8-fTt64F6qO4KJEOGw8YEp6pjTWrF9rKqYqQq7pJvXzBKBqLjLQvPY';
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(
-          'BEl62iUYgUivxIkv69yViEuiBIa-Ib37J8-fTt64F6qO4KJEOGw8YEp6pjTWrF9rKqYqQq7pJvXzBKBqLjLQvPY'
-        )
+        applicationServerKey: urlBase64ToUint8Array(publicKey)
       });
     }
 
-    // Save subscription to database
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
+    
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
 
-    const subscriptionJson = subscription.toJSON();
-    await supabase.from('push_subscriptions').upsert({
-      user_id: user.id,
-      endpoint: subscription.endpoint,
-      p256dh: subscriptionJson.keys?.p256dh || '',
-      auth: subscriptionJson.keys?.auth || ''
-    }, {
-      onConflict: 'user_id,endpoint'
-    });
+    const subscriptionJSON = subscription.toJSON();
+    
+    const { error } = await supabase
+      .from('push_subscriptions')
+      .upsert({
+        user_id: user.id,
+        endpoint: subscriptionJSON.endpoint,
+        p256dh: subscriptionJSON.keys?.p256dh || '',
+        auth: subscriptionJSON.keys?.auth || '',
+        platform: 'web'
+      });
 
-    console.log('Push subscription saved');
+    if (error) {
+      console.error('Error saving push subscription:', error);
+      return false;
+    }
+
+    console.log('Push notification subscription saved successfully');
     return true;
   } catch (error) {
-    console.error('Error subscribing to push notifications:', error);
+    console.error('Error in web push subscription:', error);
     return false;
   }
-};
+}
 
 // Helper function to convert VAPID key
 function urlBase64ToUint8Array(base64String: string): BufferSource {
@@ -77,7 +165,8 @@ function urlBase64ToUint8Array(base64String: string): BufferSource {
   return outputArray as BufferSource;
 }
 
-export const requestNotificationPermission = async (): Promise<boolean> => {
+// Request notification permission (web only)
+async function requestNotificationPermission(): Promise<boolean> {
   if (!('Notification' in window)) {
     console.log('This browser does not support notifications');
     return false;
@@ -93,7 +182,24 @@ export const requestNotificationPermission = async (): Promise<boolean> => {
   }
 
   return false;
-};
+}
+
+// Initialize native push notification listeners
+export function initializeNativePushListeners() {
+  if (!Capacitor.isNativePlatform()) {
+    return;
+  }
+
+  // Show notification when received
+  PushNotifications.addListener('pushNotificationReceived', (notification) => {
+    console.log('Push notification received: ', notification);
+  });
+
+  // Handle notification action
+  PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
+    console.log('Push notification action performed', notification.actionId, notification.inputValue);
+  });
+}
 
 export const showQuickMessageNotification = (
   messageType: string,
