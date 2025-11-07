@@ -660,8 +660,8 @@ const Dashboard = () => {
     setActiveView("home");
   }
 
-  if (activeView === "love") {
-    navigate('/love');
+  if (activeView === "flirt") {
+    navigate('/flirt-customization');
     setActiveView("home");
     return null;
   }

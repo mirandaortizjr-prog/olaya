@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Calendar, Flame, Home, Lock, Image, Heart, Gamepad2, MessageCircle, Settings, Plus } from "lucide-react";
+import { Calendar, Flame, Home, Lock, Image, Heart, Gamepad2, MessageCircle, Settings, Plus, Star } from "lucide-react";
 
 interface BottomNavigationProps {
   activeView: string;
@@ -19,9 +19,9 @@ export const BottomNavigation = ({
   newVaultCount = 0
 }: BottomNavigationProps) => {
   const navItems = [
-    { id: "new", icon: Plus, label: "New" },
+    { id: "flirt", icon: Flame, label: "Flirt" },
     { id: "home", icon: Home, label: "Home" },
-    { id: "love", icon: Heart, label: "Love" },
+    { id: "desires", icon: Heart, label: "Desires" },
     { id: "settings", icon: Settings, label: "Settings" },
   ];
 
@@ -35,10 +35,7 @@ export const BottomNavigation = ({
             size="icon"
             className="w-12 h-12 p-0 hover:bg-white/5"
             onClick={() => {
-              if (item.id === "new") onViewChange("desires");
-              else if (item.id === "love") onViewChange("love");
-              else if (item.id === "settings") onViewChange("locked");
-              else onViewChange(item.id);
+              onViewChange(item.id);
             }}
           >
             <item.icon 
