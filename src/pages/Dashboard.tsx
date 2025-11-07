@@ -11,6 +11,7 @@ import { MessageCircle, Settings, LogOut, Users, Link2, Calendar, Flame, Home, L
 import { useToast } from "@/hooks/use-toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
+import { GalleryUploadButton } from "@/components/GalleryUploadButton";
 import { CouplePictureUpload, CouplePictureUploadButton } from "@/components/CouplePictureUpload";
 import { BackgroundSlideshow } from "@/components/BackgroundSlideshow";
 import { BackgroundUploadManager } from "@/components/BackgroundUploadManager";
@@ -804,8 +805,8 @@ const Dashboard = () => {
         <div className="max-w-lg mx-auto px-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-normal text-white">
-              {coupleData.partner && userProfile?.full_name 
-                ? `${userProfile.full_name} & ${coupleData.partner.full_name}` 
+              {coupleData.partner && userProfile
+                ? `${userProfile.display_name || userProfile.full_name || 'You'} & ${coupleData.partner.full_name || 'Partner'}` 
                 : 'Couple Names'}
             </h2>
             {user && (
@@ -968,6 +969,29 @@ const Dashboard = () => {
               <p className="text-xs text-muted-foreground">{t('nestNameDescription')}</p>
             </div>
             <div>
+              <h3 className="font-semibold mb-2">{t('yourDisplayName')}</h3>
+              <Input
+                value={userProfile?.display_name || ''}
+                onChange={(e) => setUserProfile({ ...userProfile, display_name: e.target.value })}
+                onBlur={async () => {
+                  if (!user?.id) return;
+                  const { error } = await supabase
+                    .from('profiles')
+                    .update({ display_name: userProfile?.display_name })
+                    .eq('id', user.id);
+                  
+                  if (error) {
+                    toast({ title: t('errorUpdatingDisplayName'), variant: "destructive" });
+                  } else {
+                    toast({ title: t('displayNameUpdated') });
+                  }
+                }}
+                placeholder={t('enterDisplayName')}
+                className="mb-2"
+              />
+              <p className="text-xs text-muted-foreground">{t('displayNameDescription')}</p>
+            </div>
+            <div>
               <h3 className="font-semibold mb-2">{t('anniversaryDate')}</h3>
               <Input
                 type="date"
@@ -992,6 +1016,9 @@ const Dashboard = () => {
               <h3 className="font-semibold mb-2">{t('language')}</h3>
               <LanguageSwitcher />
             </div>
+            
+            <GalleryUploadButton coupleId={coupleData.coupleId} userId={user!.id} />
+            
             <NotificationSettings />
             
             <Button 

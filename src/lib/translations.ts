@@ -245,6 +245,13 @@ export const translations = {
     language: "Language",
     manageSongs: "Manage Songs",
     viewProfiles: "View Profiles",
+    yourDisplayName: "Your Display Name",
+    enterDisplayName: "Enter your display name (e.g., Jose Miranda)",
+    displayNameDescription: "This is how your name appears in the couple view",
+    displayNameUpdated: "Display name updated!",
+    errorUpdatingDisplayName: "Error updating display name",
+    uploadToGallery: "Upload to Gallery",
+    uploadPhotosToGallery: "Upload photos or videos to your shared gallery",
     
     
     // Games
@@ -589,6 +596,13 @@ export const translations = {
     language: "Idioma",
     manageSongs: "Administrar Canciones",
     viewProfiles: "Ver Perfiles",
+    yourDisplayName: "Tu Nombre de Visualización",
+    enterDisplayName: "Ingresa tu nombre de visualización (ej., Jose Miranda)",
+    displayNameDescription: "Así es como aparece tu nombre en la vista de pareja",
+    displayNameUpdated: "¡Nombre de visualización actualizado!",
+    errorUpdatingDisplayName: "Error al actualizar el nombre de visualización",
+    uploadToGallery: "Subir a Galería",
+    uploadPhotosToGallery: "Sube fotos o videos a tu galería compartida",
     
     
     // Games

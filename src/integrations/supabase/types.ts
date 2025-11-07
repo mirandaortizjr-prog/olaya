@@ -768,6 +768,7 @@ export type Database = {
           bio: string | null
           birthday: string | null
           created_at: string
+          display_name: string | null
           email: string
           full_name: string | null
           id: string
@@ -780,6 +781,7 @@ export type Database = {
           bio?: string | null
           birthday?: string | null
           created_at?: string
+          display_name?: string | null
           email: string
           full_name?: string | null
           id: string
@@ -792,6 +794,7 @@ export type Database = {
           bio?: string | null
           birthday?: string | null
           created_at?: string
+          display_name?: string | null
           email?: string
           full_name?: string | null
           id?: string
