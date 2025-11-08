@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Heart } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import giftBoxIcon from "@/assets/gift-box-icon.png";
+
 
 interface AnniversaryCountdownProps {
   anniversaryDate: string | null;
@@ -67,8 +67,9 @@ export const AnniversaryCountdown = ({ anniversaryDate }: AnniversaryCountdownPr
   return (
     <Card className="p-3 bg-anniversary-bg border border-anniversary-border">
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <img src={giftBoxIcon} alt="Anniversary Gift" className="w-6 h-6" />
+        <div className="flex items-center gap-2 text-anniversary-textDark">
+          <Heart className="w-4 h-4 text-anniversary-textLight" />
+          <span className="text-xs font-medium">{language === 'en' ? 'Anniversary' : 'Aniversario'}</span>
         </div>
         <div className="flex items-center gap-2 text-xs font-mono">
           <div className="flex flex-col items-center">
