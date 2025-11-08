@@ -433,6 +433,45 @@ export type Database = {
         }
         Relationships: []
       }
+      intimate_journal: {
+        Row: {
+          couple_id: string
+          created_at: string
+          created_by: string
+          encounter_date: string
+          encounter_time: string | null
+          id: string
+          location: string | null
+          partner_experience: string | null
+          updated_at: string
+          user_experience: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          created_by: string
+          encounter_date: string
+          encounter_time?: string | null
+          id?: string
+          location?: string | null
+          partner_experience?: string | null
+          updated_at?: string
+          user_experience: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          encounter_date?: string
+          encounter_time?: string | null
+          id?: string
+          location?: string | null
+          partner_experience?: string | null
+          updated_at?: string
+          user_experience?: string
+        }
+        Relationships: []
+      }
       love_languages: {
         Row: {
           created_at: string

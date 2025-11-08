@@ -292,7 +292,7 @@ const PrivatePage = () => {
     { id: 'fantasies', label: 'FANTASIES' },
     { id: 'sex-lust-languages', label: 'SEX & LUST\nLANGUAGES' },
     { id: 'videos', label: 'VIDEOS' },
-    { id: 'our-journal', label: 'OUR JOURNAL' },
+    { id: 'our-journal', label: 'OUR JOURNAL', route: '/intimate-journal' },
     { id: 'sex-timeline', label: 'SEX TIMELINE' },
   ];
 
@@ -404,6 +404,8 @@ const PrivatePage = () => {
                   setShowVideoGallery(true);
                 } else if (item.id === 'fantasies') {
                   navigate('/desires');
+                } else if (item.route) {
+                  navigate(item.route);
                 } else {
                   console.log(`Opening ${item.id}`);
                   toast({ title: `Opening ${item.label}` });

@@ -17,6 +17,7 @@ import { FlirtCustomization } from "./pages/FlirtCustomization";
 import NotFound from "./pages/NotFound";
 import FlirtsPage from "./pages/FlirtsPage";
 import DesiresPage from "./pages/DesiresPage";
+import IntimateJournalPage from "./pages/IntimateJournalPage";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,7 @@ const App = () => {
               <Route path="/daily-notes" element={<DailyNotesPage />} />
               <Route path="/couple-profiles" element={<CoupleProfiles />} />
               <Route path="/private" element={<PrivatePage />} />
+              <Route path="/intimate-journal" element={<IntimateJournalPage />} />
               <Route path="/mood-customization" element={<MoodCustomization />} />
               <Route path="/flirt-customization" element={<FlirtCustomization />} />
               <Route path="/404" element={<NotFound />} />
