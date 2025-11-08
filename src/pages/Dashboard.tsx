@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import giftBoxAnniversary from "@/assets/gift-box-anniversary.png";
+import shopIcon from "@/assets/shop-icon.png";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -793,6 +794,15 @@ const Dashboard = () => {
               coupleId={coupleData.coupleId}
               currentPictureUrl={coupleData.couplePictureUrl || userProfile?.avatar_url || null}
               onUploadComplete={(url) => setCoupleData({ ...coupleData, couplePictureUrl: url })}
+            />
+          </div>
+
+          {/* Shop Icon - top-right corner */}
+          <div className="absolute top-4 right-4 z-20">
+            <img 
+              src={shopIcon} 
+              alt="Shop" 
+              className="w-10 h-10 cursor-pointer animate-pulse-glow"
             />
           </div>
         </div>
