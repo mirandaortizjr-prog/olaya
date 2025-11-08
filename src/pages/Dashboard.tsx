@@ -39,6 +39,7 @@ import { PremiumFeatures } from "@/components/PremiumFeatures";
 import { useCoupleProgress } from "@/hooks/useCoupleProgress";
 import { SharedJournalForm } from "@/components/SharedJournalForm";
 import { SharedJournalList } from "@/components/SharedJournalList";
+import { useMusicPlayer } from "@/contexts/MusicPlayerContext";
 
 interface CoupleData {
   coupleId: string;
@@ -101,6 +102,7 @@ const Dashboard = () => {
   const { toast } = useToast();
   const { t } = useLanguage();
   const { progress } = useCoupleProgress(coupleData?.coupleId || null);
+  const { setCoupleId: setMusicCoupleId } = useMusicPlayer();
 
   // Enable auto-notifications
   useNotificationTrigger({
@@ -331,6 +333,9 @@ const Dashboard = () => {
     });
     setSpaceName(couple.name || 'name your space');
     setCoupleSongs((couple.couple_songs as string[]) || []);
+    
+    // Initialize music player with couple ID
+    setMusicCoupleId(couple.id);
 
     loadFeelingStatuses(couple.id, userId, partnerData?.user_id);
   };
