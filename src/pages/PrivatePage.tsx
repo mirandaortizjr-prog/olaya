@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { formatDistanceToNow } from "date-fns";
+import { PrivatePhotoGallery } from "@/components/PrivatePhotoGallery";
 
 const PrivatePage = () => {
   const navigate = useNavigate();
@@ -32,6 +33,7 @@ const PrivatePage = () => {
   const [vaultTitle, setVaultTitle] = useState<string>("");
   const [showSettingsDialog, setShowSettingsDialog] = useState(false);
   const [editingTitle, setEditingTitle] = useState("");
+  const [showPhotoGallery, setShowPhotoGallery] = useState(false);
 
   useEffect(() => {
     loadUserAndCouple();
@@ -394,8 +396,12 @@ const PrivatePage = () => {
               key={item.id}
               className="flex flex-col items-center gap-1.5 group"
               onClick={() => {
-                console.log(`Opening ${item.id}`);
-                toast({ title: `Opening ${item.label}` });
+                if (item.id === 'photos') {
+                  setShowPhotoGallery(true);
+                } else {
+                  console.log(`Opening ${item.id}`);
+                  toast({ title: `Opening ${item.label}` });
+                }
               }}
             >
               <div className="w-24 h-24 rounded-full bg-gray-600 transition-transform group-hover:scale-105 shadow-lg" />
@@ -406,6 +412,15 @@ const PrivatePage = () => {
           ))}
         </div>
       </div>
+
+      {/* Photo Gallery */}
+      {showPhotoGallery && coupleId && userId && (
+        <PrivatePhotoGallery
+          coupleId={coupleId}
+          userId={userId}
+          onClose={() => setShowPhotoGallery(false)}
+        />
+      )}
 
       {/* The Wall Section - Two Columns */}
       <div className="px-4 py-6 mt-2">

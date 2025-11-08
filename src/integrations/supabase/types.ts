@@ -864,6 +864,36 @@ export type Database = {
         }
         Relationships: []
       }
+      private_photos: {
+        Row: {
+          caption: string | null
+          couple_id: string
+          created_at: string
+          file_path: string
+          id: string
+          updated_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          caption?: string | null
+          couple_id: string
+          created_at?: string
+          file_path: string
+          id?: string
+          updated_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          caption?: string | null
+          couple_id?: string
+          created_at?: string
+          file_path?: string
+          id?: string
+          updated_at?: string
+          uploaded_by?: string
+        }
+        Relationships: []
+      }
       private_vault_settings: {
         Row: {
           couple_id: string
