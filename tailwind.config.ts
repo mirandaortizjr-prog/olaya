@@ -53,11 +53,22 @@ export default {
           textDark: "hsl(var(--anniversary-text-dark))",
           textLight: "hsl(var(--anniversary-text-light))",
         },
+        fantasy: {
+          skyblue: "hsl(var(--fantasy-skyblue))",
+          skyblue_dark: "hsl(var(--fantasy-skyblue-dark))",
+          purple: "hsl(var(--fantasy-purple))",
+          purple_dark: "hsl(var(--fantasy-purple-dark))",
+          black: "hsl(var(--fantasy-black))",
+        },
       },
       backgroundImage: {
         'gradient-romantic': 'var(--gradient-romantic)',
         'gradient-warm': 'var(--gradient-warm)',
         'gradient-glow': 'var(--gradient-glow)',
+        'fantasy-wishlist': 'var(--fantasy-wishlist)',
+        'fantasy-consider': 'var(--fantasy-consider)',
+        'fantasy-approved': 'var(--fantasy-approved)',
+        'fantasy-fulfilled': 'var(--fantasy-fulfilled)',
       },
       boxShadow: {
         'soft': 'var(--shadow-soft)',
