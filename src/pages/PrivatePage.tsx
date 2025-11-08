@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Lock } from "lucide-react";
+import { ArrowLeft, Lock, Send, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { BiometricPrivacyDialog } from "@/components/BiometricPrivacyDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Textarea } from "@/components/ui/textarea";
+import { formatDistanceToNow } from "date-fns";
 
 const PrivatePage = () => {
   const navigate = useNavigate();
@@ -16,6 +18,11 @@ const PrivatePage = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const authSucceededRef = useRef(false);
+  
+  // Wall comments state
+  const [wallComments, setWallComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     loadUserAndCouple();
@@ -26,6 +33,13 @@ const PrivatePage = () => {
       checkPasswordExists();
     }
   }, [coupleId]);
+
+  useEffect(() => {
+    if (isUnlocked && coupleId) {
+      loadWallComments();
+      subscribeToWallComments();
+    }
+  }, [isUnlocked, coupleId]);
 
   const loadUserAndCouple = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -124,6 +138,91 @@ const PrivatePage = () => {
       }
     }, 0);
   };
+
+  const loadWallComments = async () => {
+    if (!coupleId) return;
+
+    const { data, error } = await supabase
+      .from('wall_comments')
+      .select(`
+        *,
+        profiles:user_id (full_name, email)
+      `)
+      .eq('couple_id', coupleId)
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      setWallComments(data);
+    }
+  };
+
+  const subscribeToWallComments = () => {
+    if (!coupleId) return;
+
+    const channel = supabase
+      .channel('wall_comments_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'wall_comments',
+          filter: `couple_id=eq.${coupleId}`
+        },
+        () => {
+          loadWallComments();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
+
+  const handleSubmitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim() || !coupleId || !userId) return;
+
+    setSubmitting(true);
+    const { error } = await supabase
+      .from('wall_comments')
+      .insert({
+        couple_id: coupleId,
+        user_id: userId,
+        comment: newComment.trim()
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to post comment",
+        variant: "destructive"
+      });
+    } else {
+      setNewComment("");
+      toast({ title: "Comment posted! 🔥" });
+    }
+    setSubmitting(false);
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    const { error } = await supabase
+      .from('wall_comments')
+      .delete()
+      .eq('id', commentId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete comment",
+        variant: "destructive"
+      });
+    } else {
+      toast({ title: "Comment deleted" });
+    }
+  };
+
   const privateItems = [
     { id: 'photos', label: 'PHOTOS' },
     { id: 'fantasies', label: 'FANTASIES' },
@@ -211,7 +310,68 @@ const PrivatePage = () => {
       {/* The Wall Section */}
       <div className="px-4 py-6 mt-2">
         <h2 className="text-2xl font-bold text-white mb-4">THE WALL</h2>
-        <div className="h-[400px] bg-gradient-to-b from-gray-800/50 to-gray-900/50 rounded-lg" />
+        
+        {/* Comment Input */}
+        <form onSubmit={handleSubmitComment} className="mb-6">
+          <div className="bg-gradient-to-b from-gray-800/50 to-gray-900/50 rounded-lg p-4">
+            <Textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="Write something sexy... 🔥"
+              className="bg-black/30 border-purple-500/30 text-white placeholder:text-gray-400 min-h-[80px] resize-none"
+              maxLength={500}
+            />
+            <div className="flex justify-between items-center mt-3">
+              <span className="text-xs text-gray-400">{newComment.length}/500</span>
+              <Button
+                type="submit"
+                disabled={!newComment.trim() || submitting}
+                className="bg-pink-600 hover:bg-pink-700 text-white"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                Post
+              </Button>
+            </div>
+          </div>
+        </form>
+
+        {/* Comments Feed */}
+        <div className="space-y-4 max-h-[400px] overflow-y-auto">
+          {wallComments.length === 0 ? (
+            <div className="text-center py-12 text-gray-400">
+              <p>No comments yet. Be the first to write something! 💕</p>
+            </div>
+          ) : (
+            wallComments.map((comment) => (
+              <div
+                key={comment.id}
+                className="bg-gradient-to-b from-gray-800/50 to-gray-900/50 rounded-lg p-4"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <p className="text-sm font-semibold text-purple-300">
+                      {comment.profiles?.full_name || comment.profiles?.email || 'User'}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+                    </p>
+                  </div>
+                  {comment.user_id === userId && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 w-8"
+                      onClick={() => handleDeleteComment(comment.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+                <p className="text-white whitespace-pre-wrap">{comment.comment}</p>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

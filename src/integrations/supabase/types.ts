@@ -1123,6 +1123,33 @@ export type Database = {
         }
         Relationships: []
       }
+      wall_comments: {
+        Row: {
+          comment: string
+          couple_id: string
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment: string
+          couple_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string
+          couple_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
