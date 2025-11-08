@@ -438,6 +438,7 @@ export type Database = {
           couple_id: string
           created_at: string
           created_by: string
+          description: string | null
           encounter_date: string
           encounter_time: string | null
           id: string
@@ -450,6 +451,7 @@ export type Database = {
           couple_id: string
           created_at?: string
           created_by: string
+          description?: string | null
           encounter_date: string
           encounter_time?: string | null
           id?: string
@@ -462,6 +464,7 @@ export type Database = {
           couple_id?: string
           created_at?: string
           created_by?: string
+          description?: string | null
           encounter_date?: string
           encounter_time?: string | null
           id?: string

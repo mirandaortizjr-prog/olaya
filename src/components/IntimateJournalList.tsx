@@ -23,6 +23,7 @@ interface JournalEntry {
   encounter_date: string;
   encounter_time: string | null;
   location: string | null;
+  description: string | null;
   user_experience: string;
   partner_experience: string | null;
   created_by: string;
@@ -148,6 +149,15 @@ export const IntimateJournalList = ({ coupleId, refreshTrigger }: IntimateJourna
             </div>
 
             <div className="space-y-4">
+              {entry.description && (
+                <div>
+                  <h3 className="font-semibold text-sm text-muted-foreground mb-2">
+                    Description
+                  </h3>
+                  <p className="text-foreground whitespace-pre-wrap">{entry.description}</p>
+                </div>
+              )}
+
               <div>
                 <h3 className="font-semibold text-sm text-primary mb-2 flex items-center gap-2">
                   <Heart className="h-4 w-4" />

@@ -18,6 +18,7 @@ export const IntimateJournalForm = ({ coupleId, userId, onSuccess }: IntimateJou
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [location, setLocation] = useState('');
+  const [description, setDescription] = useState('');
   const [userExperience, setUserExperience] = useState('');
   const [partnerExperience, setPartnerExperience] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,10 +27,10 @@ export const IntimateJournalForm = ({ coupleId, userId, onSuccess }: IntimateJou
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!date || !userExperience) {
+    if (!date || !description || !userExperience) {
       toast({
         title: 'Missing Information',
-        description: 'Please fill in date and your experience',
+        description: 'Please fill in date, description, and your experience',
         variant: 'destructive',
       });
       return;
@@ -43,6 +44,7 @@ export const IntimateJournalForm = ({ coupleId, userId, onSuccess }: IntimateJou
       encounter_date: date,
       encounter_time: time || null,
       location: location || null,
+      description: description,
       user_experience: userExperience,
       partner_experience: partnerExperience || null,
     });
@@ -62,6 +64,7 @@ export const IntimateJournalForm = ({ coupleId, userId, onSuccess }: IntimateJou
     setDate('');
     setTime('');
     setLocation('');
+    setDescription('');
     setUserExperience('');
     setPartnerExperience('');
     
@@ -107,6 +110,18 @@ export const IntimateJournalForm = ({ coupleId, userId, onSuccess }: IntimateJou
               placeholder="Where did this happen?"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Description *</Label>
+            <Textarea
+              id="description"
+              placeholder="Describe what happened..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              required
             />
           </div>
 
