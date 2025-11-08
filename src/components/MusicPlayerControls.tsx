@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Play, Pause, SkipForward, SkipBack, Music, Video } from 'lucide-react';
 import { useMusicPlayer } from '@/contexts/MusicPlayerContext';
 import { YouTubePlayer } from '@/components/YouTubePlayer';
+import { useState } from 'react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface MusicPlayerControlsProps {
   coupleId: string;
@@ -19,6 +21,8 @@ export const MusicPlayerControls = ({ coupleId, videoUrl, onVideoUrlChange }: Mu
     nextSong,
     previousSong,
   } = useMusicPlayer();
+  
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
 
   if (playlist.length === 0) {
     return (
@@ -41,61 +45,75 @@ export const MusicPlayerControls = ({ coupleId, videoUrl, onVideoUrlChange }: Mu
   };
 
   return (
-    <div className="space-y-3">
-      <Card className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 backdrop-blur border-border/50">
-        <CardContent className="p-2">
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <Music className={`w-4 h-4 text-white ${isPlaying ? 'animate-pulse' : ''}`} />
-                <span className="text-white font-medium text-sm">Music Player</span>
-              </div>
+    <Card className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 backdrop-blur border-border/50">
+      <CardContent className="p-2">
+        <div className="space-y-1">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <Music className={`w-4 h-4 text-white ${isPlaying ? 'animate-pulse' : ''}`} />
+              <span className="text-white font-medium text-sm">Music Player</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 text-white hover:bg-white/20"
+                onClick={() => setIsVideoOpen(!isVideoOpen)}
+              >
+                <Video className="h-3.5 w-3.5" />
+              </Button>
               <span className="text-white/70 text-xs">
                 Song {currentIndex + 1} of {playlist.length}
               </span>
             </div>
-
-            <div className="flex items-center justify-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-white hover:bg-white/20"
-                onClick={previousSong}
-              >
-                <SkipBack className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 text-white hover:bg-white/20"
-                onClick={handlePlayPause}
-              >
-                {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-white hover:bg-white/20"
-                onClick={nextSong}
-              >
-                <SkipForward className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <div className="text-center">
-              <p className="text-white/60 text-[10px]">
-                {isPlaying ? '♫ Now Playing ♫' : 'Paused'}
-              </p>
-            </div>
           </div>
-        </CardContent>
-      </Card>
 
-      <YouTubePlayer
-        coupleId={coupleId}
-        videoUrl={videoUrl}
-        onVideoUrlChange={onVideoUrlChange}
-      />
-    </div>
+          <div className="flex items-center justify-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-white hover:bg-white/20"
+              onClick={previousSong}
+            >
+              <SkipBack className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 text-white hover:bg-white/20"
+              onClick={handlePlayPause}
+            >
+              {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-white hover:bg-white/20"
+              onClick={nextSong}
+            >
+              <SkipForward className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <div className="text-center">
+            <p className="text-white/60 text-[10px]">
+              {isPlaying ? '♫ Now Playing ♫' : 'Paused'}
+            </p>
+          </div>
+
+          <Collapsible open={isVideoOpen} onOpenChange={setIsVideoOpen}>
+            <CollapsibleContent>
+              <div className="pt-2 border-t border-white/10">
+                <YouTubePlayer
+                  coupleId={coupleId}
+                  videoUrl={videoUrl}
+                  onVideoUrlChange={onVideoUrlChange}
+                />
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
