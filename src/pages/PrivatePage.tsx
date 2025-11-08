@@ -4,6 +4,8 @@ import { ArrowLeft, Lock, Send, Trash2, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { BiometricPrivacyDialog } from "@/components/BiometricPrivacyDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { biometrics } from "@/utils/biometrics";
+import { Capacitor } from "@capacitor/core";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -21,6 +23,7 @@ const PrivatePage = () => {
   const [coupleId, setCoupleId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [biometricsAvailable, setBiometricsAvailable] = useState(false);
   const authSucceededRef = useRef(false);
   
   // Wall comments state
@@ -42,6 +45,14 @@ const PrivatePage = () => {
   }, []);
 
   useEffect(() => {
+    const checkBiometrics = async () => {
+      const available = await biometrics.isAvailable();
+      setBiometricsAvailable(available);
+    };
+    checkBiometrics();
+  }, []);
+
+  useEffect(() => {
     if (coupleId) {
       // Check if already unlocked in this session
       const wasUnlocked = sessionStorage.getItem('private_vault_unlocked');
@@ -50,10 +61,15 @@ const PrivatePage = () => {
         setShowAuthDialog(false);
       } else {
         checkPasswordExists();
-        setShowAuthDialog(true);
+        // If biometrics is available on native platform, try it first
+        if (biometricsAvailable && Capacitor.isNativePlatform()) {
+          attemptBiometricAuth();
+        } else {
+          setShowAuthDialog(true);
+        }
       }
     }
-  }, [coupleId]);
+  }, [coupleId, biometricsAvailable]);
 
   useEffect(() => {
     if (isUnlocked && coupleId && userId) {
@@ -105,6 +121,30 @@ const PrivatePage = () => {
       .maybeSingle();
     
     setPasswordExists(!!data?.password_hash);
+  };
+
+  const attemptBiometricAuth = async () => {
+    try {
+      const biometryName = await biometrics.getBiometryName();
+      const success = await biometrics.authenticate(
+        `Use ${biometryName} to access your Private Vault`
+      );
+
+      if (success) {
+        handleAuthSuccess();
+        toast({
+          title: "Welcome!",
+          description: `Authenticated with ${biometryName}`,
+        });
+      } else {
+        // Biometric auth failed or was cancelled, show password dialog
+        setShowAuthDialog(true);
+      }
+    } catch (error) {
+      console.error('Biometric auth error:', error);
+      // Fall back to password
+      setShowAuthDialog(true);
+    }
   };
 
   const hashPassword = async (password: string): Promise<string> => {
