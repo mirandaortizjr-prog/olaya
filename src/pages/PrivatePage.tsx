@@ -6,21 +6,56 @@ import { BiometricPrivacyDialog } from "@/components/BiometricPrivacyDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-interface PrivatePageProps {
-  coupleId?: string;
-  userId?: string;
-}
-
-const PrivatePage = ({ coupleId, userId }: PrivatePageProps) => {
+const PrivatePage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isUnlocked, setIsUnlocked] = useState(false);
-  const [showAuthDialog, setShowAuthDialog] = useState(true);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [passwordExists, setPasswordExists] = useState(false);
+  const [coupleId, setCoupleId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkPasswordExists();
+    loadUserAndCouple();
+  }, []);
+
+  useEffect(() => {
+    if (coupleId) {
+      checkPasswordExists();
+    }
   }, [coupleId]);
+
+  const loadUserAndCouple = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+
+    setUserId(user.id);
+
+    const { data: membership } = await supabase
+      .from('couple_members')
+      .select('couple_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (!membership) {
+      toast({ 
+        title: "No couple found", 
+        description: "Please join or create a couple first",
+        variant: "destructive" 
+      });
+      navigate("/dashboard");
+      return;
+    }
+
+    setCoupleId(membership.couple_id);
+    setLoading(false);
+    setShowAuthDialog(true);
+  };
 
   const checkPasswordExists = async () => {
     if (!coupleId) return;
