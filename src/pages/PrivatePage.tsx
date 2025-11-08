@@ -1,13 +1,10 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import tenderDaresImage from "@/assets/tender-dares.png";
-import sexLustLanguagesImage from "@/assets/sex-lust-languages.png";
-import { useLustMeter } from "@/hooks/useLustMeter";
-import { FlirtNotifications } from "@/components/FlirtNotifications";
-import { DesireNotifications } from "@/components/DesireNotifications";
+import { BiometricPrivacyDialog } from "@/components/BiometricPrivacyDialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface PrivatePageProps {
   coupleId?: string;
@@ -16,173 +13,164 @@ interface PrivatePageProps {
 
 const PrivatePage = ({ coupleId, userId }: PrivatePageProps) => {
   const navigate = useNavigate();
-  const { score, trackInteraction } = useLustMeter(coupleId);
+  const { toast } = useToast();
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(true);
+  const [passwordExists, setPasswordExists] = useState(false);
+
+  useEffect(() => {
+    checkPasswordExists();
+  }, [coupleId]);
+
+  const checkPasswordExists = async () => {
+    if (!coupleId) return;
+    
+    const { data } = await supabase
+      .from('privacy_settings')
+      .select('password_hash')
+      .eq('couple_id', coupleId)
+      .maybeSingle();
+    
+    setPasswordExists(!!data?.password_hash);
+  };
+
+  const hashPassword = async (password: string): Promise<string> => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  };
+
+  const verifyPassword = async (password: string): Promise<boolean> => {
+    if (!coupleId) return false;
+
+    const hashedPassword = await hashPassword(password);
+    const { data } = await supabase
+      .from('privacy_settings')
+      .select('password_hash')
+      .eq('couple_id', coupleId)
+      .maybeSingle();
+
+    return data?.password_hash === hashedPassword;
+  };
+
+  const setPassword = async (password: string): Promise<boolean> => {
+    if (!coupleId) return false;
+
+    const hashedPassword = await hashPassword(password);
+    const { error } = await supabase
+      .from('privacy_settings')
+      .upsert({
+        couple_id: coupleId,
+        password_hash: hashedPassword,
+      });
+
+    if (!error) {
+      setPasswordExists(true);
+      return true;
+    }
+    return false;
+  };
+
+  const handleAuthSuccess = () => {
+    setIsUnlocked(true);
+    setShowAuthDialog(false);
+  };
 
   const privateItems = [
-    { 
-      id: 'photos', 
-      label: 'Photos',
-      image: 'https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=200&h=200&fit=crop'
-    },
-    { 
-      id: 'tender-dares', 
-      label: 'Tender Dares',
-      image: tenderDaresImage
-    },
-    { 
-      id: 'videos', 
-      label: 'Videos',
-      image: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=200&h=200&fit=crop'
-    },
-    { 
-      id: 'sex-timeline', 
-      label: 'Sex Timeline',
-      image: 'https://images.unsplash.com/photo-1533158326339-7f3cf2404354?w=200&h=200&fit=crop'
-    },
-    { 
-      id: 'our-journal', 
-      label: 'Our Journal',
-      image: 'https://images.unsplash.com/photo-1531346878377-a5be20888e57?w=200&h=200&fit=crop'
-    },
-    { 
-      id: 'sex-lust-languages', 
-      label: 'Sex & Lust Languages',
-      image: sexLustLanguagesImage
-    },
+    { id: 'photos', label: 'PHOTOS' },
+    { id: 'fantasies', label: 'FANTASIES' },
+    { id: 'sex-lust-languages', label: 'SEX & LUST\nLANGUAGES' },
+    { id: 'videos', label: 'VIDEOS' },
+    { id: 'our-journal', label: 'OUR JOURNAL' },
+    { id: 'sex-timeline', label: 'SEX TIMELINE' },
   ];
 
-  return (
-    <div className="min-h-screen bg-black">
-      {/* Header */}
-      <div className="relative h-24 bg-gradient-to-r from-red-900 to-red-800 flex items-center justify-center border-b-8 border-black">
-        <div 
-          className="absolute inset-0 opacity-40"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 20% 50%, transparent 0%, transparent 20%, rgba(139, 0, 0, 0.3) 21%, transparent 22%), radial-gradient(circle at 60% 30%, transparent 0%, transparent 15%, rgba(139, 0, 0, 0.3) 16%, transparent 17%), radial-gradient(circle at 80% 70%, transparent 0%, transparent 18%, rgba(139, 0, 0, 0.3) 19%, transparent 20%), linear-gradient(135deg, transparent 48%, rgba(0,0,0,0.4) 49%, rgba(0,0,0,0.4) 51%, transparent 52%), linear-gradient(-135deg, transparent 48%, rgba(0,0,0,0.4) 49%, rgba(0,0,0,0.4) 51%, transparent 52%)',
-            backgroundSize: '100% 100%, 100% 100%, 100% 100%, 15px 15px, 15px 15px'
-          }}
+  if (!isUnlocked) {
+    return (
+      <>
+        <BiometricPrivacyDialog
+          open={showAuthDialog}
+          onClose={() => navigate(-1)}
+          onSuccess={handleAuthSuccess}
+          mode={passwordExists ? 'verify' : 'set'}
+          onVerify={verifyPassword}
+          onSet={setPassword}
         />
+        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-purple-900 flex items-center justify-center">
+          <Lock className="w-32 h-32 text-purple-300/20" />
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-black to-purple-900">
+      {/* Header */}
+      <div className="relative h-32 flex items-center justify-between px-6">
         <Button 
           variant="ghost" 
           size="icon" 
-          className="absolute left-4 text-white hover:bg-white/20"
+          className="text-white hover:bg-white/20"
           onClick={() => navigate(-1)}
         >
           <ArrowLeft className="w-6 h-6" />
         </Button>
-        <h1 className="text-4xl font-bold text-red-600 relative z-10 tracking-wider drop-shadow-lg">
-          Private
-        </h1>
+        
+        <div className="flex items-center gap-3">
+          <svg className="w-12 h-12 text-purple-400" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="3">
+            <path d="M30 70 L50 20 L70 70 L30 70 Z M40 70 L50 40 L60 70" />
+            <path d="M30 70 L50 60 L70 70" />
+          </svg>
+          <h1 className="text-3xl font-bold text-white tracking-wide">
+            PRIVATE VAULT
+          </h1>
+        </div>
+
+        {/* Flower decoration */}
+        <svg className="w-24 h-24 text-pink-400" viewBox="0 0 100 100" fill="currentColor">
+          <g transform="translate(50, 50)">
+            <ellipse rx="12" ry="25" transform="rotate(0)" opacity="0.9"/>
+            <ellipse rx="12" ry="25" transform="rotate(72)" opacity="0.9"/>
+            <ellipse rx="12" ry="25" transform="rotate(144)" opacity="0.9"/>
+            <ellipse rx="12" ry="25" transform="rotate(216)" opacity="0.9"/>
+            <ellipse rx="12" ry="25" transform="rotate(288)" opacity="0.9"/>
+            <circle r="8" fill="#1a1a2e"/>
+          </g>
+        </svg>
       </div>
 
-      {/* Main Content with red border frame */}
-      <div className="p-2 bg-gradient-to-b from-red-900 to-red-800">
-        <div className="bg-black p-6 pb-24 space-y-4 min-h-[calc(100vh-10rem)] border-4 border-red-900/50">
-          {/* Notification Cards */}
-          <Card className="p-3 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-200 dark:border-amber-900 rounded-2xl">
-            <h3 className="text-base font-semibold text-center text-amber-900 dark:text-amber-100 mb-2">
-              Desires Notifications
-            </h3>
-            <DesireNotifications 
-              coupleId={coupleId || ''} 
-              userId={userId || ''} 
-              partnerName="Partner"
-            />
-          </Card>
-
-          <Card className="p-3 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-200 dark:border-amber-900 rounded-2xl">
-            <h3 className="text-base font-semibold text-center text-amber-900 dark:text-amber-100 mb-2">
-              Flirts Notification
-            </h3>
-            <FlirtNotifications 
-              coupleId={coupleId || ''} 
-              userId={userId || ''} 
-              partnerName="Partner"
-            />
-          </Card>
-
-          <Card className="p-3 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border-2 border-amber-200 dark:border-amber-900 rounded-2xl">
-            <h3 className="text-base font-semibold text-center text-amber-900 dark:text-amber-100 mb-2">
-              Lust - O - Meter
-            </h3>
-            <Progress value={score} className="h-2 bg-red-200" />
-            <p className="text-center text-xs text-amber-800 dark:text-amber-200 mt-1">{score}% Heat Level</p>
-          </Card>
-
-          {/* Grid of Private Items */}
-          <div className="grid grid-cols-3 gap-6 pt-4">
-            {privateItems.map((item) => (
-              <button
-                key={item.id}
-                className="flex flex-col items-center gap-2 group"
-                onClick={() => {
-                  trackInteraction(item.id);
-                  console.log(`Opening ${item.id}`);
-                }}
-              >
-                <div className="relative">
-                  {item.id === 'tender-dares' || item.id === 'sex-lust-languages' ? (
-                    <div className="w-24 h-24 transition-transform group-hover:scale-105 flex items-center justify-center bg-black">
-                      <img 
-                        src={typeof item.image === 'string' ? item.image : item.image}
-                        alt={item.label}
-                        className="w-24 h-24 object-contain"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-24 h-24 rounded-full border-4 border-red-600 overflow-hidden transition-transform group-hover:scale-105">
-                      <img 
-                        src={typeof item.image === 'string' ? item.image : item.image}
-                        alt={item.label}
-                        className="w-full h-full object-cover object-center"
-                      />
-                    </div>
-                  )}
-                  <div className="absolute bottom-0 right-0 w-8 h-8 bg-amber-50 dark:bg-amber-950 rounded-full border-2 border-red-600 flex items-center justify-center">
-                    <Lock className="w-4 h-4 text-foreground" />
-                  </div>
+      {/* Grid of Private Items */}
+      <div className="px-8 py-8">
+        <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
+          {privateItems.map((item) => (
+            <button
+              key={item.id}
+              className="flex flex-col items-center gap-3 group"
+              onClick={() => {
+                console.log(`Opening ${item.id}`);
+                toast({ title: `Opening ${item.label}` });
+              }}
+            >
+              <div className="relative">
+                <div className="w-32 h-32 rounded-full bg-gray-600 transition-transform group-hover:scale-105 shadow-lg" />
+                <div className="absolute bottom-0 right-0 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md">
+                  <Lock className="w-5 h-5 text-gray-800" />
                 </div>
-                <span className="text-sm font-medium text-center text-white leading-tight">
-                  {item.label}
-                </span>
-              </button>
-            ))}
-          </div>
+              </div>
+              <span className="text-sm font-semibold text-center text-white leading-tight whitespace-pre-line">
+                {item.label}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-red-900 to-red-800 border-t-8 border-black z-40">
-        <div className="flex justify-around items-center h-16 max-w-lg mx-auto px-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-white hover:bg-white/20"
-          >
-            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z"/>
-            </svg>
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-white hover:bg-white/20"
-            onClick={() => navigate(-1)}
-          >
-            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
-            </svg>
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-white hover:bg-white/20"
-          >
-            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd"/>
-            </svg>
-          </Button>
-        </div>
+      {/* The Wall Section */}
+      <div className="px-8 py-12">
+        <h2 className="text-4xl font-bold text-white mb-8">THE WALL</h2>
+        <div className="h-96 bg-gradient-to-b from-gray-800/50 to-gray-900/50 rounded-lg" />
       </div>
     </div>
   );
