@@ -113,6 +113,12 @@ const PrivatePage = () => {
     setShowAuthDialog(false);
   };
 
+  const handleDialogClose = () => {
+    if (!isUnlocked) {
+      navigate(-1);
+    }
+  };
+
   const privateItems = [
     { id: 'photos', label: 'PHOTOS' },
     { id: 'fantasies', label: 'FANTASIES' },
@@ -127,7 +133,7 @@ const PrivatePage = () => {
       <>
         <BiometricPrivacyDialog
           open={showAuthDialog}
-          onClose={() => navigate(-1)}
+          onClose={handleDialogClose}
           onSuccess={handleAuthSuccess}
           mode={passwordExists ? 'verify' : 'set'}
           onVerify={verifyPassword}
