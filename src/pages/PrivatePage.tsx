@@ -112,15 +112,15 @@ const PrivatePage = () => {
   };
 
   const checkPasswordExists = async () => {
-    if (!coupleId) return;
+    if (!userId) return;
     
     const { data } = await supabase
-      .from('privacy_settings')
-      .select('password_hash')
-      .eq('couple_id', coupleId)
+      .from('profiles')
+      .select('privacy_password_hash')
+      .eq('id', userId)
       .maybeSingle();
     
-    setPasswordExists(!!data?.password_hash);
+    setPasswordExists(!!data?.privacy_password_hash);
   };
 
   const attemptBiometricAuth = async () => {
@@ -156,28 +156,26 @@ const PrivatePage = () => {
   };
 
   const verifyPassword = async (password: string): Promise<boolean> => {
-    if (!coupleId) return false;
+    if (!userId) return false;
 
     const hashedPassword = await hashPassword(password);
     const { data } = await supabase
-      .from('privacy_settings')
-      .select('password_hash')
-      .eq('couple_id', coupleId)
+      .from('profiles')
+      .select('privacy_password_hash')
+      .eq('id', userId)
       .maybeSingle();
 
-    return data?.password_hash === hashedPassword;
+    return data?.privacy_password_hash === hashedPassword;
   };
 
   const setPassword = async (password: string): Promise<boolean> => {
-    if (!coupleId) return false;
+    if (!userId) return false;
 
     const hashedPassword = await hashPassword(password);
     const { error } = await supabase
-      .from('privacy_settings')
-      .upsert({
-        couple_id: coupleId,
-        password_hash: hashedPassword,
-      });
+      .from('profiles')
+      .update({ privacy_password_hash: hashedPassword })
+      .eq('id', userId);
 
     if (!error) {
       setPasswordExists(true);
