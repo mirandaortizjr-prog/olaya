@@ -43,7 +43,14 @@ const PrivatePage = () => {
 
   useEffect(() => {
     if (coupleId) {
-      checkPasswordExists();
+      // Check if already unlocked in this session
+      const wasUnlocked = sessionStorage.getItem('private_vault_unlocked');
+      if (wasUnlocked === 'true') {
+        setIsUnlocked(true);
+        setShowAuthDialog(false);
+      } else {
+        checkPasswordExists();
+      }
     }
   }, [coupleId]);
 
@@ -142,6 +149,8 @@ const PrivatePage = () => {
     authSucceededRef.current = true;
     setIsUnlocked(true);
     setShowAuthDialog(false);
+    // Remember that user unlocked the vault in this session
+    sessionStorage.setItem('private_vault_unlocked', 'true');
   };
 
   const handleDialogClose = () => {
