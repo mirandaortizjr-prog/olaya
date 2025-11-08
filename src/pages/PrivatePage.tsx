@@ -351,20 +351,6 @@ const PrivatePage = () => {
         </Button>
       </div>
 
-      {/* Flower decoration - moved below header */}
-      <div className="flex justify-end px-4 -mt-4">
-        <svg className="w-16 h-16 text-pink-400" viewBox="0 0 100 100" fill="currentColor">
-          <g transform="translate(50, 50)">
-            <ellipse rx="12" ry="25" transform="rotate(0)" opacity="0.9"/>
-            <ellipse rx="12" ry="25" transform="rotate(72)" opacity="0.9"/>
-            <ellipse rx="12" ry="25" transform="rotate(144)" opacity="0.9"/>
-            <ellipse rx="12" ry="25" transform="rotate(216)" opacity="0.9"/>
-            <ellipse rx="12" ry="25" transform="rotate(288)" opacity="0.9"/>
-            <circle r="8" fill="#1a1a2e"/>
-          </g>
-        </svg>
-      </div>
-
       {/* Settings Dialog */}
       <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
         <DialogContent className="bg-gradient-to-b from-gray-900 to-black border-purple-500/30">
