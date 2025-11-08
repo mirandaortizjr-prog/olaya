@@ -825,9 +825,8 @@ const Dashboard = () => {
 
       {/* Video/Music Section */}
       <div style={{ background: 'var(--video-gradient)' }} className="py-6">
-        <div className="max-w-lg mx-auto px-4 space-y-4">
-          <MusicPlayerControls />
-          <YouTubePlayer
+        <div className="max-w-lg mx-auto px-4">
+          <MusicPlayerControls
             coupleId={coupleData.coupleId}
             videoUrl={coupleData.videoUrl}
             onVideoUrlChange={async (url) => {
