@@ -864,6 +864,30 @@ export type Database = {
         }
         Relationships: []
       }
+      private_vault_settings: {
+        Row: {
+          couple_id: string
+          created_at: string
+          id: string
+          updated_at: string
+          vault_title: string | null
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          vault_title?: string | null
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          vault_title?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

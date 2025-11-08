@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Lock, Send, Trash2 } from "lucide-react";
+import { ArrowLeft, Lock, Send, Trash2, Settings } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { BiometricPrivacyDialog } from "@/components/BiometricPrivacyDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { formatDistanceToNow } from "date-fns";
 
 const PrivatePage = () => {
@@ -25,6 +27,11 @@ const PrivatePage = () => {
   const [newComment, setNewComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [partnerInfo, setPartnerInfo] = useState<any>(null);
+  
+  // Vault settings
+  const [vaultTitle, setVaultTitle] = useState<string>("");
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false);
+  const [editingTitle, setEditingTitle] = useState("");
 
   useEffect(() => {
     loadUserAndCouple();
@@ -40,6 +47,7 @@ const PrivatePage = () => {
     if (isUnlocked && coupleId && userId) {
       loadWallComments();
       loadPartnerInfo();
+      loadVaultSettings();
       subscribeToWallComments();
     }
   }, [isUnlocked, coupleId, userId]);
@@ -153,6 +161,43 @@ const PrivatePage = () => {
 
     if (members && members[0]) {
       setPartnerInfo(members[0].profiles);
+    }
+  };
+
+  const loadVaultSettings = async () => {
+    if (!coupleId) return;
+
+    const { data } = await supabase
+      .from('private_vault_settings')
+      .select('vault_title')
+      .eq('couple_id', coupleId)
+      .maybeSingle();
+
+    if (data?.vault_title) {
+      setVaultTitle(data.vault_title);
+    }
+  };
+
+  const handleSaveVaultTitle = async () => {
+    if (!coupleId) return;
+
+    const { error } = await supabase
+      .from('private_vault_settings')
+      .upsert({
+        couple_id: coupleId,
+        vault_title: editingTitle.trim() || null
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update vault title",
+        variant: "destructive"
+      });
+    } else {
+      setVaultTitle(editingTitle.trim());
+      setShowSettingsDialog(false);
+      toast({ title: "Vault title updated!" });
     }
   };
 
@@ -278,17 +323,36 @@ const PrivatePage = () => {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         
-        <div className="flex items-center gap-2">
-          <svg className="w-8 h-8 text-purple-400" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="3">
-            <path d="M30 70 L50 20 L70 70 L30 70 Z M40 70 L50 40 L60 70" />
-            <path d="M30 70 L50 60 L70 70" />
-          </svg>
-          <h1 className="text-xl font-bold text-white tracking-wide">
-            PRIVATE VAULT
-          </h1>
+        <div className="flex flex-col items-center">
+          <div className="flex items-center gap-2 mb-1">
+            <svg className="w-8 h-8 text-purple-400" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="3">
+              <path d="M30 70 L50 20 L70 70 L30 70 Z M40 70 L50 40 L60 70" />
+              <path d="M30 70 L50 60 L70 70" />
+            </svg>
+            <h1 className="text-xl font-bold text-white tracking-wide">
+              PRIVATE VAULT
+            </h1>
+          </div>
+          {vaultTitle && (
+            <p className="text-sm text-purple-300 italic">"{vaultTitle}"</p>
+          )}
         </div>
 
-        {/* Flower decoration */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-white hover:bg-white/20 h-8 w-8"
+          onClick={() => {
+            setEditingTitle(vaultTitle);
+            setShowSettingsDialog(true);
+          }}
+        >
+          <Settings className="w-5 h-5" />
+        </Button>
+      </div>
+
+      {/* Flower decoration - moved below header */}
+      <div className="flex justify-end px-4 -mt-4">
         <svg className="w-16 h-16 text-pink-400" viewBox="0 0 100 100" fill="currentColor">
           <g transform="translate(50, 50)">
             <ellipse rx="12" ry="25" transform="rotate(0)" opacity="0.9"/>
@@ -300,6 +364,47 @@ const PrivatePage = () => {
           </g>
         </svg>
       </div>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="bg-gradient-to-b from-gray-900 to-black border-purple-500/30">
+          <DialogHeader>
+            <DialogTitle className="text-white">Vault Settings</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm text-gray-300 mb-2 block">
+                Custom Title (Optional)
+              </label>
+              <Input
+                value={editingTitle}
+                onChange={(e) => setEditingTitle(e.target.value)}
+                placeholder="Our Secret Space..."
+                maxLength={50}
+                className="bg-black/30 border-purple-500/30 text-white placeholder:text-gray-500"
+              />
+              <p className="text-xs text-gray-400 mt-1">
+                Give your private vault a special name
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => setShowSettingsDialog(false)}
+              className="text-gray-400"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveVaultTitle}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Grid of Private Items */}
       <div className="px-4 py-6">
