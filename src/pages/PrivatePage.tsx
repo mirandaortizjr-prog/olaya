@@ -415,6 +415,8 @@ const PrivatePage = () => {
                 } else if (item.id === 'fantasies') {
                   navigate('/desires');
                 } else if (item.route) {
+                  // Preserve unlocked state while navigating within private sections
+                  sessionStorage.setItem('private_vault_unlocked', 'true');
                   navigate(item.route);
                 } else {
                   console.log(`Opening ${item.id}`);
