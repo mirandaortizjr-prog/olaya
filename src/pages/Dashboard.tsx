@@ -765,10 +765,12 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen pb-20" style={{ background: 'var(--hero-bg)' }}>
       {/* Hero Section - Dark gradient background with full background images */}
-      <div style={{ background: 'var(--hero-bg)' }} className="relative">
+      <div style={{ background: 'var(--hero-bg)' }} className="relative overflow-hidden">
         {/* Background slideshow - extends to top */}
         <div className="relative h-80 max-w-lg mx-auto overflow-hidden">
-          <BackgroundSlideshow coupleId={coupleData.coupleId} />
+          <div className="absolute inset-0">
+            <BackgroundSlideshow coupleId={coupleData.coupleId} />
+          </div>
           
           {/* Title centered at top */}
           <div className="absolute top-4 left-0 right-0 z-20 flex items-center justify-center px-4">
@@ -809,7 +811,7 @@ const Dashboard = () => {
       </div>
 
       {/* Info Section */}
-      <div style={{ background: 'var(--info-bg)' }} className="py-4">
+      <div style={{ background: 'var(--info-bg)' }} className="py-4 relative z-10">
         <div className="max-w-lg mx-auto px-4">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-normal text-white">
