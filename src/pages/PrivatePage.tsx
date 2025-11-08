@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +15,7 @@ const PrivatePage = () => {
   const [coupleId, setCoupleId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const authSucceededRef = useRef(false);
 
   useEffect(() => {
     loadUserAndCouple();
@@ -109,16 +110,20 @@ const PrivatePage = () => {
   };
 
   const handleAuthSuccess = () => {
+    authSucceededRef.current = true;
     setIsUnlocked(true);
     setShowAuthDialog(false);
   };
 
   const handleDialogClose = () => {
-    if (!isUnlocked) {
-      navigate(-1);
-    }
+    // Keep the dialog open until unlocked to avoid accidental navigation
+    setTimeout(() => {
+      if (!authSucceededRef.current && !isUnlocked) {
+        setShowAuthDialog(true);
+        return;
+      }
+    }, 0);
   };
-
   const privateItems = [
     { id: 'photos', label: 'PHOTOS' },
     { id: 'fantasies', label: 'FANTASIES' },
