@@ -69,7 +69,6 @@ export const AnniversaryCountdown = ({ anniversaryDate }: AnniversaryCountdownPr
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-anniversary-textDark">
           <Heart className="w-4 h-4 text-anniversary-textLight" />
-          <span className="text-xs font-medium">{language === 'en' ? 'Anniversary' : 'Aniversario'}</span>
         </div>
         <div className="flex items-center gap-2 text-xs font-mono">
           <div className="flex flex-col items-center">
