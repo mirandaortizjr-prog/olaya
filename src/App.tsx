@@ -27,6 +27,7 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
+  const [isReady, setIsReady] = useState(false);
 
   // Only show splash on initial page load
   useEffect(() => {
@@ -34,6 +35,7 @@ const App = () => {
     if (hasSeenSplash) {
       setShowSplash(false);
     }
+    setIsReady(true);
   }, []);
 
   const handleSplashFinish = () => {
@@ -41,7 +43,7 @@ const App = () => {
     setShowSplash(false);
   };
 
-  if (showSplash) {
+  if (!isReady || showSplash) {
     return <SplashScreen onFinish={handleSplashFinish} />;
   }
 

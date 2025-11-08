@@ -11,8 +11,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#000000">
     <style>
-      body { margin: 0; background-color: #000000; }
-      #root { background-color: #000000; }
+      body { margin: 0; background-color: #000000; overflow: hidden; }
+      #root { background-color: #000000; min-height: 100vh; }
+      /* Hide any default loading indicators */
+      body::before, body::after, html::before, html::after { display: none !important; }
+      /* Hide progress bars and loading lines */
+      [role="progressbar"], .nprogress, progress { display: none !important; }
     </style>
     <title>Olaya Together - Your Sacred Space for Connection</title>
     <meta name="description" content="A private sanctuary for couples to deepen intimacy, share love notes, and celebrate your journey together" />
