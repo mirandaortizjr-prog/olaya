@@ -372,7 +372,7 @@ const PrivatePage = () => {
           variant="ghost" 
           size="icon" 
           className="text-white hover:bg-white/20 h-8 w-8"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/dashboard')}
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
