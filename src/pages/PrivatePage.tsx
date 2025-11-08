@@ -324,15 +324,9 @@ const PrivatePage = () => {
         </Button>
         
         <div className="flex flex-col items-center">
-          <div className="flex items-center gap-2 mb-1">
-            <svg className="w-8 h-8 text-purple-400" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="3">
-              <path d="M30 70 L50 20 L70 70 L30 70 Z M40 70 L50 40 L60 70" />
-              <path d="M30 70 L50 60 L70 70" />
-            </svg>
-            <h1 className="text-xl font-bold text-white tracking-wide">
-              PRIVATE VAULT
-            </h1>
-          </div>
+          <h1 className="text-xl font-bold text-white tracking-wide mb-1">
+            PRIVATE VAULT
+          </h1>
           {vaultTitle && (
             <p className="text-sm text-purple-300 italic">"{vaultTitle}"</p>
           )}
