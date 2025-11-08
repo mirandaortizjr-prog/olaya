@@ -60,9 +60,22 @@ export const PrivateVideoGallery = ({ coupleId, userId }: PrivateVideoGalleryPro
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 100 * 1024 * 1024) {
-      toast({ title: "Video too large", description: "Maximum size is 100MB", variant: "destructive" });
+    // Allow videos up to 500MB (Supabase storage limit)
+    if (file.size > 500 * 1024 * 1024) {
+      toast({ 
+        title: "Video too large", 
+        description: "Maximum size is 500MB. Consider compressing your video.", 
+        variant: "destructive" 
+      });
       return;
+    }
+
+    // Warn for large files
+    if (file.size > 200 * 1024 * 1024) {
+      toast({ 
+        title: "Large video detected", 
+        description: "Upload may take a few minutes...",
+      });
     }
 
     setUploading(true);
