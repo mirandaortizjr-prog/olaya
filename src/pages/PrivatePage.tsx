@@ -402,6 +402,8 @@ const PrivatePage = () => {
                   setShowPhotoGallery(true);
                 } else if (item.id === 'videos') {
                   setShowVideoGallery(true);
+                } else if (item.id === 'fantasies') {
+                  navigate('/desires');
                 } else {
                   console.log(`Opening ${item.id}`);
                   toast({ title: `Opening ${item.label}` });
