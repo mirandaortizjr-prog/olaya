@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { formatDistanceToNow } from "date-fns";
 import { PrivatePhotoGallery } from "@/components/PrivatePhotoGallery";
+import { PrivateVideoGallery } from "@/components/PrivateVideoGallery";
 
 const PrivatePage = () => {
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ const PrivatePage = () => {
   const [showSettingsDialog, setShowSettingsDialog] = useState(false);
   const [editingTitle, setEditingTitle] = useState("");
   const [showPhotoGallery, setShowPhotoGallery] = useState(false);
+  const [showVideoGallery, setShowVideoGallery] = useState(false);
 
   useEffect(() => {
     loadUserAndCouple();
@@ -398,6 +400,8 @@ const PrivatePage = () => {
               onClick={() => {
                 if (item.id === 'photos') {
                   setShowPhotoGallery(true);
+                } else if (item.id === 'videos') {
+                  setShowVideoGallery(true);
                 } else {
                   console.log(`Opening ${item.id}`);
                   toast({ title: `Opening ${item.label}` });
@@ -420,6 +424,17 @@ const PrivatePage = () => {
           userId={userId}
           onClose={() => setShowPhotoGallery(false)}
         />
+      )}
+
+      {/* Video Gallery */}
+      {showVideoGallery && (
+        <Dialog open={showVideoGallery} onOpenChange={setShowVideoGallery}>
+          <DialogContent className="max-w-[95vw] max-h-[95vh] p-4 bg-gradient-to-b from-gray-900 to-black border-purple-500/30">
+            <div className="h-[90vh] overflow-auto">
+              <PrivateVideoGallery coupleId={coupleId!} userId={userId!} />
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
 
       {/* The Wall Section - Two Columns */}
