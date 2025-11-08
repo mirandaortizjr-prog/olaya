@@ -31,7 +31,6 @@ import { MemoryCalendar } from "@/components/MemoryCalendar";
 import { LoveMeter } from "@/components/LoveMeter";
 import { CoupleSongPlayer, CoupleSongPlayerEmbed } from "@/components/CoupleSongPlayer";
 import { AnniversaryCountdown } from "@/components/AnniversaryCountdown";
-import giftBoxIcon from "@/assets/gift-box-icon.png";
 import { ThemeSettings } from "@/components/ThemeSettings";
 import { SongSettings } from "@/components/SongSettings";
 import { YouTubePlayer } from "@/components/YouTubePlayer";
@@ -815,7 +814,7 @@ const Dashboard = () => {
             )}
           </div>
           <div className="flex items-center justify-between">
-            <img src={giftBoxIcon} alt="Anniversary" className="w-6 h-6" />
+            <span className="text-white text-base">Anniversary</span>
             <AnniversaryCountdown anniversaryDate={coupleData.anniversaryDate || null} />
           </div>
         </div>
