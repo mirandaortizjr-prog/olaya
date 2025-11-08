@@ -16,8 +16,10 @@ const swCleanup = async () => {
         const keys = await caches.keys();
         await Promise.all(keys.map((k) => caches.delete(k)));
       }
-      if (!sessionStorage.getItem("reloadedAfterSWCleanup")) {
-        sessionStorage.setItem("reloadedAfterSWCleanup", "true");
+      // Clear sessionStorage to ensure fresh start
+      sessionStorage.clear();
+      if (!localStorage.getItem("reloadedAfterSWCleanup")) {
+        localStorage.setItem("reloadedAfterSWCleanup", "true");
         location.reload();
         return false;
       }

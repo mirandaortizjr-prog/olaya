@@ -37,6 +37,15 @@ const App = () => {
       setShowSplash(false);
     }
     setIsReady(true);
+    
+    // Auto-hide splash after timeout as fallback
+    const timeout = setTimeout(() => {
+      if (showSplash) {
+        handleSplashFinish();
+      }
+    }, 3000);
+    
+    return () => clearTimeout(timeout);
   }, []);
 
   const handleSplashFinish = () => {
