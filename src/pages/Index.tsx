@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
 import olayaLogo from "@/assets/olaya-logo.png";
+import shopIcon from "@/assets/shop-icon.png";
 
 const Index = () => {
   const { t } = useLanguage();
@@ -68,6 +69,13 @@ const Index = () => {
     <div className="min-h-screen bg-black">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-black">
+        <div className="absolute top-4 left-4 z-10">
+          <img 
+            src={shopIcon} 
+            alt="Shop" 
+            className="w-12 h-12 cursor-pointer animate-pulse-glow"
+          />
+        </div>
         <div className="absolute top-4 right-4 z-10">
           <LanguageSwitcher />
         </div>

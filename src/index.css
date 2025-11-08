@@ -156,10 +156,23 @@ All colors MUST be HSL.
   }
 }
 
+@keyframes pulse-glow {
+  0%, 100% { 
+    filter: drop-shadow(0 0 8px hsl(var(--primary) / 0.6)) brightness(1);
+  }
+  50% { 
+    filter: drop-shadow(0 0 16px hsl(var(--primary) / 0.9)) brightness(1.2);
+  }
+}
+
 .animate-walk-turkey {
   animation: walk-turkey 20s linear infinite;
 }
 
 .animate-fall-leaf {
   animation: fall-leaf linear infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
 }
