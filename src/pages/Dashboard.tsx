@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import giftBoxAnniversary from "@/assets/gift-box-anniversary.png";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
@@ -813,7 +814,8 @@ const Dashboard = () => {
               />
             )}
           </div>
-          <div className="flex items-center justify-end">
+          <div className="flex items-center justify-between">
+            <img src={giftBoxAnniversary} alt="Anniversary Gift" className="w-12 h-12 object-contain" />
             <AnniversaryCountdown anniversaryDate={coupleData.anniversaryDate || null} />
           </div>
         </div>
