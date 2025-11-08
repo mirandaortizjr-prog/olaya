@@ -15,7 +15,7 @@ interface Fantasy {
   title: string;
   description?: string;
   category: string;
-  status: 'wishlist' | 'consider' | 'approved' | 'fulfilled';
+  status: 'wishlist' | 'consider' | 'approved' | 'denied' | 'fulfilled';
   created_at: string;
   fulfilled_at?: string;
   user_id: string;
@@ -69,7 +69,12 @@ export default function DesiresPage() {
         title: d.title,
         description: d.description || undefined,
         category: d.category,
-        status: d.fulfilled ? 'fulfilled' : (d.category === 'approved' ? 'approved' : (d.category === 'consider' ? 'consider' : 'wishlist')),
+        status: d.fulfilled ? 'fulfilled' : (
+          d.category === 'approved' ? 'approved' : 
+          d.category === 'denied' ? 'denied' : 
+          d.category === 'consider' ? 'consider' : 
+          'wishlist'
+        ),
         created_at: d.created_at,
         fulfilled_at: d.fulfilled_at || undefined,
         user_id: d.user_id,
@@ -107,7 +112,7 @@ export default function DesiresPage() {
     loadFantasies(coupleId);
   };
 
-  const updateStatus = async (fantasyId: string, newStatus: 'wishlist' | 'consider' | 'approved' | 'fulfilled') => {
+  const updateStatus = async (fantasyId: string, newStatus: 'wishlist' | 'consider' | 'approved' | 'denied' | 'fulfilled') => {
     if (!coupleId) return;
 
     const updates: any = {
@@ -151,6 +156,7 @@ export default function DesiresPage() {
   const wishlistFantasies = fantasies.filter(f => f.status === 'wishlist');
   const considerFantasies = fantasies.filter(f => f.status === 'consider');
   const approvedFantasies = fantasies.filter(f => f.status === 'approved');
+  const deniedFantasies = fantasies.filter(f => f.status === 'denied');
   const fulfilledFantasies = fantasies.filter(f => f.status === 'fulfilled');
 
   const renderFantasyCard = (fantasy: Fantasy, actions: JSX.Element) => (
@@ -200,160 +206,220 @@ export default function DesiresPage() {
         </div>
       </header>
 
-      {/* Content - 4 Sections Grid */}
-      <div className="max-w-6xl mx-auto px-4 py-6 grid md:grid-cols-2 gap-6 pb-24">
-        {/* Section 1: Wishlist */}
-        <Card className="border-fantasy-skyblue/30 bg-fantasy-wishlist shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Sparkles className="w-5 h-5" />
-              Wishlist
-              <span className="ml-auto text-sm font-normal text-white/70">
-                {wishlistFantasies.length}
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 max-h-96 overflow-y-auto">
-            {wishlistFantasies.length === 0 ? (
-              <p className="text-white/50 text-center py-8">No wishes yet</p>
-            ) : (
-              wishlistFantasies.map(fantasy =>
-                renderFantasyCard(
-                  fantasy,
-                  <>
-                    <Button
-                      size="sm"
-                      onClick={() => updateStatus(fantasy.id, 'consider')}
-                      className="bg-fantasy-purple hover:bg-fantasy-purple-dark"
-                    >
-                      <MessageCircle className="w-4 h-4 mr-1" />
-                      Consider
-                    </Button>
-                  </>
+      {/* Content - 5 Sections Grid */}
+      <div className="max-w-7xl mx-auto px-4 py-6 space-y-6 pb-24">
+        {/* Row 1: Wishlist, Discuss, Approved */}
+        <div className="grid md:grid-cols-3 gap-6">
+          {/* Section 1: Wishlist */}
+          <Card className="border-fantasy-skyblue/30 bg-fantasy-wishlist shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Sparkles className="w-5 h-5" />
+                Wishlist
+                <span className="ml-auto text-sm font-normal text-white/70">
+                  {wishlistFantasies.length}
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 max-h-96 overflow-y-auto">
+              {wishlistFantasies.length === 0 ? (
+                <p className="text-white/50 text-center py-8">No wishes yet</p>
+              ) : (
+                wishlistFantasies.map(fantasy =>
+                  renderFantasyCard(
+                    fantasy,
+                    <>
+                      <Button
+                        size="sm"
+                        onClick={() => updateStatus(fantasy.id, 'consider')}
+                        className="bg-fantasy-purple hover:bg-fantasy-purple-dark"
+                      >
+                        <MessageCircle className="w-4 h-4 mr-1" />
+                        Discuss
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => updateStatus(fantasy.id, 'approved')}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => updateStatus(fantasy.id, 'denied')}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        Deny
+                      </Button>
+                    </>
+                  )
                 )
-              )
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </CardContent>
+          </Card>
 
-        {/* Section 2: Consider & Talk About */}
-        <Card className="border-fantasy-purple/30 bg-fantasy-consider shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <MessageCircle className="w-5 h-5" />
-              To Discuss
-              <span className="ml-auto text-sm font-normal text-white/70">
-                {considerFantasies.length}
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 max-h-96 overflow-y-auto">
-            {considerFantasies.length === 0 ? (
-              <p className="text-white/50 text-center py-8">Nothing to discuss</p>
-            ) : (
-              considerFantasies.map(fantasy =>
-                renderFantasyCard(
-                  fantasy,
-                  <>
-                    <Button
-                      size="sm"
-                      onClick={() => updateStatus(fantasy.id, 'wishlist')}
-                      className="bg-fantasy-skyblue/80 hover:bg-fantasy-skyblue"
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => updateStatus(fantasy.id, 'approved')}
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      Approve
-                    </Button>
-                  </>
+          {/* Section 2: Consider & Talk About */}
+          <Card className="border-fantasy-purple/30 bg-fantasy-consider shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <MessageCircle className="w-5 h-5" />
+                To Discuss
+                <span className="ml-auto text-sm font-normal text-white/70">
+                  {considerFantasies.length}
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 max-h-96 overflow-y-auto">
+              {considerFantasies.length === 0 ? (
+                <p className="text-white/50 text-center py-8">Nothing to discuss</p>
+              ) : (
+                considerFantasies.map(fantasy =>
+                  renderFantasyCard(
+                    fantasy,
+                    <>
+                      <Button
+                        size="sm"
+                        onClick={() => updateStatus(fantasy.id, 'wishlist')}
+                        className="bg-fantasy-skyblue/80 hover:bg-fantasy-skyblue"
+                      >
+                        Back
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => updateStatus(fantasy.id, 'approved')}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => updateStatus(fantasy.id, 'denied')}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        Deny
+                      </Button>
+                    </>
+                  )
                 )
-              )
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </CardContent>
+          </Card>
 
-        {/* Section 3: Approved to Fulfill */}
-        <Card className="border-fantasy-purple-dark/30 bg-fantasy-approved shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5" />
-              Approved
-              <span className="ml-auto text-sm font-normal text-white/70">
-                {approvedFantasies.length}
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 max-h-96 overflow-y-auto">
-            {approvedFantasies.length === 0 ? (
-              <p className="text-white/50 text-center py-8">Nothing approved yet</p>
-            ) : (
-              approvedFantasies.map(fantasy =>
-                renderFantasyCard(
-                  fantasy,
-                  <>
-                    <Button
-                      size="sm"
-                      onClick={() => updateStatus(fantasy.id, 'consider')}
-                      className="bg-fantasy-purple/80 hover:bg-fantasy-purple"
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => updateStatus(fantasy.id, 'fulfilled')}
-                      className="bg-emerald-600 hover:bg-emerald-700"
-                    >
-                      <CheckCircle2 className="w-4 h-4 mr-1" />
-                      Fulfilled
-                    </Button>
-                  </>
+          {/* Section 3: Approved to Fulfill */}
+          <Card className="border-fantasy-purple-dark/30 bg-fantasy-approved shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5" />
+                Approved
+                <span className="ml-auto text-sm font-normal text-white/70">
+                  {approvedFantasies.length}
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 max-h-96 overflow-y-auto">
+              {approvedFantasies.length === 0 ? (
+                <p className="text-white/50 text-center py-8">Nothing approved yet</p>
+              ) : (
+                approvedFantasies.map(fantasy =>
+                  renderFantasyCard(
+                    fantasy,
+                    <>
+                      <Button
+                        size="sm"
+                        onClick={() => updateStatus(fantasy.id, 'consider')}
+                        className="bg-fantasy-purple/80 hover:bg-fantasy-purple"
+                      >
+                        Back
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => updateStatus(fantasy.id, 'fulfilled')}
+                        className="bg-emerald-600 hover:bg-emerald-700"
+                      >
+                        <CheckCircle2 className="w-4 h-4 mr-1" />
+                        Fulfilled
+                      </Button>
+                    </>
+                  )
                 )
-              )
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
-        {/* Section 4: Fulfilled Log */}
-        <Card className="border-white/10 bg-fantasy-fulfilled shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <History className="w-5 h-5" />
-              Fulfilled
-              <span className="ml-auto text-sm font-normal text-white/70">
-                {fulfilledFantasies.length}
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 max-h-96 overflow-y-auto">
-            {fulfilledFantasies.length === 0 ? (
-              <p className="text-white/50 text-center py-8">No fulfilled fantasies yet</p>
-            ) : (
-              fulfilledFantasies.map(fantasy =>
-                renderFantasyCard(
-                  fantasy,
-                  <>
-                    <Button
-                      size="sm"
-                      onClick={() => updateStatus(fantasy.id, 'approved')}
-                      className="bg-white/10 hover:bg-white/20"
-                    >
-                      Undo
-                    </Button>
-                    {fantasy.fulfilled_at && (
-                      <span className="text-xs text-white/50">
-                        {new Date(fantasy.fulfilled_at).toLocaleDateString()}
-                      </span>
-                    )}
-                  </>
+        {/* Row 2: Denied and Fulfilled */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Section 4: Denied */}
+          <Card className="border-red-500/30 bg-gradient-to-br from-red-900/30 to-black shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <span className="text-xl">❌</span>
+                Denied
+                <span className="ml-auto text-sm font-normal text-white/70">
+                  {deniedFantasies.length}
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 max-h-96 overflow-y-auto">
+              {deniedFantasies.length === 0 ? (
+                <p className="text-white/50 text-center py-8">No denied fantasies</p>
+              ) : (
+                deniedFantasies.map(fantasy =>
+                  renderFantasyCard(
+                    fantasy,
+                    <>
+                      <Button
+                        size="sm"
+                        onClick={() => updateStatus(fantasy.id, 'wishlist')}
+                        className="bg-fantasy-skyblue/80 hover:bg-fantasy-skyblue"
+                      >
+                        Reconsider
+                      </Button>
+                    </>
+                  )
                 )
-              )
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Section 5: Fulfilled Log */}
+          <Card className="border-white/10 bg-fantasy-fulfilled shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <History className="w-5 h-5" />
+                Fulfilled
+                <span className="ml-auto text-sm font-normal text-white/70">
+                  {fulfilledFantasies.length}
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 max-h-96 overflow-y-auto">
+              {fulfilledFantasies.length === 0 ? (
+                <p className="text-white/50 text-center py-8">No fulfilled fantasies yet</p>
+              ) : (
+                fulfilledFantasies.map(fantasy =>
+                  renderFantasyCard(
+                    fantasy,
+                    <>
+                      <Button
+                        size="sm"
+                        onClick={() => updateStatus(fantasy.id, 'approved')}
+                        className="bg-white/10 hover:bg-white/20"
+                      >
+                        Undo
+                      </Button>
+                      {fantasy.fulfilled_at && (
+                        <span className="text-xs text-white/50">
+                          {new Date(fantasy.fulfilled_at).toLocaleDateString()}
+                        </span>
+                      )}
+                    </>
+                  )
+                )
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Add Fantasy Dialog */}
