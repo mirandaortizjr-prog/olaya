@@ -219,21 +219,21 @@ export const PrivatePhotoGallery = ({ coupleId, userId, onClose }: PrivatePhotoG
             </label>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1">
+          <div className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-1 space-y-1">
             {photos.map((photo) => (
               <button
                 key={photo.id}
                 onClick={() => setSelectedPhoto(photo)}
-                className="relative aspect-square overflow-hidden bg-gray-900 hover:opacity-90 transition-opacity group"
+                className="relative w-full mb-1 overflow-hidden bg-gray-900 hover:opacity-90 transition-opacity group break-inside-avoid"
               >
                 <img
                   src={photo.url}
                   alt={photo.caption || 'Private photo'}
-                  className="w-full h-full object-cover"
+                  className="w-full h-auto object-cover"
                   loading="lazy"
                 />
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                  <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
                 </div>
               </button>
             ))}
