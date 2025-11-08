@@ -104,7 +104,7 @@ export const BackgroundSlideshow = ({ coupleId }: BackgroundSlideshowProps) => {
   }
 
   return (
-    <div className="relative w-full h-full overflow-hidden">
+    <div className="relative w-full h-full overflow-hidden pointer-events-none">
       {backgroundImages.map((url, index) => (
         <div
           key={index}
