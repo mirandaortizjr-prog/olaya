@@ -14,14 +14,15 @@ interface ShopCategory {
   name: string;
   icon: any;
   comingSoon: boolean;
+  path: string | null;
 }
 
 const shopCategories: ShopCategory[] = [
-  { id: 'visual-effects', name: 'Visual Effects', icon: Sparkles, comingSoon: true },
-  { id: 'gifts', name: 'Gifts', icon: Gift, comingSoon: true },
-  { id: 'accessories', name: 'Accessories', icon: Palette, comingSoon: true },
-  { id: 'badges', name: 'Badges', icon: Badge, comingSoon: true },
-  { id: 'seasonal', name: 'Seasonal Items', icon: Calendar, comingSoon: true },
+  { id: 'gifts', name: 'Gifts', icon: Gift, comingSoon: false, path: '/shop/gifts' },
+  { id: 'visual-effects', name: 'Visual Effects', icon: Sparkles, comingSoon: true, path: null },
+  { id: 'accessories', name: 'Accessories', icon: Palette, comingSoon: true, path: null },
+  { id: 'badges', name: 'Badges', icon: Badge, comingSoon: true, path: null },
+  { id: 'seasonal', name: 'Seasonal Items', icon: Calendar, comingSoon: true, path: null },
 ];
 
 export default function ShopPage() {
@@ -108,7 +109,8 @@ export default function ShopPage() {
           {shopCategories.map((category) => (
             <Card
               key={category.id}
-              className="bg-white/5 border-white/10 hover:bg-white/10 transition-all p-6 relative"
+              className="bg-white/5 border-white/10 hover:bg-white/10 transition-all p-6 relative cursor-pointer"
+              onClick={() => category.path && navigate(category.path)}
             >
               <div className="flex flex-col items-center gap-3">
                 <category.icon className="h-10 w-10 text-pink-400" />

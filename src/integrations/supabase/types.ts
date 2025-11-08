@@ -474,6 +474,44 @@ export type Database = {
         }
         Relationships: []
       }
+      gift_transactions: {
+        Row: {
+          couple_id: string
+          created_at: string
+          id: string
+          item_id: string
+          message: string | null
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          id?: string
+          item_id: string
+          message?: string | null
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          id?: string
+          item_id?: string
+          message?: string | null
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gift_transactions_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "shop_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       intimate_journal: {
         Row: {
           couple_id: string
@@ -1220,6 +1258,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      shop_items: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string
+          name: string
+          price: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url: string
+          name: string
+          price: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string
+          name?: string
+          price?: number
+        }
+        Relationships: []
       }
       subscriptions: {
         Row: {
