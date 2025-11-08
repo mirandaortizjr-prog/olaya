@@ -815,7 +815,9 @@ const Dashboard = () => {
             )}
           </div>
           <div className="flex items-center justify-between">
-            <img src={giftBoxAnniversary} alt="Anniversary Gift" className="w-12 h-12 object-contain" />
+            <div className="flex items-center justify-center flex-1">
+              <img src={giftBoxAnniversary} alt="Anniversary Gift" className="w-16 h-16 object-contain drop-shadow-lg" />
+            </div>
             <AnniversaryCountdown anniversaryDate={coupleData.anniversaryDate || null} />
           </div>
         </div>
