@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Upload, X, Trash2, ZoomIn } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +28,10 @@ export const PrivatePhotoGallery = ({ coupleId, userId, onClose }: PrivatePhotoG
   const [uploading, setUploading] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const imageRef = useRef<HTMLImageElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadPhotos();
@@ -148,6 +152,61 @@ export const PrivatePhotoGallery = ({ coupleId, userId, onClose }: PrivatePhotoG
     }
   };
 
+  const resetZoom = () => {
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  };
+
+  const handlePhotoClick = (photo: Photo) => {
+    setSelectedPhoto(photo);
+    resetZoom();
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY * -0.01;
+    const newScale = Math.min(Math.max(1, scale + delta), 4);
+    setScale(newScale);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.hypot(
+        touch1.clientX - touch2.clientX,
+        touch1.clientY - touch2.clientY
+      );
+      (containerRef.current as any)._lastDistance = distance;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 2 && containerRef.current) {
+      e.preventDefault();
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.hypot(
+        touch1.clientX - touch2.clientX,
+        touch1.clientY - touch2.clientY
+      );
+      
+      const lastDistance = (containerRef.current as any)._lastDistance || distance;
+      const delta = (distance - lastDistance) * 0.01;
+      const newScale = Math.min(Math.max(1, scale + delta), 4);
+      setScale(newScale);
+      (containerRef.current as any)._lastDistance = distance;
+    }
+  };
+
+  const handleDoubleClick = () => {
+    if (scale > 1) {
+      resetZoom();
+    } else {
+      setScale(2);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-purple-900 via-black to-purple-900 z-50 overflow-y-auto">
       {/* Header */}
@@ -219,12 +278,12 @@ export const PrivatePhotoGallery = ({ coupleId, userId, onClose }: PrivatePhotoG
             </label>
           </div>
         ) : (
-          <div className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-1 space-y-1">
+          <div className="columns-3 md:columns-4 lg:columns-5 xl:columns-6 gap-0.5 space-y-0.5">
             {photos.map((photo) => (
               <button
                 key={photo.id}
-                onClick={() => setSelectedPhoto(photo)}
-                className="relative w-full mb-1 overflow-hidden bg-gray-900 hover:opacity-90 transition-opacity group break-inside-avoid"
+                onClick={() => handlePhotoClick(photo)}
+                className="relative w-full mb-0.5 overflow-hidden bg-gray-900 hover:opacity-90 transition-opacity group break-inside-avoid"
               >
                 <img
                   src={photo.url}
@@ -232,8 +291,8 @@ export const PrivatePhotoGallery = ({ coupleId, userId, onClose }: PrivatePhotoG
                   className="w-full h-auto object-cover"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                  <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                  <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
                 </div>
               </button>
             ))}
@@ -242,16 +301,16 @@ export const PrivatePhotoGallery = ({ coupleId, userId, onClose }: PrivatePhotoG
       </div>
 
       {/* Photo Viewer Dialog */}
-      <Dialog open={!!selectedPhoto} onOpenChange={() => setSelectedPhoto(null)}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] bg-black/95 border-purple-500/20 p-0">
+      <Dialog open={!!selectedPhoto} onOpenChange={() => { setSelectedPhoto(null); resetZoom(); }}>
+        <DialogContent className="max-w-[100vw] max-h-[100vh] w-full h-full bg-black/98 border-none p-0 m-0">
           {selectedPhoto && (
             <div className="relative w-full h-full">
-              <div className="absolute top-4 right-4 z-10 flex gap-2">
+              <div className="absolute top-4 right-4 z-20 flex gap-2">
                 {selectedPhoto.uploaded_by === userId && (
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="bg-black/50 text-white hover:bg-red-600"
+                    className="bg-black/50 text-white hover:bg-red-600 backdrop-blur-sm"
                     onClick={() => handleDelete(selectedPhoto)}
                   >
                     <Trash2 className="w-5 h-5" />
@@ -260,17 +319,45 @@ export const PrivatePhotoGallery = ({ coupleId, userId, onClose }: PrivatePhotoG
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="bg-black/50 text-white hover:bg-white/10"
-                  onClick={() => setSelectedPhoto(null)}
+                  className="bg-black/50 text-white hover:bg-white/10 backdrop-blur-sm"
+                  onClick={() => { setSelectedPhoto(null); resetZoom(); }}
                 >
                   <X className="w-5 h-5" />
                 </Button>
               </div>
-              <img
-                src={selectedPhoto.url}
-                alt={selectedPhoto.caption || 'Private photo'}
-                className="w-full h-full object-contain"
-              />
+              
+              <div 
+                ref={containerRef}
+                className="w-full h-full flex items-center justify-center overflow-hidden touch-none"
+                onWheel={handleWheel}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onDoubleClick={handleDoubleClick}
+              >
+                <img
+                  ref={imageRef}
+                  src={selectedPhoto.url}
+                  alt={selectedPhoto.caption || 'Private photo'}
+                  className="max-w-full max-h-full object-contain cursor-zoom-in"
+                  style={{
+                    transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
+                    transition: scale === 1 ? 'transform 0.3s ease' : 'none',
+                  }}
+                />
+              </div>
+              
+              {scale > 1 && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="bg-black/50 text-white hover:bg-white/10 backdrop-blur-sm"
+                    onClick={resetZoom}
+                  >
+                    Reset Zoom
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>
