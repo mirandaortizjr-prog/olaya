@@ -34,6 +34,7 @@ import { AnniversaryCountdown } from "@/components/AnniversaryCountdown";
 import { ThemeSettings } from "@/components/ThemeSettings";
 import { SongSettings } from "@/components/SongSettings";
 import { YouTubePlayer } from "@/components/YouTubePlayer";
+import { MusicPlayerControls } from "@/components/MusicPlayerControls";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PremiumFeatures } from "@/components/PremiumFeatures";
 import { useCoupleProgress } from "@/hooks/useCoupleProgress";
@@ -819,9 +820,10 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Video Section */}
+      {/* Video/Music Section */}
       <div style={{ background: 'var(--video-gradient)' }} className="py-6">
-        <div className="max-w-lg mx-auto px-4">
+        <div className="max-w-lg mx-auto px-4 space-y-4">
+          <MusicPlayerControls />
           <YouTubePlayer
             coupleId={coupleData.coupleId}
             videoUrl={coupleData.videoUrl}
