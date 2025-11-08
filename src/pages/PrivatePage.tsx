@@ -50,6 +50,7 @@ const PrivatePage = () => {
         setShowAuthDialog(false);
       } else {
         checkPasswordExists();
+        setShowAuthDialog(true);
       }
     }
   }, [coupleId]);
@@ -91,7 +92,7 @@ const PrivatePage = () => {
 
     setCoupleId(membership.couple_id);
     setLoading(false);
-    setShowAuthDialog(true);
+    // Don't automatically show dialog - let the next useEffect handle it
   };
 
   const checkPasswordExists = async () => {
