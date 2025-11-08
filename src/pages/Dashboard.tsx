@@ -37,6 +37,8 @@ import { YouTubePlayer } from "@/components/YouTubePlayer";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PremiumFeatures } from "@/components/PremiumFeatures";
 import { useCoupleProgress } from "@/hooks/useCoupleProgress";
+import { SharedJournalForm } from "@/components/SharedJournalForm";
+import { SharedJournalList } from "@/components/SharedJournalList";
 
 interface CoupleData {
   coupleId: string;
@@ -94,6 +96,7 @@ const Dashboard = () => {
     return stored ? new Date(stored) : new Date();
   });
   const [lastViewedMessages, setLastViewedMessages] = useState<Date>(new Date());
+  const [journalRefreshTrigger, setJournalRefreshTrigger] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -615,6 +618,36 @@ const Dashboard = () => {
         onClose={() => setActiveView("home")}
         pendingGameSessions={pendingGameSessions}
       />
+    );
+  }
+
+  if (activeView === "journal") {
+    return (
+      <div className="min-h-screen bg-muted pb-20">
+        <div className="p-4 border-b bg-card flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Shared Journal</h2>
+          <Button variant="ghost" onClick={() => setActiveView("home")}>Close</Button>
+        </div>
+        <div className="p-4 max-w-2xl mx-auto space-y-6">
+          <SharedJournalForm
+            coupleId={coupleData.coupleId}
+            userId={user!.id}
+            onSuccess={() => setJournalRefreshTrigger(prev => prev + 1)}
+          />
+          <SharedJournalList
+            coupleId={coupleData.coupleId}
+            refreshTrigger={journalRefreshTrigger}
+          />
+        </div>
+        <BottomNavigation
+          activeView={activeView}
+          onSettingsClick={() => setShowSettings(true)}
+          onViewChange={setActiveView}
+          pendingGamesCount={pendingGamesCount}
+          newFlirtsCount={newFlirtsCount}
+          newVaultCount={newVaultCount}
+        />
+      </div>
     );
   }
 

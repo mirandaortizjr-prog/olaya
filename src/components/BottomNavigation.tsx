@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Home, MessageCircle, Settings, Plus } from "lucide-react";
+import { BookOpen, MessageCircle, Settings, Plus } from "lucide-react";
 
 interface BottomNavigationProps {
   activeView: string;
@@ -22,7 +22,7 @@ export const BottomNavigation = ({
 }: BottomNavigationProps) => {
   const navItems = [
     { id: "new", icon: Plus, label: "New" },
-    { id: "home", icon: Home, label: "Home" },
+    { id: "journal", icon: BookOpen, label: "Journal" },
     { id: "messages", icon: MessageCircle, label: "Messages" },
     { id: "settings", icon: Settings, label: "Settings", isAction: true },
   ];
