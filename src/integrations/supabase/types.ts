@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      coin_transactions: {
+        Row: {
+          amount: number
+          couple_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          couple_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          couple_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coin_transactions_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       couple_background_images: {
         Row: {
           couple_id: string
@@ -972,6 +1013,7 @@ export type Database = {
           id: string
           location: string | null
           privacy_password_hash: string | null
+          together_coins: number
           updated_at: string
         }
         Insert: {
@@ -985,6 +1027,7 @@ export type Database = {
           id: string
           location?: string | null
           privacy_password_hash?: string | null
+          together_coins?: number
           updated_at?: string
         }
         Update: {
@@ -998,6 +1041,7 @@ export type Database = {
           id?: string
           location?: string | null
           privacy_password_hash?: string | null
+          together_coins?: number
           updated_at?: string
         }
         Relationships: []

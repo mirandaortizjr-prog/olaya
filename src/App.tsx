@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import FlirtsPage from "./pages/FlirtsPage";
 import DesiresPage from "./pages/DesiresPage";
 import IntimateJournalPage from "./pages/IntimateJournalPage";
+import ShopPage from "./pages/ShopPage";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,7 @@ const App = () => {
                   <Route path="/intimate-journal" element={<IntimateJournalPage />} />
                   <Route path="/mood-customization" element={<MoodCustomization />} />
                   <Route path="/flirt-customization" element={<FlirtCustomization />} />
+                  <Route path="/shop" element={<ShopPage />} />
                   <Route path="/404" element={<NotFound />} />
                   <Route path="*" element={<Navigate to="/404" replace />} />
                 </Routes>

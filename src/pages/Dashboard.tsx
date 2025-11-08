@@ -805,6 +805,7 @@ const Dashboard = () => {
               src={shopIcon} 
               alt="Shop" 
               className="w-10 h-10 cursor-pointer animate-pulse-glow"
+              onClick={() => navigate('/shop')}
             />
           </div>
         </div>
