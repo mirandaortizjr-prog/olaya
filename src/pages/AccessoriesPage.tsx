@@ -298,10 +298,18 @@ export default function AccessoriesPage() {
 
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Coins className="w-5 h-5 text-primary" />
-                          <span className="font-bold text-lg text-foreground">
-                            {item.price}
-                          </span>
+                          {item.price === 0 ? (
+                            <span className="text-sm font-semibold text-primary">
+                              Free with Premium Subscription
+                            </span>
+                          ) : (
+                            <>
+                              <Coins className="w-5 h-5 text-primary" />
+                              <span className="font-bold text-lg text-foreground">
+                                {item.price}
+                              </span>
+                            </>
+                          )}
                         </div>
 
                         {isPurchased ? (
