@@ -88,11 +88,17 @@ export const useSkins = (coupleId: string | null, userId: string | null) => {
       });
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error purchasing skin:', error);
+      console.error('Error details:', {
+        message: error?.message,
+        code: error?.code,
+        details: error?.details,
+        hint: error?.hint,
+      });
       toast({
         title: "Purchase Failed",
-        description: "Failed to purchase skin. Please try again.",
+        description: error?.message || "Failed to purchase skin. Please try again.",
         variant: "destructive",
       });
       return false;
