@@ -48,17 +48,6 @@ All colors MUST be HSL.
     --feed-bg: linear-gradient(180deg, hsl(200 9% 34%), hsl(0 0% 0%));  /* #4F585E to black */
     --nav-gradient: linear-gradient(180deg, hsl(280 60% 15%), hsl(0 0% 0%));
     
-    /* Fantasy sections colors - skyblue, purple, black */
-    --fantasy-skyblue: 200 80% 60%;
-    --fantasy-skyblue-dark: 200 70% 40%;
-    --fantasy-purple: 270 60% 55%;
-    --fantasy-purple-dark: 270 50% 35%;
-    --fantasy-black: 0 0% 8%;
-    --fantasy-wishlist: linear-gradient(135deg, hsl(200 80% 60%), hsl(200 70% 40%));
-    --fantasy-consider: linear-gradient(135deg, hsl(270 60% 55%), hsl(270 50% 40%));
-    --fantasy-approved: linear-gradient(135deg, hsl(270 50% 35%), hsl(0 0% 15%));
-    --fantasy-fulfilled: linear-gradient(135deg, hsl(0 0% 20%), hsl(0 0% 8%));
-    
     --transition-smooth: all 0.3s ease;
   }
 

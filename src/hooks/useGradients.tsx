@@ -103,9 +103,18 @@ export const useGradients = (coupleId: string | null, userId: string | null) => 
     const gradient = GRADIENTS[gradientId];
     if (!gradient) return;
 
+    // Add transition class to root element for smooth gradient changes
+    const root = document.documentElement;
+    root.style.transition = 'all 0.8s ease-in-out';
+    
     // Update CSS variables
-    document.documentElement.style.setProperty('--video-gradient', gradient.css);
-    document.documentElement.style.setProperty('--nav-gradient', gradient.css);
+    root.style.setProperty('--video-gradient', gradient.css);
+    root.style.setProperty('--nav-gradient', gradient.css);
+    
+    // Remove transition after animation completes
+    setTimeout(() => {
+      root.style.transition = '';
+    }, 800);
   };
 
   const setGradient = async (gradientId: GradientId) => {
