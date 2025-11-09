@@ -82,18 +82,10 @@ const Index = () => {
         if (user) {
           setUserId(user.id);
           
-          // Check if user has a couple profile
-          const { data: coupleData } = await supabase
-            .from('couples')
-            .select('id')
-            .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`)
-            .single();
-          
-          if (coupleData) {
-            // If user is authenticated and has a couple profile, redirect to dashboard
-            navigate('/dashboard');
-            return;
-          }
+          // If user is authenticated, redirect to dashboard
+          // Let the dashboard handle couple profile checks
+          navigate('/dashboard');
+          return;
         }
       } catch (error) {
         console.error('Error checking user status:', error);
