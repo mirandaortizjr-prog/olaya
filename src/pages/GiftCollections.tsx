@@ -43,7 +43,7 @@ interface ReceivedGift {
   gift_image: string;
   purchased_at: string;
   sender_id: string;
-  collected: boolean;
+  collection_name?: string;
 }
 
 const GiftCollections = () => {
@@ -94,8 +94,7 @@ const GiftCollections = () => {
 
       if (error) throw error;
       
-      // Add collected property (default to false for now)
-      setGifts((data || []).map(gift => ({ ...gift, collected: false })));
+      setGifts(data || []);
     } catch (error) {
       console.error('Error fetching received gifts:', error);
       toast.error("Failed to load gift collections");
@@ -104,16 +103,6 @@ const GiftCollections = () => {
     }
   };
 
-  const handleCollectGift = (giftId: string) => {
-    setGifts(prev => 
-      prev.map(gift => 
-        gift.id === giftId ? { ...gift, collected: true } : gift
-      )
-    );
-    toast.success("Gift collected! 💝");
-  };
-
-  const uncollectedCount = gifts.filter(g => !g.collected).length;
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -129,12 +118,7 @@ const GiftCollections = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-xl font-semibold text-foreground">Gift Collections</h1>
-          {uncollectedCount > 0 && (
-            <Badge className="bg-primary text-primary-foreground">
-              {uncollectedCount} New
-            </Badge>
-          )}
-          {uncollectedCount === 0 && <div className="w-10" />}
+          <div className="w-10" />
         </div>
       </div>
 
@@ -145,8 +129,11 @@ const GiftCollections = () => {
           <Gift className="w-12 h-12 mx-auto text-primary animate-pulse" />
           <h2 className="text-2xl font-bold text-foreground">Gifts from {senderName}</h2>
           <p className="text-muted-foreground">
-            Open and collect your special gifts
+            Your collection of special gifts
           </p>
+          <div className="text-sm text-muted-foreground">
+            Total: {gifts.length} {gifts.length === 1 ? 'gift' : 'gifts'}
+          </div>
         </div>
 
         {/* Gifts Grid */}
@@ -169,38 +156,23 @@ const GiftCollections = () => {
             {gifts.map((gift) => (
               <Card
                 key={gift.id}
-                className={`overflow-hidden transition-all duration-300 ${
-                  gift.collected 
-                    ? 'opacity-60' 
-                    : 'hover:shadow-lg hover:scale-105 cursor-pointer'
-                }`}
-                onClick={() => !gift.collected && handleCollectGift(gift.id)}
+                className="overflow-hidden hover:shadow-lg transition-all duration-300"
               >
                 <div className="aspect-square bg-accent/20 relative overflow-hidden">
                   {flowerImages[gift.gift_image] ? (
                     <img
                       src={flowerImages[gift.gift_image]}
                       alt={gift.gift_name}
-                      className={`w-full h-full object-contain p-4 transition-all ${
-                        gift.collected ? 'grayscale' : ''
-                      }`}
+                      className="w-full h-full object-contain p-4"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <Gift className="w-16 h-16 text-muted-foreground opacity-20" />
                     </div>
                   )}
-                  {!gift.collected && (
-                    <div className="absolute inset-0 bg-primary/10 backdrop-blur-[2px] flex items-center justify-center">
-                      <div className="text-center space-y-2">
-                        <Sparkles className="w-8 h-8 mx-auto text-primary animate-pulse" />
-                        <p className="text-xs font-semibold text-primary">Tap to Open</p>
-                      </div>
-                    </div>
-                  )}
-                  {gift.collected && (
-                    <Badge className="absolute top-2 right-2 bg-secondary text-secondary-foreground">
-                      Collected
+                  {gift.collection_name && (
+                    <Badge className="absolute top-2 right-2 bg-secondary text-secondary-foreground text-xs">
+                      {gift.collection_name}
                     </Badge>
                   )}
                 </div>
