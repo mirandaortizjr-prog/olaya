@@ -27,6 +27,15 @@ import chocolateBar from "@/assets/gifts/chocolate-bar.png";
 import heartChocolateBox from "@/assets/gifts/heart-chocolate-box.png";
 import giftBoxDeluxe from "@/assets/gifts/gift-box-deluxe.png";
 import loveCake from "@/assets/gifts/love-cake.png";
+import balloonBear from "@/assets/gifts/balloon-bear.png";
+import balloonMonkey from "@/assets/gifts/balloon-monkey.png";
+import balloonFlower from "@/assets/gifts/balloon-flower.png";
+import balloonUnicorn from "@/assets/gifts/balloon-unicorn.png";
+import balloonPacifier from "@/assets/gifts/balloon-pacifier.png";
+import balloonSwan from "@/assets/gifts/balloon-swan.png";
+import balloonDog from "@/assets/gifts/balloon-dog.png";
+import balloonHeartWand from "@/assets/gifts/balloon-heart-wand.png";
+import balloonPoodle from "@/assets/gifts/balloon-poodle.png";
 
 const giftImages: { [key: string]: string } = {
   'flower-bouquet-1': flowerBouquet1,
@@ -46,6 +55,15 @@ const giftImages: { [key: string]: string } = {
   'heart-chocolate-box': heartChocolateBox,
   'gift-box-deluxe': giftBoxDeluxe,
   'love-cake': loveCake,
+  'balloon-bear': balloonBear,
+  'balloon-monkey': balloonMonkey,
+  'balloon-flower': balloonFlower,
+  'balloon-unicorn': balloonUnicorn,
+  'balloon-pacifier': balloonPacifier,
+  'balloon-swan': balloonSwan,
+  'balloon-dog': balloonDog,
+  'balloon-heart-wand': balloonHeartWand,
+  'balloon-poodle': balloonPoodle,
 };
 
 interface ShopItem {
@@ -68,9 +86,11 @@ const GiftsPage = () => {
   const navigate = useNavigate();
   const [flowerGifts, setFlowerGifts] = useState<ShopItem[]>([]);
   const [sweetGifts, setSweetGifts] = useState<ShopItem[]>([]);
+  const [balloonGifts, setBalloonGifts] = useState<ShopItem[]>([]);
   const [purchaseHistory, setPurchaseHistory] = useState<PurchasedGiftHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [collectionComplete, setCollectionComplete] = useState(false);
   const { coins } = useTogetherCoins(user?.id);
 
   useEffect(() => {
@@ -104,6 +124,15 @@ const GiftsPage = () => {
 
       if (sweetsError) throw sweetsError;
       setSweetGifts(sweetsData || []);
+
+      const { data: balloonsData, error: balloonsError } = await supabase
+        .from('shop_items')
+        .select('*')
+        .eq('category', 'balloons')
+        .order('price', { ascending: true });
+
+      if (balloonsError) throw balloonsError;
+      setBalloonGifts(balloonsData || []);
     } catch (error) {
       console.error('Error fetching gifts:', error);
       toast.error("Failed to load gifts");
@@ -123,8 +152,47 @@ const GiftsPage = () => {
 
       if (error) throw error;
       setPurchaseHistory(data || []);
+
+      // Check if balloon collection is complete
+      if (data && balloonGifts.length > 0) {
+        const balloonImageNames = balloonGifts.map(g => g.image_url);
+        const purchasedBalloons = data.filter(p => balloonImageNames.includes(p.gift_image));
+        if (purchasedBalloons.length === balloonGifts.length && !collectionComplete) {
+          await awardCollectionBonus(userId);
+        }
+      }
     } catch (error) {
       console.error('Error fetching purchase history:', error);
+    }
+  };
+
+  const awardCollectionBonus = async (userId: string) => {
+    try {
+      const { data: coupleData } = await supabase
+        .from('couple_members')
+        .select('couple_id')
+        .eq('user_id', userId)
+        .single();
+
+      if (!coupleData) return;
+
+      // Award 100 bonus coins
+      const { error } = await supabase
+        .from('coin_transactions')
+        .insert({
+          user_id: userId,
+          couple_id: coupleData.couple_id,
+          amount: 100,
+          transaction_type: 'earn',
+          description: 'Balloon Collection Complete! 🎈',
+        });
+
+      if (!error) {
+        setCollectionComplete(true);
+        toast.success("🎉 Collection Complete! You earned 100 bonus coins!");
+      }
+    } catch (error) {
+      console.error('Error awarding collection bonus:', error);
     }
   };
 
@@ -208,13 +276,16 @@ const GiftsPage = () => {
 
       {/* Tabs for Gift Categories and History */}
       <Tabs defaultValue="flowers" className="p-4">
-        <TabsList className="w-full grid grid-cols-3">
+        <TabsList className="w-full grid grid-cols-4">
           <TabsTrigger value="flowers">
             <Heart className="w-4 h-4 mr-1" />
             Flowers
           </TabsTrigger>
           <TabsTrigger value="sweets">
             🍫 Sweets
+          </TabsTrigger>
+          <TabsTrigger value="balloons">
+            🎈 Balloons
           </TabsTrigger>
           <TabsTrigger value="history">
             <History className="w-4 h-4 mr-1" />
@@ -362,6 +433,94 @@ const GiftsPage = () => {
             <div className="text-center py-12 space-y-4">
               <div className="text-5xl">🍫</div>
               <p className="text-muted-foreground">No sweet gifts available yet</p>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="balloons" className="space-y-6 mt-6">
+          {/* Header Section */}
+          <div className="text-center space-y-2">
+            <div className="text-5xl mx-auto">🎈</div>
+            <h2 className="text-2xl font-bold text-foreground">Balloon Collection</h2>
+            <p className="text-muted-foreground">
+              Collect all balloon figures to earn 100 bonus coins!
+            </p>
+            {balloonGifts.length > 0 && (
+              <div className="flex items-center justify-center gap-2 text-sm">
+                <span className="text-muted-foreground">Progress:</span>
+                <span className="font-semibold text-primary">
+                  {purchaseHistory.filter(p => balloonGifts.map(g => g.image_url).includes(p.gift_image)).length} / {balloonGifts.length}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Balloons Grid */}
+          {loading ? (
+            <div className="grid grid-cols-2 gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-64 bg-accent animate-pulse rounded-lg" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {balloonGifts.map((gift) => {
+                const isCollected = purchaseHistory.some(p => p.gift_image === gift.image_url);
+                return (
+                  <Card
+                    key={gift.id}
+                    className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105 relative"
+                  >
+                    {isCollected && (
+                      <div className="absolute top-2 left-2 z-10 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+                        ✓ Collected
+                      </div>
+                    )}
+                    <div className="aspect-square bg-accent/20 relative overflow-hidden">
+                      {giftImages[gift.image_url] ? (
+                        <img
+                          src={giftImages[gift.image_url]}
+                          alt={gift.name}
+                          className="w-full h-full object-contain p-4"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-5xl">
+                          🎈
+                        </div>
+                      )}
+                      <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
+                        <img src={togetherCoinsIcon} alt="Coins" className="w-3 h-3 mr-1" />
+                        {gift.price}
+                      </Badge>
+                    </div>
+                    <div className="p-3 space-y-2">
+                      <h3 className="font-semibold text-sm text-foreground line-clamp-1">
+                        {gift.name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground line-clamp-2">
+                        {gift.description}
+                      </p>
+                      <Button
+                        onClick={() => handlePurchase(gift)}
+                        className="w-full"
+                        size="sm"
+                        disabled={coins < gift.price || isCollected}
+                      >
+                        <ShoppingCart className="w-3 h-3 mr-1" />
+                        {isCollected ? 'Collected' : coins < gift.price ? 'Need More Coins' : 'Send Gift'}
+                      </Button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && balloonGifts.length === 0 && (
+            <div className="text-center py-12 space-y-4">
+              <div className="text-5xl">🎈</div>
+              <p className="text-muted-foreground">No balloon gifts available yet</p>
             </div>
           )}
         </TabsContent>
