@@ -80,20 +80,6 @@ export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
         duration: 8 + Math.random() * 4,
       }));
       setParticles(newParticles);
-      
-      // Force re-render of particles for preview
-      if (previewEffect) {
-        const timer = setInterval(() => {
-          setParticles(Array.from({ length: 20 }, (_, i) => ({
-            id: i,
-            left: Math.random() * 100,
-            delay: Math.random() * 5,
-            duration: 8 + Math.random() * 4,
-          })));
-        }, 100);
-        
-        return () => clearInterval(timer);
-      }
     } else {
       setParticles([]);
     }
@@ -135,21 +121,20 @@ export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
 
   const getAnimation = (animation: string) => {
     const animationMap: Record<string, string> = {
-      falling: 'animate-fade-in',
-      floating: 'animate-fade-in',
-      flutter: 'animate-fade-in',
+      falling: 'animate-fall-leaf',
+      floating: 'animate-float',
+      flutter: 'animate-flutter',
       fade: 'animate-fade-in',
     };
-    return animationMap[animation] || 'animate-fade-in';
+    return animationMap[animation] || 'animate-fall-leaf';
   };
-
   return (
     <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
       {effectsToRender.map((effect) =>
         particles.map((particle) => (
           <div
             key={`${effect.id}-${particle.id}`}
-            className={`absolute top-0 ${getAnimation(effect.visual_effects.animation)}`}
+            className={`absolute -top-10 ${getAnimation(effect.visual_effects.animation)}`}
             style={{
               left: `${particle.left}%`,
               animationDelay: `${particle.delay}s`,
