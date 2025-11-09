@@ -830,8 +830,11 @@ const Dashboard = () => {
             )}
           </div>
           <div className="flex items-center justify-between">
-            <div className="flex items-center justify-center flex-1">
-              <img src={giftBoxAnniversary} alt="Anniversary Gift" className="w-16 h-16 object-contain drop-shadow-lg" />
+            <div 
+              className="flex items-center justify-center flex-1 cursor-pointer hover:scale-110 transition-transform"
+              onClick={() => navigate('/gift-collections')}
+            >
+              <img src={giftBoxAnniversary} alt="Gift Collections" className="w-16 h-16 object-contain drop-shadow-lg" />
             </div>
             <AnniversaryCountdown anniversaryDate={coupleData.anniversaryDate || null} />
           </div>
