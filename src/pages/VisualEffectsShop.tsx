@@ -4,11 +4,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Sparkles, Heart, Eye } from 'lucide-react';
+import { ArrowLeft, Eye } from 'lucide-react';
 import { useTogetherCoins } from '@/hooks/useTogetherCoins';
 import { toast } from '@/hooks/use-toast';
 import togetherCoinsIcon from '@/assets/together-coins-icon.png';
 import { VisualEffectsRenderer } from '@/components/VisualEffectsRenderer';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { translations } from '@/lib/translations';
 
 interface VisualEffect {
   id: string;
@@ -23,6 +25,8 @@ interface VisualEffect {
 
 export default function VisualEffectsShop() {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const t = translations[language];
   const [user, setUser] = useState<User | null>(null);
   const [coupleId, setCoupleId] = useState<string>('');
   const [objectEffects, setObjectEffects] = useState<VisualEffect[]>([]);
@@ -69,8 +73,8 @@ export default function VisualEffectsShop() {
   const handlePurchase = async (effect: VisualEffect) => {
     if (!user || !coupleId) {
       toast({
-        title: "Authentication required",
-        description: "Please log in to purchase effects",
+        title: t.authRequired,
+        description: t.authRequiredDesc,
         variant: "destructive",
       });
       return;
@@ -78,8 +82,8 @@ export default function VisualEffectsShop() {
 
     if (coins < effect.price) {
       toast({
-        title: "Insufficient coins",
-        description: `You need ${effect.price} coins to purchase this effect`,
+        title: t.insufficientCoins,
+        description: t.insufficientCoinsDesc.replace('{amount}', effect.price.toString()),
         variant: "destructive",
       });
       return;
@@ -116,14 +120,14 @@ export default function VisualEffectsShop() {
       if (activateError) throw activateError;
 
       toast({
-        title: "Effect purchased & activated! ✨",
-        description: `${effect.name} will be active for 24 hours`,
+        title: t.effectPurchased,
+        description: t.effectPurchasedDesc.replace('{name}', effect.name),
       });
     } catch (error) {
       console.error('Purchase error:', error);
       toast({
-        title: "Purchase failed",
-        description: "Something went wrong. Please try again.",
+        title: t.purchaseFailed,
+        description: t.purchaseFailedDesc,
         variant: "destructive",
       });
     }
@@ -132,8 +136,8 @@ export default function VisualEffectsShop() {
   const handlePreview = (effect: VisualEffect) => {
     setPreviewEffect(effect);
     toast({
-      title: "Preview started ✨",
-      description: "Effect will play for 10 seconds",
+      title: t.previewStarted,
+      description: t.previewDesc,
     });
 
     setTimeout(() => {
@@ -192,9 +196,9 @@ export default function VisualEffectsShop() {
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <h1 className="text-xl font-semibold text-foreground">Visual Effects</h1>
+            <h1 className="text-xl font-semibold text-foreground">{t.visualEffectsTitle}</h1>
             <div className="flex items-center gap-2 bg-card px-3 py-1.5 rounded-full border border-border">
-              <img src={togetherCoinsIcon} alt="Coins" className="w-5 h-5" />
+              <img src={togetherCoinsIcon} alt={t.visualEffectsCoins} className="w-5 h-5" />
               <span className="text-sm font-medium">{coins}</span>
             </div>
           </div>
@@ -203,15 +207,15 @@ export default function VisualEffectsShop() {
 
       <div className="max-w-lg mx-auto px-4 py-6 space-y-8">
         {loading ? (
-          <div className="text-center py-12 text-muted-foreground">Loading effects...</div>
+          <div className="text-center py-12 text-muted-foreground">{t.loadingEffects}</div>
         ) : (
           <>
             {/* Romantic Objects */}
             <div>
               <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground mb-1">Romantic Objects</h2>
+                <h2 className="text-lg font-semibold text-foreground mb-1">{t.romanticObjects}</h2>
                 <p className="text-sm text-muted-foreground">
-                  Beautiful falling objects that create a magical atmosphere for 24 hours
+                  {t.romanticObjectsDesc}
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -231,8 +235,8 @@ export default function VisualEffectsShop() {
                           {getEffectEmoji(effect.name, effect.effect_type)}
                         </span>
                       </div>
-                      <div className="text-center">
-                        <p className="font-medium text-foreground text-sm mb-1">{effect.name}</p>
+                      <div className="text-center min-h-[3rem] flex flex-col justify-center">
+                        <p className="font-medium text-foreground text-sm mb-1 line-clamp-1">{effect.name}</p>
                         <p className="text-xs text-muted-foreground line-clamp-2">{effect.behavior}</p>
                       </div>
                       <div className="flex gap-2">
@@ -243,7 +247,7 @@ export default function VisualEffectsShop() {
                           size="sm"
                         >
                           <Eye className="w-3 h-3 mr-1" />
-                          Preview
+                          {t.preview}
                         </Button>
                         <Button
                           onClick={() => handlePurchase(effect)}
@@ -264,9 +268,9 @@ export default function VisualEffectsShop() {
             {/* Romantic Phrases */}
             <div>
               <div className="mb-4">
-                <h2 className="text-lg font-semibold text-foreground mb-1">Romantic Phrases</h2>
+                <h2 className="text-lg font-semibold text-foreground mb-1">{t.romanticPhrases}</h2>
                 <p className="text-sm text-muted-foreground">
-                  Neon-glow phrases that cascade down your screen for 24 hours
+                  {t.romanticPhrasesDesc}
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -287,8 +291,8 @@ export default function VisualEffectsShop() {
                           {getEffectEmoji(effect.name, effect.effect_type)}
                         </span>
                       </div>
-                      <div className="text-center">
-                        <p className="font-medium text-foreground text-sm mb-1">{effect.name}</p>
+                      <div className="text-center min-h-[3rem] flex flex-col justify-center">
+                        <p className="font-medium text-foreground text-sm mb-1 line-clamp-1">{effect.name}</p>
                         <p className="text-xs text-muted-foreground line-clamp-2">{effect.behavior}</p>
                       </div>
                       <div className="flex gap-2">
@@ -299,7 +303,7 @@ export default function VisualEffectsShop() {
                           size="sm"
                         >
                           <Eye className="w-3 h-3 mr-1" />
-                          Preview
+                          {t.preview}
                         </Button>
                         <Button
                           onClick={() => handlePurchase(effect)}
