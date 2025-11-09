@@ -98,6 +98,14 @@ export default function AccessoriesPage() {
       'Dark Blue to Bright Blue': 'darkblue-brightblue',
       'Pale Green to Light Blue': 'palegreen-lightblue',
       'Red to Orange': 'red-orange',
+      'Lavender to Purple': 'lavender-purple',
+      'Coral Red': 'coral-red',
+      'Silver Gray': 'silver-gray',
+      'Bright Cyan': 'cyan-bright',
+      'Dusty Rose': 'dusty-rose',
+      'Lime Green': 'lime-green',
+      'Green to Yellow': 'green-yellow',
+      'Slate Blue': 'slate-blue',
     };
     return mapping[name] || 'default';
   };
