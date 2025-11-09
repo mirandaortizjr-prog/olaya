@@ -11,14 +11,12 @@ export const useTogetherCoins = (userId: string | undefined) => {
     if (!userId) return;
 
     try {
+      // Use the database function that returns unlimited coins for admins
       const { data, error } = await supabase
-        .from('profiles')
-        .select('together_coins')
-        .eq('id', userId)
-        .single();
+        .rpc('get_coin_balance', { _user_id: userId });
 
       if (error) throw error;
-      setCoins(data?.together_coins || 0);
+      setCoins(data || 0);
     } catch (error) {
       console.error('Error fetching coins:', error);
     } finally {
@@ -71,18 +69,27 @@ export const useTogetherCoins = (userId: string | undefined) => {
   };
 
   const spendCoins = async (amount: number, description: string, coupleId?: string) => {
-    if (!userId || coins < amount) return false;
+    if (!userId) return false;
 
     try {
-      // Update profile coins
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ together_coins: coins - amount })
-        .eq('id', userId);
+      // Check if user is admin (they have unlimited coins)
+      const { data: isAdmin } = await supabase
+        .rpc('has_role', { _user_id: userId, _role: 'admin' });
 
-      if (updateError) throw updateError;
+      if (!isAdmin) {
+        // Non-admins must have enough coins
+        if (coins < amount) return false;
 
-      // Record transaction
+        // Update profile coins for non-admins
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ together_coins: coins - amount })
+          .eq('id', userId);
+
+        if (updateError) throw updateError;
+      }
+
+      // Record transaction (even for admins, for audit purposes)
       const { error: transactionError } = await supabase
         .from('coin_transactions')
         .insert({
@@ -95,7 +102,10 @@ export const useTogetherCoins = (userId: string | undefined) => {
 
       if (transactionError) throw transactionError;
 
-      setCoins(coins - amount);
+      // Update local state (admins stay at 999999)
+      if (!isAdmin) {
+        setCoins(coins - amount);
+      }
 
       toast({
         title: "Purchase Complete! 🎁",
@@ -117,7 +127,7 @@ export const useTogetherCoins = (userId: string | undefined) => {
   useEffect(() => {
     fetchCoins();
 
-    // Subscribe to coin changes
+    // Subscribe to profile changes (for non-admins)
     const channel = supabase
       .channel('coin-changes')
       .on(
@@ -128,10 +138,9 @@ export const useTogetherCoins = (userId: string | undefined) => {
           table: 'profiles',
           filter: `id=eq.${userId}`,
         },
-        (payload) => {
-          if (payload.new && 'together_coins' in payload.new) {
-            setCoins(payload.new.together_coins as number);
-          }
+        () => {
+          // Refetch to get updated balance (handles admin status too)
+          fetchCoins();
         }
       )
       .subscribe();

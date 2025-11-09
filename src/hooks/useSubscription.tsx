@@ -16,15 +16,13 @@ export const useSubscription = (userId: string | undefined) => {
 
     const checkSubscription = async () => {
       try {
-        // Use secure function instead of direct table access
+        // Check if user is admin or has active subscription
         const { data, error } = await supabase
-          .rpc('get_user_subscription_status')
-          .maybeSingle();
+          .rpc('is_premium_user', { _user_id: userId });
 
         if (error) throw error;
 
-        const isActive = data?.status === 'active' || data?.status === 'trialing';
-        setIsPremium(isActive);
+        setIsPremium(data || false);
       } catch (error) {
         console.error('Error checking subscription:', error);
         toast({
@@ -39,8 +37,8 @@ export const useSubscription = (userId: string | undefined) => {
 
     checkSubscription();
 
-    // Subscribe to subscription changes
-    const channel = supabase
+    // Subscribe to changes that affect premium status
+    const subscriptionChannel = supabase
       .channel('subscription-changes')
       .on(
         'postgres_changes',
@@ -50,21 +48,27 @@ export const useSubscription = (userId: string | undefined) => {
           table: 'subscriptions',
           filter: `user_id=eq.${userId}`,
         },
-        async () => {
-          // Re-fetch from secure function when subscription changes
-          const { data } = await supabase
-            .rpc('get_user_subscription_status')
-            .maybeSingle();
-          
-          const newStatus = data?.status;
-          const isActive = newStatus === 'active' || newStatus === 'trialing';
-          setIsPremium(isActive);
-        }
+        checkSubscription
+      )
+      .subscribe();
+
+    const rolesChannel = supabase
+      .channel('role-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_roles',
+          filter: `user_id=eq.${userId}`,
+        },
+        checkSubscription
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(subscriptionChannel);
+      supabase.removeChannel(rolesChannel);
     };
   }, [userId, toast]);
 
