@@ -125,37 +125,43 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
   return (
     <div className="fixed bottom-24 right-4 z-40 pointer-events-none">
       <div className="pointer-events-auto">
-        <Card
-          className={`
-            ${isExpanded ? 'w-72' : 'w-20 h-20'}
-            transition-all duration-500 ease-in-out
-            ${glowColor}
-            ring-2 ${ringColor}
-            animate-pulse
-            cursor-pointer
-            overflow-hidden
-            bg-background/95 backdrop-blur-sm
-          `}
-          onClick={() => setIsExpanded(!isExpanded)}
-        >
-          {!isExpanded ? (
-            // Collapsed view - just the gift icon
-            <div className="w-full h-full flex items-center justify-center relative">
-              {giftImages[activeGift.gift_image] ? (
-                <img
-                  src={giftImages[activeGift.gift_image]}
-                  alt={activeGift.gift_name}
-                  className="w-14 h-14 object-contain"
-                />
-              ) : (
-                <Gift className="w-10 h-10 text-primary" />
-              )}
-              <Badge className="absolute -top-1 -right-1 bg-red-500 text-white px-1 py-0 text-[10px]">
-                New
-              </Badge>
-            </div>
-          ) : (
-            // Expanded view - full details
+        {!isExpanded ? (
+          // Collapsed view - just the gift icon without background
+          <div 
+            className={`
+              relative cursor-pointer
+              ${glowColor}
+              animate-[pulse_3s_ease-in-out_infinite]
+            `}
+            onClick={() => setIsExpanded(true)}
+          >
+            {giftImages[activeGift.gift_image] ? (
+              <img
+                src={giftImages[activeGift.gift_image]}
+                alt={activeGift.gift_name}
+                className="w-28 h-28 object-contain drop-shadow-2xl"
+              />
+            ) : (
+              <Gift className="w-24 h-24 text-primary drop-shadow-2xl" />
+            )}
+            <Badge className="absolute -top-2 -right-2 bg-red-500 text-white px-2 py-1 text-xs">
+              New
+            </Badge>
+          </div>
+        ) : (
+          // Expanded view - full details
+          <Card
+            className={`
+              w-72
+              transition-all duration-500 ease-in-out
+              ${glowColor}
+              ring-2 ${ringColor}
+              cursor-pointer
+              overflow-hidden
+              bg-background/95 backdrop-blur-sm
+            `}
+            onClick={() => setIsExpanded(false)}
+          >
             <div className="p-4 space-y-3">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-2">
@@ -196,8 +202,8 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
                 Tap to collapse • Hover for details
               </div>
             </div>
-          )}
-        </Card>
+          </Card>
+        )}
       </div>
     </div>
   );
