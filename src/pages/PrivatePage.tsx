@@ -451,7 +451,8 @@ const PrivatePage = () => {
                 } else if (item.id === 'videos') {
                   setShowVideoGallery(true);
                 } else if (item.id === 'fantasies') {
-                  navigate('/desires');
+                  sessionStorage.setItem('private_vault_unlocked', 'true');
+                  navigate('/fantasies');
                 } else if (item.route) {
                   // Preserve unlocked state while navigating within private sections
                   sessionStorage.setItem('private_vault_unlocked', 'true');

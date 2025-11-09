@@ -15,7 +15,6 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
 import { GalleryUploadButton } from "@/components/GalleryUploadButton";
 import { CouplePictureUpload, CouplePictureUploadButton } from "@/components/CouplePictureUpload";
-import { CravingBoard } from "@/components/CravingBoard";
 import { BackgroundSlideshow } from "@/components/BackgroundSlideshow";
 import { BackgroundUploadManager } from "@/components/BackgroundUploadManager";
 import { FeelingStatusSelector } from "@/components/FeelingStatusSelector";
@@ -634,32 +633,6 @@ const Dashboard = () => {
     );
   }
 
-  if (activeView === "cravings") {
-    return (
-      <div className="min-h-screen bg-muted pb-20">
-        <div className="p-4 border-b bg-card flex justify-between items-center">
-          <h2 className="text-xl font-semibold">{t('cravingBoard')}</h2>
-          <Button variant="ghost" onClick={() => setActiveView("home")}>Close</Button>
-        </div>
-        <div className="p-4 max-w-2xl mx-auto">
-          <CravingBoard
-            coupleId={coupleData.coupleId}
-            userId={user!.id}
-            partnerName={coupleData.partner?.full_name || "Partner"}
-          />
-        </div>
-        <BottomNavigation
-          activeView={activeView}
-          onSettingsClick={() => setShowSettings(true)}
-          onViewChange={setActiveView}
-          pendingGamesCount={pendingGamesCount}
-          newFlirtsCount={newFlirtsCount}
-          newVaultCount={newVaultCount}
-        />
-      </div>
-    );
-  }
-
   if (activeView === "journal") {
     return (
       <div className="min-h-screen bg-muted pb-20">
@@ -899,7 +872,7 @@ const Dashboard = () => {
           <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => navigate('/flirts')}>
             <Flame className="w-10 h-10 text-[hsl(200_30%_60%)]" strokeWidth={1.5} />
           </Button>
-          <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => setActiveView("cravings")}>
+          <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => navigate('/desires')}>
             <Heart className="w-10 h-10 text-[hsl(200_30%_60%)]" strokeWidth={1.5} />
           </Button>
           <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => setActiveView("locked")}>
