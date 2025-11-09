@@ -157,6 +157,7 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
 
   const handleTouchMove = (e: TouchEvent) => {
     if (!isDragging) return;
+    e.preventDefault(); // Prevent pull-to-refresh
     const touch = e.touches[0];
     const deltaX = touch.clientX - dragRef.current.startX;
     const deltaY = touch.clientY - dragRef.current.startY;
@@ -174,7 +175,7 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
     if (isDragging) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
-      window.addEventListener('touchmove', handleTouchMove);
+      window.addEventListener('touchmove', handleTouchMove, { passive: false });
       window.addEventListener('touchend', handleTouchEnd);
       return () => {
         window.removeEventListener('mousemove', handleMouseMove);
