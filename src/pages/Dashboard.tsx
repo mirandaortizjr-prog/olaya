@@ -44,6 +44,7 @@ import { useCoupleProgress } from "@/hooks/useCoupleProgress";
 import { SharedJournalForm } from "@/components/SharedJournalForm";
 import { SharedJournalList } from "@/components/SharedJournalList";
 import { useMusicPlayer } from "@/contexts/MusicPlayerContext";
+import FloatingGifts from "@/components/FloatingGifts";
 
 interface CoupleData {
   coupleId: string;
@@ -909,6 +910,8 @@ const Dashboard = () => {
           </Card>
         </div>
       )}
+
+      {coupleData.coupleId && <FloatingGifts coupleId={coupleData.coupleId} />}
 
       <BottomNavigation
         activeView={activeView}

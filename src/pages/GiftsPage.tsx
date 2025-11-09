@@ -81,13 +81,56 @@ const GiftsPage = () => {
     }
   };
 
-  const handlePurchase = (gift: ShopItem) => {
+  const handlePurchase = async (gift: ShopItem) => {
     if (coins < gift.price) {
       toast.error("Not enough coins! Buy more to send this gift.");
       return;
     }
-    toast.success(`Purchasing ${gift.name}...`);
-    // TODO: Implement actual purchase logic
+
+    try {
+      // Get couple_id
+      const { data: coupleData } = await supabase
+        .from('couple_members')
+        .select('couple_id')
+        .eq('user_id', user?.id)
+        .single();
+
+      if (!coupleData) {
+        toast.error("You need to be in a couple to send gifts");
+        return;
+      }
+
+      // Insert purchased gift
+      const { error: giftError } = await supabase
+        .from('purchased_gifts')
+        .insert({
+          couple_id: coupleData.couple_id,
+          sender_id: user.id,
+          gift_id: gift.id,
+          gift_name: gift.name,
+          gift_image: gift.image_url,
+        });
+
+      if (giftError) throw giftError;
+
+      // Deduct coins
+      const { error: coinError } = await supabase
+        .from('coin_transactions')
+        .insert({
+          user_id: user.id,
+          couple_id: coupleData.couple_id,
+          amount: gift.price,
+          transaction_type: 'spent',
+          description: `Purchased ${gift.name}`,
+        });
+
+      if (coinError) throw coinError;
+
+      toast.success(`${gift.name} sent! 💝`);
+    } catch (error) {
+      console.error('Error purchasing gift:', error);
+      toast.error("Failed to send gift");
+    }
   };
 
   return (

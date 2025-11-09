@@ -1157,6 +1157,39 @@ export type Database = {
           },
         ]
       }
+      purchased_gifts: {
+        Row: {
+          couple_id: string
+          created_at: string
+          gift_id: string
+          gift_image: string
+          gift_name: string
+          id: string
+          purchased_at: string
+          sender_id: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          gift_id: string
+          gift_image: string
+          gift_name: string
+          id?: string
+          purchased_at?: string
+          sender_id: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          gift_id?: string
+          gift_image?: string
+          gift_name?: string
+          id?: string
+          purchased_at?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           auth: string
