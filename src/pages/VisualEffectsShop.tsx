@@ -143,7 +143,9 @@ export default function VisualEffectsShop() {
   };
 
   const handlePreview = (effect: VisualEffect) => {
-    setPreviewEffect({
+    console.log('Preview clicked for:', effect.name, effect);
+    
+    const previewData = {
       id: 'preview',
       effect_id: effect.id,
       expires_at: new Date(Date.now() + 10000).toISOString(),
@@ -153,7 +155,10 @@ export default function VisualEffectsShop() {
         animation: effect.animation,
         behavior: effect.behavior,
       }
-    } as any);
+    };
+    
+    console.log('Setting preview effect:', previewData);
+    setPreviewEffect(previewData as any);
     
     toast({
       title: t.previewStarted,
@@ -161,6 +166,7 @@ export default function VisualEffectsShop() {
     });
 
     setTimeout(() => {
+      console.log('Clearing preview');
       setPreviewEffect(null);
     }, 10000);
   };
