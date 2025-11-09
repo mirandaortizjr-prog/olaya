@@ -271,6 +271,30 @@ export type Database = {
         }
         Relationships: []
       }
+      couple_skins: {
+        Row: {
+          active_skin_id: string
+          couple_id: string
+          created_at: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          active_skin_id?: string
+          couple_id: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          active_skin_id?: string
+          couple_id?: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       couples: {
         Row: {
           anniversary_date: string | null
@@ -1582,6 +1606,33 @@ export type Database = {
           created_at?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_skin_purchases: {
+        Row: {
+          couple_id: string
+          created_at: string | null
+          id: string
+          purchased_at: string | null
+          skin_id: string
+          user_id: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string | null
+          id?: string
+          purchased_at?: string | null
+          skin_id: string
+          user_id: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string | null
+          id?: string
+          purchased_at?: string | null
+          skin_id?: string
           user_id?: string
         }
         Relationships: []
