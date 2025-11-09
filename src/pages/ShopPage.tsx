@@ -57,14 +57,6 @@ export default function ShopPage() {
     getUser();
   }, []);
 
-  useEffect(() => {
-    const onPop = (e: PopStateEvent) => {
-      e.preventDefault();
-      navigate('/dashboard', { replace: true });
-    };
-    window.addEventListener('popstate', onPop);
-    return () => window.removeEventListener('popstate', onPop);
-  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-background pb-20">
