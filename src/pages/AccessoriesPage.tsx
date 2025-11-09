@@ -98,6 +98,13 @@ export default function AccessoriesPage() {
       'Ocean Hearts': 'ocean-hearts',
       'Classic Love': 'classic-love',
       'Diamond Lattice': 'diamond-lattice',
+      'Golden Marble': 'golden-marble',
+      'White Radiance': 'white-radiance',
+      'Rose Gold Shimmer': 'rose-gold-shimmer',
+      'Pink Flowers': 'pink-flowers',
+      'Celestial Watercolor': 'celestial-watercolor',
+      'Pink Floral Garden': 'pink-floral-garden',
+      'Pink Gold Watercolor': 'pink-gold-watercolor',
     };
     return skinMapping[name] || null;
   };

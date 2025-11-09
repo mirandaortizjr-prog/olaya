@@ -5,6 +5,13 @@ import burgundyRomance from '@/assets/skins/burgundy-romance.png';
 import oceanHearts from '@/assets/skins/ocean-hearts.png';
 import classicLove from '@/assets/skins/classic-love.png';
 import diamondLattice from '@/assets/skins/diamond-lattice.png';
+import goldenMarble from '@/assets/skins/golden-marble.png';
+import whiteRadiance from '@/assets/skins/white-radiance.png';
+import roseGoldShimmer from '@/assets/skins/rose-gold-shimmer.png';
+import pinkFlowers from '@/assets/skins/pink-flowers.png';
+import celestialWatercolor from '@/assets/skins/celestial-watercolor.png';
+import pinkFloralGarden from '@/assets/skins/pink-floral-garden.png';
+import pinkGoldWatercolor from '@/assets/skins/pink-gold-watercolor.png';
 
 export const SKINS = {
   'default': {
@@ -46,6 +53,41 @@ export const SKINS = {
     id: 'diamond-lattice',
     name: 'Diamond Lattice',
     image: diamondLattice,
+  },
+  'golden-marble': {
+    id: 'golden-marble',
+    name: 'Golden Marble',
+    image: goldenMarble,
+  },
+  'white-radiance': {
+    id: 'white-radiance',
+    name: 'White Radiance',
+    image: whiteRadiance,
+  },
+  'rose-gold-shimmer': {
+    id: 'rose-gold-shimmer',
+    name: 'Rose Gold Shimmer',
+    image: roseGoldShimmer,
+  },
+  'pink-flowers': {
+    id: 'pink-flowers',
+    name: 'Pink Flowers',
+    image: pinkFlowers,
+  },
+  'celestial-watercolor': {
+    id: 'celestial-watercolor',
+    name: 'Celestial Watercolor',
+    image: celestialWatercolor,
+  },
+  'pink-floral-garden': {
+    id: 'pink-floral-garden',
+    name: 'Pink Floral Garden',
+    image: pinkFloralGarden,
+  },
+  'pink-gold-watercolor': {
+    id: 'pink-gold-watercolor',
+    name: 'Pink Gold Watercolor',
+    image: pinkGoldWatercolor,
   },
 } as const;
 

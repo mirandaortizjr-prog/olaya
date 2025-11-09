@@ -108,9 +108,17 @@ export const useSkins = (coupleId: string | null, userId: string | null) => {
     
     // Update background image or remove it
     if (skin.image) {
-      root.style.setProperty('--background-skin', `url(${skin.image})`);
+      root.style.backgroundImage = `url(${skin.image})`;
+      root.style.backgroundSize = 'cover';
+      root.style.backgroundPosition = 'center';
+      root.style.backgroundRepeat = 'no-repeat';
+      root.style.backgroundAttachment = 'fixed';
     } else {
-      root.style.setProperty('--background-skin', 'none');
+      root.style.backgroundImage = 'none';
+      root.style.backgroundSize = '';
+      root.style.backgroundPosition = '';
+      root.style.backgroundRepeat = '';
+      root.style.backgroundAttachment = '';
     }
     
     setTimeout(() => {
