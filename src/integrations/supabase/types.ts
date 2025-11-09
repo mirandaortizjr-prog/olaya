@@ -550,6 +550,39 @@ export type Database = {
           },
         ]
       }
+      intimacy_languages: {
+        Row: {
+          couple_id: string
+          created_at: string
+          entry_count: number | null
+          id: string
+          lust_language: Json | null
+          sex_language: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          entry_count?: number | null
+          id?: string
+          lust_language?: Json | null
+          sex_language?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          entry_count?: number | null
+          id?: string
+          lust_language?: Json | null
+          sex_language?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       intimate_journal: {
         Row: {
           couple_id: string

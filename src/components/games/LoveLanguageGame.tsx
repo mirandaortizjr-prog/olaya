@@ -44,8 +44,12 @@ export const LoveLanguageGame = ({ coupleId, userId, partnerId, onBack }: GamePr
         .maybeSingle();
 
       if (userData) {
-        setLustResult(userData.lust_language as QuizResult);
-        setSexResult(userData.sex_language as QuizResult);
+        if (userData.lust_language) {
+          setLustResult(userData.lust_language as unknown as QuizResult);
+        }
+        if (userData.sex_language) {
+          setSexResult(userData.sex_language as unknown as QuizResult);
+        }
       }
 
       // Load partner results if available
@@ -57,8 +61,12 @@ export const LoveLanguageGame = ({ coupleId, userId, partnerId, onBack }: GamePr
           .maybeSingle();
 
         if (partnerData) {
-          setPartnerLustResult(partnerData.lust_language as QuizResult);
-          setPartnerSexResult(partnerData.sex_language as QuizResult);
+          if (partnerData.lust_language) {
+            setPartnerLustResult(partnerData.lust_language as unknown as QuizResult);
+          }
+          if (partnerData.sex_language) {
+            setPartnerSexResult(partnerData.sex_language as unknown as QuizResult);
+          }
         }
       }
     } catch (error) {
@@ -76,12 +84,12 @@ export const LoveLanguageGame = ({ coupleId, userId, partnerId, onBack }: GamePr
 
       const { error } = await supabase
         .from('intimacy_languages')
-        .upsert({
+        .upsert([{
           user_id: userId,
           couple_id: coupleId,
           ...updateData,
           updated_at: new Date().toISOString(),
-        });
+        }] as any);
 
       if (error) throw error;
 

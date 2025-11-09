@@ -6,7 +6,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { lustLanguageQuestions, sexLanguageQuestions } from "@/lib/intimacyLanguages/quizData";
 import { scoreQuiz } from "@/lib/intimacyLanguages/scoring";
 import { QuizResult } from "@/lib/intimacyLanguages/types";
-import { motion, AnimatePresence } from "framer-motion";
 
 interface IntimacyQuizProps {
   type: 'lust' | 'sex';
@@ -49,38 +48,29 @@ export const IntimacyQuiz = ({ type, onComplete, onBack }: IntimacyQuizProps) =>
         </p>
       </div>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentQuestion}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.3 }}
-          className="flex-1 flex flex-col items-center justify-center"
-        >
-          <Card className="w-full max-w-2xl p-8">
-            <h2 className="text-2xl font-semibold mb-8 text-center">
-              {questions[currentQuestion].question}
-            </h2>
-            
-            <div className="space-y-3">
-              {questions[currentQuestion].options.map((option, index) => (
-                <Button
-                  key={index}
-                  variant="outline"
-                  className="w-full h-auto py-4 px-6 text-left justify-start whitespace-normal"
-                  onClick={() => handleAnswer(option.value)}
-                >
-                  <span className="mr-3 text-primary font-semibold">
-                    {String.fromCharCode(65 + index)}.
-                  </span>
-                  <span>{option.text}</span>
-                </Button>
-              ))}
-            </div>
-          </Card>
-        </motion.div>
-      </AnimatePresence>
+      <div className="flex-1 flex flex-col items-center justify-center">
+        <Card className="w-full max-w-2xl p-8">
+          <h2 className="text-2xl font-semibold mb-8 text-center">
+            {questions[currentQuestion].question}
+          </h2>
+          
+          <div className="space-y-3">
+            {questions[currentQuestion].options.map((option, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                className="w-full h-auto py-4 px-6 text-left justify-start whitespace-normal"
+                onClick={() => handleAnswer(option.value)}
+              >
+                <span className="mr-3 text-primary font-semibold">
+                  {String.fromCharCode(65 + index)}.
+                </span>
+                <span>{option.text}</span>
+              </Button>
+            ))}
+          </div>
+        </Card>
+      </div>
     </div>
   );
 };
