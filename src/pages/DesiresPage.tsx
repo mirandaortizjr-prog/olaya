@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Send, Settings } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
+import DesireCustomization from "@/components/DesireCustomization";
 
 const DESIRES_CATEGORIES = {
   emotional: {
@@ -116,10 +117,19 @@ export default function DesiresPage() {
   const [user, setUser] = useState<any>(null);
   const [coupleId, setCoupleId] = useState<string | null>(null);
   const [sending, setSending] = useState<string | null>(null);
+  const [customizeOpen, setCustomizeOpen] = useState(false);
+  const [preferences, setPreferences] = useState<any>(null);
+  const [displayedDesires, setDisplayedDesires] = useState(DESIRES_CATEGORIES);
 
   useEffect(() => {
     checkUser();
   }, []);
+
+  useEffect(() => {
+    if (coupleId) {
+      loadPreferences();
+    }
+  }, [coupleId]);
 
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -137,6 +147,75 @@ export default function DesiresPage() {
 
     if (membership) {
       setCoupleId(membership.couple_id);
+    }
+  };
+
+  const loadPreferences = async () => {
+    if (!coupleId) return;
+
+    const { data } = await supabase
+      .from("couple_desire_preferences")
+      .select("*")
+      .eq("couple_id", coupleId)
+      .maybeSingle();
+
+    setPreferences(data);
+    updateDisplayedDesires(data);
+  };
+
+  const updateDisplayedDesires = (prefs: any) => {
+    if (!prefs) {
+      setDisplayedDesires(DESIRES_CATEGORIES);
+      return;
+    }
+
+    const { show_all, favorite_desires, custom_desires } = prefs;
+
+    if (show_all) {
+      // Show all + custom
+      const newCategories = { ...DESIRES_CATEGORIES };
+      
+      if (custom_desires && custom_desires.length > 0) {
+        newCategories.playful = {
+          ...newCategories.playful,
+          items: [...newCategories.playful.items, ...custom_desires.map((d: any) => ({
+            key: d.id,
+            labelEn: d.labelEn,
+            labelEs: d.labelEs
+          }))]
+        };
+      }
+      
+      setDisplayedDesires(newCategories);
+    } else {
+      // Show only favorites + custom
+      const newCategories = {
+        emotional: { ...DESIRES_CATEGORIES.emotional, items: [] },
+        sensory: { ...DESIRES_CATEGORIES.sensory, items: [] },
+        comfort: { ...DESIRES_CATEGORIES.comfort, items: [] },
+        playful: { ...DESIRES_CATEGORIES.playful, items: [] }
+      };
+
+      Object.entries(DESIRES_CATEGORIES).forEach(([category, data]) => {
+        const filteredItems = data.items.filter((item: any) => 
+          favorite_desires?.includes(item.key)
+        );
+        (newCategories as any)[category].items = filteredItems;
+      });
+
+      // Add custom desires to playful
+      if (custom_desires && custom_desires.length > 0) {
+        newCategories.playful.items = [
+          ...newCategories.playful.items,
+          ...custom_desires.map((d: any) => ({
+            key: d.id,
+            labelEn: d.labelEn,
+            labelEs: d.labelEs
+          }))
+        ];
+      }
+
+      setDisplayedDesires(newCategories);
     }
   };
 
@@ -192,7 +271,13 @@ export default function DesiresPage() {
             <ArrowLeft className="w-6 h-6" />
           </Button>
           <h1 className="text-2xl font-bold">{language === 'es' ? 'Deseos' : 'Desires'}</h1>
-          <div className="w-10" />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setCustomizeOpen(true)}
+          >
+            <Settings className="w-6 h-6" />
+          </Button>
         </div>
       </header>
 
@@ -202,11 +287,11 @@ export default function DesiresPage() {
           {/* Emotional & Relational */}
           <Card className="p-6 bg-gradient-to-br from-pink-500/10 to-rose-500/10">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <span className="text-2xl">{DESIRES_CATEGORIES.emotional.icon}</span>
-              {language === 'es' ? DESIRES_CATEGORIES.emotional.titleEs : DESIRES_CATEGORIES.emotional.titleEn}
+              <span className="text-2xl">{displayedDesires.emotional.icon}</span>
+              {language === 'es' ? displayedDesires.emotional.titleEs : displayedDesires.emotional.titleEn}
             </h2>
             <div className="space-y-1">
-              {DESIRES_CATEGORIES.emotional.items.map((item) => (
+              {displayedDesires.emotional.items.map((item) => (
                 <Button
                   key={item.key}
                   variant="ghost"
@@ -225,11 +310,11 @@ export default function DesiresPage() {
           {/* Sensory & Physical */}
           <Card className="p-6 bg-gradient-to-br from-red-500/10 to-orange-500/10">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <span className="text-2xl">{DESIRES_CATEGORIES.sensory.icon}</span>
-              {language === 'es' ? DESIRES_CATEGORIES.sensory.titleEs : DESIRES_CATEGORIES.sensory.titleEn}
+              <span className="text-2xl">{displayedDesires.sensory.icon}</span>
+              {language === 'es' ? displayedDesires.sensory.titleEs : displayedDesires.sensory.titleEn}
             </h2>
             <div className="space-y-1">
-              {DESIRES_CATEGORIES.sensory.items.map((item) => (
+              {displayedDesires.sensory.items.map((item) => (
                 <Button
                   key={item.key}
                   variant="ghost"
@@ -248,11 +333,11 @@ export default function DesiresPage() {
           {/* Comfort & Care */}
           <Card className="p-6 bg-gradient-to-br from-blue-500/10 to-cyan-500/10">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <span className="text-2xl">{DESIRES_CATEGORIES.comfort.icon}</span>
-              {language === 'es' ? DESIRES_CATEGORIES.comfort.titleEs : DESIRES_CATEGORIES.comfort.titleEn}
+              <span className="text-2xl">{displayedDesires.comfort.icon}</span>
+              {language === 'es' ? displayedDesires.comfort.titleEs : displayedDesires.comfort.titleEn}
             </h2>
             <div className="space-y-1">
-              {DESIRES_CATEGORIES.comfort.items.map((item) => (
+              {displayedDesires.comfort.items.map((item) => (
                 <Button
                   key={item.key}
                   variant="ghost"
@@ -271,11 +356,11 @@ export default function DesiresPage() {
           {/* Playful & Mischievous */}
           <Card className="p-6 bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10">
             <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <span className="text-2xl">{DESIRES_CATEGORIES.playful.icon}</span>
-              {language === 'es' ? DESIRES_CATEGORIES.playful.titleEs : DESIRES_CATEGORIES.playful.titleEn}
+              <span className="text-2xl">{displayedDesires.playful.icon}</span>
+              {language === 'es' ? displayedDesires.playful.titleEs : displayedDesires.playful.titleEn}
             </h2>
             <div className="space-y-1">
-              {DESIRES_CATEGORIES.playful.items.map((item) => (
+              {displayedDesires.playful.items.map((item) => (
                 <Button
                   key={item.key}
                   variant="ghost"
@@ -292,6 +377,19 @@ export default function DesiresPage() {
           </Card>
         </div>
       </div>
+
+      {/* Customization Dialog */}
+      {coupleId && (
+        <DesireCustomization
+          open={customizeOpen}
+          onOpenChange={setCustomizeOpen}
+          coupleId={coupleId}
+          allDesires={Object.values(DESIRES_CATEGORIES).flatMap(cat => 
+            cat.items.map(item => ({ ...item, category: cat.titleEn }))
+          )}
+          onPreferencesUpdate={loadPreferences}
+        />
+      )}
     </div>
   );
 }

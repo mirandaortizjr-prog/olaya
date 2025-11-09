@@ -128,6 +128,36 @@ export type Database = {
           },
         ]
       }
+      couple_desire_preferences: {
+        Row: {
+          couple_id: string
+          created_at: string
+          custom_desires: Json | null
+          favorite_desires: Json | null
+          id: string
+          show_all: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          custom_desires?: Json | null
+          favorite_desires?: Json | null
+          id?: string
+          show_all?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          custom_desires?: Json | null
+          favorite_desires?: Json | null
+          id?: string
+          show_all?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       couple_members: {
         Row: {
           couple_id: string
