@@ -135,7 +135,7 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
               <img
                 src={giftImages[activeGift.gift_image]}
                 alt={activeGift.gift_name}
-                className={`w-28 h-28 object-contain ${glowColor}`}
+                className="w-42 h-42 object-contain"
                 style={{
                   filter: `drop-shadow(0 0 20px ${
                     senderGender === 'female' 
@@ -147,7 +147,7 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
                 }}
               />
             ) : (
-              <Gift className={`w-24 h-24 text-primary ${glowColor}`} />
+              <Gift className={`w-36 h-36 text-primary ${glowColor}`} />
             )}
           </div>
         ) : (
