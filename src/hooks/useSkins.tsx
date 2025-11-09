@@ -108,13 +108,13 @@ export const useSkins = (coupleId: string | null, userId: string | null) => {
     
     // Update purple gradient areas with skin image or restore original gradients
     if (skin.image) {
-      // Apply skin to all purple gradient areas
-      const skinUrl = `url(${skin.image})`;
-      root.style.setProperty('--video-gradient', skinUrl);
-      root.style.setProperty('--nav-gradient', skinUrl);
-      root.style.setProperty('--fantasy-consider', skinUrl);
-      root.style.setProperty('--gradient-romantic', skinUrl);
-      root.style.setProperty('--gradient-vibrant', skinUrl);
+      // Apply skin with proper CSS background properties for full coverage
+      const skinStyles = `url(${skin.image}) center/cover no-repeat fixed`;
+      root.style.setProperty('--video-gradient', skinStyles);
+      root.style.setProperty('--nav-gradient', skinStyles);
+      root.style.setProperty('--fantasy-consider', skinStyles);
+      root.style.setProperty('--gradient-romantic', skinStyles);
+      root.style.setProperty('--gradient-vibrant', skinStyles);
     } else {
       // Restore original purple gradients
       root.style.setProperty('--video-gradient', 'linear-gradient(180deg, hsl(280 50% 25%), hsl(280 60% 15%))');
