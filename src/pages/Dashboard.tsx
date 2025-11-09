@@ -45,6 +45,8 @@ import { SharedJournalForm } from "@/components/SharedJournalForm";
 import { SharedJournalList } from "@/components/SharedJournalList";
 import { useMusicPlayer } from "@/contexts/MusicPlayerContext";
 import FloatingGifts from "@/components/FloatingGifts";
+import { ActiveGiftDisplay } from "@/components/ActiveGiftDisplay";
+import { giftImages } from "@/lib/giftImages";
 
 interface CoupleData {
   coupleId: string;
@@ -1063,6 +1065,15 @@ const Dashboard = () => {
         songs={coupleSongs}
         onUpdate={setCoupleSongs}
       />
+
+      {/* Active Gift Display - Shows gifts received in last 24 hours */}
+      {user && coupleData.coupleId && (
+        <ActiveGiftDisplay
+          userId={user.id}
+          coupleId={coupleData.coupleId}
+          giftImages={giftImages}
+        />
+      )}
     </div>
   );
 };
