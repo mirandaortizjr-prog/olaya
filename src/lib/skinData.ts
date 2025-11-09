@@ -19,6 +19,10 @@ import baseballVintage from '@/assets/skins/baseball-vintage.png';
 import footballField from '@/assets/skins/football-field.png';
 import basketballFire from '@/assets/skins/basketball-fire.png';
 import footballTexture from '@/assets/skins/football-texture.png';
+import basketballElite from '@/assets/skins/basketball-elite.png';
+import basketballClassic from '@/assets/skins/basketball-classic.png';
+import footballBlaze from '@/assets/skins/football-blaze.png';
+import basketballExplosion from '@/assets/skins/basketball-explosion.png';
 
 export const SKINS = {
   'default': {
@@ -130,6 +134,26 @@ export const SKINS = {
     id: 'football-texture',
     name: 'Football Texture',
     image: footballTexture,
+  },
+  'basketball-elite': {
+    id: 'basketball-elite',
+    name: 'Basketball Elite',
+    image: basketballElite,
+  },
+  'basketball-classic': {
+    id: 'basketball-classic',
+    name: 'Basketball Classic',
+    image: basketballClassic,
+  },
+  'football-blaze': {
+    id: 'football-blaze',
+    name: 'Football Blaze',
+    image: footballBlaze,
+  },
+  'basketball-explosion': {
+    id: 'basketball-explosion',
+    name: 'Basketball Explosion',
+    image: basketballExplosion,
   },
 } as const;
 

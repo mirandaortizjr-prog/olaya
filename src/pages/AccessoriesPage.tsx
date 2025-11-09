@@ -112,6 +112,10 @@ export default function AccessoriesPage() {
       'Football Field': 'football-field',
       'Basketball Fire': 'basketball-fire',
       'Football Texture': 'football-texture',
+      'Basketball Elite': 'basketball-elite',
+      'Basketball Classic': 'basketball-classic',
+      'Football Blaze': 'football-blaze',
+      'Basketball Explosion': 'basketball-explosion',
     };
     return skinMapping[name] || null;
   };
