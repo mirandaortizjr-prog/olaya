@@ -120,13 +120,18 @@ export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
   };
 
   const getAnimation = (animation: string) => {
-    const animationMap: Record<string, string> = {
-      falling: 'animate-fall-leaf',
-      floating: 'animate-float',
-      flutter: 'animate-flutter',
-      fade: 'animate-fade-in',
-    };
-    return animationMap[animation] || 'animate-fall-leaf';
+    // All effects should fall down, but can have additional behavior
+    return 'animate-fall-leaf';
+  };
+
+  const getAdditionalAnimation = (behavior: string) => {
+    if (behavior.includes('shimmer') || behavior.includes('blink') || behavior.includes('flicker')) {
+      return 'animate-shimmer';
+    }
+    if (behavior.includes('pulse') || behavior.includes('glow')) {
+      return 'animate-pulse';
+    }
+    return '';
   };
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -145,8 +150,7 @@ export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
               className={`
                 ${effect.visual_effects.effect_type === 'phrase' ? 'text-base font-bold' : 'text-3xl'}
                 text-foreground opacity-90 drop-shadow-lg
-                ${effect.visual_effects.behavior.includes('pulse') ? 'animate-pulse' : ''}
-                ${effect.visual_effects.behavior.includes('shimmer') ? 'animate-shimmer' : ''}
+                ${getAdditionalAnimation(effect.visual_effects.behavior)}
               `}
               style={{
                 color: effect.visual_effects.effect_type === 'phrase' 
