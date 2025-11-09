@@ -24,7 +24,8 @@ export default function VisualEffectsShop() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [coupleId, setCoupleId] = useState<string>('');
-  const [effects, setEffects] = useState<VisualEffect[]>([]);
+  const [objectEffects, setObjectEffects] = useState<VisualEffect[]>([]);
+  const [phraseEffects, setPhraseEffects] = useState<VisualEffect[]>([]);
   const [loading, setLoading] = useState(true);
   const { coins, spendCoins } = useTogetherCoins(user?.id);
 
@@ -53,7 +54,8 @@ export default function VisualEffectsShop() {
         .order('name');
 
       if (data) {
-        setEffects(data);
+        setObjectEffects(data.filter(e => e.category === 'objects'));
+        setPhraseEffects(data.filter(e => e.category === 'phrases'));
       }
       setLoading(false);
     };
@@ -129,9 +131,6 @@ export default function VisualEffectsShop() {
     return type === 'phrase' ? <Heart className="h-6 w-6" /> : <Sparkles className="h-6 w-6" />;
   };
 
-  const objectEffects = effects.filter(e => e.category === 'objects');
-  const phraseEffects = effects.filter(e => e.category === 'phrases');
-
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
@@ -155,85 +154,87 @@ export default function VisualEffectsShop() {
         </div>
       </div>
 
-      {loading ? (
-        <div className="text-center py-12 text-muted-foreground">Loading effects...</div>
-      ) : (
-        <>
-          {/* Romantic Objects Bundle */}
-          <div className="max-w-lg mx-auto px-4 py-6">
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold text-foreground mb-1">Romantic Objects</h2>
-              <p className="text-sm text-muted-foreground">
-                Visual animations that create a magical atmosphere for 24 hours
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              {objectEffects.map((effect) => (
-                <Card
-                  key={effect.id}
-                  className="bg-card border-border hover:bg-accent transition-all p-4"
-                >
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center justify-center h-16 text-primary">
-                      <Sparkles className="h-6 w-6" />
+      <div className="max-w-lg mx-auto px-4 py-6 space-y-8">
+        {loading ? (
+          <div className="text-center py-12 text-muted-foreground">Loading effects...</div>
+        ) : (
+          <>
+            {/* Romantic Objects */}
+            <div>
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold text-foreground mb-1">Romantic Objects</h2>
+                <p className="text-sm text-muted-foreground">
+                  Beautiful falling objects that create a magical atmosphere for 24 hours
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {objectEffects.map((effect) => (
+                  <Card
+                    key={effect.id}
+                    className="bg-card border-border hover:bg-accent transition-all p-4"
+                  >
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-center h-16 text-primary">
+                        {getEffectIcon(effect.effect_type)}
+                      </div>
+                      <div className="text-center">
+                        <p className="font-medium text-foreground text-sm mb-1">{effect.name}</p>
+                        <p className="text-xs text-muted-foreground line-clamp-2">{effect.behavior}</p>
+                      </div>
+                      <Button
+                        onClick={() => handlePurchase(effect)}
+                        disabled={coins < effect.price}
+                        className="w-full"
+                        size="sm"
+                      >
+                        <img src={togetherCoinsIcon} alt="Coins" className="w-4 h-4 mr-1.5" />
+                        {effect.price}
+                      </Button>
                     </div>
-                    <div className="text-center">
-                      <p className="font-medium text-foreground text-sm mb-1">{effect.name}</p>
-                      <p className="text-xs text-muted-foreground line-clamp-2">{effect.behavior}</p>
-                    </div>
-                    <Button
-                      onClick={() => handlePurchase(effect)}
-                      disabled={coins < effect.price}
-                      className="w-full"
-                      size="sm"
-                    >
-                      <img src={togetherCoinsIcon} alt="Coins" className="w-4 h-4 mr-1.5" />
-                      {effect.price}
-                    </Button>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Romantic Phrases Bundle */}
-          <div className="max-w-lg mx-auto px-4 py-6">
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold text-foreground mb-1">Romantic Phrases</h2>
-              <p className="text-sm text-muted-foreground">
-                Neon-glowing phrases that express your feelings for 24 hours
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              {phraseEffects.map((effect) => (
-                <Card
-                  key={effect.id}
-                  className="bg-card border-border hover:bg-accent transition-all p-4"
-                >
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center justify-center h-16 text-primary">
-                      <Heart className="h-6 w-6" />
+            {/* Romantic Phrases */}
+            <div>
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold text-foreground mb-1">Romantic Phrases</h2>
+                <p className="text-sm text-muted-foreground">
+                  Neon-glow phrases that cascade down your screen for 24 hours
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {phraseEffects.map((effect) => (
+                  <Card
+                    key={effect.id}
+                    className="bg-card border-border hover:bg-accent transition-all p-4"
+                  >
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-center h-16 text-primary">
+                        {getEffectIcon(effect.effect_type)}
+                      </div>
+                      <div className="text-center">
+                        <p className="font-medium text-foreground text-sm mb-1">{effect.name}</p>
+                        <p className="text-xs text-muted-foreground line-clamp-2">{effect.behavior}</p>
+                      </div>
+                      <Button
+                        onClick={() => handlePurchase(effect)}
+                        disabled={coins < effect.price}
+                        className="w-full"
+                        size="sm"
+                      >
+                        <img src={togetherCoinsIcon} alt="Coins" className="w-4 h-4 mr-1.5" />
+                        {effect.price}
+                      </Button>
                     </div>
-                    <div className="text-center">
-                      <p className="font-medium text-foreground text-sm mb-1">{effect.name}</p>
-                      <p className="text-xs text-muted-foreground line-clamp-2">{effect.behavior}</p>
-                    </div>
-                    <Button
-                      onClick={() => handlePurchase(effect)}
-                      disabled={coins < effect.price}
-                      className="w-full"
-                      size="sm"
-                    >
-                      <img src={togetherCoinsIcon} alt="Coins" className="w-4 h-4 mr-1.5" />
-                      {effect.price}
-                    </Button>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                ))}
+              </div>
             </div>
-          </div>
-        </>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
