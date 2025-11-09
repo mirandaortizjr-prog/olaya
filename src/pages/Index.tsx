@@ -3,11 +3,20 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useSubscription } from "@/hooks/useSubscription";
 import olayaLogo from "@/assets/olaya-logo.png";
 import shopIcon from "@/assets/shop-icon.png";
 
 const Index = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
+  const [userId, setUserId] = useState<string | undefined>();
+  const [hasCoupleProfile, setHasCoupleProfile] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const { isPremium } = useSubscription(userId);
   
   const features = [
     {
@@ -64,6 +73,47 @@ const Index = () => {
     "Priority customer support",
     "Early access to new features",
   ];
+
+  useEffect(() => {
+    const checkUserStatus = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          setUserId(user.id);
+          
+          // Check if user has a couple profile
+          const { data: coupleData } = await supabase
+            .from('couples')
+            .select('id')
+            .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`)
+            .single();
+          
+          if (coupleData) {
+            setHasCoupleProfile(true);
+            // If user is authenticated and has a couple profile, redirect to dashboard
+            navigate('/dashboard');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking user status:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkUserStatus();
+  }, [navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="animate-pulse">
+          <img src={olayaLogo} alt="OLAYA Logo" className="w-40 h-40" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black">
