@@ -52,17 +52,14 @@ const FloatingGifts = ({ coupleId, userId, receiverGender = 'female' }: Floating
     if (!coupleId) return;
 
     const fetchActiveGifts = async () => {
-      const twentyFourHoursAgo = new Date();
-      twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
-
-      // Only show gifts sent TO this user (not sent BY this user)
+      // Show most recent gifts sent TO this user (not sent BY this user)
       const { data, error } = await supabase
         .from('purchased_gifts')
         .select('*')
         .eq('couple_id', coupleId)
         .neq('sender_id', userId)
-        .gte('purchased_at', twentyFourHoursAgo.toISOString())
-        .order('purchased_at', { ascending: true });
+        .order('purchased_at', { ascending: false })
+        .limit(5);
 
       if (!error && data) {
         setActiveGifts(data);
@@ -95,7 +92,7 @@ const FloatingGifts = ({ coupleId, userId, receiverGender = 'female' }: Floating
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [coupleId]);
+  }, [coupleId, userId]);
 
   // Rotate gifts every 10 seconds
   useEffect(() => {
