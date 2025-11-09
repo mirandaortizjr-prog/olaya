@@ -11,7 +11,7 @@ interface RitualDisplayProps {
 }
 
 export const RitualDisplay = ({ primaryLanguage, entryCount }: RitualDisplayProps) => {
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   const [ritualIndex, setRitualIndex] = useState(0);
   
   const ritual = getNextRitual(primaryLanguage, entryCount + ritualIndex);
@@ -22,7 +22,7 @@ export const RitualDisplay = ({ primaryLanguage, entryCount }: RitualDisplayProp
         <div className="flex items-center gap-2">
           <Sparkles className="w-6 h-6 text-primary" />
           <h3 className="text-xl font-semibold">
-            {language === 'es' ? 'Ritual Sugerido' : 'Suggested Ritual'}
+            {t('suggestedRitual')}
           </h3>
         </div>
         <Button
@@ -39,9 +39,7 @@ export const RitualDisplay = ({ primaryLanguage, entryCount }: RitualDisplayProp
       
       <div className="mt-4 pt-4 border-t">
         <p className="text-sm text-muted-foreground">
-          {language === 'es' 
-            ? `Diseñado para tu lenguaje: ${primaryLanguage}` 
-            : `Designed for your ${primaryLanguage} language`}
+          {t('designedForLanguage')} {primaryLanguage}
         </p>
       </div>
     </Card>

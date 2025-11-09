@@ -155,7 +155,7 @@ export const LoveLanguageGame = ({ coupleId, userId, partnerId, onBack }: GamePr
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h2 className="text-xl font-semibold">
-            {language === 'es' ? 'Tu Perfil de Intimidad' : 'Your Intimacy Profile'}
+            {t('yourIntimacyProfile')}
           </h2>
         </div>
         <IntimacyProfile
@@ -175,7 +175,7 @@ export const LoveLanguageGame = ({ coupleId, userId, partnerId, onBack }: GamePr
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h2 className="text-xl font-semibold">
-            {language === 'es' ? 'Rituales' : 'Rituals'}
+            {t('viewRituals')}
           </h2>
         </div>
         <div className="p-4">
@@ -196,7 +196,7 @@ export const LoveLanguageGame = ({ coupleId, userId, partnerId, onBack }: GamePr
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h2 className="text-xl font-semibold">
-            {language === 'es' ? 'Comparación de Pareja' : 'Partner Comparison'}
+            {t('partnerComparison')}
           </h2>
         </div>
         <PartnerComparison userLanguages={userLanguages} partnerLanguages={partnerLanguages} />
@@ -211,7 +211,7 @@ export const LoveLanguageGame = ({ coupleId, userId, partnerId, onBack }: GamePr
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <h2 className="text-xl font-semibold">
-          {language === 'es' ? 'Lenguajes de Intimidad' : 'Intimacy Languages'}
+          {t('intimacyLanguages')}
         </h2>
       </div>
       
@@ -220,21 +220,17 @@ export const LoveLanguageGame = ({ coupleId, userId, partnerId, onBack }: GamePr
           <div className="flex items-center gap-3 mb-4">
             <Flame className="w-8 h-8 text-rose-500" />
             <h3 className="text-xl font-semibold">
-              {language === 'es' ? 'Lenguaje de Deseo' : 'Lust Language'}
+              {t('lustLanguage')}
             </h3>
           </div>
           <p className="text-muted-foreground mb-4">
-            {language === 'es' 
-              ? 'Descubre qué enciende tu deseo: romántico, sensual, juguetón o dominante.'
-              : 'Discover what ignites your desire: romantic, sensual, playful, or dominant.'}
+            {t('discoverLustLanguage')}
           </p>
           <Button 
             className="w-full"
             onClick={() => setView('lust-quiz')}
           >
-            {lustResult 
-              ? (language === 'es' ? 'Retomar Quiz' : 'Retake Quiz')
-              : (language === 'es' ? 'Comenzar Quiz' : 'Start Quiz')}
+            {lustResult ? t('retakeQuiz') : t('startQuiz')}
           </Button>
         </Card>
 
@@ -242,21 +238,17 @@ export const LoveLanguageGame = ({ coupleId, userId, partnerId, onBack }: GamePr
           <div className="flex items-center gap-3 mb-4">
             <Sparkles className="w-8 h-8 text-purple-500" />
             <h3 className="text-xl font-semibold">
-              {language === 'es' ? 'Lenguaje Sexual' : 'Sex Language'}
+              {t('sexLanguage')}
             </h3>
           </div>
           <p className="text-muted-foreground mb-4">
-            {language === 'es'
-              ? 'Explora cómo experimentas la intimidad: diversión, deseo, placer, paciencia o celebración.'
-              : 'Explore how you experience intimacy: fun, desire, pleasure, patience, or celebration.'}
+            {t('exploreSexLanguage')}
           </p>
           <Button 
             className="w-full"
             onClick={() => setView('sex-quiz')}
           >
-            {sexResult
-              ? (language === 'es' ? 'Retomar Quiz' : 'Retake Quiz')
-              : (language === 'es' ? 'Comenzar Quiz' : 'Start Quiz')}
+            {sexResult ? t('retakeQuiz') : t('startQuiz')}
           </Button>
         </Card>
 
@@ -267,7 +259,7 @@ export const LoveLanguageGame = ({ coupleId, userId, partnerId, onBack }: GamePr
               className="w-full"
               onClick={() => setView('profile')}
             >
-              {language === 'es' ? 'Ver Mi Perfil' : 'View My Profile'}
+              {t('viewMyProfile')}
             </Button>
 
             {lustResult && (
@@ -276,7 +268,7 @@ export const LoveLanguageGame = ({ coupleId, userId, partnerId, onBack }: GamePr
                 className="w-full"
                 onClick={() => setView('rituals')}
               >
-                {language === 'es' ? 'Ver Rituales' : 'View Rituals'}
+                {t('viewRituals')}
               </Button>
             )}
 
@@ -286,7 +278,7 @@ export const LoveLanguageGame = ({ coupleId, userId, partnerId, onBack }: GamePr
                 className="w-full"
                 onClick={() => setView('comparison')}
               >
-                {language === 'es' ? 'Comparar con Pareja' : 'Compare with Partner'}
+                {t('compareWithPartner')}
               </Button>
             )}
           </>

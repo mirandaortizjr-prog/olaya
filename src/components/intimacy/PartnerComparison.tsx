@@ -10,7 +10,7 @@ interface PartnerComparisonProps {
 }
 
 export const PartnerComparison = ({ userLanguages, partnerLanguages }: PartnerComparisonProps) => {
-  const { language } = useLanguage();
+  const { t } = useLanguage();
   const comparison = compareLanguages(userLanguages, partnerLanguages);
   const compatibilityPercent = Math.round(comparison.compatibilityScore * 100);
 
@@ -20,13 +20,13 @@ export const PartnerComparison = ({ userLanguages, partnerLanguages }: PartnerCo
         <div className="flex items-center gap-3 mb-4">
           <Heart className="w-6 h-6 text-rose-500" />
           <h3 className="text-xl font-semibold">
-            {language === 'es' ? 'Compatibilidad' : 'Compatibility'}
+            {t('compatibility')}
           </h3>
         </div>
         <div className="mb-2">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium">
-              {language === 'es' ? 'Alineación de Lenguajes' : 'Language Alignment'}
+              {t('languageAlignment')}
             </span>
             <span className="text-2xl font-bold text-primary">{compatibilityPercent}%</span>
           </div>
@@ -39,7 +39,7 @@ export const PartnerComparison = ({ userLanguages, partnerLanguages }: PartnerCo
           <div className="flex items-center gap-3 mb-4">
             <TrendingUp className="w-6 h-6 text-green-500" />
             <h3 className="text-lg font-semibold">
-              {language === 'es' ? 'Lenguajes Compartidos' : 'Shared Languages'}
+              {t('sharedLanguages')}
             </h3>
           </div>
           <div className="flex flex-wrap gap-2 mb-4">
@@ -50,7 +50,7 @@ export const PartnerComparison = ({ userLanguages, partnerLanguages }: PartnerCo
             ))}
           </div>
           <div className="space-y-2">
-            {getSharedPrompts(comparison.shared, language as 'en' | 'es').map((prompt, i) => (
+            {getSharedPrompts(comparison.shared, t).map((prompt, i) => (
               <p key={i} className="text-sm text-muted-foreground italic">"{prompt}"</p>
             ))}
           </div>
@@ -62,13 +62,11 @@ export const PartnerComparison = ({ userLanguages, partnerLanguages }: PartnerCo
           <div className="flex items-center gap-3 mb-4">
             <Lightbulb className="w-6 h-6 text-amber-500" />
             <h3 className="text-lg font-semibold">
-              {language === 'es' ? 'Explorar Juntos' : 'Explore Together'}
+              {t('exploreTogether')}
             </h3>
           </div>
           <p className="text-sm text-muted-foreground mb-3">
-            {language === 'es' 
-              ? 'Tus lenguajes únicos pueden enriquecer su conexión:'
-              : 'Your unique languages can enrich your connection:'}
+            {t('uniqueLanguagesEnrich')}
           </p>
           <div className="flex flex-wrap gap-2 mb-4">
             {comparison.contrast.map((lang, i) => (
@@ -78,7 +76,7 @@ export const PartnerComparison = ({ userLanguages, partnerLanguages }: PartnerCo
             ))}
           </div>
           <div className="space-y-2">
-            {getContrastPrompts(comparison.contrast, language as 'en' | 'es').map((prompt, i) => (
+            {getContrastPrompts(comparison.contrast, t).map((prompt, i) => (
               <p key={i} className="text-sm text-muted-foreground italic">"{prompt}"</p>
             ))}
           </div>

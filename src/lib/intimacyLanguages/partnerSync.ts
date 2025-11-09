@@ -14,19 +14,24 @@ export function compareLanguages(
   };
 }
 
-export function getSharedPrompts(shared: string[], language: 'en' | 'es'): string[] {
-  if (language === 'es') {
-    return shared.map(lang => 
-      `Ambos comparten el lenguaje ${lang}. Prueben rituales que honren esta conexión.`
+export function getSharedPrompts(shared: string[], t: (key: string) => string): string[] {
+  // For now, return hardcoded prompts - can add to translations later
+  const lang = t('shop') === 'Tienda' ? 'es' : 'en';
+  
+  if (lang === 'es') {
+    return shared.map(l => 
+      `Ambos comparten el lenguaje ${l}. Prueben rituales que honren esta conexión.`
     );
   }
-  return shared.map(lang => 
-    `You both share ${lang} as a language. Try rituals that honor this connection.`
+  return shared.map(l => 
+    `You both share ${l} as a language. Try rituals that honor this connection.`
   );
 }
 
-export function getContrastPrompts(contrast: string[], language: 'en' | 'es'): string[] {
-  if (language === 'es') {
+export function getContrastPrompts(contrast: string[], t: (key: string) => string): string[] {
+  const lang = t('shop') === 'Tienda' ? 'es' : 'en';
+  
+  if (lang === 'es') {
     return contrast.length > 0 
       ? [`Explora el lenguaje ${contrast[0]} de tu pareja para profundizar la comprensión.`]
       : [];
