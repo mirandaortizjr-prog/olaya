@@ -104,7 +104,7 @@ const AppRouter = () => {
         <Route path="/fantasies" element={<FantasiesPage />} />
         <Route path="/daily-notes" element={<DailyNotesPage />} />
         <Route path="/couple-profiles" element={<CoupleProfiles />} />
-        <Route path="/private" element={<PrivatePage />} />
+        <Route path="/private/*" element={<PrivatePage />} />
         <Route path="/intimate-journal" element={<IntimateJournalPage />} />
         <Route path="/mood-customization" element={<MoodCustomization />} />
         <Route path="/flirt-customization" element={<FlirtCustomization />} />

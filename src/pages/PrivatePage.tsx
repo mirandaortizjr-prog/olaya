@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Lock, Send, Trash2, Settings } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Routes, Route, useLocation } from "react-router-dom";
 import { BiometricPrivacyDialog } from "@/components/BiometricPrivacyDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { biometrics } from "@/utils/biometrics";
@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { formatDistanceToNow } from "date-fns";
 import { PrivatePhotoGallery } from "@/components/PrivatePhotoGallery";
 import { PrivateVideoGallery } from "@/components/PrivateVideoGallery";
+import { TruthOrDareGame } from "@/components/games/TruthOrDareGame";
 import vaultPhotosIcon from "@/assets/vault-photos.png";
 import vaultFantasiesIcon from "@/assets/vault-fantasies.png";
 import vaultLanguagesIcon from "@/assets/vault-languages.png";
@@ -22,6 +23,7 @@ import vaultTimelineIcon from "@/assets/vault-timeline.png";
 
 const PrivatePage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
@@ -114,7 +116,6 @@ const PrivatePage = () => {
 
     setCoupleId(membership.couple_id);
     setLoading(false);
-    // Don't automatically show dialog - let the next useEffect handle it
   };
 
   const checkPasswordExists = async () => {
@@ -143,12 +144,10 @@ const PrivatePage = () => {
           description: `Authenticated with ${biometryName}`,
         });
       } else {
-        // Biometric auth failed or was cancelled, show password dialog
         setShowAuthDialog(true);
       }
     } catch (error) {
       console.error('Biometric auth error:', error);
-      // Fall back to password
       setShowAuthDialog(true);
     }
   };
@@ -194,12 +193,10 @@ const PrivatePage = () => {
     authSucceededRef.current = true;
     setIsUnlocked(true);
     setShowAuthDialog(false);
-    // Remember that user unlocked the vault in this session
     sessionStorage.setItem('private_vault_unlocked', 'true');
   };
 
   const handleDialogClose = () => {
-    // Keep the dialog open until unlocked to avoid accidental navigation
     setTimeout(() => {
       if (!authSucceededRef.current && !isUnlocked) {
         setShowAuthDialog(true);
@@ -344,7 +341,7 @@ const PrivatePage = () => {
   const privateItems = [
     { id: 'photos', label: 'PHOTOS', icon: vaultPhotosIcon },
     { id: 'fantasies', label: 'FANTASIES', icon: vaultFantasiesIcon },
-    { id: 'sex-lust-languages', label: 'SEX & LUST\nLANGUAGES', icon: vaultLanguagesIcon },
+    { id: 'truth-or-dare', label: 'TRUTH OR\nDARE', route: '/private/truth-or-dare', icon: vaultLanguagesIcon },
     { id: 'videos', label: 'VIDEOS', icon: vaultVideosIcon },
     { id: 'our-journal', label: 'OUR JOURNAL', route: '/intimate-journal', icon: vaultJournalIcon },
     { id: 'sex-timeline', label: 'SEX TIMELINE', icon: vaultTimelineIcon },
@@ -365,6 +362,21 @@ const PrivatePage = () => {
           <Lock className="w-32 h-32 text-purple-300/20" />
         </div>
       </>
+    );
+  }
+
+  // If in a sub-route, render the sub-route component
+  if (location.pathname !== '/private') {
+    return (
+      <Routes>
+        <Route path="/truth-or-dare" element={
+          <TruthOrDareGame
+            coupleId={coupleId!}
+            userId={userId!}
+            onBack={() => navigate('/private')}
+          />
+        } />
+      </Routes>
     );
   }
 
@@ -460,7 +472,6 @@ const PrivatePage = () => {
                   sessionStorage.setItem('private_vault_unlocked', 'true');
                   navigate('/fantasies');
                 } else if (item.route) {
-                  // Preserve unlocked state while navigating within private sections
                   sessionStorage.setItem('private_vault_unlocked', 'true');
                   navigate(item.route);
                 } else {
