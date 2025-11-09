@@ -1,8 +1,54 @@
 import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
-export const SeasonalAnimations = () => {
+interface SeasonalAnimationsProps {
+  coupleId?: string;
+}
+
+export const SeasonalAnimations = ({ coupleId }: SeasonalAnimationsProps) => {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [leaves, setLeaves] = useState<Array<{ id: number; left: number; delay: number; duration: number }>>([]);
+  const [hasActiveEffects, setHasActiveEffects] = useState(false);
+
+  // Check for active visual effects
+  useEffect(() => {
+    if (!coupleId) return;
+
+    const checkActiveEffects = async () => {
+      const { data } = await supabase
+        .from('active_effects')
+        .select('id')
+        .eq('couple_id', coupleId)
+        .eq('is_active', true)
+        .gt('expires_at', new Date().toISOString())
+        .limit(1);
+
+      setHasActiveEffects(data && data.length > 0);
+    };
+
+    checkActiveEffects();
+
+    // Subscribe to realtime changes
+    const channel = supabase
+      .channel('seasonal_effects_check')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'active_effects',
+          filter: `couple_id=eq.${coupleId}`,
+        },
+        () => {
+          checkActiveEffects();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [coupleId]);
 
   useEffect(() => {
     setCurrentMonth(new Date().getMonth());
@@ -23,6 +69,11 @@ export const SeasonalAnimations = () => {
   const showTurkey = currentMonth === 10;
   // Autumn = September (8), October (9), November (10)
   const showLeaves = currentMonth >= 8 && currentMonth <= 10;
+
+  // Don't show seasonal animations if visual effects are active
+  if (hasActiveEffects) {
+    return null;
+  }
 
   return (
     <div className="pointer-events-none fixed inset-0 z-10 overflow-hidden">

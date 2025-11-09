@@ -885,7 +885,7 @@ const Dashboard = () => {
       </div>
 
       {/* Seasonal Animations Overlay */}
-      <SeasonalAnimations />
+      <SeasonalAnimations coupleId={coupleData.coupleId} />
       
       {/* Visual Effects Overlay */}
       <VisualEffectsRenderer coupleId={coupleData.coupleId} />
