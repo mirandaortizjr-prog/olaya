@@ -5,11 +5,13 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Trophy, Bell, Star } from "lucide-react";
+import { ArrowLeft, Trophy, Bell, Star, Coins, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { generateHowWellQuestions, calculateExperienceGain } from "@/lib/gameQuestions";
 import { useCoupleProgress } from "@/hooks/useCoupleProgress";
+import { useTogetherCoins } from "@/hooks/useTogetherCoins";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface HowWellGameProps {
   coupleId: string;
@@ -29,15 +31,51 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
   const [partnerAnswers, setPartnerAnswers] = useState<Record<string, string>>({});
   const [pendingInvitation, setPendingInvitation] = useState<any>(null);
   const [partnerScores, setPartnerScores] = useState<Array<{ score: number; total: number; date: string }>>([]);
+  const [canPlayToday, setCanPlayToday] = useState(true);
+  const [weeklyCoins, setWeeklyCoins] = useState(0);
   const { toast } = useToast();
   const { t, language } = useLanguage();
   const { progress, addExperience } = useCoupleProgress(coupleId);
+  const { addCoins } = useTogetherCoins(userId);
 
   useEffect(() => {
     // Generate questions based on current level
     const levelQuestions = generateHowWellQuestions(progress.currentLevel, language);
     setQuestions(levelQuestions);
+    checkDailyLimit();
+    checkWeeklyCoins();
   }, [progress.currentLevel, language]);
+
+  const checkDailyLimit = async () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const { data } = await supabase
+      .from('game_completions')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('game_type', 'how-well')
+      .gte('completed_at', today.toISOString())
+      .limit(1);
+
+    setCanPlayToday(!data || data.length === 0);
+  };
+
+  const checkWeeklyCoins = async () => {
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    weekStart.setHours(0, 0, 0, 0);
+
+    const { data } = await supabase
+      .from('game_completions')
+      .select('coins_earned')
+      .eq('user_id', userId)
+      .eq('game_type', 'how-well')
+      .gte('completed_at', weekStart.toISOString());
+
+    const total = data?.reduce((sum, item) => sum + item.coins_earned, 0) || 0;
+    setWeeklyCoins(total);
+  };
 
   const loadPartnerAnswers = async () => {
     if (!partnerId) return;
@@ -238,13 +276,56 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      // Calculate experience based on score
-      const accuracy = (score + (isCorrect ? 1 : 0)) / questions.length;
-      const resultType = accuracy >= 0.8 ? 'correct' : accuracy >= 0.5 ? 'partial' : 'incorrect';
-      const expGained = calculateExperienceGain(progress.currentLevel, resultType);
-      await addExperience(expGained);
+      const finalScore = score + (isCorrect ? 1 : 0);
+      await gradeAndReward(finalScore);
       setGameMode("results");
     }
+  };
+
+  const gradeAndReward = async (finalScore: number) => {
+    // Calculate experience
+    const accuracy = finalScore / questions.length;
+    const resultType = accuracy >= 0.8 ? 'correct' : accuracy >= 0.5 ? 'partial' : 'incorrect';
+    const expGained = calculateExperienceGain(progress.currentLevel, resultType);
+    await addExperience(expGained);
+
+    // Check if both partners got perfect scores
+    let coinsEarned = 0;
+    if (finalScore === questions.length && partnerId) {
+      // Check partner's most recent game completion
+      const { data: partnerCompletion } = await supabase
+        .from('game_completions')
+        .select('*')
+        .eq('user_id', partnerId)
+        .eq('game_type', 'how-well')
+        .order('completed_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (partnerCompletion && partnerCompletion.score === partnerCompletion.total_questions) {
+        coinsEarned = 10;
+        await addCoins(10, 'Perfect score on How Well game', coupleId);
+        toast({ 
+          title: '🎉 Perfect Match!', 
+          description: 'Both of you scored 10/10! You earned 10 coins!',
+          duration: 5000
+        });
+      }
+    }
+
+    // Save completion
+    await supabase.from('game_completions').insert({
+      couple_id: coupleId,
+      user_id: userId,
+      game_type: 'how-well',
+      session_id: sessionId,
+      score: finalScore,
+      total_questions: questions.length,
+      coins_earned: coinsEarned
+    });
+
+    await checkDailyLimit();
+    await checkWeeklyCoins();
   };
 
   useEffect(() => {
@@ -334,10 +415,41 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
               </Card>
             )}
 
+            {/* Game Instructions */}
+            <Card className="p-6 border-primary/50 bg-gradient-to-br from-primary/5 to-accent/5">
+              <div className="flex items-start gap-3 mb-4">
+                <Info className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                <div>
+                  <h3 className="font-semibold mb-2">How to Play</h3>
+                  <ul className="text-sm text-muted-foreground space-y-2">
+                    <li>• <strong>Answer Mode:</strong> Answer 10 questions about yourself</li>
+                    <li>• <strong>Guess Mode:</strong> Try to guess your partner's answers</li>
+                    <li>• <strong>Perfect Score:</strong> If both partners score 10/10, you each earn 10 coins!</li>
+                    <li>• <strong>Daily Limit:</strong> Play once per day (max 70 coins/week)</li>
+                  </ul>
+                </div>
+              </div>
+            </Card>
+
+            {/* Coins Progress */}
+            <Card className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Coins className="w-5 h-5 text-yellow-500" />
+                  <span className="font-semibold">Weekly Progress</span>
+                </div>
+                <span className="text-sm text-muted-foreground">{weeklyCoins}/70 coins</span>
+              </div>
+              <Progress value={(weeklyCoins / 70) * 100} className="h-2" />
+              {!canPlayToday && (
+                <p className="text-xs text-muted-foreground mt-2">Come back tomorrow to play again!</p>
+              )}
+            </Card>
+
             <Card className="p-6 text-center">
               <h3 className="text-lg font-semibold mb-2">{t('chooseYourRole')}</h3>
               <p className="text-sm text-muted-foreground mb-6">
-                {t('chooseRoleDescription')}
+                Select whether you want to answer or guess
               </p>
               <div className="space-y-3">
                 <Button 
@@ -346,6 +458,7 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
                     sendGameInvitation();
                     setGameMode("answer");
                   }}
+                  disabled={!canPlayToday}
                 >
                   {t('illAnswerQuestions')}
                 </Button>
@@ -353,7 +466,7 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
                   className="w-full" 
                   variant="outline"
                   onClick={() => setGameMode("guess")}
-                  disabled={!partnerId || Object.keys(partnerAnswers).length === 0}
+                  disabled={!canPlayToday || !partnerId || Object.keys(partnerAnswers).length === 0}
                 >
                   {t('illGuessAnswers')}
                 </Button>
