@@ -158,6 +158,33 @@ export type Database = {
         }
         Relationships: []
       }
+      couple_gradients: {
+        Row: {
+          active_gradient_id: string | null
+          couple_id: string
+          created_at: string
+          id: string
+          purchased_gradients: Json
+          updated_at: string
+        }
+        Insert: {
+          active_gradient_id?: string | null
+          couple_id: string
+          created_at?: string
+          id?: string
+          purchased_gradients?: Json
+          updated_at?: string
+        }
+        Update: {
+          active_gradient_id?: string | null
+          couple_id?: string
+          created_at?: string
+          id?: string
+          purchased_gradients?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       couple_members: {
         Row: {
           couple_id: string

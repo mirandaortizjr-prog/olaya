@@ -31,7 +31,7 @@ export default function ShopPage() {
   const shopCategories: ShopCategory[] = [
     { id: 'gifts', nameKey: 'shopGifts', icon: Gift, comingSoon: false, path: '/shop/gifts' },
     { id: 'visual-effects', nameKey: 'shopVisualEffects', icon: Sparkles, comingSoon: false, path: '/shop/visual-effects' },
-    { id: 'accessories', nameKey: 'shopAccessories', icon: Palette, comingSoon: true, path: null },
+    { id: 'accessories', nameKey: 'shopAccessories', icon: Palette, comingSoon: false, path: '/shop/accessories' },
     { id: 'badges', nameKey: 'shopBadges', icon: Badge, comingSoon: true, path: null },
     { id: 'seasonal', nameKey: 'shopSeasonalItems', icon: Calendar, comingSoon: true, path: null },
   ];

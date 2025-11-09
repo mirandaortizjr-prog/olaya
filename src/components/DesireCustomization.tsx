@@ -50,8 +50,8 @@ export default function DesireCustomization({
 
     if (data) {
       setShowAll(data.show_all || false);
-      setFavorites(data.favorite_desires || []);
-      setCustomDesires(data.custom_desires || []);
+      setFavorites(Array.isArray(data.favorite_desires) ? data.favorite_desires as string[] : []);
+      setCustomDesires(Array.isArray(data.custom_desires) ? data.custom_desires as { id: string; labelEn: string; labelEs: string; }[] : []);
     }
   };
 
