@@ -127,6 +127,14 @@ export const translations = {
     gradientPurpleLime: "Purple Lime Gradient",
     gradientPurpleCyan: "Purple Cyan Gradient",
     gradientBlueCyan: "Blue Cyan Gradient",
+    gradientCyanDarkBlue: "Cyan to Dark Blue",
+    gradientBlackDarkGray: "Black to Dark Gray",
+    gradientDarkGrayWhite: "Dark Gray to White",
+    gradientLightGrayWhite: "Light Gray to White",
+    gradientBlackDarkBlue: "Black to Dark Blue",
+    gradientDarkBlueBrightBlue: "Dark Blue to Bright Blue",
+    gradientPaleGreenLightBlue: "Pale Green to Light Blue",
+    gradientRedOrange: "Red to Orange",
     
     // Index page
     indexTitle: "OLAYA",
@@ -842,6 +850,14 @@ export const translations = {
     gradientPurpleLime: "Degradado Púrpura Lima",
     gradientPurpleCyan: "Degradado Púrpura Cian",
     gradientBlueCyan: "Degradado Azul Cian",
+    gradientCyanDarkBlue: "Cian a Azul Oscuro",
+    gradientBlackDarkGray: "Negro a Gris Oscuro",
+    gradientDarkGrayWhite: "Gris Oscuro a Blanco",
+    gradientLightGrayWhite: "Gris Claro a Blanco",
+    gradientBlackDarkBlue: "Negro a Azul Oscuro",
+    gradientDarkBlueBrightBlue: "Azul Oscuro a Azul Brillante",
+    gradientPaleGreenLightBlue: "Verde Pálido a Azul Claro",
+    gradientRedOrange: "Rojo a Naranja",
     
     // Index page
     indexTitle: "OLAYA",

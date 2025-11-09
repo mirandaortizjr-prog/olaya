@@ -133,7 +133,11 @@ export default function AccessoriesPage() {
 
     const success = await spendCoins(item.price, `Purchased ${item.name}`, coupleId);
     if (success) {
-      await purchaseGradient(gradientId);
+      const purchased = await purchaseGradient(gradientId);
+      if (purchased) {
+        // Auto-apply the newly purchased gradient with smooth transition
+        await setGradient(gradientId);
+      }
     }
   };
 
@@ -199,9 +203,9 @@ export default function AccessoriesPage() {
                 const isPurchased = purchasedGradients.includes(gradientId);
 
                 return (
-                  <Card key={item.id} className="overflow-hidden">
+                  <Card key={item.id} className="overflow-hidden transition-all duration-300 hover:shadow-lg">
                     <div
-                      className="h-32 w-full"
+                      className="h-32 w-full transition-all duration-500"
                       style={{ background: gradient.css }}
                     />
                     <div className="p-4 space-y-3">
@@ -225,7 +229,7 @@ export default function AccessoriesPage() {
                         </div>
 
                         {isPurchased ? (
-                          <Button disabled className="gap-2">
+                          <Button disabled className="gap-2 animate-scale-in">
                             <Check className="w-4 h-4" />
                             {t('owned') || 'Owned'}
                           </Button>
@@ -233,7 +237,7 @@ export default function AccessoriesPage() {
                           <Button
                             onClick={() => handlePurchase(item)}
                             disabled={coins < item.price}
-                            className="gap-2"
+                            className="gap-2 transition-all duration-200 hover:scale-105"
                           >
                             <Coins className="w-4 h-4" />
                             {t('purchase') || 'Purchase'}
