@@ -65,7 +65,7 @@ interface CoupleData {
 
 const Dashboard = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [coupleData, setCoupleData] = useState<CoupleData | null>(null);
   const [inviteCode, setInviteCode] = useState("");
   const [userProfile, setUserProfile] = useState<any>(null);
