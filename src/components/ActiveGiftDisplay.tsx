@@ -111,10 +111,10 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
   if (!activeGift) return null;
 
   const glowColor = senderGender === 'female' 
-    ? 'shadow-[0_0_20px_rgba(236,72,153,0.6)]' // pink glow
+    ? 'drop-shadow-[0_0_20px_rgba(236,72,153,0.8)]' // pink glow
     : senderGender === 'male' 
-    ? 'shadow-[0_0_20px_rgba(59,130,246,0.6)]' // blue glow
-    : 'shadow-[0_0_20px_rgba(168,85,247,0.6)]'; // purple glow (default)
+    ? 'drop-shadow-[0_0_20px_rgba(59,130,246,0.8)]' // blue glow
+    : 'drop-shadow-[0_0_20px_rgba(168,85,247,0.8)]'; // purple glow (default)
 
   const ringColor = senderGender === 'female'
     ? 'ring-pink-500'
@@ -126,23 +126,28 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
     <div className="fixed bottom-24 right-4 z-40 pointer-events-none">
       <div className="pointer-events-auto">
         {!isExpanded ? (
-          // Collapsed view - just the gift image, nothing else
+          // Collapsed view - just the gift image with glow tracing its shape
           <div 
-            className={`
-              cursor-pointer
-              ${glowColor}
-              animate-[pulse_3s_ease-in-out_infinite]
-            `}
+            className="cursor-pointer animate-[pulse_3s_ease-in-out_infinite]"
             onClick={() => setIsExpanded(true)}
           >
             {giftImages[activeGift.gift_image] ? (
               <img
                 src={giftImages[activeGift.gift_image]}
                 alt={activeGift.gift_name}
-                className="w-28 h-28 object-contain drop-shadow-2xl"
+                className={`w-28 h-28 object-contain ${glowColor}`}
+                style={{
+                  filter: `drop-shadow(0 0 20px ${
+                    senderGender === 'female' 
+                      ? 'rgba(236,72,153,0.8)'
+                      : senderGender === 'male'
+                      ? 'rgba(59,130,246,0.8)'
+                      : 'rgba(168,85,247,0.8)'
+                  })`
+                }}
               />
             ) : (
-              <Gift className="w-24 h-24 text-primary drop-shadow-2xl" />
+              <Gift className={`w-24 h-24 text-primary ${glowColor}`} />
             )}
           </div>
         ) : (
