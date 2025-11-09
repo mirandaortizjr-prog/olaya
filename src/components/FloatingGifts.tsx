@@ -32,6 +32,7 @@ const flowerImages: { [key: string]: string } = {
 
 interface PurchasedGift {
   id: string;
+  sender_id: string;
   gift_name: string;
   gift_image: string;
   purchased_at: string;
@@ -39,10 +40,11 @@ interface PurchasedGift {
 
 interface FloatingGiftsProps {
   coupleId: string;
+  userId: string;
   receiverGender?: 'male' | 'female';
 }
 
-const FloatingGifts = ({ coupleId, receiverGender = 'female' }: FloatingGiftsProps) => {
+const FloatingGifts = ({ coupleId, userId, receiverGender = 'female' }: FloatingGiftsProps) => {
   const [activeGifts, setActiveGifts] = useState<PurchasedGift[]>([]);
   const [currentGiftIndex, setCurrentGiftIndex] = useState(0);
 
@@ -53,10 +55,12 @@ const FloatingGifts = ({ coupleId, receiverGender = 'female' }: FloatingGiftsPro
       const twentyFourHoursAgo = new Date();
       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
 
+      // Only show gifts sent TO this user (not sent BY this user)
       const { data, error } = await supabase
         .from('purchased_gifts')
         .select('*')
         .eq('couple_id', coupleId)
+        .neq('sender_id', userId)
         .gte('purchased_at', twentyFourHoursAgo.toISOString())
         .order('purchased_at', { ascending: true });
 
@@ -80,7 +84,10 @@ const FloatingGifts = ({ coupleId, receiverGender = 'female' }: FloatingGiftsPro
         },
         (payload) => {
           const newGift = payload.new as PurchasedGift;
-          setActiveGifts((prev) => [...prev, newGift]);
+          // Only add if the gift was sent TO this user
+          if (newGift.sender_id !== userId) {
+            setActiveGifts((prev) => [...prev, newGift]);
+          }
         }
       )
       .subscribe();

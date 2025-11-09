@@ -898,7 +898,7 @@ const Dashboard = () => {
           />
         </div>
         {/* FloatingGifts positioned within the gallery container */}
-        {coupleData.coupleId && <FloatingGifts coupleId={coupleData.coupleId} receiverGender="female" />}
+        {coupleData.coupleId && user && <FloatingGifts coupleId={coupleData.coupleId} userId={user.id} receiverGender="female" />}
       </div>
 
       {!coupleData.partner && (
