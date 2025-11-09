@@ -22,7 +22,7 @@ import footballTexture from '@/assets/skins/football-texture.png';
 import basketballElite from '@/assets/skins/basketball-elite.png';
 import basketballClassic from '@/assets/skins/basketball-classic.png';
 import footballBlaze from '@/assets/skins/football-blaze.png';
-import basketballExplosion from '@/assets/skins/basketball-explosion.png';
+
 
 export const SKINS = {
   'default': {
@@ -149,11 +149,6 @@ export const SKINS = {
     id: 'football-blaze',
     name: 'Football Blaze',
     image: footballBlaze,
-  },
-  'basketball-explosion': {
-    id: 'basketball-explosion',
-    name: 'Basketball Explosion',
-    image: basketballExplosion,
   },
 } as const;
 

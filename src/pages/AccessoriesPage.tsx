@@ -115,7 +115,6 @@ export default function AccessoriesPage() {
       'Basketball Elite': 'basketball-elite',
       'Basketball Classic': 'basketball-classic',
       'Football Blaze': 'football-blaze',
-      'Basketball Explosion': 'basketball-explosion',
     };
     return skinMapping[name] || null;
   };
