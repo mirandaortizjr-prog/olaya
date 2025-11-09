@@ -222,12 +222,12 @@ export default function VisualEffectsShop() {
                 {objectEffects.map((effect) => (
                   <Card
                     key={effect.id}
-                    className="bg-card border-border hover:bg-accent transition-all p-4"
+                    className="bg-card border-border hover:bg-accent transition-all p-3 overflow-hidden"
                   >
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-center justify-center h-16">
+                    <div className="flex flex-col gap-2 h-full">
+                      <div className="flex items-center justify-center h-14">
                         <span 
-                          className={`text-4xl ${getAnimationClass(effect.behavior)}`}
+                          className={`text-3xl ${getAnimationClass(effect.behavior)}`}
                           style={{
                             textShadow: '0 0 10px rgba(255, 255, 255, 0.5)',
                           }}
@@ -235,15 +235,15 @@ export default function VisualEffectsShop() {
                           {getEffectEmoji(effect.name, effect.effect_type)}
                         </span>
                       </div>
-                      <div className="text-center min-h-[3rem] flex flex-col justify-center">
-                        <p className="font-medium text-foreground text-sm mb-1 line-clamp-1">{effect.name}</p>
-                        <p className="text-xs text-muted-foreground line-clamp-2">{effect.behavior}</p>
+                      <div className="text-center min-h-[2.5rem] flex flex-col justify-center px-1">
+                        <p className="font-medium text-foreground text-xs mb-0.5 line-clamp-1">{effect.name}</p>
+                        <p className="text-[10px] text-muted-foreground line-clamp-1">{effect.behavior}</p>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-1.5 mt-auto">
                         <Button
                           onClick={() => handlePreview(effect)}
                           variant="outline"
-                          className="flex-1"
+                          className="flex-1 h-8 px-2 text-xs"
                           size="sm"
                         >
                           <Eye className="w-3 h-3 mr-1" />
@@ -252,10 +252,10 @@ export default function VisualEffectsShop() {
                         <Button
                           onClick={() => handlePurchase(effect)}
                           disabled={coins < effect.price}
-                          className="flex-1"
+                          className="flex-1 h-8 px-2 text-xs"
                           size="sm"
                         >
-                          <img src={togetherCoinsIcon} alt="Coins" className="w-4 h-4 mr-1.5" />
+                          <img src={togetherCoinsIcon} alt="Coins" className="w-3 h-3 mr-1" />
                           {effect.price}
                         </Button>
                       </div>
@@ -277,12 +277,12 @@ export default function VisualEffectsShop() {
                 {phraseEffects.map((effect) => (
                   <Card
                     key={effect.id}
-                    className="bg-card border-border hover:bg-accent transition-all p-4"
+                    className="bg-card border-border hover:bg-accent transition-all p-3 overflow-hidden"
                   >
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-center justify-center h-16">
+                    <div className="flex flex-col gap-2 h-full">
+                      <div className="flex items-center justify-center h-14">
                         <span 
-                          className={`text-lg font-bold ${getAnimationClass(effect.behavior)}`}
+                          className={`text-sm font-bold ${getAnimationClass(effect.behavior)}`}
                           style={{
                             color: getNeonColor(effect.behavior),
                             textShadow: `0 0 20px ${getNeonColor(effect.behavior)}, 0 0 30px ${getNeonColor(effect.behavior)}`,
@@ -291,15 +291,15 @@ export default function VisualEffectsShop() {
                           {getEffectEmoji(effect.name, effect.effect_type)}
                         </span>
                       </div>
-                      <div className="text-center min-h-[3rem] flex flex-col justify-center">
-                        <p className="font-medium text-foreground text-sm mb-1 line-clamp-1">{effect.name}</p>
-                        <p className="text-xs text-muted-foreground line-clamp-2">{effect.behavior}</p>
+                      <div className="text-center min-h-[2.5rem] flex flex-col justify-center px-1">
+                        <p className="font-medium text-foreground text-xs mb-0.5 line-clamp-1">{effect.name}</p>
+                        <p className="text-[10px] text-muted-foreground line-clamp-1">{effect.behavior}</p>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-1.5 mt-auto">
                         <Button
                           onClick={() => handlePreview(effect)}
                           variant="outline"
-                          className="flex-1"
+                          className="flex-1 h-8 px-2 text-xs"
                           size="sm"
                         >
                           <Eye className="w-3 h-3 mr-1" />
@@ -308,10 +308,10 @@ export default function VisualEffectsShop() {
                         <Button
                           onClick={() => handlePurchase(effect)}
                           disabled={coins < effect.price}
-                          className="flex-1"
+                          className="flex-1 h-8 px-2 text-xs"
                           size="sm"
                         >
-                          <img src={togetherCoinsIcon} alt="Coins" className="w-4 h-4 mr-1.5" />
+                          <img src={togetherCoinsIcon} alt="Coins" className="w-3 h-3 mr-1" />
                           {effect.price}
                         </Button>
                       </div>
