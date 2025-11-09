@@ -8,8 +8,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTogetherCoins } from "@/hooks/useTogetherCoins";
 import { useGradients } from "@/hooks/useGradients";
+import { useSkins } from "@/hooks/useSkins";
 import { GradientSelector } from "@/components/GradientSelector";
 import { GRADIENTS, GradientId } from "@/lib/gradientData";
+import { SKINS, SkinId } from "@/lib/skinData";
 
 interface ShopItem {
   id: string;
@@ -25,7 +27,7 @@ export default function AccessoriesPage() {
   const { t } = useLanguage();
   const [userId, setUserId] = useState<string>("");
   const [coupleId, setCoupleId] = useState<string | null>(null);
-  const [gradients, setGradients] = useState<ShopItem[]>([]);
+  const [shopItems, setShopItems] = useState<ShopItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   const { coins, spendCoins } = useTogetherCoins(userId);
@@ -35,6 +37,13 @@ export default function AccessoriesPage() {
     purchaseGradient,
     setGradient,
   } = useGradients(coupleId, userId || null);
+  
+  const {
+    activeSkin,
+    purchasedSkins,
+    purchaseSkin,
+    setSkin,
+  } = useSkins(coupleId, userId || null);
 
   useEffect(() => {
     fetchUserData();
@@ -42,7 +51,7 @@ export default function AccessoriesPage() {
 
   useEffect(() => {
     if (coupleId) {
-      fetchGradients();
+      fetchShopItems();
     }
   }, [coupleId]);
 
@@ -63,21 +72,34 @@ export default function AccessoriesPage() {
     }
   };
 
-  const fetchGradients = async () => {
+  const fetchShopItems = async () => {
     try {
       const { data, error } = await supabase
         .from("shop_items")
         .select("*")
         .eq("category", "accessories")
-        .order("name");
+        .order("price", { ascending: true });
 
       if (error) throw error;
-      setGradients(data || []);
+      setShopItems(data || []);
     } catch (error) {
-      console.error("Error fetching gradients:", error);
+      console.error("Error fetching shop items:", error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const getSkinIdFromName = (name: string): SkinId | null => {
+    const skinMapping: Record<string, SkinId> = {
+      'Golden Elegance': 'golden-elegance',
+      'Passionate Hearts': 'passionate-hearts',
+      'Pink Heart Bokeh': 'pink-bokeh',
+      'Burgundy Romance': 'burgundy-romance',
+      'Ocean Hearts': 'ocean-hearts',
+      'Classic Love': 'classic-love',
+      'Diamond Lattice': 'diamond-lattice',
+    };
+    return skinMapping[name] || null;
   };
 
   const getGradientIdFromName = (name: string): GradientId => {
@@ -128,16 +150,6 @@ export default function AccessoriesPage() {
       return;
     }
 
-    const gradientId = getGradientIdFromName(item.name);
-
-    if (purchasedGradients.includes(gradientId)) {
-      toast({
-        title: t('alreadyOwned') || 'Already Owned',
-        description: t('youAlreadyOwnThisGradient') || 'You already own this gradient!',
-      });
-      return;
-    }
-
     if (coins < item.price) {
       toast({
         title: t('notEnoughCoins') || 'Not Enough Coins',
@@ -147,12 +159,43 @@ export default function AccessoriesPage() {
       return;
     }
 
-    const success = await spendCoins(item.price, `Purchased ${item.name}`, coupleId);
-    if (success) {
-      const purchased = await purchaseGradient(gradientId);
-      if (purchased) {
-        // Auto-apply the newly purchased gradient with smooth transition
-        await setGradient(gradientId);
+    // Check if it's an image-based skin or gradient skin
+    const skinId = getSkinIdFromName(item.name);
+    const gradientId = getGradientIdFromName(item.name);
+
+    if (skinId) {
+      // Image-based skin
+      if (purchasedSkins.includes(skinId)) {
+        toast({
+          title: t('alreadyOwned') || 'Already Owned',
+          description: t('youAlreadyOwnThisGradient') || 'You already own this skin!',
+        });
+        return;
+      }
+
+      const success = await spendCoins(item.price, `Purchased ${item.name}`, coupleId);
+      if (success) {
+        const purchased = await purchaseSkin(skinId);
+        if (purchased) {
+          await setSkin(skinId);
+        }
+      }
+    } else {
+      // Gradient skin
+      if (purchasedGradients.includes(gradientId)) {
+        toast({
+          title: t('alreadyOwned') || 'Already Owned',
+          description: t('youAlreadyOwnThisGradient') || 'You already own this skin!',
+        });
+        return;
+      }
+
+      const success = await spendCoins(item.price, `Purchased ${item.name}`, coupleId);
+      if (success) {
+        const purchased = await purchaseGradient(gradientId);
+        if (purchased) {
+          await setGradient(gradientId);
+        }
       }
     }
   };
@@ -207,23 +250,33 @@ export default function AccessoriesPage() {
             <p className="text-muted-foreground text-center py-8">
               {t('loading') || 'Loading...'}
             </p>
-          ) : gradients.length === 0 ? (
+          ) : shopItems.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">
               {t('noSkinsAvailable') || 'No skins available at this time'}
             </p>
           ) : (
             <div className="grid grid-cols-1 gap-4">
-              {gradients.map((item) => {
+              {shopItems.map((item) => {
+                const skinId = getSkinIdFromName(item.name);
                 const gradientId = getGradientIdFromName(item.name);
-                const gradient = GRADIENTS[gradientId];
-                const isPurchased = purchasedGradients.includes(gradientId);
+                const isImageSkin = skinId !== null;
+                const isPurchased = isImageSkin 
+                  ? purchasedSkins.includes(skinId!) 
+                  : purchasedGradients.includes(gradientId);
 
                 return (
                   <Card key={item.id} className="overflow-hidden transition-all duration-300 hover:shadow-lg">
-                    <div
-                      className="h-32 w-full transition-all duration-500"
-                      style={{ background: gradient.css }}
-                    />
+                    {isImageSkin && skinId ? (
+                      <div
+                        className="h-32 w-full bg-cover bg-center transition-all duration-500"
+                        style={{ backgroundImage: `url(${SKINS[skinId].image})` }}
+                      />
+                    ) : (
+                      <div
+                        className="h-32 w-full transition-all duration-500"
+                        style={{ background: GRADIENTS[gradientId]?.css }}
+                      />
+                    )}
                     <div className="p-4 space-y-3">
                       <div>
                         <h3 className="font-semibold text-lg text-card-foreground">
