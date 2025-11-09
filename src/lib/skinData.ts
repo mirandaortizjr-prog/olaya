@@ -12,6 +12,13 @@ import pinkFlowers from '@/assets/skins/pink-flowers.png';
 import celestialWatercolor from '@/assets/skins/celestial-watercolor.png';
 import pinkFloralGarden from '@/assets/skins/pink-floral-garden.png';
 import pinkGoldWatercolor from '@/assets/skins/pink-gold-watercolor.png';
+import baseballs from '@/assets/skins/baseballs.png';
+import soccerGoal from '@/assets/skins/soccer-goal.png';
+import baseballCloseup from '@/assets/skins/baseball-closeup.png';
+import baseballVintage from '@/assets/skins/baseball-vintage.png';
+import footballField from '@/assets/skins/football-field.png';
+import basketballFire from '@/assets/skins/basketball-fire.png';
+import footballTexture from '@/assets/skins/football-texture.png';
 
 export const SKINS = {
   'default': {
@@ -88,6 +95,41 @@ export const SKINS = {
     id: 'pink-gold-watercolor',
     name: 'Pink Gold Watercolor',
     image: pinkGoldWatercolor,
+  },
+  'baseballs': {
+    id: 'baseballs',
+    name: 'Baseballs',
+    image: baseballs,
+  },
+  'soccer-goal': {
+    id: 'soccer-goal',
+    name: 'Soccer Goal',
+    image: soccerGoal,
+  },
+  'baseball-closeup': {
+    id: 'baseball-closeup',
+    name: 'Baseball Closeup',
+    image: baseballCloseup,
+  },
+  'baseball-vintage': {
+    id: 'baseball-vintage',
+    name: 'Baseball Vintage',
+    image: baseballVintage,
+  },
+  'football-field': {
+    id: 'football-field',
+    name: 'Football Field',
+    image: footballField,
+  },
+  'basketball-fire': {
+    id: 'basketball-fire',
+    name: 'Basketball Fire',
+    image: basketballFire,
+  },
+  'football-texture': {
+    id: 'football-texture',
+    name: 'Football Texture',
+    image: footballTexture,
   },
 } as const;
 

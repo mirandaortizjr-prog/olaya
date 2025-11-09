@@ -105,6 +105,13 @@ export default function AccessoriesPage() {
       'Celestial Watercolor': 'celestial-watercolor',
       'Pink Floral Garden': 'pink-floral-garden',
       'Pink Gold Watercolor': 'pink-gold-watercolor',
+      'Baseballs': 'baseballs',
+      'Soccer Goal': 'soccer-goal',
+      'Baseball Closeup': 'baseball-closeup',
+      'Baseball Vintage': 'baseball-vintage',
+      'Football Field': 'football-field',
+      'Basketball Fire': 'basketball-fire',
+      'Football Texture': 'football-texture',
     };
     return skinMapping[name] || null;
   };
