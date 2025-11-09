@@ -60,7 +60,6 @@ const FloatingGifts = ({ coupleId, userId, receiverGender = 'female' }: Floating
         .from('purchased_gifts')
         .select('*')
         .eq('couple_id', coupleId)
-        .neq('sender_id', userId)
         .gte('purchased_at', twentyFourHoursAgo.toISOString())
         .order('purchased_at', { ascending: true });
 
@@ -84,10 +83,7 @@ const FloatingGifts = ({ coupleId, userId, receiverGender = 'female' }: Floating
         },
         (payload) => {
           const newGift = payload.new as PurchasedGift;
-          // Only add if the gift was sent TO this user
-          if (newGift.sender_id !== userId) {
-            setActiveGifts((prev) => [...prev, newGift]);
-          }
+          setActiveGifts((prev) => [...prev, newGift]);
         }
       )
       .subscribe();
