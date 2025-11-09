@@ -11,6 +11,7 @@ import { GlobalVideoPlayer } from "@/components/GlobalVideoPlayer";
 import { GlobalMusicPlayer } from "@/components/GlobalMusicPlayer";
 import { SplashScreen } from "@/components/SplashScreen";
 import { supabase } from "@/integrations/supabase/client";
+import { initializeNativePushListeners, subscribeToPushNotifications } from "@/utils/notifications";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -42,6 +43,10 @@ const AppRouter = () => {
         const { data: { user } } = await supabase.auth.getUser();
         
         if (user) {
+          // Initialize push notifications for authenticated users
+          initializeNativePushListeners();
+          subscribeToPushNotifications().catch(console.error);
+          
           // Check if user has couple profile
           const { data: coupleData } = await supabase
             .from('couples')
