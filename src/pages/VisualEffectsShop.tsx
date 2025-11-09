@@ -32,7 +32,7 @@ export default function VisualEffectsShop() {
   const [objectEffects, setObjectEffects] = useState<VisualEffect[]>([]);
   const [phraseEffects, setPhraseEffects] = useState<VisualEffect[]>([]);
   const [loading, setLoading] = useState(true);
-  const [previewEffect, setPreviewEffect] = useState<VisualEffect | null>(null);
+  const [previewEffect, setPreviewEffect] = useState<any>(null);
   const { coins, spendCoins } = useTogetherCoins(user?.id);
 
   useEffect(() => {
@@ -134,7 +134,18 @@ export default function VisualEffectsShop() {
   };
 
   const handlePreview = (effect: VisualEffect) => {
-    setPreviewEffect(effect);
+    setPreviewEffect({
+      id: 'preview',
+      effect_id: effect.id,
+      expires_at: new Date(Date.now() + 10000).toISOString(),
+      visual_effects: {
+        name: effect.name,
+        effect_type: effect.effect_type,
+        animation: effect.animation,
+        behavior: effect.behavior,
+      }
+    } as any);
+    
     toast({
       title: t.previewStarted,
       description: t.previewDesc,
@@ -327,18 +338,8 @@ export default function VisualEffectsShop() {
       {/* Preview Renderer */}
       {previewEffect && (
         <VisualEffectsRenderer 
-          coupleId="" 
-          previewEffect={{
-            id: 'preview',
-            effect_id: previewEffect.id,
-            expires_at: new Date(Date.now() + 10000).toISOString(),
-            visual_effects: {
-              name: previewEffect.name,
-              effect_type: previewEffect.effect_type,
-              animation: previewEffect.animation,
-              behavior: previewEffect.behavior,
-            }
-          }}
+          coupleId={coupleId} 
+          previewEffect={previewEffect}
         />
       )}
     </div>

@@ -80,6 +80,20 @@ export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
         duration: 8 + Math.random() * 4,
       }));
       setParticles(newParticles);
+      
+      // Force re-render of particles for preview
+      if (previewEffect) {
+        const timer = setInterval(() => {
+          setParticles(Array.from({ length: 20 }, (_, i) => ({
+            id: i,
+            left: Math.random() * 100,
+            delay: Math.random() * 5,
+            duration: 8 + Math.random() * 4,
+          })));
+        }, 100);
+        
+        return () => clearInterval(timer);
+      }
     } else {
       setParticles([]);
     }
