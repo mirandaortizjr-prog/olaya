@@ -604,6 +604,7 @@ export type Database = {
           id: string
           initiated_by: string
           partner_id: string
+          proof_url: string | null
           session_id: string
           status: string
           updated_at: string
@@ -615,6 +616,7 @@ export type Database = {
           id?: string
           initiated_by: string
           partner_id: string
+          proof_url?: string | null
           session_id: string
           status?: string
           updated_at?: string
@@ -626,6 +628,7 @@ export type Database = {
           id?: string
           initiated_by?: string
           partner_id?: string
+          proof_url?: string | null
           session_id?: string
           status?: string
           updated_at?: string

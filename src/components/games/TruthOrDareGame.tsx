@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Timer, Trophy, Zap } from "lucide-react";
+import { ArrowLeft, Timer, Trophy, Zap, Upload, Camera, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useTogetherCoins } from "@/hooks/useTogetherCoins";
+import { Camera as CapCamera } from "@capacitor/camera";
+import { CameraResultType, CameraSource } from "@capacitor/camera";
 
 interface GameProps {
   coupleId: string;
@@ -51,6 +53,10 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
   const [currentChallenge, setCurrentChallenge] = useState<Challenge | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [hasEarnedToday, setHasEarnedToday] = useState(false);
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [proofPreview, setProofPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     checkDailyReward();
@@ -152,26 +158,66 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
   const handleChallengeComplete = async () => {
     if (!currentChallenge) return;
 
-    await supabase
-      .from('game_sessions')
-      .update({ status: 'completed' })
-      .eq('id', currentChallenge.id);
-
-    if (!hasEarnedToday) {
-      await addCoins(5, 'Daily Truth or Dare completed', coupleId);
-      setHasEarnedToday(true);
+    if (!proofFile) {
       toast({
-        title: "🎉 Challenge Completed!",
-        description: "You earned 5 Together Coins!",
+        title: "Proof Required",
+        description: "Please upload a photo or video as proof of completion",
+        variant: "destructive",
       });
-    } else {
-      toast({
-        title: "✅ Challenge Completed!",
-        description: "Great job! (Daily coins already earned)",
-      });
+      return;
     }
 
-    setCurrentChallenge(null);
+    setUploading(true);
+
+    try {
+      // Upload proof file
+      const fileExt = proofFile.name.split('.').pop();
+      const fileName = `${userId}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('truth-dare-proofs')
+        .upload(fileName, proofFile);
+
+      if (uploadError) throw uploadError;
+
+      // Update game session with proof URL
+      await supabase
+        .from('game_sessions')
+        .update({ 
+          status: 'completed',
+          proof_url: fileName
+        })
+        .eq('id', currentChallenge.id);
+
+      // Award coins
+      if (!hasEarnedToday) {
+        await addCoins(5, 'Daily Truth or Dare completed', coupleId);
+        setHasEarnedToday(true);
+        toast({
+          title: "🎉 Challenge Completed!",
+          description: "You earned 5 Together Coins!",
+        });
+      } else {
+        toast({
+          title: "✅ Challenge Completed!",
+          description: "Great job! (Daily coins already earned)",
+        });
+      }
+
+      // Clean up
+      setProofFile(null);
+      setProofPreview(null);
+      setCurrentChallenge(null);
+    } catch (error) {
+      console.error('Error completing challenge:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload proof. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleChallengeFailed = async () => {
@@ -182,13 +228,74 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
       .update({ status: 'failed' })
       .eq('id', currentChallenge.id);
 
-    toast({
-      title: "⏰ Time's Up!",
-      description: "Challenge failed. Try again!",
-      variant: "destructive",
-    });
+    // Award coins anyway - participation matters!
+    if (!hasEarnedToday) {
+      await addCoins(5, 'Daily Truth or Dare participation', coupleId);
+      setHasEarnedToday(true);
+      toast({
+        title: "⏰ Time's Up!",
+        description: "But you still earned 5 coins for trying!",
+      });
+    } else {
+      toast({
+        title: "⏰ Time's Up!",
+        description: "Better luck next time!",
+        variant: "destructive",
+      });
+    }
 
+    setProofFile(null);
+    setProofPreview(null);
     setCurrentChallenge(null);
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Please choose a file smaller than 10MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setProofFile(file);
+    
+    // Create preview for images
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProofPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setProofPreview(null);
+    }
+  };
+
+  const handleTakePhoto = async () => {
+    try {
+      const image = await CapCamera.getPhoto({
+        resultType: CameraResultType.Uri,
+        source: CameraSource.Camera,
+        quality: 80,
+      });
+
+      if (image.webPath) {
+        const response = await fetch(image.webPath);
+        const blob = await response.blob();
+        const file = new File([blob], `proof-${Date.now()}.jpg`, { type: 'image/jpeg' });
+        
+        setProofFile(file);
+        setProofPreview(image.webPath);
+      }
+    } catch (error) {
+      console.error('Camera error:', error);
+    }
   };
 
   const formatTime = (ms: number) => {
@@ -235,13 +342,78 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
                 </p>
               </div>
 
+              {/* Proof Upload Section */}
+              <div className="space-y-3">
+                <p className="text-sm text-center text-muted-foreground">
+                  📸 Upload proof to complete (photo or video)
+                </p>
+                
+                {proofPreview && (
+                  <div className="relative">
+                    <img 
+                      src={proofPreview} 
+                      alt="Proof preview" 
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2"
+                      onClick={() => {
+                        setProofFile(null);
+                        setProofPreview(null);
+                      }}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+
+                {proofFile && !proofPreview && (
+                  <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+                    <p className="text-sm text-green-400 text-center">
+                      ✓ Video selected: {proofFile.name}
+                    </p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={handleTakePhoto}
+                    className="w-full"
+                  >
+                    <Camera className="w-4 h-4 mr-2" />
+                    Take Photo
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload File
+                  </Button>
+                </div>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,video/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+              </div>
+
               <Button 
                 onClick={handleChallengeComplete}
                 className="w-full"
                 size="lg"
+                disabled={!proofFile || uploading}
               >
                 <Zap className="w-4 h-4 mr-2" />
-                I've Completed It!
+                {uploading ? 'Uploading...' : 'Complete Challenge!'}
               </Button>
             </Card>
           </div>
@@ -281,12 +453,13 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
             </div>
 
             <Card className="p-4 text-sm text-muted-foreground space-y-2">
-              <p className="font-medium text-foreground">Rules:</p>
+              <p className="font-medium text-foreground">How to Play:</p>
               <ul className="space-y-1 list-disc list-inside">
-                <li>Truth: Answer within 10 minutes</li>
-                <li>Dare: Complete within 15 minutes</li>
-                <li>First completion each day earns 5 coins</li>
-                <li>Play unlimited times for fun!</li>
+                <li>Choose Truth (10 min) or Dare (15 min)</li>
+                <li>Complete the challenge before time runs out</li>
+                <li>Upload a photo or video as proof</li>
+                <li>You earn 5 coins just for playing!</li>
+                <li>Coins awarded once per day, but play unlimited for fun</li>
               </ul>
             </Card>
           </div>
