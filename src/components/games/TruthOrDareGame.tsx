@@ -141,7 +141,8 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
   const handleChallengeComplete = async () => {
     if (!currentChallenge) return;
 
-    if (!proofFile) {
+    // Only require proof for dares, not truths
+    if (currentChallenge.type === 'dare' && !proofFile) {
       toast({
         title: t('truthOrDareProofNeeded'),
         description: t('truthOrDareProofNeedDesc'),
@@ -153,17 +154,21 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
     setUploading(true);
 
     try {
-      // Upload proof file
-      const fileExt = proofFile.name.split('.').pop();
-      const fileName = `${userId}/${Date.now()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('truth-dare-proofs')
-        .upload(fileName, proofFile);
+      let fileName = null;
 
-      if (uploadError) throw uploadError;
+      // Upload proof file only if provided (required for dares)
+      if (proofFile) {
+        const fileExt = proofFile.name.split('.').pop();
+        fileName = `${userId}/${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('truth-dare-proofs')
+          .upload(fileName, proofFile);
 
-      // Update game session with proof URL
+        if (uploadError) throw uploadError;
+      }
+
+      // Update game session
       await supabase
         .from('game_sessions')
         .update({ 
@@ -325,11 +330,12 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
                 </p>
               </div>
 
-              {/* Proof Upload Section */}
-              <div className="space-y-3">
-                <p className="text-sm text-center text-muted-foreground">
-                  📸 {t('truthOrDareProofRequired')}
-                </p>
+              {/* Proof Upload Section - Only for Dares */}
+              {currentChallenge.type === 'dare' && (
+                <div className="space-y-3">
+                  <p className="text-sm text-center text-muted-foreground">
+                    📸 {t('truthOrDareProofRequired')}
+                  </p>
                 
                 {proofPreview && (
                   <div className="relative">
@@ -388,12 +394,13 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
                   className="hidden"
                 />
               </div>
+              )}
 
               <Button 
                 onClick={handleChallengeComplete}
                 className="w-full"
                 size="lg"
-                disabled={!proofFile || uploading}
+                disabled={(currentChallenge.type === 'dare' && !proofFile) || uploading}
               >
                 <Zap className="w-4 h-4 mr-2" />
                 {uploading ? t('truthOrDareUploading') : t('truthOrDareComplete')}
