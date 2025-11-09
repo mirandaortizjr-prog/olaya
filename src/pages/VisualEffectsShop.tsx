@@ -141,8 +141,41 @@ export default function VisualEffectsShop() {
     }, 10000);
   };
 
-  const getEffectIcon = (type: string) => {
-    return type === 'phrase' ? <Heart className="h-6 w-6" /> : <Sparkles className="h-6 w-6" />;
+  const getEffectEmoji = (name: string, type: string) => {
+    if (type === 'phrase') return name;
+    
+    const emojiMap: Record<string, string> = {
+      'Falling Hearts': '💗',
+      'Rose Petals': '🌸',
+      'Feathers': '🪶',
+      'Lantern Sparks': '✨',
+      'Starbursts': '⭐',
+      'Light Orbs': '💫',
+      'Halo Rings': '⭕',
+      'Butterflies': '🦋',
+      'Moon Dust': '🌙',
+      'Cupid Arrows': '💘',
+      'Lockets': '🔒',
+      'Infinity Symbols': '∞',
+      'Silhouettes': '👥',
+      'Mirrored Hearts': '💕',
+    };
+    return emojiMap[name] || '💖';
+  };
+
+  const getNeonColor = (behavior: string) => {
+    if (behavior.includes('neon pink')) return '#ff006e';
+    if (behavior.includes('neon purple')) return '#a855f7';
+    if (behavior.includes('neon blue')) return '#3b82f6';
+    if (behavior.includes('neon yellow')) return '#fbbf24';
+    return '#ffffff';
+  };
+
+  const getAnimationClass = (behavior: string) => {
+    if (behavior.includes('pulse') || behavior.includes('glow')) return 'animate-pulse';
+    if (behavior.includes('shimmer')) return 'animate-shimmer';
+    if (behavior.includes('flicker')) return 'animate-pulse';
+    return '';
   };
 
   return (
@@ -188,8 +221,15 @@ export default function VisualEffectsShop() {
                     className="bg-card border-border hover:bg-accent transition-all p-4"
                   >
                     <div className="flex flex-col gap-3">
-                      <div className="flex items-center justify-center h-16 text-primary">
-                        {getEffectIcon(effect.effect_type)}
+                      <div className="flex items-center justify-center h-16">
+                        <span 
+                          className={`text-4xl ${getAnimationClass(effect.behavior)}`}
+                          style={{
+                            textShadow: '0 0 10px rgba(255, 255, 255, 0.5)',
+                          }}
+                        >
+                          {getEffectEmoji(effect.name, effect.effect_type)}
+                        </span>
                       </div>
                       <div className="text-center">
                         <p className="font-medium text-foreground text-sm mb-1">{effect.name}</p>
@@ -236,8 +276,16 @@ export default function VisualEffectsShop() {
                     className="bg-card border-border hover:bg-accent transition-all p-4"
                   >
                     <div className="flex flex-col gap-3">
-                      <div className="flex items-center justify-center h-16 text-primary">
-                        {getEffectIcon(effect.effect_type)}
+                      <div className="flex items-center justify-center h-16">
+                        <span 
+                          className={`text-lg font-bold ${getAnimationClass(effect.behavior)}`}
+                          style={{
+                            color: getNeonColor(effect.behavior),
+                            textShadow: `0 0 20px ${getNeonColor(effect.behavior)}, 0 0 30px ${getNeonColor(effect.behavior)}`,
+                          }}
+                        >
+                          {getEffectEmoji(effect.name, effect.effect_type)}
+                        </span>
                       </div>
                       <div className="text-center">
                         <p className="font-medium text-foreground text-sm mb-1">{effect.name}</p>
