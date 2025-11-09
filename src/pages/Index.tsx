@@ -90,9 +90,9 @@ const Index = () => {
             .single();
           
           if (coupleData) {
-            setHasCoupleProfile(true);
             // If user is authenticated and has a couple profile, redirect to dashboard
             navigate('/dashboard');
+            return;
           }
         }
       } catch (error) {
@@ -106,13 +106,7 @@ const Index = () => {
   }, [navigate]);
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-pulse">
-          <img src={olayaLogo} alt="OLAYA Logo" className="w-40 h-40" />
-        </div>
-      </div>
-    );
+    return null; // No loading screen, handled by App.tsx splash
   }
 
   return (
