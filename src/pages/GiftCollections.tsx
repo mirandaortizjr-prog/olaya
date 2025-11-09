@@ -112,7 +112,7 @@ const GiftCollections = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/dashboard')}
             className="hover:bg-accent"
           >
             <ArrowLeft className="h-5 w-5" />
