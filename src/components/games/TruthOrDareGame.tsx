@@ -6,8 +6,10 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useTogetherCoins } from "@/hooks/useTogetherCoins";
+import { useCoupleProgress } from "@/hooks/useCoupleProgress";
 import { Camera as CapCamera } from "@capacitor/camera";
 import { CameraResultType, CameraSource } from "@capacitor/camera";
+import { generateTruthOrDareQuestions } from "@/lib/gameQuestions";
 
 interface GameProps {
   coupleId: string;
@@ -24,32 +26,12 @@ interface Challenge {
   status: 'pending' | 'completed' | 'failed';
 }
 
-const truthQuestions = [
-  "What's your biggest fantasy you've never shared?",
-  "What's the most romantic thing you've ever done?",
-  "What's one thing about me that turns you on the most?",
-  "What's a secret desire you have for us to try together?",
-  "When did you first know you were attracted to me?",
-  "What's the most adventurous thing you'd like to try?",
-  "What's your favorite memory of us together?",
-  "What makes you feel most loved by me?",
-];
-
-const dareQuestions = [
-  "Send me a flirty text right now",
-  "Do 10 push-ups and send me a video",
-  "Tell me three things you love about me",
-  "Share a secret you've been keeping",
-  "Dance for 30 seconds wherever you are",
-  "Give me a sincere compliment",
-  "Share your current location with me",
-  "Send me a voice note saying why you love me",
-];
-
 export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { toast } = useToast();
   const { addCoins } = useTogetherCoins(userId);
+  const { progress } = useCoupleProgress(coupleId);
+  const level = progress?.currentLevel || 1;
   const [currentChallenge, setCurrentChallenge] = useState<Challenge | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [hasEarnedToday, setHasEarnedToday] = useState(false);
@@ -118,8 +100,9 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
   };
 
   const startChallenge = async (type: 'truth' | 'dare') => {
-    const questions = type === 'truth' ? truthQuestions : dareQuestions;
-    const question = questions[Math.floor(Math.random() * questions.length)];
+    const questions = generateTruthOrDareQuestions(level, language);
+    const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
+    const question = type === 'truth' ? randomQuestion.truth : randomQuestion.dare;
     const timeLimit = type === 'truth' ? 10 * 60 * 1000 : 15 * 60 * 1000;
     const expiresAt = new Date(Date.now() + timeLimit);
 
@@ -138,8 +121,8 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
 
     if (error) {
       toast({
-        title: "Error",
-        description: "Failed to start challenge",
+        title: t('truthOrDareError'),
+        description: t('truthOrDareFailedStart'),
         variant: "destructive",
       });
       return;
@@ -160,8 +143,8 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
 
     if (!proofFile) {
       toast({
-        title: "Proof Required",
-        description: "Please upload a photo or video as proof of completion",
+        title: t('truthOrDareProofNeeded'),
+        description: t('truthOrDareProofNeedDesc'),
         variant: "destructive",
       });
       return;
@@ -194,13 +177,13 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
         await addCoins(5, 'Daily Truth or Dare completed', coupleId);
         setHasEarnedToday(true);
         toast({
-          title: "🎉 Challenge Completed!",
-          description: "You earned 5 Together Coins!",
+          title: `🎉 ${t('truthOrDareChallengeCompleted')}`,
+          description: t('truthOrDareEarnedCoins'),
         });
       } else {
         toast({
-          title: "✅ Challenge Completed!",
-          description: "Great job! (Daily coins already earned)",
+          title: `✅ ${t('truthOrDareChallengeCompleted')}`,
+          description: t('truthOrDareDoneGood'),
         });
       }
 
@@ -211,8 +194,8 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
     } catch (error) {
       console.error('Error completing challenge:', error);
       toast({
-        title: "Error",
-        description: "Failed to upload proof. Please try again.",
+        title: t('truthOrDareError'),
+        description: t('truthOrDareFailedUpload'),
         variant: "destructive",
       });
     } finally {
@@ -233,13 +216,13 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
       await addCoins(5, 'Daily Truth or Dare participation', coupleId);
       setHasEarnedToday(true);
       toast({
-        title: "⏰ Time's Up!",
-        description: "But you still earned 5 coins for trying!",
+        title: `⏰ ${t('truthOrDareTimesUp')}`,
+        description: t('truthOrDareStillEarned'),
       });
     } else {
       toast({
-        title: "⏰ Time's Up!",
-        description: "Better luck next time!",
+        title: `⏰ ${t('truthOrDareTimesUp')}`,
+        description: t('truthOrDareBetterLuck'),
         variant: "destructive",
       });
     }
@@ -256,8 +239,8 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
     // Validate file size (10MB)
     if (file.size > 10 * 1024 * 1024) {
       toast({
-        title: "File Too Large",
-        description: "Please choose a file smaller than 10MB",
+        title: t('truthOrDareFileTooLarge'),
+        description: t('truthOrDareFileSizeLimit'),
         variant: "destructive",
       });
       return;
@@ -310,7 +293,7 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
         <Button variant="ghost" size="icon" onClick={onBack}>
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <h2 className="text-xl font-semibold">Truth or Dare</h2>
+        <h2 className="text-xl font-semibold">{t('truthOrDareTitle')}</h2>
       </div>
 
       <div className="flex-1 p-4 overflow-y-auto">
@@ -337,15 +320,15 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
                 <p className="text-2xl font-medium mb-2">{currentChallenge.question}</p>
                 <p className="text-sm text-muted-foreground">
                   {currentChallenge.type === 'truth' 
-                    ? 'Answer within 10 minutes' 
-                    : 'Complete within 15 minutes'}
+                    ? t('truthOrDareAnswerWithin')
+                    : t('truthOrDareDareWithin')}
                 </p>
               </div>
 
               {/* Proof Upload Section */}
               <div className="space-y-3">
                 <p className="text-sm text-center text-muted-foreground">
-                  📸 Upload proof to complete (photo or video)
+                  📸 {t('truthOrDareProofRequired')}
                 </p>
                 
                 {proofPreview && (
@@ -372,7 +355,7 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
                 {proofFile && !proofPreview && (
                   <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
                     <p className="text-sm text-green-400 text-center">
-                      ✓ Video selected: {proofFile.name}
+                      ✓ {t('truthOrDareVideoSelected')} {proofFile.name}
                     </p>
                   </div>
                 )}
@@ -384,7 +367,7 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
                     className="w-full"
                   >
                     <Camera className="w-4 h-4 mr-2" />
-                    Take Photo
+                    {t('truthOrDareTakePhoto')}
                   </Button>
                   
                   <Button
@@ -393,7 +376,7 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
                     className="w-full"
                   >
                     <Upload className="w-4 h-4 mr-2" />
-                    Upload File
+                    {t('truthOrDareUploadFile')}
                   </Button>
                 </div>
 
@@ -413,7 +396,7 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
                 disabled={!proofFile || uploading}
               >
                 <Zap className="w-4 h-4 mr-2" />
-                {uploading ? 'Uploading...' : 'Complete Challenge!'}
+                {uploading ? t('truthOrDareUploading') : t('truthOrDareComplete')}
               </Button>
             </Card>
           </div>
@@ -421,13 +404,13 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
           <div className="space-y-6 max-w-md mx-auto">
             <Card className="p-6 text-center space-y-2">
               <Trophy className="w-12 h-12 text-primary mx-auto mb-2" />
-              <h3 className="text-lg font-semibold">Daily Reward</h3>
+              <h3 className="text-lg font-semibold">{t('truthOrDareDailyReward')}</h3>
               <p className="text-sm text-muted-foreground">
-                Complete your first Truth or Dare today to earn 5 coins!
+                {t('truthOrDareCompleteFirst')}
               </p>
               {hasEarnedToday && (
                 <div className="text-green-500 text-sm font-medium">
-                  ✓ Already earned today
+                  ✓ {t('truthOrDareAlreadyEarned')}
                 </div>
               )}
             </Card>
@@ -438,7 +421,7 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
                 className="w-full h-24 text-xl bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border-2 border-blue-500/50"
                 variant="outline"
               >
-                TRUTH
+                {t('truthOrDareTruth')}
                 <div className="text-xs text-muted-foreground ml-2">(10 min)</div>
               </Button>
 
@@ -447,19 +430,19 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
                 className="w-full h-24 text-xl bg-red-500/20 hover:bg-red-500/30 text-red-400 border-2 border-red-500/50"
                 variant="outline"
               >
-                DARE
+                {t('truthOrDareDare')}
                 <div className="text-xs text-muted-foreground ml-2">(15 min)</div>
               </Button>
             </div>
 
             <Card className="p-4 text-sm text-muted-foreground space-y-2">
-              <p className="font-medium text-foreground">How to Play:</p>
+              <p className="font-medium text-foreground">{t('truthOrDareHowToPlay')}</p>
               <ul className="space-y-1 list-disc list-inside">
-                <li>Choose Truth (10 min) or Dare (15 min)</li>
-                <li>Complete the challenge before time runs out</li>
-                <li>Upload a photo or video as proof</li>
-                <li>You earn 5 coins just for playing!</li>
-                <li>Coins awarded once per day, but play unlimited for fun</li>
+                <li>{t('truthOrDareStep1')}</li>
+                <li>{t('truthOrDareStep2')}</li>
+                <li>{t('truthOrDareStep3')}</li>
+                <li>{t('truthOrDareStep4')}</li>
+                <li>{t('truthOrDareStep5')}</li>
               </ul>
             </Card>
           </div>
