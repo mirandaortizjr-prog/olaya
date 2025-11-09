@@ -63,13 +63,15 @@ export const LoveLanguageQuiz = ({ onComplete, onBack }: LoveLanguageQuizProps) 
             <Button
               key={index}
               variant="outline"
-              className="w-full justify-start text-left h-auto py-4 px-4 hover:bg-primary/10 hover:border-primary transition-all"
+              className="w-full justify-start text-left h-auto py-3 px-4 hover:bg-primary/10 hover:border-primary transition-all whitespace-normal min-h-[3rem]"
               onClick={() => handleAnswer(option.language)}
             >
-              <span className="mr-3 text-primary font-bold">
+              <span className="mr-3 text-primary font-bold flex-shrink-0">
                 {String.fromCharCode(65 + index)}
               </span>
-              {option.text[language as 'en' | 'es']}
+              <span className="flex-1 leading-relaxed">
+                {option.text[language as 'en' | 'es']}
+              </span>
             </Button>
           ))}
         </CardContent>
