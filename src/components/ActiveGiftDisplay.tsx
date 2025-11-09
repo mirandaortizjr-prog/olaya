@@ -33,6 +33,9 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
     startPosX: 0,
     startPosY: 0
   });
+  
+  // Persist position per user/couple
+  const storageKey = `active_gift_pos_${userId}_${coupleId}`;
 
   useEffect(() => {
     if (!userId || !coupleId) return;
@@ -60,6 +63,20 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
       supabase.removeChannel(channel);
     };
   }, [userId, coupleId]);
+
+  // Load saved position on mount / when ids change
+  useEffect(() => {
+    if (!userId || !coupleId) return;
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        const pos = JSON.parse(saved);
+        if (typeof pos?.x === 'number' && typeof pos?.y === 'number') {
+          setPosition(pos);
+        }
+      }
+    } catch {}
+  }, [storageKey, userId, coupleId]);
 
   useEffect(() => {
     if (!activeGift) return;
@@ -139,6 +156,9 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
 
   const handleMouseUp = () => {
     setIsDragging(false);
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(position));
+    } catch {}
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -157,7 +177,7 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
 
   const handleTouchMove = (e: TouchEvent) => {
     if (!isDragging) return;
-    e.preventDefault(); // Prevent pull-to-refresh
+    if (e.cancelable) e.preventDefault(); // Prevent pull-to-refresh
     const touch = e.touches[0];
     const deltaX = touch.clientX - dragRef.current.startX;
     const deltaY = touch.clientY - dragRef.current.startY;
@@ -169,22 +189,32 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
 
   const handleTouchEnd = () => {
     setIsDragging(false);
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(position));
+    } catch {}
   };
 
   useEffect(() => {
     if (isDragging) {
+      const prevHtml = document.documentElement.style.overscrollBehaviorY;
+      const prevBody = document.body.style.overscrollBehaviorY;
+      document.documentElement.style.overscrollBehaviorY = 'contain';
+      document.body.style.overscrollBehaviorY = 'contain';
+
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
       window.addEventListener('touchmove', handleTouchMove, { passive: false });
       window.addEventListener('touchend', handleTouchEnd);
       return () => {
+        document.documentElement.style.overscrollBehaviorY = prevHtml;
+        document.body.style.overscrollBehaviorY = prevBody;
         window.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('mouseup', handleMouseUp);
         window.removeEventListener('touchmove', handleTouchMove);
         window.removeEventListener('touchend', handleTouchEnd);
       };
     }
-  }, [isDragging, position]);
+  }, [isDragging]);
 
   if (!activeGift) return null;
 
@@ -212,9 +242,10 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
         {!isExpanded ? (
           // Collapsed view - draggable gift
           <div 
-            className={`cursor-move touch-none ${isDragging ? 'opacity-80' : ''}`}
+            className={`cursor-move touch-none overscroll-none select-none ${isDragging ? 'opacity-80' : ''}`}
             onMouseDown={(e) => { e.preventDefault(); handleMouseDown(e); }}
             onTouchStart={handleTouchStart}
+            onTouchMove={(e) => e.preventDefault()}
             onContextMenu={(e) => e.preventDefault()}
           >
             {giftImages[activeGift.gift_image] ? (
