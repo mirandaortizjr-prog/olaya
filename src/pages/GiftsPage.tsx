@@ -23,8 +23,12 @@ import redRoseWrap from "@/assets/gifts/red-rose-wrap.png";
 import pinkPurpleBouquet from "@/assets/gifts/pink-purple-bouquet.png";
 import hotPinkRoseBouquet from "@/assets/gifts/hot-pink-rose-bouquet.png";
 import colorfulSpringBouquet from "@/assets/gifts/colorful-spring-bouquet.png";
+import chocolateBar from "@/assets/gifts/chocolate-bar.png";
+import heartChocolateBox from "@/assets/gifts/heart-chocolate-box.png";
+import giftBoxDeluxe from "@/assets/gifts/gift-box-deluxe.png";
+import loveCake from "@/assets/gifts/love-cake.png";
 
-const flowerImages: { [key: string]: string } = {
+const giftImages: { [key: string]: string } = {
   'flower-bouquet-1': flowerBouquet1,
   'flower-bouquet-2': flowerBouquet2,
   'flower-bouquet-3': flowerBouquet3,
@@ -38,6 +42,10 @@ const flowerImages: { [key: string]: string } = {
   'pink-purple-bouquet': pinkPurpleBouquet,
   'hot-pink-rose-bouquet': hotPinkRoseBouquet,
   'colorful-spring-bouquet': colorfulSpringBouquet,
+  'chocolate-bar': chocolateBar,
+  'heart-chocolate-box': heartChocolateBox,
+  'gift-box-deluxe': giftBoxDeluxe,
+  'love-cake': loveCake,
 };
 
 interface ShopItem {
@@ -58,7 +66,8 @@ interface PurchasedGiftHistory {
 
 const GiftsPage = () => {
   const navigate = useNavigate();
-  const [gifts, setGifts] = useState<ShopItem[]>([]);
+  const [flowerGifts, setFlowerGifts] = useState<ShopItem[]>([]);
+  const [sweetGifts, setSweetGifts] = useState<ShopItem[]>([]);
   const [purchaseHistory, setPurchaseHistory] = useState<PurchasedGiftHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
@@ -78,14 +87,23 @@ const GiftsPage = () => {
 
   const fetchGifts = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: flowersData, error: flowersError } = await supabase
         .from('shop_items')
         .select('*')
         .eq('category', 'flowers')
         .order('price', { ascending: true });
 
-      if (error) throw error;
-      setGifts(data || []);
+      if (flowersError) throw flowersError;
+      setFlowerGifts(flowersData || []);
+
+      const { data: sweetsData, error: sweetsError } = await supabase
+        .from('shop_items')
+        .select('*')
+        .eq('category', 'sweets')
+        .order('price', { ascending: true });
+
+      if (sweetsError) throw sweetsError;
+      setSweetGifts(sweetsData || []);
     } catch (error) {
       console.error('Error fetching gifts:', error);
       toast.error("Failed to load gifts");
@@ -180,7 +198,7 @@ const GiftsPage = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-xl font-semibold text-foreground">Flower Gifts</h1>
+          <h1 className="text-xl font-semibold text-foreground">Gifts</h1>
           <div className="flex items-center gap-2 px-3 py-1.5 bg-accent rounded-full">
             <img src={togetherCoinsIcon} alt="Coins" className="w-5 h-5" />
             <span className="font-semibold text-sm">{coins}</span>
@@ -188,20 +206,23 @@ const GiftsPage = () => {
         </div>
       </div>
 
-      {/* Tabs for Gifts and History */}
-      <Tabs defaultValue="gifts" className="p-4">
-        <TabsList className="w-full grid grid-cols-2">
-          <TabsTrigger value="gifts">
-            <Heart className="w-4 h-4 mr-2" />
-            Send Gifts
+      {/* Tabs for Gift Categories and History */}
+      <Tabs defaultValue="flowers" className="p-4">
+        <TabsList className="w-full grid grid-cols-3">
+          <TabsTrigger value="flowers">
+            <Heart className="w-4 h-4 mr-1" />
+            Flowers
+          </TabsTrigger>
+          <TabsTrigger value="sweets">
+            🍫 Sweets
           </TabsTrigger>
           <TabsTrigger value="history">
-            <History className="w-4 h-4 mr-2" />
+            <History className="w-4 h-4 mr-1" />
             History
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="gifts" className="space-y-6 mt-6">
+        <TabsContent value="flowers" className="space-y-6 mt-6">
           {/* Header Section */}
           <div className="text-center space-y-2">
             <Heart className="w-12 h-12 mx-auto text-primary animate-pulse" />
@@ -220,15 +241,15 @@ const GiftsPage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4">
-              {gifts.map((gift) => (
+              {flowerGifts.map((gift) => (
                 <Card
                   key={gift.id}
                   className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105"
                 >
                   <div className="aspect-square bg-accent/20 relative overflow-hidden">
-                    {flowerImages[gift.image_url] ? (
+                    {giftImages[gift.image_url] ? (
                       <img
-                        src={flowerImages[gift.image_url]}
+                        src={giftImages[gift.image_url]}
                         alt={gift.name}
                         className="w-full h-full object-contain p-4"
                       />
@@ -265,10 +286,82 @@ const GiftsPage = () => {
           )}
 
           {/* Empty State */}
-          {!loading && gifts.length === 0 && (
+          {!loading && flowerGifts.length === 0 && (
             <div className="text-center py-12 space-y-4">
               <Heart className="w-16 h-16 mx-auto text-muted-foreground" />
-              <p className="text-muted-foreground">No gifts available yet</p>
+              <p className="text-muted-foreground">No flower gifts available yet</p>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="sweets" className="space-y-6 mt-6">
+          {/* Header Section */}
+          <div className="text-center space-y-2">
+            <div className="text-5xl mx-auto">🍫</div>
+            <h2 className="text-2xl font-bold text-foreground">Sweet Treats</h2>
+            <p className="text-muted-foreground">
+              Send delicious sweets to make their day special
+            </p>
+          </div>
+
+          {/* Sweets Grid */}
+          {loading ? (
+            <div className="grid grid-cols-2 gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-64 bg-accent animate-pulse rounded-lg" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {sweetGifts.map((gift) => (
+                <Card
+                  key={gift.id}
+                  className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105"
+                >
+                  <div className="aspect-square bg-accent/20 relative overflow-hidden">
+                    {giftImages[gift.image_url] ? (
+                      <img
+                        src={giftImages[gift.image_url]}
+                        alt={gift.name}
+                        className="w-full h-full object-contain p-4"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-5xl">
+                        🍫
+                      </div>
+                    )}
+                    <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
+                      <img src={togetherCoinsIcon} alt="Coins" className="w-3 h-3 mr-1" />
+                      {gift.price}
+                    </Badge>
+                  </div>
+                  <div className="p-3 space-y-2">
+                    <h3 className="font-semibold text-sm text-foreground line-clamp-1">
+                      {gift.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {gift.description}
+                    </p>
+                    <Button
+                      onClick={() => handlePurchase(gift)}
+                      className="w-full"
+                      size="sm"
+                      disabled={coins < gift.price}
+                    >
+                      <ShoppingCart className="w-3 h-3 mr-1" />
+                      {coins < gift.price ? 'Need More Coins' : 'Send Gift'}
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && sweetGifts.length === 0 && (
+            <div className="text-center py-12 space-y-4">
+              <div className="text-5xl">🍫</div>
+              <p className="text-muted-foreground">No sweet gifts available yet</p>
             </div>
           )}
         </TabsContent>
@@ -288,10 +381,10 @@ const GiftsPage = () => {
               {purchaseHistory.map((gift) => (
                 <Card key={gift.id} className="p-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-accent/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                      {flowerImages[gift.gift_image] ? (
+                  <div className="w-16 h-16 bg-accent/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                      {giftImages[gift.gift_image] ? (
                         <img
-                          src={flowerImages[gift.gift_image]}
+                          src={giftImages[gift.gift_image]}
                           alt={gift.gift_name}
                           className="w-12 h-12 object-contain"
                         />
