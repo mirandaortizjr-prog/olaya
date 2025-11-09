@@ -183,10 +183,10 @@ export default function AccessoriesPage() {
       <div className="container max-w-2xl mx-auto px-4 py-6 space-y-8">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            {t('accessories') || 'Accessories'}
+            {t('skins') || 'Skins'}
           </h1>
           <p className="text-muted-foreground">
-            {t('customizeYourProfileGradients') || 'Customize your profile with beautiful gradient themes'}
+            {t('customizeYourProfileWithSkins') || 'Customize your profile with beautiful background skins'}
           </p>
         </div>
 
@@ -200,7 +200,7 @@ export default function AccessoriesPage() {
 
         <div>
           <h3 className="text-lg font-semibold text-foreground mb-4">
-            {t('availableGradients') || 'Available Gradients'}
+            {t('availableSkins') || 'Available Skins'}
           </h3>
           
           {isLoading ? (
@@ -209,7 +209,7 @@ export default function AccessoriesPage() {
             </p>
           ) : gradients.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">
-              {t('noGradientsAvailable') || 'No gradients available at this time'}
+              {t('noSkinsAvailable') || 'No skins available at this time'}
             </p>
           ) : (
             <div className="grid grid-cols-1 gap-4">
