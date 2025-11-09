@@ -39,9 +39,10 @@ interface PurchasedGift {
 
 interface FloatingGiftsProps {
   coupleId: string;
+  receiverGender?: 'male' | 'female';
 }
 
-const FloatingGifts = ({ coupleId }: FloatingGiftsProps) => {
+const FloatingGifts = ({ coupleId, receiverGender = 'female' }: FloatingGiftsProps) => {
   const [activeGifts, setActiveGifts] = useState<PurchasedGift[]>([]);
   const [currentGiftIndex, setCurrentGiftIndex] = useState(0);
 
@@ -104,22 +105,54 @@ const FloatingGifts = ({ coupleId }: FloatingGiftsProps) => {
 
   const currentGift = activeGifts[currentGiftIndex];
   const giftImage = flowerImages[currentGift.gift_image];
+  
+  // Gender-based neon color
+  const neonColor = receiverGender === 'male' 
+    ? 'rgba(59, 130, 246, 0.8)' // Blue for males
+    : 'rgba(236, 72, 153, 0.8)'; // Pink for females
 
   return (
-    <div className="fixed bottom-24 right-4 z-20 animate-fade-in">
-      <div className="relative">
-        <div className="absolute inset-0 rounded-full bg-primary/50 blur-xl animate-pulse" />
-        <div className="relative w-16 h-16 rounded-full bg-background/80 backdrop-blur-sm border-2 border-primary shadow-lg flex items-center justify-center overflow-hidden">
-          {giftImage ? (
-            <img
-              src={giftImage}
-              alt={currentGift.gift_name}
-              className="w-12 h-12 object-contain"
-            />
-          ) : (
-            <span className="text-2xl">💝</span>
-          )}
-        </div>
+    <div 
+      className="absolute bottom-4 right-4 z-20 animate-fade-in"
+      style={{
+        filter: `drop-shadow(0 0 20px ${neonColor}) drop-shadow(0 0 40px ${neonColor})`,
+      }}
+    >
+      <div className="relative w-24 h-24">
+        <style>{`
+          @keyframes deepPulse {
+            0%, 100% {
+              opacity: 0.4;
+              filter: blur(12px);
+            }
+            50% {
+              opacity: 0.9;
+              filter: blur(18px);
+            }
+          }
+          .deep-pulse-glow {
+            animation: deepPulse 3s ease-in-out infinite;
+          }
+        `}</style>
+        <div 
+          className="absolute inset-0 deep-pulse-glow"
+          style={{
+            background: neonColor,
+            borderRadius: '12px',
+          }}
+        />
+        {giftImage ? (
+          <img
+            src={giftImage}
+            alt={currentGift.gift_name}
+            className="relative w-24 h-24 object-contain"
+            style={{
+              filter: `drop-shadow(0 0 8px ${neonColor})`,
+            }}
+          />
+        ) : (
+          <span className="relative text-4xl">💝</span>
+        )}
       </div>
     </div>
   );

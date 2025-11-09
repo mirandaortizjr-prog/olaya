@@ -888,7 +888,7 @@ const Dashboard = () => {
       <VisualEffectsRenderer coupleId={coupleData.coupleId} />
 
       {/* Feed Section */}
-      <div style={{ backgroundColor: '#000000' }} className="pb-4 px-1">
+      <div style={{ backgroundColor: '#000000' }} className="pb-4 px-1 relative">
         <div style={{ background: 'linear-gradient(180deg, #000000, #4F585E)' }} className="rounded-3xl p-3 min-h-[500px]">
           <UnioGallery
             coupleId={coupleData.coupleId}
@@ -897,6 +897,8 @@ const Dashboard = () => {
             partnerFullName={coupleData.partner?.full_name || "Partner"}
           />
         </div>
+        {/* FloatingGifts positioned within the gallery container */}
+        {coupleData.coupleId && <FloatingGifts coupleId={coupleData.coupleId} receiverGender="female" />}
       </div>
 
       {!coupleData.partner && (
@@ -911,7 +913,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      {coupleData.coupleId && <FloatingGifts coupleId={coupleData.coupleId} />}
+      
 
       <BottomNavigation
         activeView={activeView}
