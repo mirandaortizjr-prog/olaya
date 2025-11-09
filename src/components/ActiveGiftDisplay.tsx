@@ -126,10 +126,10 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
     <div className="fixed bottom-24 right-4 z-40 pointer-events-none">
       <div className="pointer-events-auto">
         {!isExpanded ? (
-          // Collapsed view - just the gift icon without background
+          // Collapsed view - just the gift image, nothing else
           <div 
             className={`
-              relative cursor-pointer
+              cursor-pointer
               ${glowColor}
               animate-[pulse_3s_ease-in-out_infinite]
             `}
@@ -144,9 +144,6 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
             ) : (
               <Gift className="w-24 h-24 text-primary drop-shadow-2xl" />
             )}
-            <Badge className="absolute -top-2 -right-2 bg-red-500 text-white px-2 py-1 text-xs">
-              New
-            </Badge>
           </div>
         ) : (
           // Expanded view - full details
