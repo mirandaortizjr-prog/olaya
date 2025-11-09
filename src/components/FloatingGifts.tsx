@@ -107,16 +107,19 @@ const FloatingGifts = ({ coupleId }: FloatingGiftsProps) => {
 
   return (
     <div className="fixed bottom-24 right-4 z-20 animate-fade-in">
-      <div className="w-16 h-16 rounded-full bg-background/80 backdrop-blur-sm border-2 border-primary shadow-lg flex items-center justify-center overflow-hidden">
-        {giftImage ? (
-          <img
-            src={giftImage}
-            alt={currentGift.gift_name}
-            className="w-12 h-12 object-contain"
-          />
-        ) : (
-          <span className="text-2xl">💝</span>
-        )}
+      <div className="relative">
+        <div className="absolute inset-0 rounded-full bg-primary/50 blur-xl animate-pulse" />
+        <div className="relative w-16 h-16 rounded-full bg-background/80 backdrop-blur-sm border-2 border-primary shadow-lg flex items-center justify-center overflow-hidden">
+          {giftImage ? (
+            <img
+              src={giftImage}
+              alt={currentGift.gift_name}
+              className="w-12 h-12 object-contain"
+            />
+          ) : (
+            <span className="text-2xl">💝</span>
+          )}
+        </div>
       </div>
     </div>
   );
