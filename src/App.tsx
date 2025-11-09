@@ -26,6 +26,7 @@ import ShopPage from "./pages/ShopPage";
 import GiftsPage from "./pages/GiftsPage";
 import GiftCollections from "./pages/GiftCollections";
 import VisualEffectsShop from "./pages/VisualEffectsShop";
+import usePullToRefresh from "@/hooks/usePullToRefresh";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,9 @@ const App = () => {
     sessionStorage.setItem('hasSeenSplash', 'true');
     setShowSplash(false);
   };
+
+  // Enable pull-to-refresh across the app
+  usePullToRefresh();
 
   if (!isReady || showSplash) {
     return <SplashScreen onFinish={handleSplashFinish} />;
