@@ -106,6 +106,14 @@ export default function AccessoriesPage() {
       'Lime Green': 'lime-green',
       'Green to Yellow': 'green-yellow',
       'Slate Blue': 'slate-blue',
+      'Gentle Mystery': 'gentle-mystery',
+      'Raw Desire': 'raw-desire',
+      'Neutral Ambiguity': 'neutral-ambiguity',
+      'Clarity Surge': 'clarity-surge',
+      'Emotional Depth': 'emotional-depth',
+      'Fresh Activation': 'fresh-activation',
+      'Growth to Joy': 'growth-joy',
+      'Emotional Weight': 'emotional-weight',
     };
     return mapping[name] || 'default';
   };

@@ -143,6 +143,14 @@ export const translations = {
     gradientLimeGreen: "Lime Green",
     gradientGreenYellow: "Green to Yellow",
     gradientSlateBlue: "Slate Blue",
+    gradientGentleMystery: "Gentle Mystery",
+    gradientRawDesire: "Raw Desire",
+    gradientNeutralAmbiguity: "Neutral Ambiguity",
+    gradientClaritySurge: "Clarity Surge",
+    gradientEmotionalDepth: "Emotional Depth",
+    gradientFreshActivation: "Fresh Activation",
+    gradientGrowthJoy: "Growth to Joy",
+    gradientEmotionalWeight: "Emotional Weight",
     
     // Index page
     indexTitle: "OLAYA",
@@ -874,6 +882,14 @@ export const translations = {
     gradientLimeGreen: "Verde Lima",
     gradientGreenYellow: "Verde a Amarillo",
     gradientSlateBlue: "Azul Pizarra",
+    gradientGentleMystery: "Misterio Gentil",
+    gradientRawDesire: "Deseo Intenso",
+    gradientNeutralAmbiguity: "Ambigüedad Neutral",
+    gradientClaritySurge: "Claridad Súbita",
+    gradientEmotionalDepth: "Profundidad Emocional",
+    gradientFreshActivation: "Activación Fresca",
+    gradientGrowthJoy: "Crecimiento a Alegría",
+    gradientEmotionalWeight: "Peso Emocional",
     
     // Index page
     indexTitle: "OLAYA",
