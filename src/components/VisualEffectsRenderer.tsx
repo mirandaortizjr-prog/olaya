@@ -20,7 +20,12 @@ interface Effect {
   duration: number;
 }
 
-export const VisualEffectsRenderer = ({ coupleId }: { coupleId: string }) => {
+interface Props {
+  coupleId: string;
+  previewEffect?: ActiveEffect;
+}
+
+export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
   const [activeEffects, setActiveEffects] = useState<ActiveEffect[]>([]);
   const [particles, setParticles] = useState<Effect[]>([]);
 
@@ -65,7 +70,9 @@ export const VisualEffectsRenderer = ({ coupleId }: { coupleId: string }) => {
   }, [coupleId]);
 
   useEffect(() => {
-    if (activeEffects.length > 0) {
+    const effectsToRender = previewEffect ? [previewEffect] : activeEffects;
+    
+    if (effectsToRender.length > 0) {
       const newParticles = Array.from({ length: 20 }, (_, i) => ({
         id: i,
         left: Math.random() * 100,
@@ -76,9 +83,11 @@ export const VisualEffectsRenderer = ({ coupleId }: { coupleId: string }) => {
     } else {
       setParticles([]);
     }
-  }, [activeEffects]);
+  }, [activeEffects, previewEffect]);
 
-  if (activeEffects.length === 0) return null;
+  const effectsToRender = previewEffect ? [previewEffect] : activeEffects;
+  
+  if (effectsToRender.length === 0) return null;
 
   const getEmoji = (name: string, type: string) => {
     if (type === 'phrase') return name;
@@ -122,7 +131,7 @@ export const VisualEffectsRenderer = ({ coupleId }: { coupleId: string }) => {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
-      {activeEffects.map((effect) =>
+      {effectsToRender.map((effect) =>
         particles.map((particle) => (
           <div
             key={`${effect.id}-${particle.id}`}

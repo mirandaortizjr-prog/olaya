@@ -4,10 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Sparkles, Heart } from 'lucide-react';
+import { ArrowLeft, Sparkles, Heart, Eye } from 'lucide-react';
 import { useTogetherCoins } from '@/hooks/useTogetherCoins';
 import { toast } from '@/hooks/use-toast';
 import togetherCoinsIcon from '@/assets/together-coins-icon.png';
+import { VisualEffectsRenderer } from '@/components/VisualEffectsRenderer';
 
 interface VisualEffect {
   id: string;
@@ -27,6 +28,7 @@ export default function VisualEffectsShop() {
   const [objectEffects, setObjectEffects] = useState<VisualEffect[]>([]);
   const [phraseEffects, setPhraseEffects] = useState<VisualEffect[]>([]);
   const [loading, setLoading] = useState(true);
+  const [previewEffect, setPreviewEffect] = useState<VisualEffect | null>(null);
   const { coins, spendCoins } = useTogetherCoins(user?.id);
 
   useEffect(() => {
@@ -127,6 +129,18 @@ export default function VisualEffectsShop() {
     }
   };
 
+  const handlePreview = (effect: VisualEffect) => {
+    setPreviewEffect(effect);
+    toast({
+      title: "Preview started ✨",
+      description: "Effect will play for 10 seconds",
+    });
+
+    setTimeout(() => {
+      setPreviewEffect(null);
+    }, 10000);
+  };
+
   const getEffectIcon = (type: string) => {
     return type === 'phrase' ? <Heart className="h-6 w-6" /> : <Sparkles className="h-6 w-6" />;
   };
@@ -181,15 +195,26 @@ export default function VisualEffectsShop() {
                         <p className="font-medium text-foreground text-sm mb-1">{effect.name}</p>
                         <p className="text-xs text-muted-foreground line-clamp-2">{effect.behavior}</p>
                       </div>
-                      <Button
-                        onClick={() => handlePurchase(effect)}
-                        disabled={coins < effect.price}
-                        className="w-full"
-                        size="sm"
-                      >
-                        <img src={togetherCoinsIcon} alt="Coins" className="w-4 h-4 mr-1.5" />
-                        {effect.price}
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => handlePreview(effect)}
+                          variant="outline"
+                          className="flex-1"
+                          size="sm"
+                        >
+                          <Eye className="w-3 h-3 mr-1" />
+                          Preview
+                        </Button>
+                        <Button
+                          onClick={() => handlePurchase(effect)}
+                          disabled={coins < effect.price}
+                          className="flex-1"
+                          size="sm"
+                        >
+                          <img src={togetherCoinsIcon} alt="Coins" className="w-4 h-4 mr-1.5" />
+                          {effect.price}
+                        </Button>
+                      </div>
                     </div>
                   </Card>
                 ))}
@@ -218,15 +243,26 @@ export default function VisualEffectsShop() {
                         <p className="font-medium text-foreground text-sm mb-1">{effect.name}</p>
                         <p className="text-xs text-muted-foreground line-clamp-2">{effect.behavior}</p>
                       </div>
-                      <Button
-                        onClick={() => handlePurchase(effect)}
-                        disabled={coins < effect.price}
-                        className="w-full"
-                        size="sm"
-                      >
-                        <img src={togetherCoinsIcon} alt="Coins" className="w-4 h-4 mr-1.5" />
-                        {effect.price}
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => handlePreview(effect)}
+                          variant="outline"
+                          className="flex-1"
+                          size="sm"
+                        >
+                          <Eye className="w-3 h-3 mr-1" />
+                          Preview
+                        </Button>
+                        <Button
+                          onClick={() => handlePurchase(effect)}
+                          disabled={coins < effect.price}
+                          className="flex-1"
+                          size="sm"
+                        >
+                          <img src={togetherCoinsIcon} alt="Coins" className="w-4 h-4 mr-1.5" />
+                          {effect.price}
+                        </Button>
+                      </div>
                     </div>
                   </Card>
                 ))}
@@ -235,6 +271,24 @@ export default function VisualEffectsShop() {
           </>
         )}
       </div>
+
+      {/* Preview Renderer */}
+      {previewEffect && (
+        <VisualEffectsRenderer 
+          coupleId="" 
+          previewEffect={{
+            id: 'preview',
+            effect_id: previewEffect.id,
+            expires_at: new Date(Date.now() + 10000).toISOString(),
+            visual_effects: {
+              name: previewEffect.name,
+              effect_type: previewEffect.effect_type,
+              animation: previewEffect.animation,
+              behavior: previewEffect.behavior,
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
