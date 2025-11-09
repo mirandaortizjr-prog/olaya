@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Heart, ShoppingCart, History } from "lucide-react";
+import { ArrowLeft, Heart, ShoppingCart, History, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -769,10 +769,15 @@ const GiftsPage = () => {
             <div className="grid grid-cols-2 gap-4">
               {petGifts.map((gift) => {
                 const isCollected = purchaseHistory.some(p => p.gift_image === gift.image_url);
+                const isLimitedTime = gift.price === 1000;
                 return (
                   <Card
                     key={gift.id}
-                    className={`overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105 ${isCollected ? 'ring-2 ring-primary' : ''}`}
+                    className={`overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105 ${
+                      isCollected ? 'ring-2 ring-primary' : ''
+                    } ${
+                      isLimitedTime ? 'ring-2 ring-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)] animate-pulse' : ''
+                    }`}
                   >
                     <div className="aspect-square bg-accent/20 relative overflow-hidden">
                       {giftImages[gift.image_url] ? (
@@ -786,12 +791,17 @@ const GiftsPage = () => {
                           <div className="text-4xl">🐾</div>
                         </div>
                       )}
+                      {isLimitedTime && (
+                        <div className="absolute top-2 left-2">
+                          <Star className="w-6 h-6 fill-yellow-400 text-yellow-400 animate-pulse" />
+                        </div>
+                      )}
                       <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
                         <img src={togetherCoinsIcon} alt="Coins" className="w-3 h-3 mr-1" />
                         {gift.price}
                       </Badge>
                       {isCollected && (
-                        <Badge className="absolute top-2 left-2 bg-green-500 text-white">
+                        <Badge className="absolute bottom-2 left-2 bg-green-500 text-white">
                           ✓ Collected
                         </Badge>
                       )}
