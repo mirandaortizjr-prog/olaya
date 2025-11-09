@@ -129,7 +129,7 @@ export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
     return animationMap[animation] || 'animate-fall-leaf';
   };
   return (
-    <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
       {effectsToRender.map((effect) =>
         particles.map((particle) => (
           <div

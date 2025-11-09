@@ -203,7 +203,7 @@ export default function VisualEffectsShop() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20 relative overflow-hidden">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="max-w-lg mx-auto px-4 py-4">
@@ -224,6 +224,16 @@ export default function VisualEffectsShop() {
           </div>
         </div>
       </div>
+
+      {/* Preview Renderer - Contained within shop page */}
+      {previewEffect && (
+        <div className="pointer-events-none absolute inset-0 z-40 overflow-hidden">
+          <VisualEffectsRenderer 
+            coupleId={coupleId} 
+            previewEffect={previewEffect}
+          />
+        </div>
+      )}
 
       <div className="max-w-lg mx-auto px-4 py-6 space-y-8">
         {loading ? (
@@ -344,13 +354,6 @@ export default function VisualEffectsShop() {
         )}
       </div>
 
-      {/* Preview Renderer */}
-      {previewEffect && (
-        <VisualEffectsRenderer 
-          coupleId={coupleId} 
-          previewEffect={previewEffect}
-        />
-      )}
     </div>
   );
 }
