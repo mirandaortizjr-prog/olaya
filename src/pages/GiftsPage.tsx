@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTogetherCoins } from "@/hooks/useTogetherCoins";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { translations } from "@/lib/translations";
 import togetherCoinsIcon from "@/assets/together-coins-icon.png";
 import flowerBouquet1 from "@/assets/gifts/flower-bouquet-1.png";
 import flowerBouquet2 from "@/assets/gifts/flower-bouquet-2.png";
@@ -154,6 +156,8 @@ interface PurchasedGiftHistory {
 
 const GiftsPage = () => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const t = translations[language];
   const [flowerGifts, setFlowerGifts] = useState<ShopItem[]>([]);
   const [sweetGifts, setSweetGifts] = useState<ShopItem[]>([]);
   const [balloonGifts, setBalloonGifts] = useState<ShopItem[]>([]);
@@ -310,7 +314,8 @@ const GiftsPage = () => {
         } else if (collectionType === 'pets') {
           setPetsCollectionComplete(true);
         }
-        toast.success(`🎉 Collection Complete! You earned ${bonusAmount} bonus coins!`);
+        const completeMsg = t.giftsCollectionComplete.replace('{amount}', bonusAmount.toString());
+        toast.success(completeMsg);
       }
     } catch (error) {
       console.error('Error awarding collection bonus:', error);
@@ -332,7 +337,7 @@ const GiftsPage = () => {
         .single();
 
       if (!coupleData) {
-        toast.error("You need to be in a couple to send gifts");
+        toast.error(t.giftsNeedCouple);
         return;
       }
 
@@ -362,7 +367,7 @@ const GiftsPage = () => {
 
       if (coinError) throw coinError;
 
-      toast.success(`${gift.name} sent! 💝`);
+      toast.success(t.giftsGiftSent);
       
       // Refresh purchase history
       if (user) {
@@ -370,7 +375,7 @@ const GiftsPage = () => {
       }
     } catch (error) {
       console.error('Error purchasing gift:', error);
-      toast.error("Failed to send gift");
+      toast.error(t.giftsFailedToSend);
     }
   };
 
@@ -387,9 +392,9 @@ const GiftsPage = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-xl font-semibold text-foreground">Gifts</h1>
+          <h1 className="text-xl font-semibold text-foreground">{t.shopGifts}</h1>
           <div className="flex items-center gap-2 px-3 py-1.5 bg-accent rounded-full">
-            <img src={togetherCoinsIcon} alt="Coins" className="w-5 h-5" />
+            <img src={togetherCoinsIcon} alt={t.shopTogetherCoins} className="w-5 h-5" />
             <span className="font-semibold text-sm">{coins}</span>
           </div>
         </div>
@@ -400,23 +405,23 @@ const GiftsPage = () => {
         <TabsList className="w-full grid grid-cols-6 gap-1">
           <TabsTrigger value="flowers" className="text-xs px-2">
             <Heart className="w-3 h-3 mr-1" />
-            Flowers
+            {t.giftsFlowers}
           </TabsTrigger>
           <TabsTrigger value="sweets" className="text-xs px-2">
-            🍫 Sweets
+            🍫 {t.giftsSweets}
           </TabsTrigger>
           <TabsTrigger value="balloons" className="text-xs px-2">
-            🎈 Balloons
+            🎈 {t.giftsBalloons}
           </TabsTrigger>
           <TabsTrigger value="stuffed" className="text-xs px-2">
-            🧸 Plush
+            🧸 {t.giftsPlush}
           </TabsTrigger>
           <TabsTrigger value="pets" className="text-xs px-2">
-            🐾 Pets
+            🐾 {t.giftsPets}
           </TabsTrigger>
           <TabsTrigger value="history" className="text-xs px-2">
             <History className="w-3 h-3 mr-1" />
-            History
+            {t.giftsHistory}
           </TabsTrigger>
         </TabsList>
 
@@ -424,9 +429,9 @@ const GiftsPage = () => {
           {/* Header Section */}
           <div className="text-center space-y-2">
             <Heart className="w-12 h-12 mx-auto text-primary animate-pulse" />
-            <h2 className="text-2xl font-bold text-foreground">Send Love with Flowers</h2>
+            <h2 className="text-2xl font-bold text-foreground">{t.giftsSendLoveFlowers}</h2>
             <p className="text-muted-foreground">
-              Surprise your partner with a beautiful bouquet
+              {t.giftsSurprisePartner}
             </p>
           </div>
 
@@ -475,7 +480,7 @@ const GiftsPage = () => {
                       disabled={coins < gift.price}
                     >
                       <ShoppingCart className="w-3 h-3 mr-1" />
-                      {coins < gift.price ? 'Need More Coins' : 'Send Gift'}
+                      {coins < gift.price ? t.giftsNeedMoreCoins : t.giftsSendGift}
                     </Button>
                   </div>
                 </Card>
@@ -487,7 +492,7 @@ const GiftsPage = () => {
           {!loading && flowerGifts.length === 0 && (
             <div className="text-center py-12 space-y-4">
               <Heart className="w-16 h-16 mx-auto text-muted-foreground" />
-              <p className="text-muted-foreground">No flower gifts available yet</p>
+              <p className="text-muted-foreground">{t.giftsNoFlowers}</p>
             </div>
           )}
         </TabsContent>
@@ -496,9 +501,9 @@ const GiftsPage = () => {
           {/* Header Section */}
           <div className="text-center space-y-2">
             <div className="text-5xl mx-auto">🍫</div>
-            <h2 className="text-2xl font-bold text-foreground">Sweet Treats</h2>
+            <h2 className="text-2xl font-bold text-foreground">{t.giftsSweetTreats}</h2>
             <p className="text-muted-foreground">
-              Send delicious sweets to make their day special
+              {t.giftsSweetTreatsDesc}
             </p>
           </div>
 
@@ -547,7 +552,7 @@ const GiftsPage = () => {
                       disabled={coins < gift.price}
                     >
                       <ShoppingCart className="w-3 h-3 mr-1" />
-                      {coins < gift.price ? 'Need More Coins' : 'Send Gift'}
+                      {coins < gift.price ? t.giftsNeedMoreCoins : t.giftsSendGift}
                     </Button>
                   </div>
                 </Card>
@@ -559,7 +564,7 @@ const GiftsPage = () => {
           {!loading && sweetGifts.length === 0 && (
             <div className="text-center py-12 space-y-4">
               <div className="text-5xl">🍫</div>
-              <p className="text-muted-foreground">No sweet gifts available yet</p>
+              <p className="text-muted-foreground">{t.giftsNoSweets}</p>
             </div>
           )}
         </TabsContent>
@@ -568,13 +573,13 @@ const GiftsPage = () => {
           {/* Header Section */}
           <div className="text-center space-y-2">
             <div className="text-5xl mx-auto">🎈</div>
-            <h2 className="text-2xl font-bold text-foreground">Balloon Collection</h2>
+            <h2 className="text-2xl font-bold text-foreground">{t.giftsBalloonCollection}</h2>
             <p className="text-muted-foreground">
-              Collect all balloon figures to earn 100 bonus coins!
+              {t.giftsBalloonCollectionDesc}
             </p>
             {balloonGifts.length > 0 && (
               <div className="flex items-center justify-center gap-2 text-sm">
-                <span className="text-muted-foreground">Progress:</span>
+                <span className="text-muted-foreground">{t.giftsProgress}</span>
                 <span className="font-semibold text-primary">
                   {purchaseHistory.filter(p => balloonGifts.map(g => g.image_url).includes(p.gift_image)).length} / {balloonGifts.length}
                 </span>
@@ -634,7 +639,7 @@ const GiftsPage = () => {
                         disabled={coins < gift.price || isCollected}
                       >
                         <ShoppingCart className="w-3 h-3 mr-1" />
-                        {isCollected ? 'Collected' : coins < gift.price ? 'Need More Coins' : 'Send Gift'}
+                        {isCollected ? t.giftsCollected : coins < gift.price ? t.giftsNeedMoreCoins : t.giftsSendGift}
                       </Button>
                     </div>
                   </Card>
@@ -647,7 +652,7 @@ const GiftsPage = () => {
           {!loading && balloonGifts.length === 0 && (
             <div className="text-center py-12 space-y-4">
               <div className="text-5xl">🎈</div>
-              <p className="text-muted-foreground">No balloon gifts available yet</p>
+              <p className="text-muted-foreground">{t.giftsNoBalloons}</p>
             </div>
           )}
         </TabsContent>
@@ -722,7 +727,7 @@ const GiftsPage = () => {
                         disabled={coins < gift.price || isCollected}
                       >
                         <ShoppingCart className="w-3 h-3 mr-1" />
-                        {isCollected ? 'Collected' : coins < gift.price ? 'Need More Coins' : 'Send Gift'}
+                        {isCollected ? t.giftsCollected : coins < gift.price ? t.giftsNeedMoreCoins : t.giftsSendGift}
                       </Button>
                     </div>
                   </Card>
@@ -735,7 +740,7 @@ const GiftsPage = () => {
           {!loading && stuffedAnimalGifts.length === 0 && (
             <div className="text-center py-12 space-y-4">
               <div className="text-5xl">🧸</div>
-              <p className="text-muted-foreground">No stuffed animal gifts available yet</p>
+              <p className="text-muted-foreground">{t.giftsNoStuffed}</p>
             </div>
           )}
         </TabsContent>
@@ -744,13 +749,13 @@ const GiftsPage = () => {
           {/* Header Section */}
           <div className="text-center space-y-2">
             <div className="text-5xl mx-auto">🐾</div>
-            <h2 className="text-2xl font-bold text-foreground">Adorable Pets</h2>
+            <h2 className="text-2xl font-bold text-foreground">{t.giftsPetsCollection}</h2>
             <p className="text-muted-foreground">
-              Collect all {petGifts.length} pets and earn 1,000 bonus coins!
+              {t.giftsPetsCollectionDesc}
             </p>
             {petGifts.length > 0 && (
               <div className="flex items-center justify-center gap-2 text-sm">
-                <span className="text-muted-foreground">Progress:</span>
+                <span className="text-muted-foreground">{t.giftsProgress}</span>
                 <span className="font-semibold text-primary">
                   {purchaseHistory.filter(p => petGifts.map(g => g.image_url).includes(p.gift_image)).length} / {petGifts.length}
                 </span>
@@ -820,7 +825,7 @@ const GiftsPage = () => {
                         disabled={coins < gift.price || isCollected}
                       >
                         <ShoppingCart className="w-3 h-3 mr-1" />
-                        {isCollected ? 'Collected' : coins < gift.price ? 'Need More Coins' : 'Send Gift'}
+                        {isCollected ? t.giftsCollected : coins < gift.price ? t.giftsNeedMoreCoins : t.giftsSendGift}
                       </Button>
                     </div>
                   </Card>
@@ -833,7 +838,7 @@ const GiftsPage = () => {
           {!loading && petGifts.length === 0 && (
             <div className="text-center py-12 space-y-4">
               <div className="text-5xl">🐾</div>
-              <p className="text-muted-foreground">No pet gifts available yet</p>
+              <p className="text-muted-foreground">{t.giftsNoPets}</p>
             </div>
           )}
         </TabsContent>
@@ -843,9 +848,9 @@ const GiftsPage = () => {
           {purchaseHistory.length === 0 ? (
             <div className="text-center py-12 space-y-4">
               <History className="w-16 h-16 mx-auto text-muted-foreground" />
-              <p className="text-muted-foreground">No gifts sent yet</p>
+              <p className="text-muted-foreground">{t.giftsHistoryEmpty}</p>
               <p className="text-sm text-muted-foreground">
-                Your gift history will appear here after you send gifts
+                {t.giftsHistoryDesc}
               </p>
             </div>
           ) : (
