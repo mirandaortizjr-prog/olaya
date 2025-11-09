@@ -49,6 +49,13 @@ export const useSkins = (coupleId: string | null, userId: string | null) => {
       if (coupleData?.active_skin_id) {
         setActiveSkin(coupleData.active_skin_id as SkinId);
         applySkin(coupleData.active_skin_id as SkinId);
+      } else {
+        // Ensure a default row exists for this couple so updates never fail
+        await supabase
+          .from('couple_skins')
+          .upsert({ couple_id: coupleId, active_skin_id: 'default', updated_at: new Date().toISOString() }, { onConflict: 'couple_id' });
+        setActiveSkin('default');
+        applySkin('default');
       }
     } catch (error) {
       console.error('Error fetching skins:', error);
