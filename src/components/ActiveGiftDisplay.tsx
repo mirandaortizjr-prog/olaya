@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { X, Gift } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -25,6 +25,14 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
   const [isExpanded, setIsExpanded] = useState(false);
   const [senderGender, setSenderGender] = useState<string>('');
   const [timeRemaining, setTimeRemaining] = useState<string>('');
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef<{ startX: number; startY: number; startPosX: number; startPosY: number }>({
+    startX: 0,
+    startY: 0,
+    startPosX: 0,
+    startPosY: 0
+  });
 
   useEffect(() => {
     if (!userId || !coupleId) return;
@@ -108,6 +116,42 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
     }
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (isExpanded) return;
+    setIsDragging(true);
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      startPosX: position.x,
+      startPosY: position.y
+    };
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging) return;
+    const deltaX = e.clientX - dragRef.current.startX;
+    const deltaY = e.clientY - dragRef.current.startY;
+    setPosition({
+      x: dragRef.current.startPosX + deltaX,
+      y: dragRef.current.startPosY + deltaY
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, position]);
+
   if (!activeGift) return null;
 
   const glowColor = senderGender === 'female' 
@@ -123,19 +167,28 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
     : 'ring-purple-500';
 
   return (
-    <div className="fixed bottom-24 right-4 z-40 pointer-events-none">
+    <div 
+      className="fixed bottom-24 right-4 z-40 pointer-events-none"
+      style={{
+        transform: `translate(${position.x}px, ${position.y}px)`,
+        transition: isDragging ? 'none' : 'transform 0.2s ease-out'
+      }}
+    >
       <div className="pointer-events-auto">
         {!isExpanded ? (
-          // Collapsed view - just the gift image with glow tracing its shape
+          // Collapsed view - draggable floating gift
           <div 
-            className="cursor-pointer animate-[pulse_3s_ease-in-out_infinite]"
-            onClick={() => setIsExpanded(true)}
+            className={`cursor-move animate-[float_3s_ease-in-out_infinite] ${isDragging ? 'opacity-80' : ''}`}
+            onMouseDown={handleMouseDown}
+            onClick={(e) => {
+              if (!isDragging) setIsExpanded(true);
+            }}
           >
             {giftImages[activeGift.gift_image] ? (
               <img
                 src={giftImages[activeGift.gift_image]}
                 alt={activeGift.gift_name}
-                className="w-42 h-42 object-contain"
+                className="w-32 h-32 object-contain select-none"
                 style={{
                   filter: `drop-shadow(0 0 20px ${
                     senderGender === 'female' 
@@ -145,9 +198,10 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
                       : 'rgba(168,85,247,0.8)'
                   })`
                 }}
+                draggable={false}
               />
             ) : (
-              <Gift className={`w-36 h-36 text-primary ${glowColor}`} />
+              <Gift className={`w-28 h-28 text-primary ${glowColor}`} />
             )}
           </div>
         ) : (
