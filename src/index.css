@@ -47,6 +47,7 @@ All colors MUST be HSL.
     --icons-bg: linear-gradient(180deg, hsl(200 9% 34%), hsl(0 0% 0%));  /* #4F585E to black */
     --feed-bg: linear-gradient(180deg, hsl(200 9% 34%), hsl(0 0% 0%));  /* #4F585E to black */
     --nav-gradient: linear-gradient(180deg, hsl(280 60% 15%), hsl(0 0% 0%));
+    --fantasy-consider: linear-gradient(135deg, hsl(270 60% 55%), hsl(270 50% 40%));
     
     --transition-smooth: all 0.3s ease;
   }

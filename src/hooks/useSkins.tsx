@@ -106,19 +106,22 @@ export const useSkins = (coupleId: string | null, userId: string | null) => {
     const root = document.documentElement;
     root.style.transition = 'all 0.8s ease-in-out';
     
-    // Update background image or remove it
+    // Update purple gradient areas with skin image or restore original gradients
     if (skin.image) {
-      root.style.backgroundImage = `url(${skin.image})`;
-      root.style.backgroundSize = 'cover';
-      root.style.backgroundPosition = 'center';
-      root.style.backgroundRepeat = 'no-repeat';
-      root.style.backgroundAttachment = 'fixed';
+      // Apply skin to all purple gradient areas
+      const skinUrl = `url(${skin.image})`;
+      root.style.setProperty('--video-gradient', skinUrl);
+      root.style.setProperty('--nav-gradient', skinUrl);
+      root.style.setProperty('--fantasy-consider', skinUrl);
+      root.style.setProperty('--gradient-romantic', skinUrl);
+      root.style.setProperty('--gradient-vibrant', skinUrl);
     } else {
-      root.style.backgroundImage = 'none';
-      root.style.backgroundSize = '';
-      root.style.backgroundPosition = '';
-      root.style.backgroundRepeat = '';
-      root.style.backgroundAttachment = '';
+      // Restore original purple gradients
+      root.style.setProperty('--video-gradient', 'linear-gradient(180deg, hsl(280 50% 25%), hsl(280 60% 15%))');
+      root.style.setProperty('--nav-gradient', 'linear-gradient(180deg, hsl(280 60% 15%), hsl(0 0% 0%))');
+      root.style.setProperty('--fantasy-consider', 'linear-gradient(135deg, hsl(270 60% 55%), hsl(270 50% 40%))');
+      root.style.setProperty('--gradient-romantic', 'linear-gradient(135deg, hsl(330 65% 48%), hsl(280 55% 50%))');
+      root.style.setProperty('--gradient-vibrant', 'linear-gradient(135deg, hsl(330 65% 48%), hsl(25 75% 55%))');
     }
     
     setTimeout(() => {
