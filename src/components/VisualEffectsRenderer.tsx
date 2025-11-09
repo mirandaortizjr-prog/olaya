@@ -135,12 +135,12 @@ export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
 
   const getAnimation = (animation: string) => {
     const animationMap: Record<string, string> = {
-      falling: 'animate-fall-leaf',
-      floating: 'animate-float',
-      flutter: 'animate-flutter',
+      falling: 'animate-fade-in',
+      floating: 'animate-fade-in',
+      flutter: 'animate-fade-in',
       fade: 'animate-fade-in',
     };
-    return animationMap[animation] || 'animate-fall-leaf';
+    return animationMap[animation] || 'animate-fade-in';
   };
 
   return (
@@ -149,7 +149,7 @@ export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
         particles.map((particle) => (
           <div
             key={`${effect.id}-${particle.id}`}
-            className={`absolute -top-10 ${getAnimation(effect.visual_effects.animation)}`}
+            className={`absolute top-0 ${getAnimation(effect.visual_effects.animation)}`}
             style={{
               left: `${particle.left}%`,
               animationDelay: `${particle.delay}s`,
@@ -159,7 +159,7 @@ export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
             <span
               className={`
                 ${effect.visual_effects.effect_type === 'phrase' ? 'text-base font-bold' : 'text-3xl'}
-                opacity-90 drop-shadow-lg
+                text-foreground opacity-90 drop-shadow-lg
                 ${effect.visual_effects.behavior.includes('pulse') ? 'animate-pulse' : ''}
                 ${effect.visual_effects.behavior.includes('shimmer') ? 'animate-shimmer' : ''}
               `}

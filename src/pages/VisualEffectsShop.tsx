@@ -70,6 +70,15 @@ export default function VisualEffectsShop() {
     fetchEffects();
   }, []);
 
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => {
+      e.preventDefault();
+      navigate('/shop', { replace: true });
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, [navigate]);
+
   const handlePurchase = async (effect: VisualEffect) => {
     if (!user || !coupleId) {
       toast({
