@@ -113,14 +113,14 @@ const GiftsPage = () => {
 
       if (giftError) throw giftError;
 
-      // Deduct coins
+      // Deduct coins (use negative amount for spending)
       const { error: coinError } = await supabase
         .from('coin_transactions')
         .insert({
           user_id: user.id,
           couple_id: coupleData.couple_id,
-          amount: gift.price,
-          transaction_type: 'spent',
+          amount: -gift.price,
+          transaction_type: 'earned',
           description: `Purchased ${gift.name}`,
         });
 
