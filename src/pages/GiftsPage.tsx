@@ -15,6 +15,12 @@ import flowerBouquet4 from "@/assets/gifts/flower-bouquet-4.png";
 import flowerBouquet5 from "@/assets/gifts/flower-bouquet-5.png";
 import flowerBouquet6 from "@/assets/gifts/flower-bouquet-6.png";
 import flowerBouquet7 from "@/assets/gifts/flower-bouquet-7.png";
+import singleRedRose from "@/assets/gifts/single-red-rose.png";
+import pinkHeartBox from "@/assets/gifts/pink-heart-box.png";
+import redRoseWrap from "@/assets/gifts/red-rose-wrap.png";
+import pinkPurpleBouquet from "@/assets/gifts/pink-purple-bouquet.png";
+import hotPinkRoseBouquet from "@/assets/gifts/hot-pink-rose-bouquet.png";
+import colorfulSpringBouquet from "@/assets/gifts/colorful-spring-bouquet.png";
 
 const flowerImages: { [key: string]: string } = {
   'flower-bouquet-1': flowerBouquet1,
@@ -24,6 +30,12 @@ const flowerImages: { [key: string]: string } = {
   'flower-bouquet-5': flowerBouquet5,
   'flower-bouquet-6': flowerBouquet6,
   'flower-bouquet-7': flowerBouquet7,
+  'single-red-rose': singleRedRose,
+  'pink-heart-box': pinkHeartBox,
+  'red-rose-wrap': redRoseWrap,
+  'pink-purple-bouquet': pinkPurpleBouquet,
+  'hot-pink-rose-bouquet': hotPinkRoseBouquet,
+  'colorful-spring-bouquet': colorfulSpringBouquet,
 };
 
 interface ShopItem {
@@ -124,12 +136,18 @@ const GiftsPage = () => {
                 key={gift.id}
                 className="overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105"
               >
-                <div className="aspect-square bg-accent/20 relative">
-                  <img
-                    src={flowerImages[gift.image_url]}
-                    alt={gift.name}
-                    className="w-full h-full object-contain p-4"
-                  />
+                <div className="aspect-square bg-accent/20 relative overflow-hidden">
+                  {flowerImages[gift.image_url] ? (
+                    <img
+                      src={flowerImages[gift.image_url]}
+                      alt={gift.name}
+                      className="w-full h-full object-contain p-4"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Heart className="w-16 h-16 text-muted-foreground opacity-20" />
+                    </div>
+                  )}
                   <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
                     <img src={togetherCoinsIcon} alt="Coins" className="w-3 h-3 mr-1" />
                     {gift.price}
