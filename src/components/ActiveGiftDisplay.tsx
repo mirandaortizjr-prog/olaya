@@ -176,9 +176,9 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
     >
       <div className="pointer-events-auto">
         {!isExpanded ? (
-          // Collapsed view - draggable floating gift
+          // Collapsed view - draggable gift
           <div 
-            className={`cursor-move animate-[float_3s_ease-in-out_infinite] ${isDragging ? 'opacity-80' : ''}`}
+            className={`cursor-move ${isDragging ? 'opacity-80' : ''}`}
             onMouseDown={handleMouseDown}
             onClick={(e) => {
               if (!isDragging) setIsExpanded(true);
