@@ -141,13 +141,46 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
     setIsDragging(false);
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (isExpanded) return;
+    const touch = e.touches[0];
+    setIsDragging(true);
+    dragRef.current = {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      startPosX: position.x,
+      startPosY: position.y
+    };
+    // Prevent long-press context menu on mobile
+    e.preventDefault();
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!isDragging) return;
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - dragRef.current.startX;
+    const deltaY = touch.clientY - dragRef.current.startY;
+    setPosition({
+      x: dragRef.current.startPosX + deltaX,
+      y: dragRef.current.startPosY + deltaY
+    });
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
   useEffect(() => {
     if (isDragging) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('touchmove', handleTouchMove);
+      window.addEventListener('touchend', handleTouchEnd);
       return () => {
         window.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('touchmove', handleTouchMove);
+        window.removeEventListener('touchend', handleTouchEnd);
       };
     }
   }, [isDragging, position]);
@@ -178,11 +211,10 @@ export const ActiveGiftDisplay = ({ userId, coupleId, giftImages }: ActiveGiftDi
         {!isExpanded ? (
           // Collapsed view - draggable gift
           <div 
-            className={`cursor-move ${isDragging ? 'opacity-80' : ''}`}
-            onMouseDown={handleMouseDown}
-            onClick={(e) => {
-              if (!isDragging) setIsExpanded(true);
-            }}
+            className={`cursor-move touch-none ${isDragging ? 'opacity-80' : ''}`}
+            onMouseDown={(e) => { e.preventDefault(); handleMouseDown(e); }}
+            onTouchStart={handleTouchStart}
+            onContextMenu={(e) => e.preventDefault()}
           >
             {giftImages[activeGift.gift_image] ? (
               <img
