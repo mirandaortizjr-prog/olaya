@@ -750,25 +750,40 @@ export type Database = {
       }
       love_languages: {
         Row: {
+          all_scores: Json | null
           created_at: string
+          current_day: number | null
           id: string
+          last_action_date: string | null
           primary_language: string
+          profile_title: string | null
+          quiz_completed_at: string | null
           secondary_language: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          all_scores?: Json | null
           created_at?: string
+          current_day?: number | null
           id?: string
+          last_action_date?: string | null
           primary_language: string
+          profile_title?: string | null
+          quiz_completed_at?: string | null
           secondary_language?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          all_scores?: Json | null
           created_at?: string
+          current_day?: number | null
           id?: string
+          last_action_date?: string | null
           primary_language?: string
+          profile_title?: string | null
+          quiz_completed_at?: string | null
           secondary_language?: string | null
           updated_at?: string
           user_id?: string
