@@ -120,8 +120,13 @@ export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
   };
 
   const getAnimation = (animation: string) => {
-    // All effects should fall down, but can have additional behavior
-    return 'animate-fall-leaf';
+    const animationMap: Record<string, string> = {
+      falling: 'animate-fall-leaf',
+      floating: 'animate-float',
+      flutter: 'animate-flutter',
+      fade: 'animate-fade-in',
+    };
+    return animationMap[animation] || 'animate-fall-leaf';
   };
 
   const getAdditionalAnimation = (behavior: string) => {
