@@ -1530,6 +1530,41 @@ export type Database = {
         }
         Relationships: []
       }
+      user_gradient_purchases: {
+        Row: {
+          couple_id: string
+          created_at: string | null
+          gradient_id: string
+          id: string
+          purchased_at: string | null
+          user_id: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string | null
+          gradient_id: string
+          id?: string
+          purchased_at?: string | null
+          user_id: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string | null
+          gradient_id?: string
+          id?: string
+          purchased_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_gradient_purchases_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null

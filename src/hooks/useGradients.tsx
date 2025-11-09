@@ -3,41 +3,52 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { GradientId, GRADIENTS } from "@/lib/gradientData";
 
-export const useGradients = (coupleId: string | null) => {
+export const useGradients = (coupleId: string | null, userId: string | null) => {
   const [activeGradient, setActiveGradient] = useState<GradientId>('default');
   const [purchasedGradients, setPurchasedGradients] = useState<GradientId[]>(['default']);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!coupleId) {
+    if (!coupleId || !userId) {
       setIsLoading(false);
       return;
     }
 
     fetchGradients();
-  }, [coupleId]);
+  }, [coupleId, userId]);
 
   const fetchGradients = async () => {
-    if (!coupleId) return;
+    if (!coupleId || !userId) return;
 
     try {
-      const { data, error } = await supabase
+      // Fetch user's purchased gradients
+      const { data: purchases, error: purchasesError } = await supabase
+        .from('user_gradient_purchases')
+        .select('gradient_id')
+        .eq('user_id', userId);
+
+      if (purchasesError) throw purchasesError;
+
+      const purchased: GradientId[] = purchases ? 
+        ['default', ...purchases.map(p => p.gradient_id).filter((id): id is GradientId => 
+          Object.keys(GRADIENTS).includes(id)
+        )] : 
+        ['default'];
+      setPurchasedGradients(purchased);
+
+      // Fetch couple's active gradient
+      const { data: coupleData, error: coupleError } = await supabase
         .from('couple_gradients')
-        .select('*')
+        .select('active_gradient_id')
         .eq('couple_id', coupleId)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (coupleError && coupleError.code !== 'PGRST116') throw coupleError;
 
-      if (data) {
-        const purchased = data.purchased_gradients as GradientId[] || ['default'];
-        setPurchasedGradients(purchased);
-        
-        if (data.active_gradient_id) {
-          setActiveGradient(data.active_gradient_id as GradientId);
-          applyGradient(data.active_gradient_id as GradientId);
-        }
+      if (coupleData?.active_gradient_id) {
+        setActiveGradient(coupleData.active_gradient_id as GradientId);
+        applyGradient(coupleData.active_gradient_id as GradientId);
       }
     } catch (error) {
       console.error('Error fetching gradients:', error);
@@ -47,7 +58,7 @@ export const useGradients = (coupleId: string | null) => {
   };
 
   const purchaseGradient = async (gradientId: GradientId) => {
-    if (!coupleId) return false;
+    if (!coupleId || !userId) return false;
 
     try {
       // Check if already purchased
@@ -59,21 +70,17 @@ export const useGradients = (coupleId: string | null) => {
         return false;
       }
 
-      const newPurchased = [...purchasedGradients, gradientId];
-
       const { error } = await supabase
-        .from('couple_gradients')
-        .upsert({
+        .from('user_gradient_purchases')
+        .insert({
+          user_id: userId,
           couple_id: coupleId,
-          purchased_gradients: newPurchased,
-          updated_at: new Date().toISOString(),
-        }, {
-          onConflict: 'couple_id',
+          gradient_id: gradientId,
         });
 
       if (error) throw error;
 
-      setPurchasedGradients(newPurchased);
+      setPurchasedGradients([...purchasedGradients, gradientId]);
       
       toast({
         title: "Gradient Purchased!",
@@ -110,7 +117,6 @@ export const useGradients = (coupleId: string | null) => {
         .upsert({
           couple_id: coupleId,
           active_gradient_id: gradientId,
-          purchased_gradients: purchasedGradients,
           updated_at: new Date().toISOString(),
         }, {
           onConflict: 'couple_id',

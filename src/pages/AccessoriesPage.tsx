@@ -34,7 +34,7 @@ export default function AccessoriesPage() {
     purchasedGradients,
     purchaseGradient,
     setGradient,
-  } = useGradients(coupleId);
+  } = useGradients(coupleId, userId || null);
 
   useEffect(() => {
     fetchUserData();
