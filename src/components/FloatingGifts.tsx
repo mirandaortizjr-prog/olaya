@@ -52,14 +52,17 @@ const FloatingGifts = ({ coupleId, userId, receiverGender = 'female' }: Floating
     if (!coupleId) return;
 
     const fetchActiveGifts = async () => {
-      // Show most recent gifts sent TO this user (not sent BY this user)
+      const twentyFourHoursAgo = new Date();
+      twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+
+      // Only show gifts sent TO this user (not sent BY this user)
       const { data, error } = await supabase
         .from('purchased_gifts')
         .select('*')
         .eq('couple_id', coupleId)
         .neq('sender_id', userId)
-        .order('purchased_at', { ascending: false })
-        .limit(5);
+        .gte('purchased_at', twentyFourHoursAgo.toISOString())
+        .order('purchased_at', { ascending: true });
 
       if (!error && data) {
         setActiveGifts(data);
