@@ -190,7 +190,7 @@ export default function DesiresPage() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/private")}
             className="hover:bg-white/10"
           >
             <ArrowLeft className="w-6 h-6 text-white" />
