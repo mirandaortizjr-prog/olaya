@@ -424,7 +424,7 @@ export default function DesiresPage() {
 
       {/* Add Fantasy Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="bg-gradient-to-br from-fantasy-skyblue-dark to-fantasy-purple-dark border-fantasy-skyblue/30">
+        <DialogContent className="bg-gradient-to-br from-purple-900/95 to-black/95 border-purple-500/30 backdrop-blur-md">
           <DialogHeader>
             <DialogTitle className="text-white text-xl">Add New Fantasy</DialogTitle>
           </DialogHeader>
@@ -435,7 +435,8 @@ export default function DesiresPage() {
                 placeholder="What's your fantasy?"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:bg-white/15 focus:border-purple-400"
+                autoFocus
               />
             </div>
             <div>
@@ -444,11 +445,11 @@ export default function DesiresPage() {
                 placeholder="Add more details..."
                 value={newDescription}
                 onChange={(e) => setNewDescription(e.target.value)}
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/40 min-h-24"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/40 min-h-24 focus:bg-white/15 focus:border-purple-400"
               />
             </div>
             <Button
-              className="w-full bg-fantasy-skyblue hover:bg-fantasy-skyblue-dark text-white font-semibold"
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold"
               onClick={addFantasy}
             >
               <Plus className="w-4 h-4 mr-2" />
