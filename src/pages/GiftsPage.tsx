@@ -53,6 +53,15 @@ import stuffedZebra from "@/assets/gifts/stuffed-zebra.png";
 import stuffedPanda from "@/assets/gifts/stuffed-panda.png";
 import stuffedSquirrel from "@/assets/gifts/stuffed-squirrel.png";
 import stuffedRhino from "@/assets/gifts/stuffed-rhino.png";
+import petGorilla from "@/assets/gifts/pet-gorilla.png";
+import petPuppyHeart from "@/assets/gifts/pet-puppy-heart.png";
+import petElephant from "@/assets/gifts/pet-elephant.png";
+import petMonkey from "@/assets/gifts/pet-monkey.png";
+import petSnake from "@/assets/gifts/pet-snake.png";
+import petPuppyCollar from "@/assets/gifts/pet-puppy-collar.png";
+import petMeerkat from "@/assets/gifts/pet-meerkat.png";
+import petRaccoon from "@/assets/gifts/pet-raccoon.png";
+import petLion from "@/assets/gifts/pet-lion.png";
 
 const giftImages: { [key: string]: string } = {
   'flower-bouquet-1': flowerBouquet1,
@@ -98,6 +107,15 @@ const giftImages: { [key: string]: string } = {
   'stuffed-panda': stuffedPanda,
   'stuffed-squirrel': stuffedSquirrel,
   'stuffed-rhino': stuffedRhino,
+  'pet-gorilla': petGorilla,
+  'pet-puppy-heart': petPuppyHeart,
+  'pet-elephant': petElephant,
+  'pet-monkey': petMonkey,
+  'pet-snake': petSnake,
+  'pet-puppy-collar': petPuppyCollar,
+  'pet-meerkat': petMeerkat,
+  'pet-raccoon': petRaccoon,
+  'pet-lion': petLion,
 };
 
 interface ShopItem {
