@@ -102,6 +102,14 @@ export const VisualEffectsRenderer = ({ coupleId }: { coupleId: string }) => {
     return emojiMap[name] || '💖';
   };
 
+  const getNeonColor = (behavior: string) => {
+    if (behavior.includes('neon pink')) return '#ff006e';
+    if (behavior.includes('neon purple')) return '#bb00ff';
+    if (behavior.includes('neon blue')) return '#00d9ff';
+    if (behavior.includes('neon yellow')) return '#ffea00';
+    return '#ff006e';
+  };
+
   const getAnimation = (animation: string) => {
     const animationMap: Record<string, string> = {
       falling: 'animate-fall-leaf',
@@ -127,13 +135,16 @@ export const VisualEffectsRenderer = ({ coupleId }: { coupleId: string }) => {
           >
             <span
               className={`
-                ${effect.visual_effects.effect_type === 'phrase' ? 'text-base font-medium' : 'text-3xl'}
+                ${effect.visual_effects.effect_type === 'phrase' ? 'text-base font-bold' : 'text-3xl'}
                 opacity-80 drop-shadow-lg
                 ${effect.visual_effects.behavior.includes('glow') ? 'animate-pulse' : ''}
                 ${effect.visual_effects.behavior.includes('shimmer') ? 'animate-shimmer' : ''}
               `}
               style={{
-                textShadow: '0 0 10px rgba(255, 255, 255, 0.5)',
+                textShadow: effect.visual_effects.effect_type === 'phrase'
+                  ? `0 0 20px ${getNeonColor(effect.visual_effects.behavior)}, 0 0 30px ${getNeonColor(effect.visual_effects.behavior)}, 0 0 40px ${getNeonColor(effect.visual_effects.behavior)}`
+                  : '0 0 10px rgba(255, 255, 255, 0.5)',
+                color: effect.visual_effects.effect_type === 'phrase' ? getNeonColor(effect.visual_effects.behavior) : 'inherit',
               }}
             >
               {getEmoji(effect.visual_effects.name, effect.visual_effects.effect_type)}
