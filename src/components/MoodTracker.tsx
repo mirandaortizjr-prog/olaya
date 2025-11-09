@@ -7,6 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Heart, Sparkles, Zap, Coffee, Mountain, AlertCircle, Moon, Gift, Flame, Battery, Frown, CloudRain, Laugh, Annoyed, HeartCrack, Brain, Smile } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
+import { getGenderedMood } from "@/lib/translations";
+import { useUserGender } from "@/hooks/useUserGender";
 
 interface Mood {
   id: string;
@@ -48,7 +50,10 @@ export const MoodTracker = ({ coupleId, userId, partnerName }: MoodTrackerProps)
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { gender: myGender } = useUserGender(userId);
+  const partnerMood = moods.find(m => m.user_id !== userId);
+  const { gender: partnerGender } = useUserGender(partnerMood?.user_id || null);
 
   useEffect(() => {
     fetchLatestMoods();
@@ -144,7 +149,6 @@ export const MoodTracker = ({ coupleId, userId, partnerName }: MoodTrackerProps)
 
   const getUserMood = (uid: string) => moods.find(m => m.user_id === uid);
   const myMood = getUserMood(userId);
-  const partnerMood = moods.find(m => m.user_id !== userId);
 
   const getMoodConfig = (type: string) => moodConfigs.find(m => m.type === type);
 
@@ -163,7 +167,7 @@ export const MoodTracker = ({ coupleId, userId, partnerName }: MoodTrackerProps)
               <div className={cn("p-4 rounded-lg border-2", getMoodConfig(myMood.mood_type)?.color)}>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-2xl">{getMoodConfig(myMood.mood_type)?.emoji}</span>
-                  <span className="font-medium">{t(`mood_${myMood.mood_type}` as any)}</span>
+                  <span className="font-medium">{getGenderedMood(`mood_${myMood.mood_type}`, myGender, language)}</span>
                 </div>
                 {myMood.note && (
                   <p className="text-sm opacity-80">{myMood.note}</p>
@@ -183,7 +187,7 @@ export const MoodTracker = ({ coupleId, userId, partnerName }: MoodTrackerProps)
               <div className={cn("p-4 rounded-lg border-2", getMoodConfig(partnerMood.mood_type)?.color)}>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-2xl">{getMoodConfig(partnerMood.mood_type)?.emoji}</span>
-                  <span className="font-medium">{t(`mood_${partnerMood.mood_type}` as any)}</span>
+                  <span className="font-medium">{getGenderedMood(`mood_${partnerMood.mood_type}`, partnerGender, language)}</span>
                 </div>
                 {partnerMood.note && (
                   <p className="text-sm opacity-80">{partnerMood.note}</p>
@@ -211,10 +215,10 @@ export const MoodTracker = ({ coupleId, userId, partnerName }: MoodTrackerProps)
                   mood.color,
                   selectedMood === mood.type && "ring-2 ring-offset-2"
                 )}
-              >
-                <span className="text-2xl">{mood.emoji}</span>
-                <span className="text-xs">{t(`mood_${mood.type}` as any)}</span>
-              </Button>
+                >
+                  <span className="text-2xl">{mood.emoji}</span>
+                  <span className="text-xs">{getGenderedMood(`mood_${mood.type}`, myGender, language)}</span>
+                </Button>
             ))}
           </div>
 

@@ -828,6 +828,7 @@ const Dashboard = () => {
               <FeelingStatusSelector
                 currentStatus={partnerFeelingStatus}
                 currentCustomMessage={partnerCustomMessage}
+                userId={coupleData.partner.user_id}
               />
             )}
           </div>

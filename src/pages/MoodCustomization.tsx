@@ -7,70 +7,72 @@ import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getGenderedMood } from "@/lib/translations";
+import { useUserGender } from "@/hooks/useUserGender";
 
 // Mood configuration with translation keys
-const getMoodCategories = (t: any) => [
+const getMoodCategories = (t: any, gender: string | null, language: any) => [
   {
     titleKey: "moodCategoryPositive",
     subtitleKey: "moodSubtitleHighEnergy",
     color: "text-yellow-400",
     moods: [
-      { key: "mood_ecstatic", label: t("mood_ecstatic") },
-      { key: "mood_elated", label: t("mood_elated") },
-      { key: "mood_euphoric", label: t("mood_euphoric") },
-      { key: "mood_giddy", label: t("mood_giddy") },
+      { key: "mood_ecstatic", label: getGenderedMood("mood_ecstatic", gender, language) },
+      { key: "mood_elated", label: getGenderedMood("mood_elated", gender, language) },
+      { key: "mood_euphoric", label: getGenderedMood("mood_euphoric", gender, language) },
+      { key: "mood_giddy", label: getGenderedMood("mood_giddy", gender, language) },
       { key: "mood_playful", label: t("mood_playful") },
-      { key: "mood_flirtatious", label: t("mood_flirtatious") },
+      { key: "mood_flirtatious", label: getGenderedMood("mood_flirtatious", gender, language) },
       { key: "mood_excited", label: t("mood_excited") },
-      { key: "mood_jubilant", label: t("mood_jubilant") },
-      { key: "mood_triumphant", label: t("mood_triumphant") },
-      { key: "mood_inspired", label: t("mood_inspired") }
+      { key: "mood_jubilant", label: getGenderedMood("mood_jubilant", gender, language) },
+      { key: "mood_triumphant", label: getGenderedMood("mood_triumphant", gender, language) },
+      { key: "mood_inspired", label: getGenderedMood("mood_inspired", gender, language) }
     ]
   },
   {
     titleKey: "moodCategoryWarmContent",
     color: "text-pink-400",
     moods: [
-      { key: "mood_loved", label: t("mood_loved") },
+      { key: "mood_loved", label: getGenderedMood("mood_loved", gender, language) },
       { key: "mood_grateful", label: t("mood_grateful") },
       { key: "mood_peaceful", label: t("mood_peaceful") },
-      { key: "mood_safe", label: t("mood_safe") },
-      { key: "mood_cozy", label: t("mood_cozy") },
-      { key: "mood_affectionate", label: t("mood_affectionate") },
-      { key: "mood_fulfilled", label: t("mood_fulfilled") },
-      { key: "mood_hopeful", label: t("mood_hopeful") },
-      { key: "mood_proud", label: t("mood_proud") },
-      { key: "mood_serene", label: t("mood_serene") }
+      { key: "mood_safe", label: getGenderedMood("mood_safe", gender, language) },
+      { key: "mood_cozy", label: getGenderedMood("mood_cozy", gender, language) },
+      { key: "mood_affectionate", label: getGenderedMood("mood_affectionate", gender, language) },
+      { key: "mood_fulfilled", label: getGenderedMood("mood_fulfilled", gender, language) },
+      { key: "mood_hopeful", label: getGenderedMood("mood_hopeful", gender, language) },
+      { key: "mood_proud", label: getGenderedMood("mood_proud", gender, language) },
+      { key: "mood_serene", label: getGenderedMood("mood_serene", gender, language) }
     ]
   },
   {
     titleKey: "moodCategoryRomantic",
     color: "text-rose-400",
     moods: [
-      { key: "mood_inLove", label: t("mood_inLove") },
+      { key: "mood_inLove", label: getGenderedMood("mood_inLove", gender, language) },
       { key: "mood_tender", label: t("mood_tender") },
-      { key: "mood_passionate", label: t("mood_passionate") },
-      { key: "mood_longing", label: t("mood_longing") },
-      { key: "mood_connected", label: t("mood_connected") },
-      { key: "mood_turnedOn", label: t("mood_turnedOn") },
-      { key: "mood_vulnerable", label: t("mood_vulnerable") },
-      { key: "mood_cravingCloseness", label: t("mood_cravingCloseness") }
+      { key: "mood_passionate", label: getGenderedMood("mood_passionate", gender, language) },
+      { key: "mood_longing", label: getGenderedMood("mood_longing", gender, language) },
+      { key: "mood_connected", label: getGenderedMood("mood_connected", gender, language) },
+      { key: "mood_turnedOn", label: getGenderedMood("mood_turnedOn", gender, language) },
+      { key: "mood_vulnerable", label: getGenderedMood("mood_vulnerable", gender, language) },
+      { key: "mood_cravingCloseness", label: getGenderedMood("mood_cravingCloseness", gender, language) }
     ]
   },
   {
     titleKey: "moodCategoryNeutral",
     color: "text-gray-300",
     moods: [
-      { key: "mood_curious", label: t("mood_curious") },
-      { key: "mood_thoughtful", label: t("mood_thoughtful") },
-      { key: "mood_pensive", label: t("mood_pensive") },
-      { key: "mood_dreamy", label: t("mood_dreamy") },
-      { key: "mood_nostalgic", label: t("mood_nostalgic") },
-      { key: "mood_indifferent", label: t("mood_indifferent") },
-      { key: "mood_distracted", label: t("mood_distracted") },
-      { key: "mood_ambivalent", label: t("mood_ambivalent") },
-      { key: "mood_observant", label: t("mood_observant") },
-      { key: "mood_open", label: t("mood_open") }
+      { key: "mood_curious", label: getGenderedMood("mood_curious", gender, language) },
+      { key: "mood_thoughtful", label: getGenderedMood("mood_thoughtful", gender, language) },
+      { key: "mood_pensive", label: getGenderedMood("mood_pensive", gender, language) },
+      { key: "mood_dreamy", label: getGenderedMood("mood_dreamy", gender, language) },
+      { key: "mood_nostalgic", label: getGenderedMood("mood_nostalgic", gender, language) },
+      { key: "mood_indifferent", label: getGenderedMood("mood_indifferent", gender, language) },
+      { key: "mood_distracted", label: getGenderedMood("mood_distracted", gender, language) },
+      { key: "mood_ambivalent", label: getGenderedMood("mood_ambivalent", gender, language) },
+      { key: "mood_observant", label: getGenderedMood("mood_observant", gender, language) },
+      { key: "mood_open", label: getGenderedMood("mood_open", gender, language) }
     ]
   },
   {
@@ -78,16 +80,16 @@ const getMoodCategories = (t: any) => [
     subtitleKey: "moodSubtitleLowEnergy",
     color: "text-blue-400",
     moods: [
-      { key: "mood_lonely", label: t("mood_lonely") },
-      { key: "mood_disappointed", label: t("mood_disappointed") },
-      { key: "mood_hurt", label: t("mood_hurt") },
-      { key: "mood_melancholy", label: t("mood_melancholy") },
-      { key: "mood_numb", label: t("mood_numb") },
-      { key: "mood_rejected", label: t("mood_rejected") },
-      { key: "mood_insecure", label: t("mood_insecure") },
-      { key: "mood_discouraged", label: t("mood_discouraged") },
-      { key: "mood_homesick", label: t("mood_homesick") },
-      { key: "mood_drained", label: t("mood_drained") }
+      { key: "mood_lonely", label: getGenderedMood("mood_lonely", gender, language) },
+      { key: "mood_disappointed", label: getGenderedMood("mood_disappointed", gender, language) },
+      { key: "mood_hurt", label: getGenderedMood("mood_hurt", gender, language) },
+      { key: "mood_melancholy", label: getGenderedMood("mood_melancholy", gender, language) },
+      { key: "mood_numb", label: getGenderedMood("mood_numb", gender, language) },
+      { key: "mood_rejected", label: getGenderedMood("mood_rejected", gender, language) },
+      { key: "mood_insecure", label: getGenderedMood("mood_insecure", gender, language) },
+      { key: "mood_discouraged", label: getGenderedMood("mood_discouraged", gender, language) },
+      { key: "mood_homesick", label: getGenderedMood("mood_homesick", gender, language) },
+      { key: "mood_drained", label: getGenderedMood("mood_drained", gender, language) }
     ]
   },
   {
@@ -96,14 +98,14 @@ const getMoodCategories = (t: any) => [
     moods: [
       { key: "mood_anxious", label: t("mood_anxious") },
       { key: "mood_frustrated", label: t("mood_frustrated") },
-      { key: "mood_angry", label: t("mood_angry") },
-      { key: "mood_jealous", label: t("mood_jealous") },
-      { key: "mood_overwhelmed", label: t("mood_overwhelmed") },
-      { key: "mood_defensive", label: t("mood_defensive") },
-      { key: "mood_irritated", label: t("mood_irritated") },
-      { key: "mood_resentful", label: t("mood_resentful") },
-      { key: "mood_restless", label: t("mood_restless") },
-      { key: "mood_misunderstood", label: t("mood_misunderstood") }
+      { key: "mood_angry", label: getGenderedMood("mood_angry", gender, language) },
+      { key: "mood_jealous", label: getGenderedMood("mood_jealous", gender, language) },
+      { key: "mood_overwhelmed", label: getGenderedMood("mood_overwhelmed", gender, language) },
+      { key: "mood_defensive", label: getGenderedMood("mood_defensive", gender, language) },
+      { key: "mood_irritated", label: getGenderedMood("mood_irritated", gender, language) },
+      { key: "mood_resentful", label: getGenderedMood("mood_resentful", gender, language) },
+      { key: "mood_restless", label: getGenderedMood("mood_restless", gender, language) },
+      { key: "mood_misunderstood", label: getGenderedMood("mood_misunderstood", gender, language) }
     ]
   },
   {
@@ -111,15 +113,15 @@ const getMoodCategories = (t: any) => [
     color: "text-fuchsia-400",
     moods: [
       { key: "mood_horny", label: t("mood_horny") },
-      { key: "mood_ravenous", label: t("mood_ravenous") },
-      { key: "mood_thirsty", label: t("mood_thirsty") },
-      { key: "mood_lustful", label: t("mood_lustful") },
-      { key: "mood_feral", label: t("mood_feral") },
-      { key: "mood_needy", label: t("mood_needy") },
-      { key: "mood_overheated", label: t("mood_overheated") },
-      { key: "mood_starved", label: t("mood_starved") },
-      { key: "mood_obsessed", label: t("mood_obsessed") },
-      { key: "mood_frisky", label: t("mood_frisky") }
+      { key: "mood_ravenous", label: getGenderedMood("mood_ravenous", gender, language) },
+      { key: "mood_thirsty", label: getGenderedMood("mood_thirsty", gender, language) },
+      { key: "mood_lustful", label: getGenderedMood("mood_lustful", gender, language) },
+      { key: "mood_feral", label: getGenderedMood("mood_feral", gender, language) },
+      { key: "mood_needy", label: getGenderedMood("mood_needy", gender, language) },
+      { key: "mood_overheated", label: getGenderedMood("mood_overheated", gender, language) },
+      { key: "mood_starved", label: getGenderedMood("mood_starved", gender, language) },
+      { key: "mood_obsessed", label: getGenderedMood("mood_obsessed", gender, language) },
+      { key: "mood_frisky", label: getGenderedMood("mood_frisky", gender, language) }
     ]
   }
 ];
@@ -127,7 +129,7 @@ const getMoodCategories = (t: any) => [
 export const MoodCustomization = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
   const [customMood, setCustomMood] = useState("");
   const [showCustomInput, setShowCustomInput] = useState(false);
@@ -136,8 +138,9 @@ export const MoodCustomization = () => {
   const [userId, setUserId] = useState<string>("");
   const [coupleId, setCoupleId] = useState<string>("");
   const [saving, setSaving] = useState(false);
+  const { gender } = useUserGender(userId);
 
-  const MOOD_CATEGORIES = getMoodCategories(t);
+  const MOOD_CATEGORIES = getMoodCategories(t, gender, language);
 
   useEffect(() => {
     loadUserData();

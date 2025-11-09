@@ -1131,79 +1131,79 @@ export const translations = {
     moodCategoryDistressed: "Alta Energía / Angustiado",
     moodCategorySexual: "Estados de Ánimo Sexuales",
     
-    // All Moods - Positive
-    mood_ecstatic: "Extasiado",
-    mood_elated: "Eufórico",
+    // All Moods - Positive (masculine/feminine variants handled via getGenderedMood function)
+    mood_ecstatic: "Extasiado/a",
+    mood_elated: "Eufórico/a",
     mood_euphoric: "Exultante",
-    mood_giddy: "Mareado de felicidad",
-    mood_flirtatious: "Coqueto",
-    mood_jubilant: "Jubiloso",
+    mood_giddy: "Mareado/a de felicidad",
+    mood_flirtatious: "Coqueto/a",
+    mood_jubilant: "Jubiloso/a",
     mood_triumphant: "Triunfante",
-    mood_inspired: "Inspirado",
+    mood_inspired: "Inspirado/a",
     
     // Warm/Content
-    mood_loved: "Amado",
-    mood_safe: "Seguro",
-    mood_cozy: "Acogedor",
-    mood_affectionate: "Cariñoso",
-    mood_fulfilled: "Realizado",
-    mood_hopeful: "Esperanzado",
-    mood_proud: "Orgulloso",
-    mood_serene: "Sereno",
+    mood_loved: "Amado/a",
+    mood_safe: "Seguro/a",
+    mood_cozy: "Acogedor/a",
+    mood_affectionate: "Cariñoso/a",
+    mood_fulfilled: "Realizado/a",
+    mood_hopeful: "Esperanzado/a",
+    mood_proud: "Orgulloso/a",
+    mood_serene: "Sereno/a",
     
     // Romantic
-    mood_inLove: "Enamorado",
-    mood_passionate: "Apasionado",
+    mood_inLove: "Enamorado/a",
+    mood_passionate: "Apasionado/a",
     mood_longing: "Añorante",
-    mood_connected: "Conectado",
-    mood_turnedOn: "Excitado",
+    mood_connected: "Conectado/a",
+    mood_turnedOn: "Excitado/a",
     mood_vulnerable: "Vulnerable (de buena manera)",
     mood_cravingCloseness: "Anhelando cercanía",
     
     // Neutral
-    mood_curious: "Curioso",
-    mood_thoughtful: "Pensativo",
-    mood_pensive: "Reflexivo",
-    mood_dreamy: "Soñador",
-    mood_nostalgic: "Nostálgico",
+    mood_curious: "Curioso/a",
+    mood_thoughtful: "Pensativo/a",
+    mood_pensive: "Reflexivo/a",
+    mood_dreamy: "Soñador/a",
+    mood_nostalgic: "Nostálgico/a",
     mood_indifferent: "Indiferente",
-    mood_distracted: "Distraído",
+    mood_distracted: "Distraído/a",
     mood_ambivalent: "Ambivalente",
-    mood_observant: "Observador",
-    mood_open: "Abierto",
+    mood_observant: "Observador/a",
+    mood_open: "Abierto/a",
     
     // Negative
-    mood_lonely: "Solitario",
-    mood_disappointed: "Decepcionado",
-    mood_hurt: "Herido",
-    mood_melancholy: "Melancólico",
-    mood_numb: "Entumecido",
-    mood_rejected: "Rechazado",
-    mood_insecure: "Inseguro",
-    mood_discouraged: "Desanimado",
-    mood_homesick: "Nostálgico del hogar",
-    mood_drained: "Agotado",
+    mood_lonely: "Solitario/a",
+    mood_disappointed: "Decepcionado/a",
+    mood_hurt: "Herido/a",
+    mood_melancholy: "Melancólico/a",
+    mood_numb: "Entumecido/a",
+    mood_rejected: "Rechazado/a",
+    mood_insecure: "Inseguro/a",
+    mood_discouraged: "Desanimado/a",
+    mood_homesick: "Nostálgico/a del hogar",
+    mood_drained: "Agotado/a",
     
     // Distressed
-    mood_angry: "Enojado",
-    mood_jealous: "Celoso",
-    mood_overwhelmed: "Abrumado",
-    mood_defensive: "Defensivo",
-    mood_irritated: "Irritado",
-    mood_resentful: "Resentido",
-    mood_restless: "Inquieto",
-    mood_misunderstood: "Incomprendido",
+    mood_angry: "Enojado/a",
+    mood_jealous: "Celoso/a",
+    mood_overwhelmed: "Abrumado/a",
+    mood_defensive: "Defensivo/a",
+    mood_irritated: "Irritado/a",
+    mood_resentful: "Resentido/a",
+    mood_restless: "Inquieto/a",
+    mood_misunderstood: "Incomprendido/a",
     
     // Sexual
     mood_ravenous: "Voraz",
-    mood_thirsty: "Sediento",
-    mood_lustful: "Lujurioso",
+    mood_thirsty: "Sediento/a",
+    mood_lustful: "Lujurioso/a",
     mood_feral: "Salvaje",
-    mood_needy: "Necesitado",
-    mood_overheated: "Sobrecalentado",
-    mood_starved: "Hambriento",
-    mood_obsessed: "Obsesionado",
-    mood_frisky: "Juguetón",
+    mood_needy: "Necesitado/a",
+    mood_overheated: "Sobrecalentado/a",
+    mood_starved: "Hambriento/a",
+    mood_obsessed: "Obsesionado/a",
+    mood_frisky: "Juguetón/a",
     
     // Flirt Customization
     flirtCustomizeTitle: "Coqueteo",
@@ -1313,3 +1313,24 @@ export const translations = {
 
 export type Language = keyof typeof translations;
 export type TranslationKey = keyof typeof translations.en;
+
+// Function to get gendered mood translation for Spanish
+export const getGenderedMood = (moodKey: string, gender: string | null | undefined, language: Language): string => {
+  const baseTranslation = translations[language][moodKey as keyof typeof translations.en] as string || moodKey;
+  
+  // Only apply gender logic for Spanish
+  if (language !== 'es' || !baseTranslation.includes('/')) {
+    return baseTranslation;
+  }
+  
+  // Split on "/" to get masculine/feminine forms
+  const parts = baseTranslation.split('/');
+  if (parts.length !== 2) return baseTranslation;
+  
+  // Return appropriate form based on gender
+  if (gender === 'female') {
+    return parts[0].replace(/o$/, 'a') + parts[1]; // e.g., "Enamorado/a" -> "Enamorada"
+  } else {
+    return parts[0]; // Default to masculine or return as-is
+  }
+};

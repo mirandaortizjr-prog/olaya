@@ -1086,6 +1086,7 @@ export type Database = {
           display_name: string | null
           email: string
           full_name: string | null
+          gender: string | null
           id: string
           location: string | null
           privacy_password_hash: string | null
@@ -1100,6 +1101,7 @@ export type Database = {
           display_name?: string | null
           email: string
           full_name?: string | null
+          gender?: string | null
           id: string
           location?: string | null
           privacy_password_hash?: string | null
@@ -1114,6 +1116,7 @@ export type Database = {
           display_name?: string | null
           email?: string
           full_name?: string | null
+          gender?: string | null
           id?: string
           location?: string | null
           privacy_password_hash?: string | null
