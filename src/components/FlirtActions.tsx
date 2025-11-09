@@ -6,88 +6,89 @@ import { Flame, Heart, Eye, Sparkles, Wind, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PreferencesSettings } from "./PreferencesSettings";
 import { haptics } from "@/utils/haptics";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const FLIRT_ACTIONS = [
   // Classic Physical Flirts
-  { value: "kiss", label: "Kiss", icon: Heart, emoji: "💋", category: "physical" },
-  { value: "wink", label: "Wink", icon: Eye, emoji: "😉", category: "physical" },
-  { value: "lick", label: "Lick", icon: Wind, emoji: "👅", category: "physical" },
-  { value: "bite", label: "Bite", icon: Sparkles, emoji: "🦷", category: "physical" },
-  { value: "hug", label: "Hug", icon: Heart, emoji: "🤗", category: "physical" },
-  { value: "cuddle", label: "Cuddle", icon: Heart, emoji: "🫂", category: "physical" },
-  { value: "nuzzle", label: "Nuzzle", icon: Heart, emoji: "🥰", category: "physical" },
-  { value: "caress", label: "Caress", icon: Sparkles, emoji: "✨", category: "physical" },
-  { value: "stroke", label: "Stroke", icon: Wind, emoji: "👋", category: "physical" },
-  { value: "graze", label: "Graze", icon: Wind, emoji: "🌊", category: "physical" },
-  { value: "tickle", label: "Tickle", icon: Sparkles, emoji: "🤭", category: "physical" },
-  { value: "tease", label: "Tease", icon: Flame, emoji: "😏", category: "physical" },
-  { value: "squeeze", label: "Squeeze", icon: Heart, emoji: "🤲", category: "physical" },
-  { value: "tap", label: "Tap", icon: Sparkles, emoji: "👆", category: "physical" },
-  { value: "tug", label: "Tug", icon: Wind, emoji: "🫴", category: "physical" },
-  { value: "pull_closer", label: "Pull closer", icon: Heart, emoji: "🫶", category: "physical" },
-  { value: "brush_lips", label: "Brush lips", icon: Heart, emoji: "💋", category: "physical" },
-  { value: "trace_skin", label: "Trace skin", icon: Sparkles, emoji: "✨", category: "physical" },
-  { value: "hold_hands", label: "Hold hands", icon: Heart, emoji: "🤝", category: "physical" },
-  { value: "rest_head", label: "Rest head on shoulder", icon: Heart, emoji: "🥺", category: "physical" },
+  { value: "kiss", translationKey: "flirt_kiss", icon: Heart, emoji: "💋", category: "physical" },
+  { value: "wink", translationKey: "flirt_wink", icon: Eye, emoji: "😉", category: "physical" },
+  { value: "lick", translationKey: "flirt_lick", icon: Wind, emoji: "👅", category: "physical" },
+  { value: "bite", translationKey: "flirt_bite", icon: Sparkles, emoji: "🦷", category: "physical" },
+  { value: "hug", translationKey: "flirt_hug", icon: Heart, emoji: "🤗", category: "physical" },
+  { value: "cuddle", translationKey: "flirt_cuddle", icon: Heart, emoji: "🫂", category: "physical" },
+  { value: "nuzzle", translationKey: "flirt_nuzzle", icon: Heart, emoji: "🥰", category: "physical" },
+  { value: "caress", translationKey: "flirt_caress", icon: Sparkles, emoji: "✨", category: "physical" },
+  { value: "stroke", translationKey: "flirt_stroke", icon: Wind, emoji: "👋", category: "physical" },
+  { value: "graze", translationKey: "flirt_graze", icon: Wind, emoji: "🌊", category: "physical" },
+  { value: "tickle", translationKey: "flirt_tickle", icon: Sparkles, emoji: "🤭", category: "physical" },
+  { value: "tease", translationKey: "flirt_tease", icon: Flame, emoji: "😏", category: "physical" },
+  { value: "squeeze", translationKey: "flirt_squeeze", icon: Heart, emoji: "🤲", category: "physical" },
+  { value: "tap", translationKey: "flirt_tap", icon: Sparkles, emoji: "👆", category: "physical" },
+  { value: "tug", translationKey: "flirt_tug", icon: Wind, emoji: "🫴", category: "physical" },
+  { value: "pull_closer", translationKey: "flirt_pullCloser", icon: Heart, emoji: "🫶", category: "physical" },
+  { value: "brush_lips", translationKey: "flirt_brushLips", icon: Heart, emoji: "💋", category: "physical" },
+  { value: "trace_skin", translationKey: "flirt_traceSkin", icon: Sparkles, emoji: "✨", category: "physical" },
+  { value: "hold_hands", translationKey: "flirt_holdHands", icon: Heart, emoji: "🤝", category: "physical" },
+  { value: "rest_head", translationKey: "flirt_restHead", icon: Heart, emoji: "🥺", category: "physical" },
 
   // Sensual / Suggestive Flirts
-  { value: "whisper", label: "Whisper in ear", icon: Wind, emoji: "🗣️", category: "sensual" },
-  { value: "slow_gaze", label: "Slow gaze", icon: Eye, emoji: "👀", category: "sensual" },
-  { value: "lip_bite", label: "Lip bite", icon: Flame, emoji: "😈", category: "sensual" },
-  { value: "neck_kiss", label: "Neck kiss", icon: Heart, emoji: "💋", category: "sensual" },
-  { value: "back_touch", label: "Back touch", icon: Sparkles, emoji: "🫳", category: "sensual" },
-  { value: "hip_pull", label: "Hip pull", icon: Flame, emoji: "🔥", category: "sensual" },
-  { value: "hair_tug", label: "Hair tug", icon: Flame, emoji: "😏", category: "sensual" },
-  { value: "finger_trail", label: "Finger trail", icon: Sparkles, emoji: "✨", category: "sensual" },
-  { value: "breath_on_skin", label: "Breath on skin", icon: Wind, emoji: "💨", category: "sensual" },
-  { value: "tongue_flick", label: "Tongue flick", icon: Flame, emoji: "👅", category: "sensual" },
-  { value: "collar_grab", label: "Collar grab", icon: Flame, emoji: "🫴", category: "sensual" },
-  { value: "shirt_lift", label: "Shirt lift", icon: Flame, emoji: "👕", category: "sensual" },
-  { value: "thigh_touch", label: "Thigh touch", icon: Flame, emoji: "🔥", category: "sensual" },
-  { value: "moan_softly", label: "Moan softly", icon: Flame, emoji: "😩", category: "sensual" },
-  { value: "pin_gently", label: "Pin gently", icon: Flame, emoji: "😈", category: "sensual" },
-  { value: "straddle", label: "Straddle", icon: Flame, emoji: "🔥", category: "sensual" },
-  { value: "lap_sit", label: "Lap sit", icon: Flame, emoji: "🪑", category: "sensual" },
-  { value: "undo_button", label: "Undo button", icon: Flame, emoji: "👔", category: "sensual" },
-  { value: "slide_hand_under", label: "Slide hand under", icon: Flame, emoji: "🫳", category: "sensual" },
+  { value: "whisper", translationKey: "flirt_whisper", icon: Wind, emoji: "🗣️", category: "sensual" },
+  { value: "slow_gaze", translationKey: "flirt_slowGaze", icon: Eye, emoji: "👀", category: "sensual" },
+  { value: "lip_bite", translationKey: "flirt_lipBite", icon: Flame, emoji: "😈", category: "sensual" },
+  { value: "neck_kiss", translationKey: "flirt_neckKiss", icon: Heart, emoji: "💋", category: "sensual" },
+  { value: "back_touch", translationKey: "flirt_backTouch", icon: Sparkles, emoji: "🫳", category: "sensual" },
+  { value: "hip_pull", translationKey: "flirt_hipPull", icon: Flame, emoji: "🔥", category: "sensual" },
+  { value: "hair_tug", translationKey: "flirt_hairTug", icon: Flame, emoji: "😏", category: "sensual" },
+  { value: "finger_trail", translationKey: "flirt_fingerTrail", icon: Sparkles, emoji: "✨", category: "sensual" },
+  { value: "breath_on_skin", translationKey: "flirt_breathOnSkin", icon: Wind, emoji: "💨", category: "sensual" },
+  { value: "tongue_flick", translationKey: "flirt_tongueFlick", icon: Flame, emoji: "👅", category: "sensual" },
+  { value: "collar_grab", translationKey: "flirt_collarGrab", icon: Flame, emoji: "🫴", category: "sensual" },
+  { value: "shirt_lift", translationKey: "flirt_shirtLift", icon: Flame, emoji: "👕", category: "sensual" },
+  { value: "thigh_touch", translationKey: "flirt_thighTouch", icon: Flame, emoji: "🔥", category: "sensual" },
+  { value: "moan_softly", translationKey: "flirt_moanSoftly", icon: Flame, emoji: "😩", category: "sensual" },
+  { value: "pin_gently", translationKey: "flirt_pinGently", icon: Flame, emoji: "😈", category: "sensual" },
+  { value: "straddle", translationKey: "flirt_straddle", icon: Flame, emoji: "🔥", category: "sensual" },
+  { value: "lap_sit", translationKey: "flirt_lapSit", icon: Flame, emoji: "🪑", category: "sensual" },
+  { value: "undo_button", translationKey: "flirt_undoButton", icon: Flame, emoji: "👔", category: "sensual" },
+  { value: "slide_hand_under", translationKey: "flirt_slideHandUnder", icon: Flame, emoji: "🫳", category: "sensual" },
 
   // Playful / Coy Flirts
-  { value: "pout", label: "Pout", icon: Heart, emoji: "🥺", category: "playful" },
-  { value: "giggle", label: "Giggle", icon: Sparkles, emoji: "🤭", category: "playful" },
-  { value: "chase", label: "Chase", icon: Sparkles, emoji: "🏃", category: "playful" },
-  { value: "hide_and_seek", label: "Hide and seek", icon: Sparkles, emoji: "🙈", category: "playful" },
-  { value: "peekaboo", label: "Peekaboo", icon: Eye, emoji: "👀", category: "playful" },
-  { value: "fake_jealousy", label: "Fake jealousy", icon: Sparkles, emoji: "😤", category: "playful" },
-  { value: "play_fight", label: "Play fight", icon: Sparkles, emoji: "🤺", category: "playful" },
-  { value: "steal_blanket", label: "Steal blanket", icon: Sparkles, emoji: "🛏️", category: "playful" },
-  { value: "steal_kiss", label: "Steal kiss", icon: Heart, emoji: "💋", category: "playful" },
-  { value: "flash_smile", label: "Flash smile", icon: Heart, emoji: "😊", category: "playful" },
-  { value: "raise_eyebrow", label: "Raise eyebrow", icon: Eye, emoji: "🤨", category: "playful" },
-  { value: "send_emoji", label: "Send emoji", icon: Sparkles, emoji: "💬", category: "playful" },
-  { value: "send_voice_note", label: "Send voice note", icon: Wind, emoji: "🎙️", category: "playful" },
-  { value: "leave_lipstick_mark", label: "Leave lipstick mark", icon: Heart, emoji: "💋", category: "playful" },
-  { value: "send_secret_photo", label: "Send secret photo", icon: Eye, emoji: "📸", category: "playful" },
-  { value: "send_coded_message", label: "Send coded message", icon: Sparkles, emoji: "🔐", category: "playful" },
-  { value: "pretend_to_ignore", label: "Pretend to ignore", icon: Eye, emoji: "🙄", category: "playful" },
-  { value: "compliment_sneakily", label: "Compliment sneakily", icon: Heart, emoji: "😌", category: "playful" },
-  { value: "flirt_then_flee", label: "Flirt then flee", icon: Sparkles, emoji: "🏃‍♀️", category: "playful" },
+  { value: "pout", translationKey: "flirt_pout", icon: Heart, emoji: "🥺", category: "playful" },
+  { value: "giggle", translationKey: "flirt_giggle", icon: Sparkles, emoji: "🤭", category: "playful" },
+  { value: "chase", translationKey: "flirt_chase", icon: Sparkles, emoji: "🏃", category: "playful" },
+  { value: "hide_and_seek", translationKey: "flirt_hideAndSeek", icon: Sparkles, emoji: "🙈", category: "playful" },
+  { value: "peekaboo", translationKey: "flirt_peekaboo", icon: Eye, emoji: "👀", category: "playful" },
+  { value: "fake_jealousy", translationKey: "flirt_fakeJealousy", icon: Sparkles, emoji: "😤", category: "playful" },
+  { value: "play_fight", translationKey: "flirt_playFight", icon: Sparkles, emoji: "🤺", category: "playful" },
+  { value: "steal_blanket", translationKey: "flirt_stealBlanket", icon: Sparkles, emoji: "🛏️", category: "playful" },
+  { value: "steal_kiss", translationKey: "flirt_stealKiss", icon: Heart, emoji: "💋", category: "playful" },
+  { value: "flash_smile", translationKey: "flirt_flashSmile", icon: Heart, emoji: "😊", category: "playful" },
+  { value: "raise_eyebrow", translationKey: "flirt_raiseEyebrow", icon: Eye, emoji: "🤨", category: "playful" },
+  { value: "send_emoji", translationKey: "flirt_sendEmoji", icon: Sparkles, emoji: "💬", category: "playful" },
+  { value: "send_voice_note", translationKey: "flirt_sendVoiceNote", icon: Wind, emoji: "🎙️", category: "playful" },
+  { value: "leave_lipstick_mark", translationKey: "flirt_leaveLipstickMark", icon: Heart, emoji: "💋", category: "playful" },
+  { value: "send_secret_photo", translationKey: "flirt_sendSecretPhoto", icon: Eye, emoji: "📸", category: "playful" },
+  { value: "send_coded_message", translationKey: "flirt_sendCodedMessage", icon: Sparkles, emoji: "🔐", category: "playful" },
+  { value: "pretend_to_ignore", translationKey: "flirt_pretendToIgnore", icon: Eye, emoji: "🙄", category: "playful" },
+  { value: "compliment_sneakily", translationKey: "flirt_complimentSneakily", icon: Heart, emoji: "😌", category: "playful" },
+  { value: "flirt_then_flee", translationKey: "flirt_flirtThenFlee", icon: Sparkles, emoji: "🏃‍♀️", category: "playful" },
 
   // Verbal / Emotional Flirts
-  { value: "i_miss_you", label: "I miss you", icon: Heart, emoji: "💕", category: "verbal" },
-  { value: "youre_trouble", label: "You're trouble", icon: Flame, emoji: "😈", category: "verbal" },
-  { value: "youre_mine", label: "You're mine", icon: Heart, emoji: "❤️", category: "verbal" },
-  { value: "say_it_again", label: "Say it again", icon: Wind, emoji: "🗣️", category: "verbal" },
-  { value: "you_make_me_blush", label: "You make me blush", icon: Heart, emoji: "😊", category: "verbal" },
-  { value: "i_dare_you", label: "I dare you", icon: Flame, emoji: "😏", category: "verbal" },
-  { value: "youre_so_hot", label: "You're so hot when you…", icon: Flame, emoji: "🔥", category: "verbal" },
-  { value: "i_want_you_now", label: "I want you now", icon: Flame, emoji: "😈", category: "verbal" },
-  { value: "youre_irresistible", label: "You're irresistible", icon: Flame, emoji: "😍", category: "verbal" },
-  { value: "favorite_distraction", label: "You're my favorite distraction", icon: Heart, emoji: "💭", category: "verbal" },
-  { value: "thinking_last_night", label: "I'm thinking about last night", icon: Flame, emoji: "🌙", category: "verbal" },
-  { value: "reason_i_smile", label: "You're the reason I smile", icon: Heart, emoji: "😊", category: "verbal" },
-  { value: "not_wearing_anything", label: "I'm not wearing anything…", icon: Flame, emoji: "😏", category: "verbal" },
-  { value: "guess_what_imagining", label: "Guess what I'm imagining", icon: Flame, emoji: "💭", category: "verbal" },
-  { value: "youre_my_weakness", label: "You're my weakness", icon: Heart, emoji: "🥺", category: "verbal" },
+  { value: "i_miss_you", translationKey: "flirt_iMissYou", icon: Heart, emoji: "💕", category: "verbal" },
+  { value: "youre_trouble", translationKey: "flirt_youreTrouble", icon: Flame, emoji: "😈", category: "verbal" },
+  { value: "youre_mine", translationKey: "flirt_youreMine", icon: Heart, emoji: "❤️", category: "verbal" },
+  { value: "say_it_again", translationKey: "flirt_sayItAgain", icon: Wind, emoji: "🗣️", category: "verbal" },
+  { value: "you_make_me_blush", translationKey: "flirt_youMakeMeBlush", icon: Heart, emoji: "😊", category: "verbal" },
+  { value: "i_dare_you", translationKey: "flirt_iDareYou", icon: Flame, emoji: "😏", category: "verbal" },
+  { value: "youre_so_hot", translationKey: "flirt_youreSoHot", icon: Flame, emoji: "🔥", category: "verbal" },
+  { value: "i_want_you_now", translationKey: "flirt_iWantYouNow", icon: Flame, emoji: "😈", category: "verbal" },
+  { value: "youre_irresistible", translationKey: "flirt_youreIrresistible", icon: Flame, emoji: "😍", category: "verbal" },
+  { value: "favorite_distraction", translationKey: "flirt_favoriteDistraction", icon: Heart, emoji: "💭", category: "verbal" },
+  { value: "thinking_last_night", translationKey: "flirt_thinkingLastNight", icon: Flame, emoji: "🌙", category: "verbal" },
+  { value: "reason_i_smile", translationKey: "flirt_reasonISmile", icon: Heart, emoji: "😊", category: "verbal" },
+  { value: "not_wearing_anything", translationKey: "flirt_notWearingAnything", icon: Flame, emoji: "😏", category: "verbal" },
+  { value: "guess_what_imagining", translationKey: "flirt_guessWhatImagining", icon: Flame, emoji: "💭", category: "verbal" },
+  { value: "youre_my_weakness", translationKey: "flirt_youreMyWeakness", icon: Heart, emoji: "🥺", category: "verbal" },
 ];
 
 interface FlirtActionsProps {
@@ -99,6 +100,7 @@ interface FlirtActionsProps {
 }
 
 export const FlirtActions = ({ coupleId, senderId, open = false, onClose = () => {}, inline = false }: FlirtActionsProps) => {
+  const { t } = useLanguage();
   const [sending, setSending] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [enabledFlirts, setEnabledFlirts] = useState<string[]>([]);
@@ -271,11 +273,11 @@ export const FlirtActions = ({ coupleId, senderId, open = false, onClose = () =>
                   key={flirt.value}
                   variant="outline"
                   className="h-20 flex-col gap-1 text-sm"
-                  onClick={() => sendFlirt(flirt.value, flirt.label, flirt.emoji)}
+                  onClick={() => sendFlirt(flirt.value, t(flirt.translationKey), flirt.emoji)}
                   disabled={sending}
                 >
                   <span className="text-2xl">{flirt.emoji}</span>
-                  <span className="text-xs text-center">{flirt.label}</span>
+                  <span className="text-xs text-center">{t(flirt.translationKey)}</span>
                 </Button>
               ))}
             </div>
