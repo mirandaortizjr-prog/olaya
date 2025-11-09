@@ -19,7 +19,7 @@ interface ShopCategory {
 
 const shopCategories: ShopCategory[] = [
   { id: 'gifts', name: 'Gifts', icon: Gift, comingSoon: false, path: '/shop/gifts' },
-  { id: 'visual-effects', name: 'Visual Effects', icon: Sparkles, comingSoon: true, path: null },
+  { id: 'visual-effects', name: 'Visual Effects', icon: Sparkles, comingSoon: false, path: '/shop/visual-effects' },
   { id: 'accessories', name: 'Accessories', icon: Palette, comingSoon: true, path: null },
   { id: 'badges', name: 'Badges', icon: Badge, comingSoon: true, path: null },
   { id: 'seasonal', name: 'Seasonal Items', icon: Calendar, comingSoon: true, path: null },

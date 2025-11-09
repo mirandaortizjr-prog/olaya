@@ -24,6 +24,7 @@ import DesiresPage from "./pages/DesiresPage";
 import IntimateJournalPage from "./pages/IntimateJournalPage";
 import ShopPage from "./pages/ShopPage";
 import GiftsPage from "./pages/GiftsPage";
+import VisualEffectsShop from "./pages/VisualEffectsShop";
 
 const queryClient = new QueryClient();
 
@@ -83,6 +84,7 @@ const App = () => {
                   <Route path="/flirt-customization" element={<FlirtCustomization />} />
                   <Route path="/shop" element={<ShopPage />} />
                   <Route path="/shop/gifts" element={<GiftsPage />} />
+                  <Route path="/shop/visual-effects" element={<VisualEffectsShop />} />
                   <Route path="/404" element={<NotFound />} />
                   <Route path="*" element={<Navigate to="/404" replace />} />
                 </Routes>

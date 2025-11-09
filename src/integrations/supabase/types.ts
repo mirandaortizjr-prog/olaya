@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      active_effects: {
+        Row: {
+          activated_at: string
+          activated_by: string
+          couple_id: string
+          effect_id: string
+          expires_at: string
+          id: string
+          is_active: boolean | null
+        }
+        Insert: {
+          activated_at?: string
+          activated_by: string
+          couple_id: string
+          effect_id: string
+          expires_at: string
+          id?: string
+          is_active?: boolean | null
+        }
+        Update: {
+          activated_at?: string
+          activated_by?: string
+          couple_id?: string
+          effect_id?: string
+          expires_at?: string
+          id?: string
+          is_active?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "active_effects_effect_id_fkey"
+            columns: ["effect_id"]
+            isOneToOne: false
+            referencedRelation: "visual_effects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coin_transactions: {
         Row: {
           amount: number
@@ -1084,6 +1122,41 @@ export type Database = {
         }
         Relationships: []
       }
+      purchased_effects: {
+        Row: {
+          couple_id: string
+          effect_id: string
+          id: string
+          purchased_at: string
+          times_used: number | null
+          user_id: string
+        }
+        Insert: {
+          couple_id: string
+          effect_id: string
+          id?: string
+          purchased_at?: string
+          times_used?: number | null
+          user_id: string
+        }
+        Update: {
+          couple_id?: string
+          effect_id?: string
+          id?: string
+          purchased_at?: string
+          times_used?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchased_effects_effect_id_fkey"
+            columns: ["effect_id"]
+            isOneToOne: false
+            referencedRelation: "visual_effects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       push_subscriptions: {
         Row: {
           auth: string
@@ -1328,6 +1401,42 @@ export type Database = {
           stripe_subscription_id?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      visual_effects: {
+        Row: {
+          animation: string
+          behavior: string
+          category: string
+          created_at: string
+          effect_type: string
+          id: string
+          name: string
+          preview_enabled: boolean | null
+          price: number
+        }
+        Insert: {
+          animation: string
+          behavior: string
+          category?: string
+          created_at?: string
+          effect_type: string
+          id?: string
+          name: string
+          preview_enabled?: boolean | null
+          price?: number
+        }
+        Update: {
+          animation?: string
+          behavior?: string
+          category?: string
+          created_at?: string
+          effect_type?: string
+          id?: string
+          name?: string
+          preview_enabled?: boolean | null
+          price?: number
         }
         Relationships: []
       }

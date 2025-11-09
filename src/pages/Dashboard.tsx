@@ -29,6 +29,7 @@ import { PrivateVault } from "@/components/PrivateVault";
 import { CoupleGames } from "@/components/CoupleGames";
 import { UnioGallery } from "@/components/UnioGallery";
 import { SeasonalAnimations } from "@/components/SeasonalAnimations";
+import { VisualEffectsRenderer } from "@/components/VisualEffectsRenderer";
 import { MemoryCalendar } from "@/components/MemoryCalendar";
 import { LoveMeter } from "@/components/LoveMeter";
 import { CoupleSongPlayer, CoupleSongPlayerEmbed } from "@/components/CoupleSongPlayer";
@@ -881,6 +882,9 @@ const Dashboard = () => {
 
       {/* Seasonal Animations Overlay */}
       <SeasonalAnimations />
+      
+      {/* Visual Effects Overlay */}
+      <VisualEffectsRenderer coupleId={coupleData.coupleId} />
 
       {/* Feed Section */}
       <div style={{ backgroundColor: '#000000' }} className="pb-4 px-1">
