@@ -90,6 +90,14 @@ export default function AccessoriesPage() {
       'Purple Lime Gradient': 'purple-lime',
       'Purple Cyan Gradient': 'purple-cyan',
       'Blue Cyan Gradient': 'blue-cyan',
+      'Cyan to Dark Blue': 'cyan-darkblue',
+      'Black to Dark Gray': 'black-darkgray',
+      'Dark Gray to White': 'darkgray-white',
+      'Light Gray to White': 'lightgray-white',
+      'Black to Dark Blue': 'black-darkblue',
+      'Dark Blue to Bright Blue': 'darkblue-brightblue',
+      'Pale Green to Light Blue': 'palegreen-lightblue',
+      'Red to Orange': 'red-orange',
     };
     return mapping[name] || 'default';
   };
