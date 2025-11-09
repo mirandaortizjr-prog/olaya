@@ -100,7 +100,7 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
   };
 
   const startChallenge = async (type: 'truth' | 'dare') => {
-    const questions = generateTruthOrDareQuestions(level, language);
+    const questions = generateTruthOrDareQuestions(level, language as 'en' | 'es');
     const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
     const question = type === 'truth' ? randomQuestion.truth : randomQuestion.dare;
     const timeLimit = type === 'truth' ? 10 * 60 * 1000 : 15 * 60 * 1000;
