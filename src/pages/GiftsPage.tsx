@@ -46,6 +46,13 @@ import stuffedRaccoon from "@/assets/gifts/stuffed-raccoon.png";
 import stuffedFox from "@/assets/gifts/stuffed-fox.png";
 import stuffedSloth from "@/assets/gifts/stuffed-sloth.png";
 import stuffedLion from "@/assets/gifts/stuffed-lion.png";
+import stuffedMonkey2 from "@/assets/gifts/stuffed-monkey2.png";
+import stuffedKoala2 from "@/assets/gifts/stuffed-koala2.png";
+import stuffedMonkey3 from "@/assets/gifts/stuffed-monkey3.png";
+import stuffedZebra from "@/assets/gifts/stuffed-zebra.png";
+import stuffedPanda from "@/assets/gifts/stuffed-panda.png";
+import stuffedSquirrel from "@/assets/gifts/stuffed-squirrel.png";
+import stuffedRhino from "@/assets/gifts/stuffed-rhino.png";
 
 const giftImages: { [key: string]: string } = {
   'flower-bouquet-1': flowerBouquet1,
@@ -84,6 +91,13 @@ const giftImages: { [key: string]: string } = {
   'stuffed-fox': stuffedFox,
   'stuffed-sloth': stuffedSloth,
   'stuffed-lion': stuffedLion,
+  'stuffed-monkey2': stuffedMonkey2,
+  'stuffed-koala2': stuffedKoala2,
+  'stuffed-monkey3': stuffedMonkey3,
+  'stuffed-zebra': stuffedZebra,
+  'stuffed-panda': stuffedPanda,
+  'stuffed-squirrel': stuffedSquirrel,
+  'stuffed-rhino': stuffedRhino,
 };
 
 interface ShopItem {
