@@ -139,7 +139,7 @@ export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
     return '';
   };
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+    <div className="pointer-events-none fixed inset-0 overflow-hidden">
       {effectsToRender.map((effect) =>
         particles.map((particle) => (
           <div

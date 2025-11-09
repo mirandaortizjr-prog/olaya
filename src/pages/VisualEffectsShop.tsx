@@ -233,7 +233,7 @@ export default function VisualEffectsShop() {
 
       {/* Preview Renderer - Contained within shop page */}
       {previewEffect && (
-        <div className="pointer-events-none absolute inset-0 z-40 overflow-hidden">
+        <div className="pointer-events-none fixed inset-0 z-40 overflow-hidden">
           <VisualEffectsRenderer 
             coupleId={coupleId} 
             previewEffect={previewEffect}
