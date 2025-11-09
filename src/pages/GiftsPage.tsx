@@ -140,11 +140,13 @@ const GiftsPage = () => {
   const [sweetGifts, setSweetGifts] = useState<ShopItem[]>([]);
   const [balloonGifts, setBalloonGifts] = useState<ShopItem[]>([]);
   const [stuffedAnimalGifts, setStuffedAnimalGifts] = useState<ShopItem[]>([]);
+  const [petGifts, setPetGifts] = useState<ShopItem[]>([]);
   const [purchaseHistory, setPurchaseHistory] = useState<PurchasedGiftHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [balloonCollectionComplete, setBalloonCollectionComplete] = useState(false);
   const [stuffedCollectionComplete, setStuffedCollectionComplete] = useState(false);
+  const [petsCollectionComplete, setPetsCollectionComplete] = useState(false);
   const { coins } = useTogetherCoins(user?.id);
 
   useEffect(() => {
@@ -196,6 +198,15 @@ const GiftsPage = () => {
 
       if (stuffedError) throw stuffedError;
       setStuffedAnimalGifts(stuffedData || []);
+
+      const { data: petsData, error: petsError } = await supabase
+        .from('shop_items')
+        .select('*')
+        .eq('category', 'pets')
+        .order('price', { ascending: true });
+
+      if (petsError) throw petsError;
+      setPetGifts(petsData || []);
     } catch (error) {
       console.error('Error fetching gifts:', error);
       toast.error("Failed to load gifts");
@@ -233,6 +244,15 @@ const GiftsPage = () => {
           await awardCollectionBonus(userId, 'stuffed', 500);
         }
       }
+
+      // Check if pets collection is complete
+      if (data && petGifts.length > 0) {
+        const petImageNames = petGifts.map(g => g.image_url);
+        const purchasedPets = data.filter(p => petImageNames.includes(p.gift_image));
+        if (purchasedPets.length === petGifts.length && !petsCollectionComplete) {
+          await awardCollectionBonus(userId, 'pets', 1000);
+        }
+      }
     } catch (error) {
       console.error('Error fetching purchase history:', error);
     }
@@ -250,7 +270,9 @@ const GiftsPage = () => {
 
       const description = collectionType === 'balloon' 
         ? 'Balloon Collection Complete! 🎈' 
-        : 'Stuffed Animal Collection Complete! 🧸';
+        : collectionType === 'stuffed'
+        ? 'Stuffed Animal Collection Complete! 🧸'
+        : 'Pets Collection Complete! 🐾';
 
       const { error } = await supabase
         .from('coin_transactions')
@@ -265,8 +287,10 @@ const GiftsPage = () => {
       if (!error) {
         if (collectionType === 'balloon') {
           setBalloonCollectionComplete(true);
-        } else {
+        } else if (collectionType === 'stuffed') {
           setStuffedCollectionComplete(true);
+        } else if (collectionType === 'pets') {
+          setPetsCollectionComplete(true);
         }
         toast.success(`🎉 Collection Complete! You earned ${bonusAmount} bonus coins!`);
       }
@@ -355,7 +379,7 @@ const GiftsPage = () => {
 
       {/* Tabs for Gift Categories and History */}
       <Tabs defaultValue="flowers" className="p-4">
-        <TabsList className="w-full grid grid-cols-5 gap-1">
+        <TabsList className="w-full grid grid-cols-6 gap-1">
           <TabsTrigger value="flowers" className="text-xs px-2">
             <Heart className="w-3 h-3 mr-1" />
             Flowers
@@ -368,6 +392,9 @@ const GiftsPage = () => {
           </TabsTrigger>
           <TabsTrigger value="stuffed" className="text-xs px-2">
             🧸 Plush
+          </TabsTrigger>
+          <TabsTrigger value="pets" className="text-xs px-2">
+            🐾 Pets
           </TabsTrigger>
           <TabsTrigger value="history" className="text-xs px-2">
             <History className="w-3 h-3 mr-1" />
@@ -691,6 +718,94 @@ const GiftsPage = () => {
             <div className="text-center py-12 space-y-4">
               <div className="text-5xl">🧸</div>
               <p className="text-muted-foreground">No stuffed animal gifts available yet</p>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="pets" className="space-y-6 mt-6">
+          {/* Header Section */}
+          <div className="text-center space-y-2">
+            <div className="text-5xl mx-auto">🐾</div>
+            <h2 className="text-2xl font-bold text-foreground">Adorable Pets</h2>
+            <p className="text-muted-foreground">
+              Collect all {petGifts.length} pets and earn 1,000 bonus coins!
+            </p>
+            {petGifts.length > 0 && (
+              <div className="flex items-center justify-center gap-2 text-sm">
+                <span className="text-muted-foreground">Progress:</span>
+                <span className="font-semibold text-primary">
+                  {purchaseHistory.filter(p => petGifts.map(g => g.image_url).includes(p.gift_image)).length} / {petGifts.length}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Pets Grid */}
+          {loading ? (
+            <div className="grid grid-cols-2 gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-64 bg-accent animate-pulse rounded-lg" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {petGifts.map((gift) => {
+                const isCollected = purchaseHistory.some(p => p.gift_image === gift.image_url);
+                return (
+                  <Card
+                    key={gift.id}
+                    className={`overflow-hidden hover:shadow-lg transition-all duration-300 hover:scale-105 ${isCollected ? 'ring-2 ring-primary' : ''}`}
+                  >
+                    <div className="aspect-square bg-accent/20 relative overflow-hidden">
+                      {giftImages[gift.image_url] ? (
+                        <img
+                          src={giftImages[gift.image_url]}
+                          alt={gift.name}
+                          className="w-full h-full object-contain p-4"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="text-4xl">🐾</div>
+                        </div>
+                      )}
+                      <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
+                        <img src={togetherCoinsIcon} alt="Coins" className="w-3 h-3 mr-1" />
+                        {gift.price}
+                      </Badge>
+                      {isCollected && (
+                        <Badge className="absolute top-2 left-2 bg-green-500 text-white">
+                          ✓ Collected
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="p-3 space-y-2">
+                      <h3 className="font-semibold text-sm text-foreground line-clamp-1">
+                        {gift.name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground line-clamp-2">
+                        {gift.description}
+                      </p>
+                      <Button
+                        onClick={() => handlePurchase(gift)}
+                        className="w-full"
+                        size="sm"
+                        disabled={coins < gift.price || isCollected}
+                      >
+                        <ShoppingCart className="w-3 h-3 mr-1" />
+                        {isCollected ? 'Collected' : coins < gift.price ? 'Need More Coins' : 'Send Gift'}
+                      </Button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && petGifts.length === 0 && (
+            <div className="text-center py-12 space-y-4">
+              <div className="text-5xl">🐾</div>
+              <p className="text-muted-foreground">No pet gifts available yet</p>
             </div>
           )}
         </TabsContent>
