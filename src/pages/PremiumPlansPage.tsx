@@ -57,7 +57,7 @@ const PremiumPlansPage = () => {
   const handleStartLite = async () => {
     setIsLoading(true);
     try {
-      navigate('/dashboard');
+      navigate('/auth');
     } catch (error) {
       console.error('Error:', error);
       toast({
@@ -79,19 +79,14 @@ const PremiumPlansPage = () => {
       if (!user) throw new Error('Not authenticated');
 
       if (plan === 'premium' || plan === 'trial') {
-        // Here you would integrate with your payment processor
-        // For now, just show a toast
         toast({
-          title: plan === 'trial' ? '3-Day Free Trial Started' : 'Premium Plan Selected',
-          description: plan === 'trial' 
-            ? 'Enjoy all premium features for 3 days. Cancel anytime before day 3 to avoid charges.'
-            : 'Redirecting to checkout...',
+          title: plan === 'trial' ? '3-Day Free Trial Selected' : 'Premium Plan Selected',
+          description: 'Please sign up or log in to continue',
         });
         
-        // Navigate to dashboard after a short delay
         setTimeout(() => {
-          navigate('/dashboard');
-        }, 2000);
+          navigate('/auth');
+        }, 1500);
       }
     } catch (error) {
       console.error('Error:', error);
