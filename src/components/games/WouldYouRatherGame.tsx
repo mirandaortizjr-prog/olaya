@@ -4,13 +4,14 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Plus, Trash2, Star, Trophy } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Star, Trophy, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getWouldYouRatherQuestions } from "@/lib/wouldYouRatherQuestions";
 import { useCoupleProgress } from "@/hooks/useCoupleProgress";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 
 interface GameProps {
   coupleId: string;
@@ -39,7 +40,7 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
   const { toast } = useToast();
   const { progress } = useCoupleProgress(coupleId);
   
-  const [gameMode, setGameMode] = useState<"menu" | "customize" | "play" | "results">("menu");
+  const [gameMode, setGameMode] = useState<"menu" | "customize" | "play" | "waiting" | "compare" | "results">("menu");
   const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
   const [newQuestion, setNewQuestion] = useState({ question: "", optionA: "", optionB: "" });
   const [includeSpicy, setIncludeSpicy] = useState(true);
@@ -49,10 +50,40 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
   const [partnerAnswers, setPartnerAnswers] = useState<Record<string, 'A' | 'B'>>({});
   const [sessionId] = useState(() => `wyr-${Date.now()}`);
   const [matchCount, setMatchCount] = useState(0);
+  const [partnerReady, setPartnerReady] = useState(false);
+  const [comparisonData, setComparisonData] = useState<Array<{
+    question: GameQuestion;
+    myAnswer: 'A' | 'B';
+    partnerAnswer: 'A' | 'B' | null;
+    isMatch: boolean;
+  }>>([]);
 
   useEffect(() => {
     loadCustomQuestions();
     loadPartnerAnswers();
+    checkPartnerReadiness();
+    
+    // Subscribe to real-time updates for partner answers
+    const channel = supabase
+      .channel('wyr-game-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'game_responses',
+          filter: `couple_id=eq.${coupleId},game_type=eq.would-you-rather`
+        },
+        () => {
+          loadPartnerAnswers();
+          checkPartnerReadiness();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const loadCustomQuestions = async () => {
@@ -91,6 +122,27 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
         answers[r.question_id] = r.answer as 'A' | 'B';
       });
       setPartnerAnswers(answers);
+    }
+  };
+
+  const checkPartnerReadiness = async () => {
+    if (!partnerId) return;
+
+    // Check if partner has completed their session
+    const { data } = await supabase
+      .from('game_completions')
+      .select('*')
+      .eq('couple_id', coupleId)
+      .eq('game_type', 'would-you-rather')
+      .eq('user_id', partnerId)
+      .order('completed_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (data) {
+      const lastCompleted = new Date(data.completed_at);
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+      setPartnerReady(lastCompleted > fiveMinutesAgo);
     }
   };
 
@@ -180,33 +232,63 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
     const newAnswers = { ...myAnswers, [currentQuestion.id]: choice };
     setMyAnswers(newAnswers);
 
-    // Check if partner answered this question
-    if (partnerAnswers[currentQuestion.id]) {
-      if (partnerAnswers[currentQuestion.id] === choice) {
-        setMatchCount(matchCount + 1);
-        toast({ title: "Match! 💕", description: "You both chose the same!", duration: 2000 });
-      }
-    }
-
-    // Move to next question or results
+    // Move to next question or finish
     if (currentIndex < gameQuestions.length - 1) {
-      setTimeout(() => setCurrentIndex(currentIndex + 1), 1500);
+      setTimeout(() => setCurrentIndex(currentIndex + 1), 500);
     } else {
+      // Save completion
+      await supabase.from('game_completions').insert({
+        couple_id: coupleId,
+        user_id: userId,
+        game_type: 'would-you-rather',
+        session_id: sessionId,
+        score: 0,
+        total_questions: gameQuestions.length,
+        coins_earned: 0
+      });
+
+      // Notify partner
+      if (partnerId) {
+        try {
+          await supabase.functions.invoke('send-push-notification', {
+            body: {
+              userId: partnerId,
+              title: 'Would You Rather? 💭',
+              body: 'Your partner completed their Would You Rather - Compare your answers now!',
+              data: { type: 'game_ready', gameType: 'would-you-rather' }
+            }
+          });
+        } catch (e) {
+          console.error('Failed to send notification:', e);
+        }
+      }
+
       setTimeout(() => {
-        calculateResults(newAnswers);
-        setGameMode("results");
-      }, 1500);
+        if (partnerReady) {
+          prepareComparison(newAnswers);
+        } else {
+          setGameMode("waiting");
+        }
+      }, 500);
     }
   };
 
-  const calculateResults = (answers: Record<string, 'A' | 'B'>) => {
-    let matches = 0;
-    Object.keys(answers).forEach(questionId => {
-      if (partnerAnswers[questionId] === answers[questionId]) {
-        matches++;
-      }
+  const prepareComparison = (answers: Record<string, 'A' | 'B'>) => {
+    const comparison = gameQuestions.map(q => {
+      const myAns = answers[q.id];
+      const partnerAns = partnerAnswers[q.id];
+      return {
+        question: q,
+        myAnswer: myAns,
+        partnerAnswer: partnerAns || null,
+        isMatch: myAns === partnerAns
+      };
     });
+
+    const matches = comparison.filter(c => c.isMatch).length;
     setMatchCount(matches);
+    setComparisonData(comparison);
+    setGameMode("compare");
   };
 
   if (gameMode === "menu") {
@@ -243,6 +325,15 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
                 <p className="text-sm text-muted-foreground mb-3">
                   These will be mixed with system questions
                 </p>
+              </Card>
+            )}
+
+            {partnerReady && (
+              <Card className="p-4 border-primary bg-primary/5">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-primary" />
+                  <p className="text-sm font-medium">Partner has completed their answers - Ready to compare!</p>
+                </div>
               </Card>
             )}
 
@@ -406,6 +497,116 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
                 </Button>
               </div>
             </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (gameMode === "waiting") {
+    return (
+      <div className="fixed inset-0 bg-background z-50 flex flex-col">
+        <div className="flex items-center gap-2 p-4 border-b">
+          <Button variant="ghost" size="icon" onClick={() => setGameMode("menu")}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <h2 className="text-xl font-semibold">Waiting for Partner</h2>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="max-w-md w-full text-center space-y-6">
+            <Clock className="w-20 h-20 mx-auto text-primary animate-pulse" />
+            
+            <div>
+              <h3 className="text-2xl font-bold mb-2">Answers Submitted! ✓</h3>
+              <p className="text-muted-foreground">
+                Waiting for your partner to complete their Would You Rather...
+              </p>
+            </div>
+
+            <Card className="p-6">
+              <p className="text-sm text-muted-foreground">
+                We'll notify you when they're done and you can compare your answers together!
+              </p>
+            </Card>
+
+            <Button className="w-full" variant="outline" onClick={() => setGameMode("menu")}>
+              Back to Menu
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (gameMode === "compare") {
+    const matchPercent = Math.round((matchCount / gameQuestions.length) * 100);
+    
+    return (
+      <div className="fixed inset-0 bg-background z-50 flex flex-col">
+        <div className="flex items-center gap-2 p-4 border-b">
+          <Button variant="ghost" size="icon" onClick={() => setGameMode("menu")}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <h2 className="text-xl font-semibold">Answer Comparison</h2>
+        </div>
+
+        <div className="flex-1 overflow-auto p-4">
+          <div className="max-w-2xl mx-auto space-y-4">
+            {/* Summary Card */}
+            <Card className="p-6 bg-gradient-to-br from-primary/10 to-accent/10">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-2xl font-bold">{matchCount}/{gameQuestions.length}</h3>
+                  <p className="text-muted-foreground">Matching Answers</p>
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-primary">{matchPercent}%</div>
+                  <p className="text-sm text-muted-foreground">Compatibility</p>
+                </div>
+              </div>
+              <Progress value={matchPercent} className="h-3" />
+            </Card>
+
+            {/* Question by Question Comparison */}
+            <div className="space-y-3">
+              <h3 className="font-semibold text-lg">Question Breakdown</h3>
+              {comparisonData.map((item, idx) => (
+                <Card key={idx} className={`p-4 ${item.isMatch ? 'border-green-500/50 bg-green-500/5' : 'border-orange-500/50 bg-orange-500/5'}`}>
+                  <div className="flex items-start gap-3 mb-3">
+                    {item.isMatch ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    ) : (
+                      <XCircle className="w-5 h-5 text-orange-500 mt-0.5 flex-shrink-0" />
+                    )}
+                    <div className="flex-1">
+                      <p className="font-medium mb-2">{item.question.question}</p>
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div className={`p-2 rounded ${item.myAnswer === 'A' ? 'bg-primary/20 border border-primary' : 'bg-muted'}`}>
+                          <p className="text-xs text-muted-foreground mb-1">A: {item.question.optionA}</p>
+                          {item.myAnswer === 'A' && <Badge variant="secondary" className="text-xs">You</Badge>}
+                          {item.partnerAnswer === 'A' && <Badge variant="outline" className="text-xs ml-1">Partner</Badge>}
+                        </div>
+                        <div className={`p-2 rounded ${item.myAnswer === 'B' ? 'bg-primary/20 border border-primary' : 'bg-muted'}`}>
+                          <p className="text-xs text-muted-foreground mb-1">B: {item.question.optionB}</p>
+                          {item.myAnswer === 'B' && <Badge variant="secondary" className="text-xs">You</Badge>}
+                          {item.partnerAnswer === 'B' && <Badge variant="outline" className="text-xs ml-1">Partner</Badge>}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            <div className="space-y-3 pt-4">
+              <Button className="w-full" onClick={startGame}>
+                Play Again
+              </Button>
+              <Button className="w-full" variant="outline" onClick={() => setGameMode("menu")}>
+                Back to Menu
+              </Button>
+            </div>
           </div>
         </div>
       </div>
