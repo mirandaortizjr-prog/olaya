@@ -18,6 +18,8 @@ interface Post {
   author_name?: string;
   type: 'post' | 'desire' | 'flirt';
   emoji?: string;
+  fulfilled?: boolean;
+  rawId?: string;
 }
 
 interface PostsFeedProps {
@@ -133,16 +135,18 @@ export const PostsFeed = ({ coupleId, userId }: PostsFeedProps) => {
     // Add desires
     desiresData?.forEach(desire => {
       const emoji = desireEmojis[desire.craving_type] || "💝";
-      const content = desire.custom_message || desire.craving_type.replace(/_/g, ' ');
+      const content = desire.custom_message || desire.craving_type.replace(/_/g, ' ').charAt(0).toUpperCase() + desire.craving_type.replace(/_/g, ' ').slice(1);
       allItems.push({
         id: `desire-${desire.id}`,
+        rawId: desire.id,
         content: `${emoji} ${content}`,
         created_at: desire.created_at,
         author_id: desire.user_id,
         likes: [],
         author_name: profiles?.find(p => p.id === desire.user_id)?.full_name || 'Unknown',
         type: 'desire',
-        emoji
+        emoji,
+        fulfilled: desire.fulfilled || false
       });
     });
 
@@ -317,6 +321,21 @@ export const PostsFeed = ({ coupleId, userId }: PostsFeedProps) => {
     }
   };
 
+  const markDesireFulfilled = async (desireId: string) => {
+    const { error } = await supabase
+      .from('craving_board')
+      .update({ fulfilled: true, fulfilled_at: new Date().toISOString() })
+      .eq('id', desireId);
+
+    if (!error) {
+      fetchPosts();
+      toast({
+        title: 'Success',
+        description: 'Desire marked as fulfilled',
+      });
+    }
+  };
+
   return (
     <Card className="bg-gradient-to-br from-card to-card/50 border-primary/10 shadow-soft">
       <CardHeader className="border-b border-border/50">
@@ -422,7 +441,14 @@ export const PostsFeed = ({ coupleId, userId }: PostsFeedProps) => {
         ) : (
           <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 -mr-2">
             {posts.map((post) => (
-              <Card key={post.id} className="bg-background/30 border-border/50 hover:bg-background/50 transition-all">
+              <Card 
+                key={post.id} 
+                className={`bg-background/30 border-border/50 hover:bg-background/50 transition-all ${
+                  post.type === 'desire' && !post.fulfilled 
+                    ? 'animate-pulse border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)]' 
+                    : ''
+                }`}
+              >
                 <CardContent className="p-4">
                   {/* Post Header */}
                   <div className="flex items-start gap-3 mb-3">
@@ -511,10 +537,28 @@ export const PostsFeed = ({ coupleId, userId }: PostsFeedProps) => {
                   
                   {/* Type badge for desires and flirts */}
                   {post.type !== 'post' && (
-                    <div className="pt-2 border-t border-border/30">
-                      <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
-                        {post.type === 'desire' ? '💝 Desire' : '💕 Flirt'}
+                    <div className="pt-2 border-t border-border/30 flex items-center justify-between">
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        post.type === 'desire' 
+                          ? post.fulfilled 
+                            ? 'bg-green-500/10 text-green-500' 
+                            : 'bg-red-500/10 text-red-500'
+                          : 'bg-primary/10 text-primary'
+                      }`}>
+                        {post.type === 'desire' 
+                          ? post.fulfilled ? '✅ Desire Fulfilled' : '💝 Desire' 
+                          : '💕 Flirt'}
                       </span>
+                      {post.type === 'desire' && !post.fulfilled && post.author_id === userId && post.rawId && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => markDesireFulfilled(post.rawId!)}
+                          className="text-xs h-7"
+                        >
+                          Mark Fulfilled
+                        </Button>
+                      )}
                     </div>
                   )}
                 </CardContent>
