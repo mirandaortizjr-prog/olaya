@@ -3,10 +3,12 @@ import PullToRefresh from "pulltorefreshjs";
 import { toast } from "@/components/ui/use-toast";
 
 // Simple reusable hook to enable pull-to-refresh across the app
-export default function usePullToRefresh(options?: { onRefresh?: () => Promise<void> | void }) {
+export default function usePullToRefresh(options?: { onRefresh?: () => Promise<void> | void, enabled?: boolean, target?: string }) {
   useEffect(() => {
+    if (options && options.enabled === false) return;
+
     const ptr = PullToRefresh.init({
-      mainElement: "body",
+      mainElement: options?.target || "body",
       shouldPullToRefresh: () => window.scrollY === 0,
       distThreshold: 60,
       distMax: 80,
@@ -35,5 +37,5 @@ export default function usePullToRefresh(options?: { onRefresh?: () => Promise<v
         PullToRefresh.destroyAll();
       } catch {}
     };
-  }, []);
+  }, [options?.enabled, options?.target]);
 }

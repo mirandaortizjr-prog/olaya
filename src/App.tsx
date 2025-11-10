@@ -58,11 +58,14 @@ const AppRouter = () => {
             .single();
           
           if (coupleData) {
-            // User has couple profile, redirect to dashboard after splash
+            // User has couple profile, redirect to dashboard after splash ONLY if on landing/auth
             setTimeout(() => {
               setShowSplash(false);
               setIsCheckingAuth(false);
-              navigate('/dashboard');
+              const onLanding = ["/", "/auth", "/premium-plans"].includes(location.pathname);
+              if (onLanding) {
+                navigate('/dashboard', { replace: true });
+              }
             }, 2500);
             return;
           }
@@ -83,10 +86,11 @@ const AppRouter = () => {
     };
 
     checkAuthAndRedirect();
-  }, [navigate]);
+  }, [navigate, location.pathname]);
 
-  // Enable pull-to-refresh across the app
-  usePullToRefresh();
+  // Enable pull-to-refresh only on dashboard/landing screens
+  const ptrEnabled = location.pathname === '/dashboard' || location.pathname === '/';
+  usePullToRefresh({ enabled: ptrEnabled });
 
   if (showSplash || isCheckingAuth) {
     return <SplashScreen onFinish={() => {}} />;
