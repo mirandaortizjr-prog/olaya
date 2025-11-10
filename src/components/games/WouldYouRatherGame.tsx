@@ -45,7 +45,7 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
   const { toast } = useToast();
   const { progress } = useCoupleProgress(coupleId);
   
-  const [gameMode, setGameMode] = useState<"menu" | "customize" | "play-answer" | "play-guess" | "waiting" | "compare" | "results">("menu");
+  const [gameMode, setGameMode] = useState<"menu" | "customize" | "play-answer" | "play-guess" | "waiting" | "compare">("menu");
   const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
   const [newQuestion, setNewQuestion] = useState({ question: "", optionA: "", optionB: "" });
   const [includeSpicy, setIncludeSpicy] = useState(true);
@@ -356,14 +356,32 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
 
         <div className="flex-1 overflow-auto p-4">
           <div className="max-w-md mx-auto space-y-4">
-            <Card className="p-6">
-              <h3 className="font-semibold mb-3">How to Play</h3>
-              <ul className="text-sm text-muted-foreground space-y-2">
-                <li>• Choose between two options for 10 questions</li>
-                <li>• See how many choices match your partner</li>
-                <li>• Add custom questions or use our curated ones</li>
-                <li>• Higher levels unlock spicier questions 🌶️</li>
-              </ul>
+            
+            {/* How to Play Instructions */}
+            <Card className="p-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+              <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                <Trophy className="h-5 w-5 text-primary" />
+                How to Play & Win
+              </h3>
+              <ol className="space-y-3 text-sm">
+                <li className="flex gap-3">
+                  <span className="font-bold text-primary min-w-[24px]">1.</span>
+                  <span><strong>Answer for yourself:</strong> Choose what YOU would rather do for each question.</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="font-bold text-primary min-w-[24px]">2.</span>
+                  <span><strong>Predict your partner:</strong> Guess what your PARTNER would choose for each question.</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="font-bold text-primary min-w-[24px]">3.</span>
+                  <span><strong>Win together:</strong> Get 7+ correct predictions to earn 5 coins! See your compatibility score and who knows who better.</span>
+                </li>
+              </ol>
+              <div className="mt-4 p-3 bg-background/60 rounded-lg">
+                <p className="text-xs text-muted-foreground">
+                  💡 <strong>Tip:</strong> Both partners must complete the game to see results. You'll be notified when your partner finishes!
+                </p>
+              </div>
             </Card>
 
             {customQuestions.length > 0 && (
