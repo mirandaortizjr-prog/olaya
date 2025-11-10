@@ -35,27 +35,36 @@ interface GameQuestion {
   isCustom?: boolean;
 }
 
+interface AnswerData {
+  myChoice: 'A' | 'B';
+  myGuess: 'A' | 'B';
+}
+
 export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: GameProps) => {
   const { t, language } = useLanguage();
   const { toast } = useToast();
   const { progress } = useCoupleProgress(coupleId);
   
-  const [gameMode, setGameMode] = useState<"menu" | "customize" | "play" | "waiting" | "compare" | "results">("menu");
+  const [gameMode, setGameMode] = useState<"menu" | "customize" | "play-answer" | "play-guess" | "waiting" | "compare" | "results">("menu");
   const [customQuestions, setCustomQuestions] = useState<CustomQuestion[]>([]);
   const [newQuestion, setNewQuestion] = useState({ question: "", optionA: "", optionB: "" });
   const [includeSpicy, setIncludeSpicy] = useState(true);
   const [gameQuestions, setGameQuestions] = useState<GameQuestion[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [myAnswers, setMyAnswers] = useState<Record<string, 'A' | 'B'>>({});
-  const [partnerAnswers, setPartnerAnswers] = useState<Record<string, 'A' | 'B'>>({});
+  const [myAnswers, setMyAnswers] = useState<Record<string, AnswerData>>({});
+  const [partnerAnswers, setPartnerAnswers] = useState<Record<string, AnswerData>>({});
   const [sessionId] = useState(() => `wyr-${Date.now()}`);
-  const [matchCount, setMatchCount] = useState(0);
+  const [predictionScore, setPredictionScore] = useState(0);
   const [partnerReady, setPartnerReady] = useState(false);
+  const [currentAnswer, setCurrentAnswer] = useState<'A' | 'B' | null>(null);
   const [comparisonData, setComparisonData] = useState<Array<{
     question: GameQuestion;
-    myAnswer: 'A' | 'B';
-    partnerAnswer: 'A' | 'B' | null;
-    isMatch: boolean;
+    myChoice: 'A' | 'B';
+    myGuess: 'A' | 'B';
+    partnerChoice: 'A' | 'B' | null;
+    partnerGuess: 'A' | 'B' | null;
+    didIGuessRight: boolean;
+    didPartnerGuessRight: boolean;
   }>>([]);
 
   useEffect(() => {
@@ -117,9 +126,13 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
       .limit(20);
 
     if (data) {
-      const answers: Record<string, 'A' | 'B'> = {};
+      const answers: Record<string, AnswerData> = {};
       data.forEach(r => {
-        answers[r.question_id] = r.answer as 'A' | 'B';
+        const meta = (r as any).metadata || {};
+        answers[r.question_id] = {
+          myChoice: r.answer as 'A' | 'B',
+          myGuess: meta.partner_guess as 'A' | 'B' || r.answer as 'A' | 'B'
+        };
       });
       setPartnerAnswers(answers);
     }
@@ -212,39 +225,68 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
     setGameQuestions(allQuestions);
     setCurrentIndex(0);
     setMyAnswers({});
-    setMatchCount(0);
-    setGameMode("play");
+    setCurrentAnswer(null);
+    setPredictionScore(0);
+    setGameMode("play-answer");
   };
 
-  const handleAnswer = async (choice: 'A' | 'B') => {
+  const handleMyAnswer = (choice: 'A' | 'B') => {
+    setCurrentAnswer(choice);
+    setGameMode("play-guess");
+  };
+
+  const handleMyGuess = async (guess: 'A' | 'B') => {
+    if (!currentAnswer) return;
+    
     const currentQuestion = gameQuestions[currentIndex];
     
-    // Save answer
+    // Save both my choice and my guess about partner
     await supabase.from('game_responses').insert({
       couple_id: coupleId,
       user_id: userId,
       game_type: 'would-you-rather',
       question_id: currentQuestion.id,
-      answer: choice,
-      session_id: sessionId
+      answer: currentAnswer,
+      session_id: sessionId,
+      metadata: { partner_guess: guess }
     });
 
-    const newAnswers = { ...myAnswers, [currentQuestion.id]: choice };
+    const newAnswers = { 
+      ...myAnswers, 
+      [currentQuestion.id]: { 
+        myChoice: currentAnswer, 
+        myGuess: guess 
+      } 
+    };
     setMyAnswers(newAnswers);
+    setCurrentAnswer(null);
 
     // Move to next question or finish
     if (currentIndex < gameQuestions.length - 1) {
-      setTimeout(() => setCurrentIndex(currentIndex + 1), 500);
+      setTimeout(() => {
+        setCurrentIndex(currentIndex + 1);
+        setGameMode("play-answer");
+      }, 500);
     } else {
+      // Calculate prediction score
+      let correctPredictions = 0;
+      Object.keys(newAnswers).forEach(questionId => {
+        const partnerData = partnerAnswers[questionId];
+        if (partnerData && newAnswers[questionId].myGuess === partnerData.myChoice) {
+          correctPredictions++;
+        }
+      });
+      setPredictionScore(correctPredictions);
+
       // Save completion
       await supabase.from('game_completions').insert({
         couple_id: coupleId,
         user_id: userId,
         game_type: 'would-you-rather',
         session_id: sessionId,
-        score: 0,
+        score: correctPredictions,
         total_questions: gameQuestions.length,
-        coins_earned: 0
+        coins_earned: correctPredictions >= 7 ? 5 : 0
       });
 
       // Notify partner
@@ -254,7 +296,7 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
             body: {
               userId: partnerId,
               title: 'Would You Rather? 💭',
-              body: 'Your partner completed their Would You Rather - Compare your answers now!',
+              body: `Your partner completed their Would You Rather - They guessed ${correctPredictions}/${gameQuestions.length} correctly!`,
               data: { type: 'game_ready', gameType: 'would-you-rather' }
             }
           });
@@ -273,20 +315,25 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
     }
   };
 
-  const prepareComparison = (answers: Record<string, 'A' | 'B'>) => {
+  const prepareComparison = (answers: Record<string, AnswerData>) => {
     const comparison = gameQuestions.map(q => {
-      const myAns = answers[q.id];
-      const partnerAns = partnerAnswers[q.id];
+      const myData = answers[q.id];
+      const partnerData = partnerAnswers[q.id];
       return {
         question: q,
-        myAnswer: myAns,
-        partnerAnswer: partnerAns || null,
-        isMatch: myAns === partnerAns
+        myChoice: myData.myChoice,
+        myGuess: myData.myGuess,
+        partnerChoice: partnerData?.myChoice || null,
+        partnerGuess: partnerData?.myGuess || null,
+        didIGuessRight: myData.myGuess === partnerData?.myChoice,
+        didPartnerGuessRight: partnerData?.myGuess === myData.myChoice
       };
     });
 
-    const matches = comparison.filter(c => c.isMatch).length;
-    setMatchCount(matches);
+    const myCorrectGuesses = comparison.filter(c => c.didIGuessRight).length;
+    const partnerCorrectGuesses = comparison.filter(c => c.didPartnerGuessRight).length;
+    
+    setPredictionScore(myCorrectGuesses);
     setComparisonData(comparison);
     setGameMode("compare");
   };
@@ -449,7 +496,7 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
     );
   }
 
-  if (gameMode === "play") {
+  if (gameMode === "play-answer") {
     const currentQuestion = gameQuestions[currentIndex];
     const progressPercent = ((currentIndex + 1) / gameQuestions.length) * 100;
 
@@ -464,8 +511,8 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
               <span className="text-sm font-medium">
                 Question {currentIndex + 1} of {gameQuestions.length}
               </span>
-              <span className="text-sm text-muted-foreground">
-                {matchCount} {matchCount === 1 ? 'match' : 'matches'}
+              <span className="text-sm text-primary font-semibold">
+                Step 1: Your Choice
               </span>
             </div>
             <Progress value={progressPercent} className="h-2" />
@@ -475,13 +522,14 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="max-w-md w-full space-y-6">
             <Card className="p-8 text-center">
-              <h3 className="text-2xl font-bold mb-8">{currentQuestion.question}</h3>
+              <h3 className="text-2xl font-bold mb-2">{currentQuestion.question}</h3>
+              <p className="text-sm text-muted-foreground mb-6">What would YOU rather?</p>
               
               <div className="space-y-4">
                 <Button
                   className="w-full h-auto py-6 text-lg"
                   variant="outline"
-                  onClick={() => handleAnswer('A')}
+                  onClick={() => handleMyAnswer('A')}
                 >
                   <span className="mr-3 font-bold text-primary">A</span>
                   {currentQuestion.optionA}
@@ -490,7 +538,66 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
                 <Button
                   className="w-full h-auto py-6 text-lg"
                   variant="outline"
-                  onClick={() => handleAnswer('B')}
+                  onClick={() => handleMyAnswer('B')}
+                >
+                  <span className="mr-3 font-bold text-primary">B</span>
+                  {currentQuestion.optionB}
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (gameMode === "play-guess") {
+    const currentQuestion = gameQuestions[currentIndex];
+    const progressPercent = ((currentIndex + 1) / gameQuestions.length) * 100;
+
+    return (
+      <div className="fixed inset-0 bg-background z-50 flex flex-col">
+        <div className="flex items-center gap-2 p-4 border-b">
+          <Button variant="ghost" size="icon" onClick={() => {
+            setCurrentAnswer(null);
+            setGameMode("play-answer");
+          }}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium">
+                Question {currentIndex + 1} of {gameQuestions.length}
+              </span>
+              <span className="text-sm text-accent font-semibold">
+                Step 2: Partner Prediction
+              </span>
+            </div>
+            <Progress value={progressPercent} className="h-2" />
+          </div>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="max-w-md w-full space-y-6">
+            <Card className="p-8 text-center">
+              <Badge className="mb-4" variant="secondary">You chose: {currentAnswer === 'A' ? 'A' : 'B'}</Badge>
+              <h3 className="text-2xl font-bold mb-2">{currentQuestion.question}</h3>
+              <p className="text-sm text-muted-foreground mb-6">What would YOUR PARTNER rather?</p>
+              
+              <div className="space-y-4">
+                <Button
+                  className="w-full h-auto py-6 text-lg"
+                  variant="outline"
+                  onClick={() => handleMyGuess('A')}
+                >
+                  <span className="mr-3 font-bold text-primary">A</span>
+                  {currentQuestion.optionA}
+                </Button>
+                
+                <Button
+                  className="w-full h-auto py-6 text-lg"
+                  variant="outline"
+                  onClick={() => handleMyGuess('B')}
                 >
                   <span className="mr-3 font-bold text-primary">B</span>
                   {currentQuestion.optionB}
@@ -540,7 +647,9 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
   }
 
   if (gameMode === "compare") {
-    const matchPercent = Math.round((matchCount / gameQuestions.length) * 100);
+    const myCorrectGuesses = comparisonData.filter(c => c.didIGuessRight).length;
+    const partnerCorrectGuesses = comparisonData.filter(c => c.didPartnerGuessRight).length;
+    const matchingChoices = comparisonData.filter(c => c.myChoice === c.partnerChoice).length;
     
     return (
       <div className="fixed inset-0 bg-background z-50 flex flex-col">
@@ -548,51 +657,88 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
           <Button variant="ghost" size="icon" onClick={() => setGameMode("menu")}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h2 className="text-xl font-semibold">Answer Comparison</h2>
+          <h2 className="text-xl font-semibold">Results & Comparison</h2>
         </div>
 
         <div className="flex-1 overflow-auto p-4">
           <div className="max-w-2xl mx-auto space-y-4">
-            {/* Summary Card */}
-            <Card className="p-6 bg-gradient-to-br from-primary/10 to-accent/10">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-2xl font-bold">{matchCount}/{gameQuestions.length}</h3>
-                  <p className="text-muted-foreground">Matching Answers</p>
+            {/* Score Summary Cards */}
+            <div className="grid grid-cols-2 gap-3">
+              <Card className="p-4 bg-gradient-to-br from-primary/10 to-accent/10">
+                <div className="text-center">
+                  <Trophy className="w-8 h-8 mx-auto text-primary mb-2" />
+                  <div className="text-3xl font-bold text-primary">{myCorrectGuesses}</div>
+                  <p className="text-xs text-muted-foreground">Your Predictions</p>
+                  <p className="text-xs font-medium mt-1">{Math.round((myCorrectGuesses/gameQuestions.length)*100)}% Accuracy</p>
                 </div>
-                <div className="text-right">
-                  <div className="text-3xl font-bold text-primary">{matchPercent}%</div>
-                  <p className="text-sm text-muted-foreground">Compatibility</p>
+              </Card>
+              
+              <Card className="p-4 bg-gradient-to-br from-accent/10 to-secondary/10">
+                <div className="text-center">
+                  <Trophy className="w-8 h-8 mx-auto text-accent mb-2" />
+                  <div className="text-3xl font-bold text-accent">{partnerCorrectGuesses}</div>
+                  <p className="text-xs text-muted-foreground">Partner's Predictions</p>
+                  <p className="text-xs font-medium mt-1">{Math.round((partnerCorrectGuesses/gameQuestions.length)*100)}% Accuracy</p>
                 </div>
+              </Card>
+            </div>
+
+            <Card className="p-4 bg-gradient-to-r from-pink-500/10 to-purple-500/10">
+              <div className="text-center">
+                <h3 className="text-lg font-bold mb-1">Matching Choices</h3>
+                <div className="text-4xl font-bold text-primary mb-1">{matchingChoices}/{gameQuestions.length}</div>
+                <p className="text-sm text-muted-foreground">You both chose the same {matchingChoices} times</p>
               </div>
-              <Progress value={matchPercent} className="h-3" />
             </Card>
 
-            {/* Question by Question Comparison */}
+            {/* Question by Question Breakdown */}
             <div className="space-y-3">
               <h3 className="font-semibold text-lg">Question Breakdown</h3>
               {comparisonData.map((item, idx) => (
-                <Card key={idx} className={`p-4 ${item.isMatch ? 'border-green-500/50 bg-green-500/5' : 'border-orange-500/50 bg-orange-500/5'}`}>
-                  <div className="flex items-start gap-3 mb-3">
-                    {item.isMatch ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                    ) : (
-                      <XCircle className="w-5 h-5 text-orange-500 mt-0.5 flex-shrink-0" />
-                    )}
-                    <div className="flex-1">
-                      <p className="font-medium mb-2">{item.question.question}</p>
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div className={`p-2 rounded ${item.myAnswer === 'A' ? 'bg-primary/20 border border-primary' : 'bg-muted'}`}>
-                          <p className="text-xs text-muted-foreground mb-1">A: {item.question.optionA}</p>
-                          {item.myAnswer === 'A' && <Badge variant="secondary" className="text-xs">You</Badge>}
-                          {item.partnerAnswer === 'A' && <Badge variant="outline" className="text-xs ml-1">Partner</Badge>}
-                        </div>
-                        <div className={`p-2 rounded ${item.myAnswer === 'B' ? 'bg-primary/20 border border-primary' : 'bg-muted'}`}>
-                          <p className="text-xs text-muted-foreground mb-1">B: {item.question.optionB}</p>
-                          {item.myAnswer === 'B' && <Badge variant="secondary" className="text-xs">You</Badge>}
-                          {item.partnerAnswer === 'B' && <Badge variant="outline" className="text-xs ml-1">Partner</Badge>}
-                        </div>
+                <Card key={idx} className="p-4">
+                  <div className="mb-3">
+                    <p className="font-medium mb-2">{item.question.question}</p>
+                  </div>
+                  
+                  {/* Choices Grid */}
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold text-muted-foreground">You Chose:</p>
+                      <div className={`p-2 rounded text-sm ${item.myChoice === 'A' ? 'bg-primary/20 border border-primary' : 'bg-muted'}`}>
+                        <p className="font-medium">{item.myChoice}: {item.myChoice === 'A' ? item.question.optionA : item.question.optionB}</p>
                       </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold text-muted-foreground">Partner Chose:</p>
+                      <div className={`p-2 rounded text-sm ${item.partnerChoice === 'A' ? 'bg-accent/20 border border-accent' : 'bg-muted'}`}>
+                        <p className="font-medium">{item.partnerChoice}: {item.partnerChoice === 'A' ? item.question.optionA : item.question.optionB}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Predictions */}
+                  <div className="grid grid-cols-2 gap-3 pt-3 border-t">
+                    <div className="flex items-center gap-2">
+                      {item.didIGuessRight ? (
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <XCircle className="w-4 h-4 text-orange-500" />
+                      )}
+                      <p className="text-xs">
+                        You guessed: <strong>{item.myGuess}</strong>
+                      </p>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      {item.didPartnerGuessRight ? (
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <XCircle className="w-4 h-4 text-orange-500" />
+                      )}
+                      <p className="text-xs">
+                        Partner guessed: <strong>{item.partnerGuess}</strong>
+                      </p>
                     </div>
                   </div>
                 </Card>
@@ -613,8 +759,10 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
     );
   }
 
-  if (gameMode === "results") {
-    const matchPercent = Math.round((matchCount / gameQuestions.length) * 100);
+  if (gameMode === "compare") {
+    const myCorrectGuesses = comparisonData.filter(c => c.didIGuessRight).length;
+    const partnerCorrectGuesses = comparisonData.filter(c => c.didPartnerGuessRight).length;
+    const matchingChoices = comparisonData.filter(c => c.myChoice === c.partnerChoice).length;
     
     return (
       <div className="fixed inset-0 bg-background z-50 flex flex-col">
@@ -622,24 +770,72 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
           <Button variant="ghost" size="icon" onClick={() => setGameMode("menu")}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h2 className="text-xl font-semibold">Results</h2>
+          <h2 className="text-xl font-semibold">Results & Comparison</h2>
         </div>
 
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="max-w-md w-full text-center space-y-6">
-            <Trophy className="w-20 h-20 mx-auto text-yellow-500" />
-            
-            <div>
-              <h3 className="text-4xl font-bold mb-2">{matchCount}/{gameQuestions.length}</h3>
-              <p className="text-xl text-muted-foreground">Matching Choices</p>
+        <div className="flex-1 overflow-auto p-4">
+          <div className="max-w-2xl mx-auto space-y-4">
+            {/* Score Summary Cards */}
+            <div className="grid grid-cols-2 gap-3">
+              <Card className="p-4 bg-gradient-to-br from-primary/10 to-accent/10">
+                <div className="text-center">
+                  <Trophy className="w-8 h-8 mx-auto text-primary mb-2" />
+                  <div className="text-3xl font-bold text-primary">{myCorrectGuesses}</div>
+                  <p className="text-xs text-muted-foreground">Your Predictions</p>
+                  <p className="text-xs font-medium mt-1">{Math.round((myCorrectGuesses/gameQuestions.length)*100)}% Accuracy</p>
+                </div>
+              </Card>
+              
+              <Card className="p-4 bg-gradient-to-br from-accent/10 to-secondary/10">
+                <div className="text-center">
+                  <Trophy className="w-8 h-8 mx-auto text-accent mb-2" />
+                  <div className="text-3xl font-bold text-accent">{partnerCorrectGuesses}</div>
+                  <p className="text-xs text-muted-foreground">Partner's Predictions</p>
+                  <p className="text-xs font-medium mt-1">{Math.round((partnerCorrectGuesses/gameQuestions.length)*100)}% Accuracy</p>
+                </div>
+              </Card>
             </div>
 
-            <Card className="p-6">
-              <div className="text-6xl font-bold text-primary mb-2">{matchPercent}%</div>
-              <p className="text-muted-foreground">Compatibility</p>
+            <Card className="p-4 bg-gradient-to-r from-pink-500/10 to-purple-500/10">
+              <div className="text-center">
+                <h3 className="text-lg font-bold mb-1">Matching Choices</h3>
+                <div className="text-4xl font-bold text-primary mb-1">{matchingChoices}/{gameQuestions.length}</div>
+                <p className="text-sm text-muted-foreground">You both chose the same {matchingChoices} times</p>
+              </div>
             </Card>
 
+            {/* Question by Question Comparison */}
             <div className="space-y-3">
+              <h3 className="font-semibold text-lg">Question Breakdown</h3>
+              {comparisonData.map((item, idx) => (
+                <Card key={idx} className={`p-4 ${item.myChoice === item.partnerChoice ? 'border-green-500/50 bg-green-500/5' : 'border-muted'}`}>
+                  <div className="flex items-start gap-3 mb-3">
+                    {item.myChoice === item.partnerChoice ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                    ) : (
+                      <div className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                    )}
+                    <div className="flex-1">
+                      <p className="font-medium mb-2">{item.question.question}</p>
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div className={`p-2 rounded ${item.myChoice === 'A' ? 'bg-primary/20 border border-primary' : 'bg-muted'}`}>
+                          <p className="text-xs text-muted-foreground mb-1">A: {item.question.optionA}</p>
+                          {item.myChoice === 'A' && <Badge variant="secondary" className="text-xs">You</Badge>}
+                          {item.partnerChoice === 'A' && <Badge variant="outline" className="text-xs ml-1">Partner</Badge>}
+                        </div>
+                        <div className={`p-2 rounded ${item.myChoice === 'B' ? 'bg-primary/20 border border-primary' : 'bg-muted'}`}>
+                          <p className="text-xs text-muted-foreground mb-1">B: {item.question.optionB}</p>
+                          {item.myChoice === 'B' && <Badge variant="secondary" className="text-xs">You</Badge>}
+                          {item.partnerChoice === 'B' && <Badge variant="outline" className="text-xs ml-1">Partner</Badge>}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+
+            <div className="space-y-3 pt-4">
               <Button className="w-full" onClick={startGame}>
                 Play Again
               </Button>
