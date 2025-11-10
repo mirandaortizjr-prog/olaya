@@ -217,7 +217,8 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
       .eq('id', pendingInvitation.id);
 
     setPendingInvitation(null);
-    setGameMode("answer");
+    await loadPartnerAnswers();
+    setGameMode("guess");
   };
 
   const saveAnswer = async () => {
