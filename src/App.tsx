@@ -12,7 +12,6 @@ import { GlobalMusicPlayer } from "@/components/GlobalMusicPlayer";
 import { SplashScreen } from "@/components/SplashScreen";
 import { supabase } from "@/integrations/supabase/client";
 import { initializeNativePushListeners, subscribeToPushNotifications } from "@/utils/notifications";
-import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import DailyNotesPage from "./pages/DailyNotesPage";
@@ -97,7 +96,7 @@ const AppRouter = () => {
       <GlobalVideoPlayer />
       <GlobalMusicPlayer />
       <Routes>
-        <Route path="/" element={<Index />} />
+        <Route path="/" element={<PremiumPlansPage />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/flirts" element={<FlirtsPage />} />
