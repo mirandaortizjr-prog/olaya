@@ -24,6 +24,7 @@
     "@capacitor/preferences": "^7.0.2",
     "@capacitor/push-notifications": "^7.0.3",
     "@capacitor/share": "^7.0.2",
+    "@capgo/capacitor-purchases": "^5.0.8",
     "@emoji-mart/data": "^1.2.1",
     "@emoji-mart/react": "^1.1.1",
     "@hookform/resolvers": "^3.10.0",

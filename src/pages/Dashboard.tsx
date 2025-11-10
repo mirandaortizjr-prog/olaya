@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import giftBoxAnniversary from "@/assets/gift-box-anniversary.png";
 import shopIcon from "@/assets/shop-icon.png";
 import { useNavigate } from "react-router-dom";
@@ -117,6 +117,78 @@ const Dashboard = () => {
     coupleId: coupleData?.coupleId,
     userId: user?.id,
   });
+
+  // Memoized fetch functions to avoid unnecessary re-renders
+  const fetchPendingGames = useCallback(async () => {
+    if (!user?.id) return;
+
+    const { data: membership } = await supabase
+      .from('couple_members')
+      .select('couple_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (!membership) return;
+
+    const { data: sessions, error } = await supabase
+      .from('game_sessions')
+      .select('id, initiated_by, game_type, partner_id, status')
+      .eq('couple_id', membership.couple_id)
+      .eq('partner_id', user.id)
+      .eq('status', 'pending');
+
+    if (!error && sessions) {
+      setPendingGamesCount(sessions.length);
+      setPendingGameSessions(sessions);
+    }
+  }, [user?.id]);
+
+  const fetchNewFlirts = useCallback(async () => {
+    if (!user?.id) return;
+
+    const { data: membership } = await supabase
+      .from('couple_members')
+      .select('couple_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (!membership) return;
+
+    const { data, error } = await supabase
+      .from('flirts')
+      .select('id')
+      .eq('couple_id', membership.couple_id)
+      .neq('sender_id', user.id)
+      .gt('created_at', lastViewedFlirts.toISOString());
+
+    if (!error && data) {
+      setNewFlirtsCount(data.length);
+    }
+  }, [user?.id, lastViewedFlirts]);
+
+  const fetchNewVaultItems = useCallback(async () => {
+    if (!user?.id) return;
+
+    const { data: membership } = await supabase
+      .from('couple_members')
+      .select('couple_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (!membership) return;
+
+    const { data, error } = await supabase
+      .from('private_content')
+      .select('id')
+      .eq('couple_id', membership.couple_id)
+      .neq('user_id', user.id)
+      .eq('is_shared', true)
+      .gt('created_at', lastViewedVault.toISOString());
+
+    if (!error && data) {
+      setNewVaultCount(data.length);
+    }
+  }, [user?.id, lastViewedVault]);
 
   useEffect(() => {
     checkUser();
@@ -380,79 +452,7 @@ const Dashboard = () => {
     }
   };
 
-  const fetchPendingGames = async () => {
-    if (!user?.id) return;
-
-    // Get the user's couple_id first
-    const { data: membership } = await supabase
-      .from('couple_members')
-      .select('couple_id')
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    if (!membership) return;
-
-    // Count game sessions where partner initiated and user hasn't responded yet
-    const { data: sessions, error } = await supabase
-      .from('game_sessions')
-      .select('id, initiated_by, game_type, partner_id, status')
-      .eq('couple_id', membership.couple_id)
-      .eq('partner_id', user.id)
-      .eq('status', 'pending');
-
-    if (!error && sessions) {
-      setPendingGamesCount(sessions.length);
-      setPendingGameSessions(sessions);
-    }
-  };
-
-
-  const fetchNewFlirts = async () => {
-    if (!user?.id) return;
-
-    const { data: membership } = await supabase
-      .from('couple_members')
-      .select('couple_id')
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    if (!membership) return;
-
-    const { data, error } = await supabase
-      .from('flirts')
-      .select('id')
-      .eq('couple_id', membership.couple_id)
-      .neq('sender_id', user.id)
-      .gt('created_at', lastViewedFlirts.toISOString());
-
-    if (!error && data) {
-      setNewFlirtsCount(data.length);
-    }
-  };
-
-  const fetchNewVaultItems = async () => {
-    if (!user?.id) return;
-
-    const { data: membership } = await supabase
-      .from('couple_members')
-      .select('couple_id')
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    if (!membership) return;
-
-    const { data, error } = await supabase
-      .from('private_content')
-      .select('id')
-      .eq('couple_id', membership.couple_id)
-      .neq('user_id', user.id)
-      .eq('is_shared', true)
-      .gt('created_at', lastViewedVault.toISOString());
-
-    if (!error && data) {
-      setNewVaultCount(data.length);
-    }
-  };
+  // Functions now defined at top with useCallback
 
 
   const joinCouple = async () => {
