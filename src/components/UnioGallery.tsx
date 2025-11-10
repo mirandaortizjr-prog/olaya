@@ -14,6 +14,10 @@ interface Post {
   author_id: string;
   created_at: string;
   media_urls: any;
+  type: 'post' | 'desire' | 'flirt';
+  emoji?: string;
+  fulfilled?: boolean;
+  rawId?: string;
 }
 
 interface Comment {
@@ -49,6 +53,7 @@ interface PostCardProps {
   onToggleComments: (postId: string) => void;
   onCommentChange: (postId: string, value: string) => void;
   onAddComment: (postId: string) => void;
+  onMarkFulfilled?: (desireId: string) => void;
 }
 
 const PostCard = ({ 
@@ -63,8 +68,10 @@ const PostCard = ({
   onToggleReaction,
   onToggleComments,
   onCommentChange,
-  onAddComment
+  onAddComment,
+  onMarkFulfilled
 }: PostCardProps) => {
+  const isDesireOrFlirt = post.type === 'desire' || post.type === 'flirt';
   const getReactionCount = (postId: string, type: string) => {
     return reactions[postId]?.filter(r => r.reaction_type === type).length || 0;
   };
@@ -78,7 +85,11 @@ const PostCard = ({
   };
 
   return (
-    <Card className="mb-4 overflow-hidden animate-fade-in">
+    <Card className={`mb-4 overflow-hidden animate-fade-in ${
+      post.type === 'desire' && !post.fulfilled 
+        ? 'animate-pulse border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)]' 
+        : ''
+    }`}>
       <div className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div>
@@ -123,7 +134,34 @@ const PostCard = ({
 
         {post.content && <p className="mb-3">{post.content}</p>}
         
-        <div className="flex gap-2 border-t pt-3 mb-3">
+        {/* Type badge for desires and flirts */}
+        {isDesireOrFlirt && (
+          <div className="pt-2 border-t border-border/30 flex items-center justify-between mb-3">
+            <span className={`text-xs px-2 py-1 rounded-full ${
+              post.type === 'desire' 
+                ? post.fulfilled 
+                  ? 'bg-green-500/10 text-green-500' 
+                  : 'bg-red-500/10 text-red-500'
+                : 'bg-primary/10 text-primary'
+            }`}>
+              {post.type === 'desire' 
+                ? post.fulfilled ? '✅ Desire Fulfilled' : '💝 Desire' 
+                : '💕 Flirt'}
+            </span>
+            {post.type === 'desire' && !post.fulfilled && post.author_id === userId && post.rawId && onMarkFulfilled && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onMarkFulfilled(post.rawId!)}
+                className="text-xs h-7"
+              >
+                Mark Fulfilled
+              </Button>
+            )}
+          </div>
+        )}
+        
+        {!isDesireOrFlirt && <div className="flex gap-2 border-t pt-3 mb-3">
           <Button
             variant={hasReacted(post.id, 'like') ? 'default' : 'outline'}
             size="sm"
@@ -169,10 +207,10 @@ const PostCard = ({
             <MessageCircle className="w-4 h-4" />
             {comments[post.id]?.length || 0}
           </Button>
-        </div>
+        </div>}
 
-        {/* Comments section */}
-        {showComments[post.id] && (
+        {/* Comments section - Only for regular posts */}
+        {!isDesireOrFlirt && showComments[post.id] && (
           <div className="border-t pt-3 space-y-2">
             {comments[post.id]?.map((comment) => (
               <div key={comment.id} className="bg-muted p-2 rounded text-sm">
@@ -227,6 +265,8 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
     const channel = supabase
       .channel('posts-reactions-comments')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'posts', filter: `couple_id=eq.${coupleId}` }, loadPosts)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'craving_board', filter: `couple_id=eq.${coupleId}` }, loadPosts)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'flirts', filter: `couple_id=eq.${coupleId}` }, loadPosts)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'post_reactions' }, loadReactions)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'post_comments' }, loadComments)
       .subscribe();
@@ -236,14 +276,84 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
     };
   }, [coupleId]);
 
+  const desireEmojis: Record<string, string> = {
+    kiss: "💋", hug: "🤗", cuddle: "🫂", massage: "💆",
+    date: "🌹", surprise: "🎁", cook: "👨‍🍳", movie: "🎬",
+    talk: "💬", listen: "👂", compliment: "💕", attention: "👀"
+  };
+
   const loadPosts = async () => {
-    const { data } = await supabase
+    // Fetch regular posts
+    const { data: postsData } = await supabase
       .from('posts')
       .select('*')
       .eq('couple_id', coupleId)
       .order('created_at', { ascending: false });
 
-    if (data) setPosts(data);
+    // Fetch desires (cravings)
+    const { data: desiresData } = await supabase
+      .from('craving_board')
+      .select('*')
+      .eq('couple_id', coupleId)
+      .order('created_at', { ascending: false });
+
+    // Fetch flirts
+    const { data: flirtsData } = await supabase
+      .from('flirts')
+      .select('*')
+      .eq('couple_id', coupleId)
+      .order('created_at', { ascending: false });
+
+    // Combine all data
+    const allItems: Post[] = [];
+
+    // Add regular posts
+    postsData?.forEach(post => {
+      allItems.push({
+        id: post.id,
+        content: post.content,
+        created_at: post.created_at,
+        author_id: post.author_id,
+        media_urls: post.media_urls,
+        type: 'post'
+      });
+    });
+
+    // Add desires
+    desiresData?.forEach(desire => {
+      const emoji = desireEmojis[desire.craving_type] || "💝";
+      const content = desire.custom_message || desire.craving_type.replace(/_/g, ' ').charAt(0).toUpperCase() + desire.craving_type.replace(/_/g, ' ').slice(1);
+      allItems.push({
+        id: `desire-${desire.id}`,
+        rawId: desire.id,
+        content: `${emoji} ${content}`,
+        created_at: desire.created_at,
+        author_id: desire.user_id,
+        media_urls: null,
+        type: 'desire',
+        emoji,
+        fulfilled: desire.fulfilled || false
+      });
+    });
+
+    // Add flirts
+    flirtsData?.forEach(flirt => {
+      const content = flirt.flirt_type.replace(/_/g, ' ');
+      allItems.push({
+        id: `flirt-${flirt.id}`,
+        content: `💕 ${content}`,
+        created_at: flirt.created_at,
+        author_id: flirt.sender_id,
+        media_urls: null,
+        type: 'flirt',
+        emoji: '💕'
+      });
+    });
+
+    // Sort by created_at descending
+    allItems.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+    setPosts(allItems);
   };
 
   const loadReactions = async () => {
@@ -429,6 +539,21 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
     setShowComments({ ...showComments, [postId]: !showComments[postId] });
   };
 
+  const markDesireFulfilled = async (desireId: string) => {
+    const { error } = await supabase
+      .from('craving_board')
+      .update({ fulfilled: true, fulfilled_at: new Date().toISOString() })
+      .eq('id', desireId);
+
+    if (!error) {
+      loadPosts();
+      toast({
+        title: 'Success',
+        description: 'Desire marked as fulfilled',
+      });
+    }
+  };
+
   return (
     <div className="relative h-full flex flex-col unio-gallery-container">
       {/* Hidden trigger button for external access */}
@@ -545,6 +670,7 @@ export const UnioGallery = ({ coupleId, userId, userFullName, partnerFullName }:
               onToggleComments={handleToggleComments}
               onCommentChange={handleCommentChange}
               onAddComment={addComment}
+              onMarkFulfilled={markDesireFulfilled}
             />
           ))
         )}
