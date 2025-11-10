@@ -341,7 +341,7 @@ const PrivatePage = () => {
   const privateItems = [
     { id: 'photos', label: 'PHOTOS', icon: vaultPhotosIcon },
     { id: 'fantasies', label: 'FANTASIES', icon: vaultFantasiesIcon },
-    { id: 'truth-or-dare', label: 'TENDER DARES', route: '/private/truth-or-dare', icon: tenderDaresIcon },
+    { id: 'truth-or-dare', label: 'TRUTH OR\nDARE', route: '/private/truth-or-dare', icon: tenderDaresIcon },
     { id: 'videos', label: 'VIDEOS', icon: vaultVideosIcon },
     { id: 'our-journal', label: 'OUR JOURNAL', route: '/intimate-journal', icon: vaultJournalIcon },
     { id: 'sex-timeline', label: 'SEX TIMELINE', icon: vaultTimelineIcon },
