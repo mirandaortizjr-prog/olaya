@@ -16,6 +16,8 @@ interface Post {
   likes: string[];
   media_urls?: string[];
   author_name?: string;
+  type: 'post' | 'desire' | 'flirt';
+  emoji?: string;
 }
 
 interface PostsFeedProps {
@@ -36,25 +38,28 @@ export const PostsFeed = ({ coupleId, userId }: PostsFeedProps) => {
     fetchPosts();
     fetchCurrentUserName();
     
-    // Subscribe to realtime updates for posts
-    const channel = supabase
+    // Subscribe to realtime updates for posts, desires, and flirts
+    const postsChannel = supabase
       .channel('posts-changes')
       .on(
         'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'posts',
-          filter: `couple_id=eq.${coupleId}`
-        },
-        () => {
-          fetchPosts(); // Refresh posts when any change occurs
-        }
+        { event: '*', schema: 'public', table: 'posts', filter: `couple_id=eq.${coupleId}` },
+        () => fetchPosts()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'craving_board', filter: `couple_id=eq.${coupleId}` },
+        () => fetchPosts()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'flirts', filter: `couple_id=eq.${coupleId}` },
+        () => fetchPosts()
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(postsChannel);
     };
   }, [coupleId, userId]);
 
@@ -70,33 +75,96 @@ export const PostsFeed = ({ coupleId, userId }: PostsFeedProps) => {
     }
   };
 
+  const desireEmojis: Record<string, string> = {
+    kiss: "💋", hug: "🤗", cuddle: "🫂", massage: "💆",
+    date: "🌹", surprise: "🎁", cook: "👨‍🍳", movie: "🎬",
+    talk: "💬", listen: "👂", compliment: "💕", attention: "👀"
+  };
+
   const fetchPosts = async () => {
-    const { data: postsData, error } = await supabase
+    // Fetch regular posts
+    const { data: postsData } = await supabase
       .from('posts')
       .select('*')
       .eq('couple_id', coupleId)
       .order('created_at', { ascending: false });
 
-    if (!error && postsData) {
-      // Fetch author names for all posts
-      const authorIds = [...new Set(postsData.map(p => p.author_id))];
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, full_name')
-        .in('id', authorIds);
+    // Fetch desires (cravings)
+    const { data: desiresData } = await supabase
+      .from('craving_board')
+      .select('*')
+      .eq('couple_id', coupleId)
+      .order('created_at', { ascending: false });
 
-      const postsWithAuthors: Post[] = postsData.map(post => ({
+    // Fetch flirts
+    const { data: flirtsData } = await supabase
+      .from('flirts')
+      .select('*')
+      .eq('couple_id', coupleId)
+      .order('created_at', { ascending: false });
+
+    // Combine all data
+    const allAuthorIds = new Set<string>();
+    postsData?.forEach(p => allAuthorIds.add(p.author_id));
+    desiresData?.forEach(d => allAuthorIds.add(d.user_id));
+    flirtsData?.forEach(f => allAuthorIds.add(f.sender_id));
+
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, full_name')
+      .in('id', Array.from(allAuthorIds));
+
+    const allItems: Post[] = [];
+
+    // Add regular posts
+    postsData?.forEach(post => {
+      allItems.push({
         id: post.id,
         content: post.content,
         created_at: post.created_at,
         author_id: post.author_id,
         likes: Array.isArray(post.likes) ? post.likes.filter((item): item is string => typeof item === 'string') : [],
         media_urls: Array.isArray(post.media_urls) ? post.media_urls.filter((item): item is string => typeof item === 'string') : [],
-        author_name: profiles?.find(p => p.id === post.author_id)?.full_name || 'Unknown'
-      }));
+        author_name: profiles?.find(p => p.id === post.author_id)?.full_name || 'Unknown',
+        type: 'post'
+      });
+    });
 
-      setPosts(postsWithAuthors);
-    }
+    // Add desires
+    desiresData?.forEach(desire => {
+      const emoji = desireEmojis[desire.craving_type] || "💝";
+      const content = desire.custom_message || desire.craving_type.replace(/_/g, ' ');
+      allItems.push({
+        id: `desire-${desire.id}`,
+        content: `${emoji} ${content}`,
+        created_at: desire.created_at,
+        author_id: desire.user_id,
+        likes: [],
+        author_name: profiles?.find(p => p.id === desire.user_id)?.full_name || 'Unknown',
+        type: 'desire',
+        emoji
+      });
+    });
+
+    // Add flirts
+    flirtsData?.forEach(flirt => {
+      const content = flirt.flirt_type.replace(/_/g, ' ');
+      allItems.push({
+        id: `flirt-${flirt.id}`,
+        content: `💕 ${content}`,
+        created_at: flirt.created_at,
+        author_id: flirt.sender_id,
+        likes: [],
+        author_name: profiles?.find(p => p.id === flirt.sender_id)?.full_name || 'Unknown',
+        type: 'flirt',
+        emoji: '💕'
+      });
+    });
+
+    // Sort by created_at descending
+    allItems.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+    setPosts(allItems);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -416,28 +484,39 @@ export const PostsFeed = ({ coupleId, userId }: PostsFeedProps) => {
                     </div>
                   )}
 
-                  {/* Post Actions */}
-                  <div className="flex items-center gap-4 pt-2 border-t border-border/30">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => toggleLike(post.id, post.likes || [])}
-                      className="gap-2 hover:bg-primary/5 transition-all"
-                    >
-                      <Heart
-                        className={`h-4 w-4 transition-all ${
-                          (post.likes || []).includes(userId) 
-                            ? 'fill-red-500 text-red-500 scale-110' 
-                            : 'text-muted-foreground'
-                        }`}
-                      />
-                      <span className={`text-xs font-medium ${
-                        (post.likes || []).includes(userId) ? 'text-red-500' : 'text-muted-foreground'
-                      }`}>
-                        {(post.likes || []).length > 0 ? (post.likes || []).length : 'Like'}
+                  {/* Post Actions - Only for regular posts */}
+                  {post.type === 'post' && (
+                    <div className="flex items-center gap-4 pt-2 border-t border-border/30">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleLike(post.id, post.likes || [])}
+                        className="gap-2 hover:bg-primary/5 transition-all"
+                      >
+                        <Heart
+                          className={`h-4 w-4 transition-all ${
+                            (post.likes || []).includes(userId) 
+                              ? 'fill-red-500 text-red-500 scale-110' 
+                              : 'text-muted-foreground'
+                          }`}
+                        />
+                        <span className={`text-xs font-medium ${
+                          (post.likes || []).includes(userId) ? 'text-red-500' : 'text-muted-foreground'
+                        }`}>
+                          {(post.likes || []).length > 0 ? (post.likes || []).length : 'Like'}
+                        </span>
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {/* Type badge for desires and flirts */}
+                  {post.type !== 'post' && (
+                    <div className="pt-2 border-t border-border/30">
+                      <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
+                        {post.type === 'desire' ? '💝 Desire' : '💕 Flirt'}
                       </span>
-                    </Button>
-                  </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
