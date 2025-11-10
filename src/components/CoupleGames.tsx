@@ -5,10 +5,8 @@ import { Gamepad2, Heart, MessageCircle, Sparkles, Calendar, TrendingUp, Zap } f
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/lib/translations";
 import { HowWellGame } from "./games/HowWellGame";
-import { MemoryLaneGame } from "./games/MemoryLaneGame";
 import { LoveLanguageGame } from "./games/LoveLanguageGame";
 import { WouldYouRatherGame } from "./games/WouldYouRatherGame";
-import { DailySyncGame } from "./games/DailySyncGame";
 import { FutureForecastGame } from "./games/FutureForecastGame";
 import { TruthOrTenderGame } from "./games/TruthOrTenderGame";
 
@@ -44,13 +42,6 @@ export const CoupleGames = ({ coupleId, userId, partnerId, onClose, pendingGameS
       color: "text-pink-500"
     },
     {
-      id: "memory-lane",
-      name: t.memoryLaneMatch,
-      description: t.memoryLaneDesc,
-      icon: MessageCircle,
-      color: "text-purple-500"
-    },
-    {
       id: "love-language",
       name: t.loveLanguageDecoder,
       description: t.loveLanguageDesc,
@@ -63,13 +54,6 @@ export const CoupleGames = ({ coupleId, userId, partnerId, onClose, pendingGameS
       description: t.wouldYouRatherDesc,
       icon: Zap,
       color: "text-blue-500"
-    },
-    {
-      id: "daily-sync",
-      name: t.dailySync,
-      description: t.dailySyncDesc,
-      icon: Calendar,
-      color: "text-green-500"
     },
     {
       id: "future-forecast",
@@ -90,17 +74,11 @@ export const CoupleGames = ({ coupleId, userId, partnerId, onClose, pendingGameS
   if (selectedGame === "how-well") {
     return <HowWellGame coupleId={coupleId} userId={userId} partnerId={partnerId} onBack={() => setSelectedGame(null)} />;
   }
-  if (selectedGame === "memory-lane") {
-    return <MemoryLaneGame coupleId={coupleId} userId={userId} partnerId={partnerId} onBack={() => setSelectedGame(null)} />;
-  }
   if (selectedGame === "love-language") {
     return <LoveLanguageGame coupleId={coupleId} userId={userId} partnerId={partnerId} onBack={() => setSelectedGame(null)} />;
   }
   if (selectedGame === "would-you-rather") {
     return <WouldYouRatherGame coupleId={coupleId} userId={userId} partnerId={partnerId} onBack={() => setSelectedGame(null)} />;
-  }
-  if (selectedGame === "daily-sync") {
-    return <DailySyncGame coupleId={coupleId} userId={userId} onBack={() => setSelectedGame(null)} />;
   }
   if (selectedGame === "future-forecast") {
     return <FutureForecastGame coupleId={coupleId} userId={userId} partnerId={partnerId} onBack={() => setSelectedGame(null)} />;
