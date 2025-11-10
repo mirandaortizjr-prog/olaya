@@ -2,15 +2,9 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { X, Check, ArrowRight, Heart, Sparkles } from "lucide-react";
+import { X, Check, Heart, Sparkles, ArrowDown, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import {
-  TooltipProvider,
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-} from "@/components/ui/tooltip";
 
 interface FTUEStep {
   id: string;
@@ -129,7 +123,8 @@ export const FirstTimeUserExperience = ({ userId, coupleId }: FirstTimeUserExper
   const [isActive, setIsActive] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
-  const [showProgress, setShowProgress] = useState(true);
+  const [showCompactView, setShowCompactView] = useState(false);
+  const [showFullGuide, setShowFullGuide] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -150,12 +145,19 @@ export const FirstTimeUserExperience = ({ userId, coupleId }: FirstTimeUserExper
 
     if (data?.ftue_completed) {
       setIsActive(false);
-      setShowProgress(false);
+      setShowCompactView(false);
+      setShowFullGuide(false);
     } else {
       setIsActive(true);
       const progress = data?.ftue_progress;
       if (Array.isArray(progress)) {
-        setCompletedSteps(progress as string[]);
+        const completedArr = progress as string[];
+        setCompletedSteps(completedArr);
+        // Find the first incomplete step
+        const firstIncomplete = FTUE_STEPS.findIndex(step => !completedArr.includes(step.id));
+        if (firstIncomplete !== -1) {
+          setCurrentStep(firstIncomplete);
+        }
       } else {
         setCompletedSteps([]);
       }
@@ -200,7 +202,8 @@ export const FirstTimeUserExperience = ({ userId, coupleId }: FirstTimeUserExper
       .eq("id", userId);
 
     setIsActive(false);
-    setShowProgress(false);
+    setShowCompactView(false);
+    setShowFullGuide(false);
     
     toast({
       title: "Setup skipped",
@@ -208,142 +211,153 @@ export const FirstTimeUserExperience = ({ userId, coupleId }: FirstTimeUserExper
     });
   };
 
+  const minimizeGuide = () => {
+    setShowFullGuide(false);
+    setShowCompactView(true);
+  };
+
   const progress = (completedSteps.length / FTUE_STEPS.length) * 100;
 
-  if (!isActive && !showProgress) return null;
+  if (!isActive) return null;
   if (!coupleId) return null;
 
   const currentStepData = FTUE_STEPS[currentStep];
 
   return (
     <>
-      {/* Progress Tracker */}
-      {showProgress && (
-        <Card className="fixed top-4 right-4 z-50 p-4 w-80 bg-card/95 backdrop-blur-sm border-primary/20 shadow-lg">
-          <div className="flex items-start justify-between mb-3">
+      {/* Compact Progress Indicator */}
+      {showCompactView && (
+        <Card 
+          className="fixed bottom-20 right-4 z-50 p-3 bg-card/95 backdrop-blur-sm border-primary/20 shadow-lg cursor-pointer hover:scale-105 transition-transform"
+          onClick={() => {
+            setShowCompactView(false);
+            setShowFullGuide(true);
+          }}
+        >
+          <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <Heart className="w-5 h-5 text-primary" />
-              <h3 className="font-semibold text-foreground">Setting Up Your Sanctuary</h3>
+              <Sparkles className="w-5 h-5 text-primary animate-pulse" />
+              <div>
+                <p className="text-sm font-semibold text-foreground">Setup Guide</p>
+                <p className="text-xs text-muted-foreground">{completedSteps.length}/{FTUE_STEPS.length} complete</p>
+              </div>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={() => setShowProgress(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </div>
-          
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>{completedSteps.length} of {FTUE_STEPS.length} complete</span>
-              <span>{Math.round(progress)}%</span>
-            </div>
-            <Progress value={progress} className="h-2" />
-          </div>
-
-          <div className="mt-4 space-y-2 max-h-60 overflow-y-auto">
-            {FTUE_STEPS.map((step, index) => {
-              const isCompleted = completedSteps.includes(step.id);
-              const isCurrent = index === currentStep;
-              
-              return (
-                <div
-                  key={step.id}
-                  className={`flex items-start gap-2 text-sm p-2 rounded-md transition-all ${
-                    isCurrent ? 'bg-primary/10 border border-primary/20' : ''
-                  }`}
-                >
-                  <div className={`flex-shrink-0 mt-0.5 ${
-                    isCompleted ? 'text-primary' : isCurrent ? 'text-primary' : 'text-muted-foreground'
-                  }`}>
-                    {isCompleted ? (
-                      <Check className="w-4 h-4" />
-                    ) : isCurrent ? (
-                      <Sparkles className="w-4 h-4" />
-                    ) : (
-                      <div className="w-4 h-4 rounded-full border-2 border-current" />
-                    )}
-                  </div>
-                  <span className={`flex-1 ${
-                    isCompleted ? 'text-muted-foreground line-through' : 
-                    isCurrent ? 'text-foreground font-medium' : 'text-muted-foreground'
-                  }`}>
-                    {step.title}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-
-          {isActive && (
-            <div className="mt-4 space-y-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                onClick={() => markStepComplete(currentStepData.id)}
-              >
-                Mark Current Step Complete
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full text-muted-foreground"
-                onClick={skipFTUE}
-              >
-                Skip Setup
-              </Button>
-            </div>
-          )}
         </Card>
       )}
 
-      {/* Current Step Tooltip */}
-      {isActive && currentStepData && (
-        <div className="fixed inset-0 z-40 pointer-events-none">
-          <div className="absolute inset-0 bg-background/60 backdrop-blur-sm pointer-events-auto" />
+      {/* Full Guide Modal */}
+      {showFullGuide && currentStepData && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={minimizeGuide}
+          />
           
-          <Card className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 p-6 max-w-md bg-card shadow-2xl border-primary/30 pointer-events-auto">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-6 h-6 text-primary" />
-                <h2 className="text-xl font-semibold text-foreground">
-                  Step {currentStep + 1} of {FTUE_STEPS.length}
-                </h2>
+          {/* Guide Card */}
+          <Card className="relative z-10 w-full max-w-md bg-card shadow-2xl border-primary/30 animate-in fade-in-0 zoom-in-95 duration-300">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 pb-4 border-b border-border/50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Heart className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">Setting Up Your Sanctuary</h2>
+                  <p className="text-sm text-muted-foreground">Step {currentStep + 1} of {FTUE_STEPS.length}</p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={minimizeGuide}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="px-6 pt-4">
+              <Progress value={progress} className="h-2" />
+              <p className="text-xs text-muted-foreground mt-2 text-right">{Math.round(progress)}% complete</p>
+            </div>
+
+            {/* Current Step Content */}
+            <div className="p-6 space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  <h3 className="text-xl font-bold text-foreground">
+                    {currentStepData.title}
+                  </h3>
+                </div>
+                <p className="text-muted-foreground leading-relaxed">
+                  {currentStepData.description}
+                </p>
+              </div>
+
+              {currentStepData.action && (
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+                  <div className="flex items-start gap-2">
+                    <ArrowDown className="w-4 h-4 text-primary mt-0.5 animate-bounce" />
+                    <p className="text-sm text-foreground">
+                      <strong className="text-primary">Next:</strong> {currentStepData.action}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Progress Checklist */}
+              <div className="space-y-2 pt-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Quick View</p>
+                <div className="space-y-1 max-h-32 overflow-y-auto">
+                  {FTUE_STEPS.slice(0, 6).map((step, index) => {
+                    const isCompleted = completedSteps.includes(step.id);
+                    const isCurrent = index === currentStep;
+                    
+                    return (
+                      <div
+                        key={step.id}
+                        className={`flex items-center gap-2 text-xs p-1.5 rounded transition-colors ${
+                          isCurrent ? 'bg-primary/10' : ''
+                        }`}
+                      >
+                        {isCompleted ? (
+                          <Check className="w-3 h-3 text-primary flex-shrink-0" />
+                        ) : (
+                          <div className="w-3 h-3 rounded-full border-2 border-current flex-shrink-0 opacity-30" />
+                        )}
+                        <span className={`${
+                          isCompleted ? 'text-muted-foreground line-through' : 
+                          isCurrent ? 'text-foreground font-medium' : 'text-muted-foreground'
+                        }`}>
+                          {step.title}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
-            <h3 className="text-2xl font-bold text-foreground mb-2">
-              {currentStepData.title}
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              {currentStepData.description}
-            </p>
-
-            {currentStepData.action && (
-              <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 mb-4">
-                <p className="text-sm text-foreground">
-                  <strong>Action:</strong> {currentStepData.action}
-                </p>
-              </div>
-            )}
-
-            <div className="flex gap-2">
+            {/* Actions */}
+            <div className="flex gap-2 p-6 pt-0">
               <Button
                 onClick={() => markStepComplete(currentStepData.id)}
                 className="flex-1"
+                size="lg"
               >
-                {currentStep === FTUE_STEPS.length - 1 ? "Complete Setup" : "Next"}
-                <ArrowRight className="w-4 h-4 ml-2" />
+                {currentStep === FTUE_STEPS.length - 1 ? "Complete Setup ✨" : "Got it!"}
               </Button>
               <Button
-                variant="outline"
+                variant="ghost"
                 onClick={skipFTUE}
+                size="lg"
               >
-                Skip All
+                Skip
               </Button>
             </div>
           </Card>
