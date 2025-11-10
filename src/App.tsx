@@ -30,6 +30,7 @@ import GiftsPage from "./pages/GiftsPage";
 import GiftCollections from "./pages/GiftCollections";
 import VisualEffectsShop from "./pages/VisualEffectsShop";
 import AccessoriesPage from "./pages/AccessoriesPage";
+import PremiumPlansPage from "./pages/PremiumPlansPage";
 import usePullToRefresh from "@/hooks/usePullToRefresh";
 
 const queryClient = new QueryClient();
@@ -113,6 +114,7 @@ const AppRouter = () => {
         <Route path="/gift-collections" element={<GiftCollections />} />
         <Route path="/shop/visual-effects" element={<VisualEffectsShop />} />
         <Route path="/shop/accessories" element={<AccessoriesPage />} />
+        <Route path="/premium-plans" element={<PremiumPlansPage />} />
         <Route path="/404" element={<NotFound />} />
         <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>
