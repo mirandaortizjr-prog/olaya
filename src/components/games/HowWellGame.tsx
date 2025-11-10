@@ -421,12 +421,12 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
               <div className="flex items-start gap-3 mb-4">
                 <Info className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold mb-2">How to Play</h3>
+                  <h3 className="font-semibold mb-2">{t('howToPlay')}</h3>
                   <ul className="text-sm text-muted-foreground space-y-2">
-                    <li>• <strong>Answer Mode:</strong> Answer 10 questions about yourself</li>
-                    <li>• <strong>Guess Mode:</strong> Try to guess your partner's answers</li>
-                    <li>• <strong>Perfect Score:</strong> If both partners score 10/10, you each earn 10 coins!</li>
-                    <li>• <strong>Daily Limit:</strong> Play once per day (max 70 coins/week)</li>
+                    <li>• <strong>{t('answerMode')}</strong> {t('answerModeDesc')}</li>
+                    <li>• <strong>{t('guessMode')}</strong> {t('guessModeDesc')}</li>
+                    <li>• <strong>{t('perfectScore')}</strong> {t('perfectScoreDesc')}</li>
+                    <li>• <strong>{t('dailyLimit')}</strong> {t('dailyLimitDesc')}</li>
                   </ul>
                 </div>
               </div>
@@ -437,20 +437,20 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <Coins className="w-5 h-5 text-yellow-500" />
-                  <span className="font-semibold">Weekly Progress</span>
+                  <span className="font-semibold">{t('weeklyProgress')}</span>
                 </div>
-                <span className="text-sm text-muted-foreground">{weeklyCoins}/70 coins</span>
+                <span className="text-sm text-muted-foreground">{weeklyCoins}/70 {t('shopTogetherCoins').toLowerCase()}</span>
               </div>
               <Progress value={(weeklyCoins / 70) * 100} className="h-2" />
               {!canPlayToday && (
-                <p className="text-xs text-muted-foreground mt-2">Come back tomorrow to play again!</p>
+                <p className="text-xs text-muted-foreground mt-2">{t('comeBackTomorrow')}</p>
               )}
             </Card>
 
             <Card className="p-6 text-center">
               <h3 className="text-lg font-semibold mb-2">{t('chooseYourRole')}</h3>
               <p className="text-sm text-muted-foreground mb-6">
-                Select whether you want to answer or guess
+                {t('selectRoleDesc')}
               </p>
               <div className="space-y-3">
                 <Button 

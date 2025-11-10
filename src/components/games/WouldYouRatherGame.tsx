@@ -413,7 +413,7 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
               </div>
               {progress.currentLevel < 10 && includeSpicy && (
                 <p className="text-xs text-muted-foreground">
-                  Spicy questions unlock at level 10+
+                  {t('spicyQuestionsUnlock')}
                 </p>
               )}
             </Card>
@@ -453,39 +453,39 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
               <h3 className="font-semibold mb-4">Add New Question</h3>
               <div className="space-y-4">
                 <div>
-                  <Label>Question</Label>
+                  <Label>{t('wyrQuestionText')}</Label>
                   <Input
-                    placeholder="Would you rather..."
+                    placeholder={t('wyrQuestionPlaceholder')}
                     value={newQuestion.question}
                     onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })}
                   />
                 </div>
                 <div>
-                  <Label>Option A</Label>
+                  <Label>{t('wyrOptionA')}</Label>
                   <Input
-                    placeholder="First option"
+                    placeholder={t('wyrOptionAPlaceholder')}
                     value={newQuestion.optionA}
                     onChange={(e) => setNewQuestion({ ...newQuestion, optionA: e.target.value })}
                   />
                 </div>
                 <div>
-                  <Label>Option B</Label>
+                  <Label>{t('wyrOptionB')}</Label>
                   <Input
-                    placeholder="Second option"
+                    placeholder={t('wyrOptionBPlaceholder')}
                     value={newQuestion.optionB}
                     onChange={(e) => setNewQuestion({ ...newQuestion, optionB: e.target.value })}
                   />
                 </div>
                 <Button className="w-full" onClick={addCustomQuestion}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Question
+                  {t('wyrAddQuestion')}
                 </Button>
               </div>
             </Card>
 
             {customQuestions.length > 0 && (
               <div className="space-y-3">
-                <h3 className="font-semibold">Your Questions ({customQuestions.length})</h3>
+                <h3 className="font-semibold">{t('yourQuestions')} ({customQuestions.length})</h3>
                 {customQuestions.map((q) => (
                   <Card key={q.id} className="p-4">
                     <div className="flex items-start justify-between gap-3">
@@ -527,10 +527,10 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
           <div className="flex-1">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">
-                Question {currentIndex + 1} of {gameQuestions.length}
+                {language === 'es' ? `Pregunta ${currentIndex + 1} de ${gameQuestions.length}` : `Question ${currentIndex + 1} of ${gameQuestions.length}`}
               </span>
               <span className="text-sm text-primary font-semibold">
-                Step 1: Your Choice
+                {t('wyrAnswerForYourself')}
               </span>
             </div>
             <Progress value={progressPercent} className="h-2" />
@@ -541,7 +541,7 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
           <div className="max-w-md w-full space-y-6">
             <Card className="p-8 text-center">
               <h3 className="text-2xl font-bold mb-2">{currentQuestion.question}</h3>
-              <p className="text-sm text-muted-foreground mb-6">What would YOU rather?</p>
+              <p className="text-sm text-muted-foreground mb-6">{t('wyrWhatWouldYouChoose')}</p>
               
               <div className="space-y-4">
                 <Button
@@ -585,10 +585,10 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
           <div className="flex-1">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">
-                Question {currentIndex + 1} of {gameQuestions.length}
+                {language === 'es' ? `Pregunta ${currentIndex + 1} de ${gameQuestions.length}` : `Question ${currentIndex + 1} of ${gameQuestions.length}`}
               </span>
               <span className="text-sm text-accent font-semibold">
-                Step 2: Partner Prediction
+                {t('wyrPredictPartner')}
               </span>
             </div>
             <Progress value={progressPercent} className="h-2" />
@@ -598,9 +598,11 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="max-w-md w-full space-y-6">
             <Card className="p-8 text-center">
-              <Badge className="mb-4" variant="secondary">You chose: {currentAnswer === 'A' ? 'A' : 'B'}</Badge>
+              <Badge className="mb-4" variant="secondary">
+                {language === 'es' ? `Elegiste: ${currentAnswer}` : `You chose: ${currentAnswer}`}
+              </Badge>
               <h3 className="text-2xl font-bold mb-2">{currentQuestion.question}</h3>
-              <p className="text-sm text-muted-foreground mb-6">What would YOUR PARTNER rather?</p>
+              <p className="text-sm text-muted-foreground mb-6">{t('wyrWhatWouldTheyChoose')}</p>
               
               <div className="space-y-4">
                 <Button
@@ -635,7 +637,7 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
           <Button variant="ghost" size="icon" onClick={() => setGameMode("menu")}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h2 className="text-xl font-semibold">Waiting for Partner</h2>
+          <h2 className="text-xl font-semibold">{t('wyrWaitingForPartner')}</h2>
         </div>
 
         <div className="flex-1 flex items-center justify-center p-4">
@@ -643,20 +645,20 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
             <Clock className="w-20 h-20 mx-auto text-primary animate-pulse" />
             
             <div>
-              <h3 className="text-2xl font-bold mb-2">Answers Submitted! ✓</h3>
+              <h3 className="text-2xl font-bold mb-2">{language === 'es' ? '¡Respuestas Enviadas! ✓' : 'Answers Submitted! ✓'}</h3>
               <p className="text-muted-foreground">
-                Waiting for your partner to complete their Would You Rather...
+                {t('wyrPartnerStillPlaying')}
               </p>
             </div>
 
             <Card className="p-6">
               <p className="text-sm text-muted-foreground">
-                We'll notify you when they're done and you can compare your answers together!
+                {t('wyrYouFinishedFirst')}
               </p>
             </Card>
 
             <Button className="w-full" variant="outline" onClick={() => setGameMode("menu")}>
-              Back to Menu
+              {t('wyrBackToMenu')}
             </Button>
           </div>
         </div>
@@ -675,7 +677,7 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
           <Button variant="ghost" size="icon" onClick={() => setGameMode("menu")}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h2 className="text-xl font-semibold">Results & Comparison</h2>
+          <h2 className="text-xl font-semibold">{t('wyrCompareAnswers')}</h2>
         </div>
 
         <div className="flex-1 overflow-auto p-4">
@@ -686,8 +688,8 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
                 <div className="text-center">
                   <Trophy className="w-8 h-8 mx-auto text-primary mb-2" />
                   <div className="text-3xl font-bold text-primary">{myCorrectGuesses}</div>
-                  <p className="text-xs text-muted-foreground">Your Predictions</p>
-                  <p className="text-xs font-medium mt-1">{Math.round((myCorrectGuesses/gameQuestions.length)*100)}% Accuracy</p>
+                  <p className="text-xs text-muted-foreground">{t('wyrYourPredictionScore')}</p>
+                  <p className="text-xs font-medium mt-1">{Math.round((myCorrectGuesses/gameQuestions.length)*100)}% {t('accuracy')}</p>
                 </div>
               </Card>
               
@@ -695,23 +697,23 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
                 <div className="text-center">
                   <Trophy className="w-8 h-8 mx-auto text-accent mb-2" />
                   <div className="text-3xl font-bold text-accent">{partnerCorrectGuesses}</div>
-                  <p className="text-xs text-muted-foreground">Partner's Predictions</p>
-                  <p className="text-xs font-medium mt-1">{Math.round((partnerCorrectGuesses/gameQuestions.length)*100)}% Accuracy</p>
+                  <p className="text-xs text-muted-foreground">{t('wyrPredictionScores')}</p>
+                  <p className="text-xs font-medium mt-1">{Math.round((partnerCorrectGuesses/gameQuestions.length)*100)}% {t('accuracy')}</p>
                 </div>
               </Card>
             </div>
 
             <Card className="p-4 bg-gradient-to-r from-pink-500/10 to-purple-500/10">
               <div className="text-center">
-                <h3 className="text-lg font-bold mb-1">Matching Choices</h3>
+                <h3 className="text-lg font-bold mb-1">{t('wyrMatchingChoices')}</h3>
                 <div className="text-4xl font-bold text-primary mb-1">{matchingChoices}/{gameQuestions.length}</div>
-                <p className="text-sm text-muted-foreground">You both chose the same {matchingChoices} times</p>
+                <p className="text-sm text-muted-foreground">{t('wyrYouBothChose')}</p>
               </div>
             </Card>
 
             {/* Question by Question Breakdown */}
             <div className="space-y-3">
-              <h3 className="font-semibold text-lg">Question Breakdown</h3>
+              <h3 className="font-semibold text-lg">{t('wyrQuestionBreakdown')}</h3>
               {comparisonData.map((item, idx) => (
                 <Card key={idx} className="p-4">
                   <div className="mb-3">
@@ -743,21 +745,21 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
                       ) : (
                         <XCircle className="w-4 h-4 text-orange-500" />
                       )}
-                      <p className="text-xs">
-                        You guessed: <strong>{item.myGuess}</strong>
-                      </p>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      {item.didPartnerGuessRight ? (
-                        <CheckCircle2 className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <XCircle className="w-4 h-4 text-orange-500" />
-                      )}
-                      <p className="text-xs">
-                        Partner guessed: <strong>{item.partnerGuess}</strong>
-                      </p>
-                    </div>
+                       <p className="text-xs">
+                         {t('wyrYouGuessed')}: <strong>{item.myGuess}</strong>
+                       </p>
+                     </div>
+                     
+                     <div className="flex items-center gap-2">
+                       {item.didPartnerGuessRight ? (
+                         <CheckCircle2 className="w-4 h-4 text-green-500" />
+                       ) : (
+                         <XCircle className="w-4 h-4 text-orange-500" />
+                       )}
+                       <p className="text-xs">
+                         {t('wyrTheyGuessed')}: <strong>{item.partnerGuess}</strong>
+                       </p>
+                     </div>
                   </div>
                 </Card>
               ))}
@@ -765,10 +767,10 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
 
             <div className="space-y-3 pt-4">
               <Button className="w-full" onClick={startGame}>
-                Play Again
+                {t('playAgain')}
               </Button>
               <Button className="w-full" variant="outline" onClick={() => setGameMode("menu")}>
-                Back to Menu
+                {t('wyrBackToMenu')}
               </Button>
             </div>
           </div>
