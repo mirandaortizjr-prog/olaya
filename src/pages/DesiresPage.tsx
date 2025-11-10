@@ -6,7 +6,9 @@ import { ArrowLeft, Send, Settings } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import DesireCustomization from "@/components/DesireCustomization";
+import usePullToRefresh from "@/hooks/usePullToRefresh";
 
 const DESIRES_CATEGORIES = {
   emotional: {
@@ -120,6 +122,9 @@ export default function DesiresPage() {
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const [preferences, setPreferences] = useState<any>(null);
   const [displayedDesires, setDisplayedDesires] = useState(DESIRES_CATEGORIES);
+
+  // Disable pull-to-refresh on this page
+  usePullToRefresh({ enabled: false });
 
   useEffect(() => {
     checkUser();
@@ -259,7 +264,7 @@ export default function DesiresPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-rose-500/10 via-background to-background">
+    <div className="min-h-screen bg-gradient-to-b from-rose-500/10 via-background to-background pb-8">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -285,95 +290,103 @@ export default function DesiresPage() {
       <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="grid md:grid-cols-2 gap-6">
           {/* Emotional & Relational */}
-          <Card className="p-6 bg-gradient-to-br from-pink-500/10 to-rose-500/10">
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+          <Card className="p-6 bg-gradient-to-br from-pink-500/10 to-rose-500/10 flex flex-col max-h-[70vh]">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2 flex-shrink-0">
               <span className="text-2xl">{displayedDesires.emotional.icon}</span>
               {language === 'es' ? displayedDesires.emotional.titleEs : displayedDesires.emotional.titleEn}
             </h2>
-            <div className="space-y-1">
-              {displayedDesires.emotional.items.map((item) => (
-                <Button
-                  key={item.key}
-                  variant="ghost"
-                  className="w-full justify-start text-sm h-auto py-2 hover:bg-pink-500/20"
-                  onClick={() => sendDesire(item.key, language === 'es' ? item.labelEs : item.labelEn)}
-                  disabled={sending === item.key}
-                >
-                  <span className="mr-2">-</span>
-                  {language === 'es' ? item.labelEs : item.labelEn}
-                  {sending === item.key && <Send className="ml-auto w-4 h-4 animate-pulse" />}
-                </Button>
-              ))}
-            </div>
+            <ScrollArea className="flex-1">
+              <div className="space-y-1 pr-4">
+                {displayedDesires.emotional.items.map((item) => (
+                  <Button
+                    key={item.key}
+                    variant="ghost"
+                    className="w-full justify-start text-sm h-auto py-2 hover:bg-pink-500/20"
+                    onClick={() => sendDesire(item.key, language === 'es' ? item.labelEs : item.labelEn)}
+                    disabled={sending === item.key}
+                  >
+                    <span className="mr-2">-</span>
+                    {language === 'es' ? item.labelEs : item.labelEn}
+                    {sending === item.key && <Send className="ml-auto w-4 h-4 animate-pulse" />}
+                  </Button>
+                ))}
+              </div>
+            </ScrollArea>
           </Card>
 
           {/* Sensory & Physical */}
-          <Card className="p-6 bg-gradient-to-br from-red-500/10 to-orange-500/10">
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+          <Card className="p-6 bg-gradient-to-br from-red-500/10 to-orange-500/10 flex flex-col max-h-[70vh]">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2 flex-shrink-0">
               <span className="text-2xl">{displayedDesires.sensory.icon}</span>
               {language === 'es' ? displayedDesires.sensory.titleEs : displayedDesires.sensory.titleEn}
             </h2>
-            <div className="space-y-1">
-              {displayedDesires.sensory.items.map((item) => (
-                <Button
-                  key={item.key}
-                  variant="ghost"
-                  className="w-full justify-start text-sm h-auto py-2 hover:bg-red-500/20"
-                  onClick={() => sendDesire(item.key, language === 'es' ? item.labelEs : item.labelEn)}
-                  disabled={sending === item.key}
-                >
-                  <span className="mr-2">-</span>
-                  {language === 'es' ? item.labelEs : item.labelEn}
-                  {sending === item.key && <Send className="ml-auto w-4 h-4 animate-pulse" />}
-                </Button>
-              ))}
-            </div>
+            <ScrollArea className="flex-1">
+              <div className="space-y-1 pr-4">
+                {displayedDesires.sensory.items.map((item) => (
+                  <Button
+                    key={item.key}
+                    variant="ghost"
+                    className="w-full justify-start text-sm h-auto py-2 hover:bg-red-500/20"
+                    onClick={() => sendDesire(item.key, language === 'es' ? item.labelEs : item.labelEn)}
+                    disabled={sending === item.key}
+                  >
+                    <span className="mr-2">-</span>
+                    {language === 'es' ? item.labelEs : item.labelEn}
+                    {sending === item.key && <Send className="ml-auto w-4 h-4 animate-pulse" />}
+                  </Button>
+                ))}
+              </div>
+            </ScrollArea>
           </Card>
 
           {/* Comfort & Care */}
-          <Card className="p-6 bg-gradient-to-br from-blue-500/10 to-cyan-500/10">
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+          <Card className="p-6 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 flex flex-col max-h-[70vh]">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2 flex-shrink-0">
               <span className="text-2xl">{displayedDesires.comfort.icon}</span>
               {language === 'es' ? displayedDesires.comfort.titleEs : displayedDesires.comfort.titleEn}
             </h2>
-            <div className="space-y-1">
-              {displayedDesires.comfort.items.map((item) => (
-                <Button
-                  key={item.key}
-                  variant="ghost"
-                  className="w-full justify-start text-sm h-auto py-2 hover:bg-blue-500/20"
-                  onClick={() => sendDesire(item.key, language === 'es' ? item.labelEs : item.labelEn)}
-                  disabled={sending === item.key}
-                >
-                  <span className="mr-2">-</span>
-                  {language === 'es' ? item.labelEs : item.labelEn}
-                  {sending === item.key && <Send className="ml-auto w-4 h-4 animate-pulse" />}
-                </Button>
-              ))}
-            </div>
+            <ScrollArea className="flex-1">
+              <div className="space-y-1 pr-4">
+                {displayedDesires.comfort.items.map((item) => (
+                  <Button
+                    key={item.key}
+                    variant="ghost"
+                    className="w-full justify-start text-sm h-auto py-2 hover:bg-blue-500/20"
+                    onClick={() => sendDesire(item.key, language === 'es' ? item.labelEs : item.labelEn)}
+                    disabled={sending === item.key}
+                  >
+                    <span className="mr-2">-</span>
+                    {language === 'es' ? item.labelEs : item.labelEn}
+                    {sending === item.key && <Send className="ml-auto w-4 h-4 animate-pulse" />}
+                  </Button>
+                ))}
+              </div>
+            </ScrollArea>
           </Card>
 
           {/* Playful & Mischievous */}
-          <Card className="p-6 bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10">
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+          <Card className="p-6 bg-gradient-to-br from-purple-500/10 to-fuchsia-500/10 flex flex-col max-h-[70vh]">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2 flex-shrink-0">
               <span className="text-2xl">{displayedDesires.playful.icon}</span>
               {language === 'es' ? displayedDesires.playful.titleEs : displayedDesires.playful.titleEn}
             </h2>
-            <div className="space-y-1">
-              {displayedDesires.playful.items.map((item) => (
-                <Button
-                  key={item.key}
-                  variant="ghost"
-                  className="w-full justify-start text-sm h-auto py-2 hover:bg-purple-500/20"
-                  onClick={() => sendDesire(item.key, language === 'es' ? item.labelEs : item.labelEn)}
-                  disabled={sending === item.key}
-                >
-                  <span className="mr-2">-</span>
-                  {language === 'es' ? item.labelEs : item.labelEn}
-                  {sending === item.key && <Send className="ml-auto w-4 h-4 animate-pulse" />}
-                </Button>
-              ))}
-            </div>
+            <ScrollArea className="flex-1">
+              <div className="space-y-1 pr-4">
+                {displayedDesires.playful.items.map((item) => (
+                  <Button
+                    key={item.key}
+                    variant="ghost"
+                    className="w-full justify-start text-sm h-auto py-2 hover:bg-purple-500/20"
+                    onClick={() => sendDesire(item.key, language === 'es' ? item.labelEs : item.labelEn)}
+                    disabled={sending === item.key}
+                  >
+                    <span className="mr-2">-</span>
+                    {language === 'es' ? item.labelEs : item.labelEn}
+                    {sending === item.key && <Send className="ml-auto w-4 h-4 animate-pulse" />}
+                  </Button>
+                ))}
+              </div>
+            </ScrollArea>
           </Card>
         </div>
       </div>
