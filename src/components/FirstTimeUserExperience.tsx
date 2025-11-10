@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { X, Check, Heart, Sparkles, ArrowDown, ChevronRight } from "lucide-react";
+import { X, Check, Heart, Sparkles, ArrowDown, ChevronRight, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -13,6 +14,8 @@ interface FTUEStep {
   targetSelector: string;
   position: "top" | "bottom" | "left" | "right";
   action?: string;
+  navigationPath?: string;
+  scrollToSelector?: string;
 }
 
 const FTUE_STEPS: FTUEStep[] = [
@@ -22,7 +25,9 @@ const FTUE_STEPS: FTUEStep[] = [
     description: "Give your shared space a name that feels like home.",
     targetSelector: "[data-ftue='couple-name']",
     position: "bottom",
-    action: "Open settings and set your Nest Name"
+    action: "Set your Nest Name",
+    navigationPath: "/dashboard",
+    scrollToSelector: "[data-ftue='couple-name']"
   },
   {
     id: "shared-photo",
@@ -30,7 +35,9 @@ const FTUE_STEPS: FTUEStep[] = [
     description: "Upload a picture that captures your connection.",
     targetSelector: "[data-ftue='shared-photo']",
     position: "bottom",
-    action: "Upload your couple photo"
+    action: "Upload your couple photo",
+    navigationPath: "/dashboard",
+    scrollToSelector: "[data-ftue='shared-photo']"
   },
   {
     id: "anniversary",
@@ -38,7 +45,9 @@ const FTUE_STEPS: FTUEStep[] = [
     description: "Mark the day your hearts found each other.",
     targetSelector: "[data-ftue='anniversary']",
     position: "bottom",
-    action: "Set your anniversary date"
+    action: "Set your anniversary date",
+    navigationPath: "/dashboard",
+    scrollToSelector: "[data-ftue='anniversary']"
   },
   {
     id: "couple-songs",
@@ -46,7 +55,9 @@ const FTUE_STEPS: FTUEStep[] = [
     description: "Choose songs that soundtrack your love story.",
     targetSelector: "[data-ftue='songs']",
     position: "bottom",
-    action: "Add your first song"
+    action: "Add your first song",
+    navigationPath: "/dashboard",
+    scrollToSelector: "[data-ftue='songs']"
   },
   {
     id: "slideshow",
@@ -54,7 +65,9 @@ const FTUE_STEPS: FTUEStep[] = [
     description: "Upload up to 5 photos that tell your story.",
     targetSelector: "[data-ftue='slideshow']",
     position: "bottom",
-    action: "Upload slideshow photos"
+    action: "Upload slideshow photos",
+    navigationPath: "/dashboard",
+    scrollToSelector: "[data-ftue='slideshow']"
   },
   {
     id: "page-title",
@@ -62,7 +75,9 @@ const FTUE_STEPS: FTUEStep[] = [
     description: "What should we call this beautiful space?",
     targetSelector: "[data-ftue='page-title']",
     position: "bottom",
-    action: "Set your page title"
+    action: "Set your page title",
+    navigationPath: "/dashboard",
+    scrollToSelector: "[data-ftue='page-title']"
   },
   {
     id: "skin-gradient",
@@ -70,7 +85,8 @@ const FTUE_STEPS: FTUEStep[] = [
     description: "Choose colors that feel like your relationship.",
     targetSelector: "[data-ftue='skin']",
     position: "bottom",
-    action: "Choose your visual style"
+    action: "Choose your visual style",
+    navigationPath: "/shop"
   },
   {
     id: "theme",
@@ -78,7 +94,9 @@ const FTUE_STEPS: FTUEStep[] = [
     description: "Personalize your colors, language, and brightness.",
     targetSelector: "[data-ftue='theme']",
     position: "bottom",
-    action: "Customize theme preferences"
+    action: "Customize theme preferences",
+    navigationPath: "/dashboard",
+    scrollToSelector: "[data-ftue='theme']"
   },
   {
     id: "mood-status",
@@ -86,7 +104,8 @@ const FTUE_STEPS: FTUEStep[] = [
     description: "Let your partner know what's in your heart.",
     targetSelector: "[data-ftue='mood']",
     position: "top",
-    action: "Share your current mood"
+    action: "Share your current mood",
+    navigationPath: "/mood-customization"
   },
   {
     id: "desires",
@@ -94,7 +113,8 @@ const FTUE_STEPS: FTUEStep[] = [
     description: "Express what would make you feel loved today.",
     targetSelector: "[data-ftue='desires']",
     position: "top",
-    action: "Select from desires menu"
+    action: "Select from desires menu",
+    navigationPath: "/desires"
   },
   {
     id: "first-flirt",
@@ -102,7 +122,8 @@ const FTUE_STEPS: FTUEStep[] = [
     description: "Start with a flirt—playful, tender, just for them.",
     targetSelector: "[data-ftue='flirt']",
     position: "top",
-    action: "Send your first flirt"
+    action: "Send your first flirt",
+    navigationPath: "/flirts"
   },
   {
     id: "first-journal",
@@ -110,7 +131,9 @@ const FTUE_STEPS: FTUEStep[] = [
     description: "Write your first entry together—memories start here.",
     targetSelector: "[data-ftue='journal']",
     position: "top",
-    action: "Write your first journal entry"
+    action: "Write your first journal entry",
+    navigationPath: "/dashboard",
+    scrollToSelector: "[data-ftue='journal']"
   }
 ];
 
@@ -125,6 +148,7 @@ export const FirstTimeUserExperience = ({ userId, coupleId }: FirstTimeUserExper
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
   const [showCompactView, setShowCompactView] = useState(false);
   const [showFullGuide, setShowFullGuide] = useState(true);
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -216,6 +240,31 @@ export const FirstTimeUserExperience = ({ userId, coupleId }: FirstTimeUserExper
     setShowCompactView(true);
   };
 
+  const handleActionClick = (step: FTUEStep) => {
+    // Minimize the guide first
+    minimizeGuide();
+    
+    // Navigate to the specified path
+    if (step.navigationPath) {
+      navigate(step.navigationPath);
+      
+      // If there's a scroll target, scroll to it after navigation
+      if (step.scrollToSelector) {
+        setTimeout(() => {
+          const element = document.querySelector(step.scrollToSelector!);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Add a subtle highlight effect
+            element.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+            setTimeout(() => {
+              element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
+            }, 3000);
+          }
+        }, 300);
+      }
+    }
+  };
+
   const progress = (completedSteps.length / FTUE_STEPS.length) * 100;
 
   if (!isActive) return null;
@@ -300,14 +349,19 @@ export const FirstTimeUserExperience = ({ userId, coupleId }: FirstTimeUserExper
               </div>
 
               {currentStepData.action && (
-                <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
-                  <div className="flex items-start gap-2">
-                    <ArrowDown className="w-4 h-4 text-primary mt-0.5 animate-bounce" />
-                    <p className="text-sm text-foreground">
-                      <strong className="text-primary">Next:</strong> {currentStepData.action}
-                    </p>
+                <Button
+                  variant="outline"
+                  className="w-full justify-between border-primary/20 bg-primary/5 hover:bg-primary/10 transition-all"
+                  onClick={() => handleActionClick(currentStepData)}
+                >
+                  <div className="flex items-center gap-2">
+                    <ArrowDown className="w-4 h-4 text-primary animate-bounce" />
+                    <span className="text-sm font-medium">
+                      {currentStepData.action}
+                    </span>
                   </div>
-                </div>
+                  <ExternalLink className="w-4 h-4 text-primary" />
+                </Button>
               )}
 
               {/* Progress Checklist */}
