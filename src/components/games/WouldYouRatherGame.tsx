@@ -64,7 +64,7 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
       .order('created_at', { ascending: false });
 
     if (data) {
-      setCustomQuestions(data.map(q => ({
+      setCustomQuestions(data.map((q: any) => ({
         id: q.id,
         question: q.question,
         optionA: q.option_a || '',
@@ -118,14 +118,16 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
       return;
     }
 
-    setCustomQuestions([...customQuestions, {
-      id: data.id,
-      question: data.question,
-      optionA: data.option_a || '',
-      optionB: data.option_b || ''
-    }]);
-    setNewQuestion({ question: "", optionA: "", optionB: "" });
-    toast({ title: "Custom question added!" });
+    if (data) {
+      setCustomQuestions([...customQuestions, {
+        id: data.id,
+        question: (data as any).question,
+        optionA: (data as any).option_a || '',
+        optionB: (data as any).option_b || ''
+      }]);
+      setNewQuestion({ question: "", optionA: "", optionB: "" });
+      toast({ title: "Custom question added!" });
+    }
   };
 
   const deleteCustomQuestion = async (id: string) => {

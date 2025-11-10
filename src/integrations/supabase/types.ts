@@ -384,6 +384,47 @@ export type Database = {
           },
         ]
       }
+      custom_game_questions: {
+        Row: {
+          couple_id: string
+          created_at: string
+          created_by: string
+          game_type: string
+          id: string
+          option_a: string | null
+          option_b: string | null
+          question: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          created_by: string
+          game_type: string
+          id?: string
+          option_a?: string | null
+          option_b?: string | null
+          question: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          created_by?: string
+          game_type?: string
+          id?: string
+          option_a?: string | null
+          option_b?: string | null
+          question?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_game_questions_couple_id_fkey"
+            columns: ["couple_id"]
+            isOneToOne: false
+            referencedRelation: "couples"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_notes: {
         Row: {
           content: string
