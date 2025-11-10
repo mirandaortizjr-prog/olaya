@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import usePullToRefresh from "@/hooks/usePullToRefresh";
 import flowerBouquet1 from "@/assets/gifts/flower-bouquet-1.png";
 import flowerBouquet2 from "@/assets/gifts/flower-bouquet-2.png";
 import flowerBouquet3 from "@/assets/gifts/flower-bouquet-3.png";
@@ -52,6 +53,9 @@ const GiftCollections = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [senderName, setSenderName] = useState<string>("Your Partner");
+
+  // Disable pull-to-refresh on Gift Collections page
+  usePullToRefresh({ enabled: false });
 
   useEffect(() => {
     const getUser = async () => {
@@ -105,7 +109,7 @@ const GiftCollections = () => {
 
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20 overscroll-contain">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center justify-between p-4">

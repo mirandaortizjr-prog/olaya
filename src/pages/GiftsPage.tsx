@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/lib/translations";
 import togetherCoinsIcon from "@/assets/together-coins-icon.png";
+import usePullToRefresh from "@/hooks/usePullToRefresh";
 import flowerBouquet1 from "@/assets/gifts/flower-bouquet-1.png";
 import flowerBouquet2 from "@/assets/gifts/flower-bouquet-2.png";
 import flowerBouquet3 from "@/assets/gifts/flower-bouquet-3.png";
@@ -170,6 +171,9 @@ const GiftsPage = () => {
   const [stuffedCollectionComplete, setStuffedCollectionComplete] = useState(false);
   const [petsCollectionComplete, setPetsCollectionComplete] = useState(false);
   const { coins } = useTogetherCoins(user?.id);
+
+  // Disable pull-to-refresh on Gifts page
+  usePullToRefresh({ enabled: false });
 
   useEffect(() => {
     const getUser = async () => {
@@ -380,7 +384,7 @@ const GiftsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20 overscroll-contain">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center justify-between p-4">

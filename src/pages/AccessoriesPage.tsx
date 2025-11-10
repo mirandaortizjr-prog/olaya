@@ -12,6 +12,7 @@ import { useSkins } from "@/hooks/useSkins";
 import { GradientSelector } from "@/components/GradientSelector";
 import { GRADIENTS, GradientId } from "@/lib/gradientData";
 import { SKINS, SkinId } from "@/lib/skinData";
+import usePullToRefresh from "@/hooks/usePullToRefresh";
 
 interface ShopItem {
   id: string;
@@ -27,6 +28,9 @@ export default function AccessoriesPage() {
   const { t } = useLanguage();
   const [userId, setUserId] = useState<string>("");
   const [coupleId, setCoupleId] = useState<string | null>(null);
+
+  // Disable pull-to-refresh on Accessories page
+  usePullToRefresh({ enabled: false });
   const [shopItems, setShopItems] = useState<ShopItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
@@ -218,7 +222,7 @@ export default function AccessoriesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20 overscroll-contain">
       <div className="sticky top-0 z-10 bg-card border-b border-border">
         <div className="container max-w-2xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
