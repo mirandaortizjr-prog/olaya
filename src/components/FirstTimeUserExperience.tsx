@@ -244,24 +244,26 @@ export const FirstTimeUserExperience = ({ userId, coupleId }: FirstTimeUserExper
     // Minimize the guide first
     minimizeGuide();
     
-    // Navigate to the specified path
+    // Navigate to the specified path if needed
     if (step.navigationPath) {
-      navigate(step.navigationPath);
-      
-      // If there's a scroll target, scroll to it after navigation
-      if (step.scrollToSelector) {
-        setTimeout(() => {
-          const element = document.querySelector(step.scrollToSelector!);
-          if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            // Add a subtle highlight effect
-            element.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
-            setTimeout(() => {
-              element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2');
-            }, 3000);
-          }
-        }, 300);
-      }
+      // Small delay to ensure smooth transition
+      setTimeout(() => {
+        navigate(step.navigationPath!);
+        
+        // If there's a scroll target, scroll to it after navigation
+        if (step.scrollToSelector) {
+          setTimeout(() => {
+            const element = document.querySelector(step.scrollToSelector!);
+            if (element) {
+              element.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center',
+                inline: 'nearest'
+              });
+            }
+          }, 500);
+        }
+      }, 100);
     }
   };
 
@@ -298,19 +300,24 @@ export const FirstTimeUserExperience = ({ userId, coupleId }: FirstTimeUserExper
 
       {/* Full Guide Modal */}
       {showFullGuide && currentStepData && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          {/* Backdrop */}
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 pointer-events-auto">
+          {/* Backdrop - only minimize on direct backdrop click, not child clicks */}
           <div 
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={minimizeGuide}
+            onClick={(e) => {
+              // Only minimize if clicking directly on backdrop
+              if (e.target === e.currentTarget) {
+                minimizeGuide();
+              }
+            }}
           />
           
           {/* Guide Card */}
-          <Card className="relative z-10 w-full max-w-md bg-card shadow-2xl border-primary/30 animate-in fade-in-0 zoom-in-95 duration-300">
+          <Card className="relative z-10 w-full max-w-md bg-card shadow-2xl border-primary/30 animate-in fade-in-0 zoom-in-95 duration-300 pointer-events-auto max-h-[90vh] overflow-y-auto">
             {/* Header */}
-            <div className="flex items-center justify-between p-6 pb-4 border-b border-border/50">
+            <div className="flex items-center justify-between p-6 pb-4 border-b border-border/50 sticky top-0 bg-card z-10">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <Heart className="w-5 h-5 text-primary" />
                 </div>
                 <div>
@@ -321,7 +328,7 @@ export const FirstTimeUserExperience = ({ userId, coupleId }: FirstTimeUserExper
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="h-8 w-8 flex-shrink-0"
                 onClick={minimizeGuide}
               >
                 <X className="h-4 w-4" />
@@ -338,7 +345,7 @@ export const FirstTimeUserExperience = ({ userId, coupleId }: FirstTimeUserExper
             <div className="p-6 space-y-4">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-primary" />
+                  <Sparkles className="w-5 h-5 text-primary flex-shrink-0" />
                   <h3 className="text-xl font-bold text-foreground">
                     {currentStepData.title}
                   </h3>
@@ -398,7 +405,7 @@ export const FirstTimeUserExperience = ({ userId, coupleId }: FirstTimeUserExper
             </div>
 
             {/* Actions */}
-            <div className="flex gap-2 p-6 pt-0">
+            <div className="flex gap-2 p-6 pt-0 sticky bottom-0 bg-card">
               <Button
                 onClick={() => markStepComplete(currentStepData.id)}
                 className="flex-1"
