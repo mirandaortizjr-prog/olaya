@@ -404,7 +404,7 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
 
             <Card className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <Label htmlFor="spicy">Include Spicy Questions 🌶️</Label>
+                <Label htmlFor="spicy">{t('wyrIncludeSpicy')}</Label>
                 <Switch
                   id="spicy"
                   checked={includeSpicy}
@@ -420,7 +420,7 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
 
             <div className="space-y-3">
               <Button className="w-full" onClick={startGame}>
-                Start Playing (10 Questions)
+                {t('wyrStartGame')}
               </Button>
               <Button 
                 className="w-full" 
@@ -428,7 +428,7 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
                 onClick={() => setGameMode("customize")}
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Add Custom Questions
+                {t('wyrCustomizeQuestions')}
               </Button>
             </div>
           </div>
