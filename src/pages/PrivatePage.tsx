@@ -16,7 +16,7 @@ import { PrivateVideoGallery } from "@/components/PrivateVideoGallery";
 import { TruthOrDareGame } from "@/components/games/TruthOrDareGame";
 import vaultPhotosIcon from "@/assets/vault-photos.png";
 import vaultFantasiesIcon from "@/assets/vault-fantasies.png";
-import tenderDaresIcon from "@/assets/tender-dares.png";
+import vaultLanguagesIcon from "@/assets/vault-languages.png";
 import vaultVideosIcon from "@/assets/vault-videos.png";
 import vaultJournalIcon from "@/assets/vault-journal.png";
 import vaultTimelineIcon from "@/assets/vault-timeline.png";
@@ -341,7 +341,7 @@ const PrivatePage = () => {
   const privateItems = [
     { id: 'photos', label: 'PHOTOS', icon: vaultPhotosIcon },
     { id: 'fantasies', label: 'FANTASIES', icon: vaultFantasiesIcon },
-    { id: 'truth-or-dare', label: 'TRUTH OR\nDARE', route: '/private/truth-or-dare', icon: tenderDaresIcon },
+    { id: 'truth-or-dare', label: 'TRUTH OR\nDARE', route: '/private/truth-or-dare', icon: vaultLanguagesIcon },
     { id: 'videos', label: 'VIDEOS', icon: vaultVideosIcon },
     { id: 'our-journal', label: 'OUR JOURNAL', route: '/intimate-journal', icon: vaultJournalIcon },
     { id: 'sex-timeline', label: 'SEX TIMELINE', icon: vaultTimelineIcon },
