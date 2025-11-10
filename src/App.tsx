@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { VideoPlayerProvider } from "@/contexts/VideoPlayerContext";
 import { MusicPlayerProvider } from "@/contexts/MusicPlayerContext";
@@ -38,6 +38,7 @@ const AppRouter = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const checkAuthAndRedirect = async () => {
@@ -51,9 +52,9 @@ const AppRouter = () => {
           
           // Check if user has couple profile
           const { data: coupleData } = await supabase
-            .from('couples')
-            .select('id')
-            .or(`user1_id.eq.${user.id},user2_id.eq.${user.id}`)
+            .from('couple_members')
+            .select('couple_id')
+            .eq('user_id', user.id)
             .single();
           
           if (coupleData) {
@@ -95,7 +96,7 @@ const AppRouter = () => {
     <>
       <GlobalVideoPlayer />
       <GlobalMusicPlayer />
-      <Routes>
+      <Routes key={location.pathname}>
         <Route path="/" element={<PremiumPlansPage />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/dashboard" element={<Dashboard />} />

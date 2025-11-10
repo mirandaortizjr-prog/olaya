@@ -5,6 +5,34 @@
   text-align: center;
 }
 
+/* Page transition animations */
+.page-transition {
+  animation: fadeIn 300ms ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Smooth rendering */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent layout shift during loading */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
