@@ -87,13 +87,21 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
       .eq('game_type', 'how-well')
       .eq('user_id', partnerId)
       .order('created_at', { ascending: false })
-      .limit(questions.length);
+      .limit(10);
 
-    if (data) {
+    if (data && data.length > 0) {
+      // Extract the actual questions from the question_id field and regenerate the questions array
+      const partnerQuestions: string[] = [];
       const answers: Record<string, string> = {};
+      
       data.forEach(r => {
+        // question_id is stored as the actual question text
+        partnerQuestions.push(r.question_id);
         answers[r.question_id] = r.answer;
       });
+      
+      // Update questions array to match partner's questions
+      setQuestions(partnerQuestions.reverse()); // reverse because we fetched in desc order
       setPartnerAnswers(answers);
     }
   };
@@ -151,6 +159,7 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
       if (partnerGuesses && partnerGuesses.length > 0) {
         let correctCount = 0;
         mySessionAnswers.forEach(myAnswer => {
+          // Match by actual question text (stored in question_id)
           const partnerGuess = partnerGuesses.find(pg => 
             pg.question_id === myAnswer.question_id
           );
@@ -217,6 +226,7 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
       .eq('id', pendingInvitation.id);
 
     setPendingInvitation(null);
+    setCurrentQuestionIndex(0);
     await loadPartnerAnswers();
     setGameMode("guess");
   };
@@ -224,11 +234,12 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
   const saveAnswer = async () => {
     if (!myAnswer.trim()) return;
 
+    // Store the actual question text as the question_id to ensure matching works
     await supabase.from('game_responses').insert({
       couple_id: coupleId,
       user_id: userId,
       game_type: 'how-well',
-      question_id: `q${currentQuestionIndex}`,
+      question_id: questions[currentQuestionIndex],
       answer: myAnswer.trim(),
       session_id: sessionId
     });
@@ -259,7 +270,9 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
   const checkGuess = async () => {
     if (!myGuess.trim() || !partnerId) return;
 
-    const partnerAnswer = partnerAnswers[`q${currentQuestionIndex}`];
+    // Use the actual question text to find the partner's answer
+    const currentQuestion = questions[currentQuestionIndex];
+    const partnerAnswer = partnerAnswers[currentQuestion];
     const isCorrect = myGuess.trim().toLowerCase() === partnerAnswer?.toLowerCase();
 
     if (isCorrect) {
@@ -337,6 +350,7 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
 
   useEffect(() => {
     if (gameMode === "guess") {
+      setCurrentQuestionIndex(0);
       loadPartnerAnswers();
     }
   }, [gameMode]);
