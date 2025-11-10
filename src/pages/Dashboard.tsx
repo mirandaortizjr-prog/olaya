@@ -47,6 +47,7 @@ import { useMusicPlayer } from "@/contexts/MusicPlayerContext";
 import FloatingGifts from "@/components/FloatingGifts";
 import { ActiveGiftDisplay } from "@/components/ActiveGiftDisplay";
 import { giftImages } from "@/lib/giftImages";
+import { FirstTimeUserExperience } from "@/components/FirstTimeUserExperience";
 
 interface CoupleData {
   coupleId: string;
@@ -641,11 +642,13 @@ const Dashboard = () => {
           <Button variant="ghost" onClick={() => setActiveView("home")}>Close</Button>
         </div>
         <div className="p-4 max-w-2xl mx-auto space-y-6">
-          <SharedJournalForm
-            coupleId={coupleData.coupleId}
-            userId={user!.id}
-            onSuccess={() => setJournalRefreshTrigger(prev => prev + 1)}
-          />
+          <div data-ftue="journal">
+            <SharedJournalForm
+              coupleId={coupleData.coupleId}
+              userId={user!.id}
+              onSuccess={() => setJournalRefreshTrigger(prev => prev + 1)}
+            />
+          </div>
           <SharedJournalList
             coupleId={coupleData.coupleId}
             refreshTrigger={journalRefreshTrigger}
@@ -767,6 +770,10 @@ const Dashboard = () => {
 
   // Main Home View - exact match to reference images
   return (
+    <>
+      {/* First Time User Experience */}
+      <FirstTimeUserExperience userId={user!.id} coupleId={coupleData.coupleId} />
+      
     <div className="min-h-screen pb-20" style={{ background: 'var(--hero-bg)' }}>
       {/* Hero Section - Dark gradient background with full background images */}
       <div style={{ background: 'var(--hero-bg)' }} className="relative overflow-hidden">
@@ -777,7 +784,7 @@ const Dashboard = () => {
           </div>
           
           {/* Title centered at top */}
-          <div className="absolute top-4 left-0 right-0 z-20 flex items-center justify-center px-4">
+          <div className="absolute top-4 left-0 right-0 z-20 flex items-center justify-center px-4" data-ftue="couple-name">
             {editingSpaceName ? (
               <Input
                 value={spaceName}
@@ -795,7 +802,7 @@ const Dashboard = () => {
           </div>
           
           {/* Profile Picture - bottom-left corner, overlapping */}
-          <div className="absolute bottom-4 left-4 z-20">
+          <div className="absolute bottom-4 left-4 z-20" data-ftue="shared-photo">
             <CouplePictureUpload
               coupleId={coupleData.coupleId}
               currentPictureUrl={coupleData.couplePictureUrl || userProfile?.avatar_url || null}
@@ -804,7 +811,7 @@ const Dashboard = () => {
           </div>
 
           {/* Shop Icon - top-right corner */}
-          <div className="absolute top-4 right-4 z-20">
+          <div className="absolute top-4 right-4 z-20" data-ftue="skin">
             <img 
               src={shopIcon} 
               alt="Shop" 
@@ -825,11 +832,13 @@ const Dashboard = () => {
                 : 'Couple Names'}
             </h2>
             {user && coupleData.partner && (
-              <FeelingStatusSelector
-                currentStatus={partnerFeelingStatus}
-                currentCustomMessage={partnerCustomMessage}
-                userId={coupleData.partner.user_id}
-              />
+              <div data-ftue="mood">
+                <FeelingStatusSelector
+                  currentStatus={partnerFeelingStatus}
+                  currentCustomMessage={partnerCustomMessage}
+                  userId={coupleData.partner.user_id}
+                />
+              </div>
             )}
           </div>
           <div className="flex items-center justify-between">
@@ -845,7 +854,7 @@ const Dashboard = () => {
       </div>
 
       {/* Video/Music Section */}
-      <div style={{ background: 'var(--video-gradient)' }} className="py-6">
+      <div style={{ background: 'var(--video-gradient)' }} className="py-6" data-ftue="songs">
         <div className="max-w-lg mx-auto px-4">
           <MusicPlayerControls
             coupleId={coupleData.coupleId}
@@ -869,10 +878,10 @@ const Dashboard = () => {
       {/* Icon Row */}
       <div style={{ background: 'var(--icons-bg)' }} className="py-6">
         <div className="max-w-lg mx-auto px-4 flex items-center justify-center gap-12">
-          <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => navigate('/flirts')}>
+          <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => navigate('/flirts')} data-ftue="flirt">
             <Flame className="w-10 h-10 text-[hsl(200_30%_60%)]" strokeWidth={1.5} />
           </Button>
-          <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => navigate('/desires')}>
+          <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => navigate('/desires')} data-ftue="desires">
             <Heart className="w-10 h-10 text-[hsl(200_30%_60%)]" strokeWidth={1.5} />
           </Button>
           <Button variant="ghost" size="icon" className="w-12 h-12 p-0 hover:bg-white/5" onClick={() => setActiveView("locked")}>
@@ -969,8 +978,10 @@ const Dashboard = () => {
                 setCoupleData({ ...coupleData, couplePictureUrl: url });
               }}
             />
-            <BackgroundUploadManager coupleId={coupleData.coupleId} />
-            <div>
+            <div data-ftue="slideshow">
+              <BackgroundUploadManager coupleId={coupleData.coupleId} />
+            </div>
+            <div data-ftue="page-title">
               <h3 className="font-semibold mb-2">{t('nestName')}</h3>
               <Input
                 value={spaceName}
@@ -1004,7 +1015,7 @@ const Dashboard = () => {
               />
               <p className="text-xs text-muted-foreground">{t('displayNameDescription')}</p>
             </div>
-            <div>
+            <div data-ftue="anniversary">
               <h3 className="font-semibold mb-2">{t('anniversaryDate')}</h3>
               <Input
                 type="date"
@@ -1025,7 +1036,7 @@ const Dashboard = () => {
                 }}
               />
             </div>
-            <div>
+            <div data-ftue="theme">
               <h3 className="font-semibold mb-2">{t('language')}</h3>
               <LanguageSwitcher />
             </div>
@@ -1076,6 +1087,7 @@ const Dashboard = () => {
         />
       )}
     </div>
+    </>
   );
 };
 

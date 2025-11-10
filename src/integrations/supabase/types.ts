@@ -1297,6 +1297,8 @@ export type Database = {
           created_at: string
           display_name: string | null
           email: string
+          ftue_completed: boolean | null
+          ftue_progress: Json | null
           full_name: string | null
           gender: string | null
           id: string
@@ -1312,6 +1314,8 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email: string
+          ftue_completed?: boolean | null
+          ftue_progress?: Json | null
           full_name?: string | null
           gender?: string | null
           id: string
@@ -1327,6 +1331,8 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string
+          ftue_completed?: boolean | null
+          ftue_progress?: Json | null
           full_name?: string | null
           gender?: string | null
           id?: string
