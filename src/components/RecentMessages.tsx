@@ -151,7 +151,7 @@ export const RecentMessages = ({ coupleId, userId, partnerName }: RecentMessages
                   })}
                 </p>
               </div>
-              {isFromPartner && !desire.fulfilled && (
+              {!isFromPartner && !desire.fulfilled && (
                 <Button
                   size="sm"
                   variant="ghost"
@@ -164,8 +164,8 @@ export const RecentMessages = ({ coupleId, userId, partnerName }: RecentMessages
               {desire.fulfilled && (
                 <Check className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
               )}
-              {!isFromPartner && !desire.fulfilled && (
-                <Heart className="w-3 h-3 text-pink-600 flex-shrink-0" />
+              {isFromPartner && !desire.fulfilled && (
+                <Heart className="w-3 h-3 text-pink-600 flex-shrink-0 animate-pulse" />
               )}
             </div>
           );
