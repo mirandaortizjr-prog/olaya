@@ -905,7 +905,11 @@ const Dashboard = () => {
 
       {/* Daily Love Action Section */}
       <div className="py-4 px-4">
-        <DailyLoveAction userId={user!.id} partnerUserId={coupleData.partner?.user_id || null} />
+        <DailyLoveAction 
+          userId={user!.id} 
+          partnerUserId={coupleData.partner?.user_id || null}
+          onOpenGames={() => setActiveView("games")}
+        />
       </div>
 
       {/* Feed Section */}

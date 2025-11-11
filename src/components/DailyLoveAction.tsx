@@ -13,9 +13,10 @@ import { useNavigate } from 'react-router-dom';
 interface DailyLoveActionProps {
   userId: string;
   partnerUserId: string | null;
+  onOpenGames?: () => void;
 }
 
-export const DailyLoveAction = ({ userId, partnerUserId }: DailyLoveActionProps) => {
+export const DailyLoveAction = ({ userId, partnerUserId, onOpenGames }: DailyLoveActionProps) => {
   const { language } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -161,7 +162,10 @@ export const DailyLoveAction = ({ userId, partnerUserId }: DailyLoveActionProps)
                 </p>
               </div>
               <Button
-                onClick={() => navigate('/couple-games')}
+                onClick={() => {
+                  setIsOpen(false);
+                  onOpenGames?.();
+                }}
                 className="w-full"
                 variant="outline"
               >
