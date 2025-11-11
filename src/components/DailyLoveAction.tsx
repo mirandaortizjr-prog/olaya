@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Heart, CheckCircle2, X } from 'lucide-react';
+import { Heart, CheckCircle2, X, Sparkles } from 'lucide-react';
 import { getDailyAction, DailyAction } from '@/lib/loveLanguages/dailyActions';
+import { getBasicDailyAction, BasicDailyAction } from '@/lib/loveLanguages/basicDailyActions';
 import { LoveLanguageScore } from '@/lib/loveLanguages/scoring';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useSubscription } from '@/hooks/useSubscription';
+import { useNavigate } from 'react-router-dom';
 
 interface DailyLoveActionProps {
   userId: string;
@@ -15,9 +18,12 @@ interface DailyLoveActionProps {
 export const DailyLoveAction = ({ userId, partnerUserId }: DailyLoveActionProps) => {
   const { language } = useLanguage();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { isPremium, isLoading: isPremiumLoading } = useSubscription(userId);
   const [isOpen, setIsOpen] = useState(false);
   const [currentDay, setCurrentDay] = useState(1);
   const [todayAction, setTodayAction] = useState<DailyAction | null>(null);
+  const [basicAction, setBasicAction] = useState<BasicDailyAction | null>(null);
   const [isCompleted, setIsCompleted] = useState(false);
   const [partnerLanguages, setPartnerLanguages] = useState<LoveLanguageScore[] | null>(null);
 
@@ -64,11 +70,14 @@ export const DailyLoveAction = ({ userId, partnerUserId }: DailyLoveActionProps)
   };
 
   useEffect(() => {
-    if (partnerLanguages) {
+    if (isPremium && partnerLanguages) {
       const action = getDailyAction(currentDay, partnerLanguages);
       setTodayAction(action);
+    } else if (!isPremium) {
+      const action = getBasicDailyAction(currentDay);
+      setBasicAction(action);
     }
-  }, [partnerLanguages, currentDay]);
+  }, [partnerLanguages, currentDay, isPremium]);
 
   const markAsComplete = async () => {
     const today = new Date().toISOString().split('T')[0];
@@ -99,11 +108,12 @@ export const DailyLoveAction = ({ userId, partnerUserId }: DailyLoveActionProps)
     });
   };
 
-  if (!partnerUserId) {
+  if (!partnerUserId || isPremiumLoading) {
     return null;
   }
 
-  if (!todayAction) {
+  // Premium users need partner's love language data
+  if (isPremium && !todayAction) {
     return (
       <div className="w-full p-4 bg-gradient-to-r from-purple-900/50 to-pink-900/50 rounded-lg border border-border/50">
         <div className="flex flex-col items-center gap-2 text-center">
@@ -115,6 +125,11 @@ export const DailyLoveAction = ({ userId, partnerUserId }: DailyLoveActionProps)
         </div>
       </div>
     );
+  }
+
+  // Free users should always see a basic action
+  if (!isPremium && !basicAction) {
+    return null;
   }
 
   return (
@@ -143,6 +158,9 @@ export const DailyLoveAction = ({ userId, partnerUserId }: DailyLoveActionProps)
             <div className="flex items-center gap-2">
               <Heart className="w-5 h-5 text-primary" />
               <h3 className="font-semibold text-lg">Today's Love Action</h3>
+              {!isPremium && (
+                <span className="text-xs bg-muted px-2 py-1 rounded-full">Basic</span>
+              )}
             </div>
             <Button
               variant="ghost"
@@ -156,13 +174,41 @@ export const DailyLoveAction = ({ userId, partnerUserId }: DailyLoveActionProps)
 
           <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
             <p className="text-base leading-relaxed">
-              {todayAction.action[language as 'en' | 'es']}
+              {isPremium && todayAction 
+                ? todayAction.action[language as 'en' | 'es']
+                : basicAction?.action[language as 'en' | 'es']
+              }
             </p>
           </div>
 
           <div className="text-sm text-muted-foreground">
-            Day {currentDay} of 365 • {todayAction.timeRequired}
+            Day {currentDay} of 365 • {isPremium && todayAction ? todayAction.timeRequired : basicAction?.timeRequired}
           </div>
+
+          {/* Upgrade prompt for free users */}
+          {!isPremium && (
+            <div className="p-4 bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-lg border border-amber-500/20">
+              <div className="flex items-start gap-3">
+                <Sparkles className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                <div className="flex-1 space-y-2">
+                  <p className="text-sm font-medium text-foreground">
+                    Get Tailored Love Actions
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Upgrade to Premium for personalized daily actions based on your partner's unique love languages
+                  </p>
+                  <Button
+                    onClick={() => navigate('/premium-plans')}
+                    size="sm"
+                    className="w-full mt-2"
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Upgrade to Premium
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {!isCompleted ? (
             <Button
