@@ -8,7 +8,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import DesireCustomization from "@/components/DesireCustomization";
-import usePullToRefresh from "@/hooks/usePullToRefresh";
 
 const DESIRES_CATEGORIES = {
   emotional: {
@@ -122,9 +121,6 @@ export default function DesiresPage() {
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const [preferences, setPreferences] = useState<any>(null);
   const [displayedDesires, setDisplayedDesires] = useState(DESIRES_CATEGORIES);
-
-  // Disable pull-to-refresh on this page
-  usePullToRefresh({ enabled: false });
 
   useEffect(() => {
     checkUser();

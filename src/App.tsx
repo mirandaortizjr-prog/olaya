@@ -31,7 +31,6 @@ import VisualEffectsShop from "./pages/VisualEffectsShop";
 import AccessoriesPage from "./pages/AccessoriesPage";
 import PremiumPlansPage from "./pages/PremiumPlansPage";
 import InAppPurchasePage from "./pages/InAppPurchasePage";
-import usePullToRefresh from "@/hooks/usePullToRefresh";
 
 const queryClient = new QueryClient();
 
@@ -90,9 +89,6 @@ const AppRouter = () => {
     checkAuthAndRedirect();
   }, [navigate, location.pathname]);
 
-  // Enable pull-to-refresh only on dashboard/landing screens
-  const ptrEnabled = location.pathname === '/dashboard' || location.pathname === '/';
-  usePullToRefresh({ enabled: ptrEnabled });
 
   if (showSplash || isCheckingAuth) {
     return <SplashScreen onFinish={() => {}} />;

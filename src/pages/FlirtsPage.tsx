@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Flame } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import usePullToRefresh from "@/hooks/usePullToRefresh";
 
 // Simple standalone page that opens the Instant Flirt UI
 // and ensures proper routing. It mirrors the modal layout but as a page route.
@@ -27,9 +26,6 @@ export default function FlirtsPage() {
     heart: { emoji: "❤️", label: "Hearts" },
     fire: { emoji: "🔥", label: "Fire" },
   };
-
-  // Disable pull-to-refresh on this page
-  usePullToRefresh({ enabled: false });
 
   useEffect(() => {
     document.title = "Flirts • OLAYA"; // SEO page title

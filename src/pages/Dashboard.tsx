@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MessageCircle, Settings, LogOut, Users, Link2, Calendar, Flame, Home, Lock, Clock, ThumbsUp, ThumbsDown, Heart, Bookmark, Gamepad2, Music, X } from "lucide-react";
+import { MessageCircle, Settings, LogOut, Users, Link2, Calendar, Flame, Home, Lock, Clock, ThumbsUp, ThumbsDown, Heart, Bookmark, Gamepad2, Music, X, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
@@ -1061,6 +1061,17 @@ const Dashboard = () => {
             >
               <Music className="w-4 h-4 mr-2" />
               {t('manageSongs')}
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="w-full" 
+              onClick={() => {
+                window.location.reload();
+              }}
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh App
             </Button>
             
             <Button variant="outline" className="w-full" onClick={() => navigate('/couple-profiles')}>

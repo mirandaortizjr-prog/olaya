@@ -10,7 +10,6 @@ import togetherCoinsIcon from '@/assets/together-coins-icon.png';
 import CoinPurchaseSheet from '@/components/CoinPurchaseSheet';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { translations } from '@/lib/translations';
-import usePullToRefresh from "@/hooks/usePullToRefresh";
 
 interface ShopCategory {
   id: string;
@@ -57,9 +56,6 @@ export default function ShopPage() {
 
     getUser();
   }, []);
-
-  // Disable pull-to-refresh on Shop page
-  usePullToRefresh({ enabled: false });
   return (
     <div className="min-h-screen bg-background pb-20 overscroll-contain">
       {/* Header */}

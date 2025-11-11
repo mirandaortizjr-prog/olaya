@@ -12,7 +12,6 @@ import { format } from "date-fns";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/lib/translations";
 import togetherCoinsIcon from "@/assets/together-coins-icon.png";
-import usePullToRefresh from "@/hooks/usePullToRefresh";
 import flowerBouquet1 from "@/assets/gifts/flower-bouquet-1.png";
 import flowerBouquet2 from "@/assets/gifts/flower-bouquet-2.png";
 import flowerBouquet3 from "@/assets/gifts/flower-bouquet-3.png";
@@ -171,9 +170,6 @@ const GiftsPage = () => {
   const [stuffedCollectionComplete, setStuffedCollectionComplete] = useState(false);
   const [petsCollectionComplete, setPetsCollectionComplete] = useState(false);
   const { coins } = useTogetherCoins(user?.id);
-
-  // Disable pull-to-refresh on Gifts page
-  usePullToRefresh({ enabled: false });
 
   useEffect(() => {
     const getUser = async () => {

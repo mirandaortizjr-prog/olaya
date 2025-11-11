@@ -12,7 +12,6 @@ import { useSkins } from "@/hooks/useSkins";
 import { GradientSelector } from "@/components/GradientSelector";
 import { GRADIENTS, GradientId } from "@/lib/gradientData";
 import { SKINS, SkinId } from "@/lib/skinData";
-import usePullToRefresh from "@/hooks/usePullToRefresh";
 
 interface ShopItem {
   id: string;
@@ -28,9 +27,6 @@ export default function AccessoriesPage() {
   const { t } = useLanguage();
   const [userId, setUserId] = useState<string>("");
   const [coupleId, setCoupleId] = useState<string | null>(null);
-
-  // Disable pull-to-refresh on Accessories page
-  usePullToRefresh({ enabled: false });
   const [shopItems, setShopItems] = useState<ShopItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   

@@ -11,7 +11,6 @@ import togetherCoinsIcon from '@/assets/together-coins-icon.png';
 import { VisualEffectsRenderer } from '@/components/VisualEffectsRenderer';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { translations } from '@/lib/translations';
-import usePullToRefresh from "@/hooks/usePullToRefresh";
 
 interface VisualEffect {
   id: string;
@@ -35,9 +34,6 @@ export default function VisualEffectsShop() {
   const [loading, setLoading] = useState(true);
   const [previewEffect, setPreviewEffect] = useState<any>(null);
   const { coins, spendCoins } = useTogetherCoins(user?.id);
-
-  // Disable pull-to-refresh on Visual Effects page
-  usePullToRefresh({ enabled: false });
 
   useEffect(() => {
     const getUser = async () => {
