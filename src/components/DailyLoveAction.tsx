@@ -105,12 +105,12 @@ export const DailyLoveAction = ({ userId, partnerUserId }: DailyLoveActionProps)
 
   if (!todayAction) {
     return (
-      <div className="w-full p-4 bg-muted/50 rounded-lg border border-border">
-        <div className="flex items-center gap-3">
-          <Heart className="w-5 h-5 text-muted-foreground" />
+      <div className="w-full p-4 bg-gradient-to-r from-purple-900/50 to-pink-900/50 rounded-lg border border-border/50">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <Heart className="w-5 h-5 text-white" />
           <div>
-            <p className="font-semibold text-foreground">Daily Love Action</p>
-            <p className="text-sm text-muted-foreground">Your partner needs to complete the Love Language Quiz in Games first</p>
+            <p className="font-semibold text-white">Daily Love Action</p>
+            <p className="text-sm text-white/70">Your partner needs to complete the Love Language Quiz in Games first</p>
           </div>
         </div>
       </div>
