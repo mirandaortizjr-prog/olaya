@@ -63,11 +63,11 @@ const AppRouter = () => {
             setTimeout(() => {
               setShowSplash(false);
               setIsCheckingAuth(false);
-              const onLanding = ["/", "/auth", "/premium-plans"].includes(location.pathname);
+              const onLanding = ["/", "/auth", "/premium-plans", "/purchase"].includes(location.pathname);
               if (onLanding) {
                 navigate('/dashboard', { replace: true });
               }
-            }, 2500);
+            }, 1800);
             return;
           }
         }
@@ -76,13 +76,13 @@ const AppRouter = () => {
         setTimeout(() => {
           setShowSplash(false);
           setIsCheckingAuth(false);
-        }, 2500);
+        }, 1800);
       } catch (error) {
         console.error('Auth check error:', error);
         setTimeout(() => {
           setShowSplash(false);
           setIsCheckingAuth(false);
-        }, 2500);
+        }, 1800);
       }
     };
 
