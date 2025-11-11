@@ -17,6 +17,43 @@
       body::before, body::after, html::before, html::after { display: none !important; }
       /* Hide progress bars and loading lines */
       [role="progressbar"], .nprogress, progress { display: none !important; }
+      
+      /* Instant splash screen before React loads */
+      #initial-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #000000;
+        transition: opacity 0.3s ease-out;
+      }
+      #initial-splash.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #initial-splash img {
+        width: 256px;
+        height: 256px;
+        animation: fadeInScale 0.6s ease-out;
+      }
+      @keyframes fadeInScale {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      @media (min-width: 768px) {
+        #initial-splash img {
+          width: 320px;
+          height: 320px;
+        }
+      }
     </style>
     <title>Olaya Together - Your Sacred Space for Connection</title>
     <meta name="description" content="A private sanctuary for couples to deepen intimacy, share love notes, and celebrate your journey together" />
@@ -33,6 +70,10 @@
   </head>
 
   <body>
+    <!-- Instant splash screen shown before React loads -->
+    <div id="initial-splash">
+      <img src="/splash-image.png" alt="OLAYA Together" />
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

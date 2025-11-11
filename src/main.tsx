@@ -44,6 +44,16 @@ const start = async () => {
       <App />
     </LanguageProvider>
   );
+  
+  // Hide initial splash after React mounts
+  setTimeout(() => {
+    const splash = document.getElementById("initial-splash");
+    if (splash) {
+      splash.classList.add("hidden");
+      // Remove from DOM after transition
+      setTimeout(() => splash.remove(), 300);
+    }
+  }, 100);
 };
 
 start();
