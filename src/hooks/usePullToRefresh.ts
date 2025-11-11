@@ -5,13 +5,13 @@ import { toast } from "@/components/ui/use-toast";
 // Simple reusable hook to enable pull-to-refresh across the app
 export default function usePullToRefresh(options?: { onRefresh?: () => Promise<void> | void, enabled?: boolean, target?: string }) {
   useEffect(() => {
-    // Always clear any existing instances when options change (especially when disabling)
+    // Always clear any existing instances first
     try {
       PullToRefresh.destroyAll();
     } catch {}
 
-    if (options && options.enabled === false) {
-      // Disabled: ensure no active listeners remain
+    // Only initialize if explicitly enabled
+    if (!options || options.enabled !== true) {
       return;
     }
 
@@ -41,7 +41,6 @@ export default function usePullToRefresh(options?: { onRefresh?: () => Promise<v
 
     return () => {
       try {
-        // Destroy all instances to avoid duplicates or leaks across routes
         PullToRefresh.destroyAll();
       } catch {}
     };

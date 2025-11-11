@@ -36,21 +36,12 @@ const start = () => {
   const rootElement = document.getElementById("root");
   if (!rootElement) throw new Error("Root element not found");
   
-  // Render app immediately
+  // Render app immediately - React splash will handle everything
   createRoot(rootElement).render(
     <LanguageProvider>
       <App />
     </LanguageProvider>
   );
-  
-  // Hide initial splash after React renders
-  requestAnimationFrame(() => {
-    const splash = document.getElementById("initial-splash");
-    if (splash) {
-      splash.classList.add("hidden");
-      setTimeout(() => splash.remove(), 300);
-    }
-  });
 };
 
 start();

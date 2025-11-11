@@ -59,14 +59,15 @@ const AppRouter = () => {
             .single();
           
           if (coupleData) {
-            // User has couple profile, redirect to dashboard after splash ONLY if on landing/auth
+            // User has couple profile - go straight to dashboard
+            const onLanding = ["/", "/auth", "/premium-plans", "/purchase"].includes(location.pathname);
+            if (onLanding) {
+              navigate('/dashboard', { replace: true });
+            }
+            // Wait for splash animation then hide
             setTimeout(() => {
               setShowSplash(false);
               setIsCheckingAuth(false);
-              const onLanding = ["/", "/auth", "/premium-plans", "/purchase"].includes(location.pathname);
-              if (onLanding) {
-                navigate('/dashboard', { replace: true });
-              }
             }, 1800);
             return;
           }

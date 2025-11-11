@@ -966,7 +966,7 @@ const Dashboard = () => {
       />
 
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-h-[85vh] overflow-y-auto overscroll-contain">
           <DialogHeader>
             <DialogTitle>{t('settings')}</DialogTitle>
           </DialogHeader>
