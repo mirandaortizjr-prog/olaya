@@ -99,8 +99,22 @@ export const DailyLoveAction = ({ userId, partnerUserId }: DailyLoveActionProps)
     });
   };
 
-  if (!partnerUserId || !todayAction) {
+  if (!partnerUserId) {
     return null;
+  }
+
+  if (!todayAction) {
+    return (
+      <div className="w-full p-4 bg-muted/50 rounded-lg border border-border">
+        <div className="flex items-center gap-3">
+          <Heart className="w-5 h-5 text-muted-foreground" />
+          <div>
+            <p className="font-semibold text-foreground">Daily Love Action</p>
+            <p className="text-sm text-muted-foreground">Your partner needs to complete the Love Language Quiz in Games first</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
