@@ -7,35 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import flowerBouquet1 from "@/assets/gifts/flower-bouquet-1.png";
-import flowerBouquet2 from "@/assets/gifts/flower-bouquet-2.png";
-import flowerBouquet3 from "@/assets/gifts/flower-bouquet-3.png";
-import flowerBouquet4 from "@/assets/gifts/flower-bouquet-4.png";
-import flowerBouquet5 from "@/assets/gifts/flower-bouquet-5.png";
-import flowerBouquet6 from "@/assets/gifts/flower-bouquet-6.png";
-import flowerBouquet7 from "@/assets/gifts/flower-bouquet-7.png";
-import singleRedRose from "@/assets/gifts/single-red-rose.png";
-import pinkHeartBox from "@/assets/gifts/pink-heart-box.png";
-import redRoseWrap from "@/assets/gifts/red-rose-wrap.png";
-import pinkPurpleBouquet from "@/assets/gifts/pink-purple-bouquet.png";
-import hotPinkRoseBouquet from "@/assets/gifts/hot-pink-rose-bouquet.png";
-import colorfulSpringBouquet from "@/assets/gifts/colorful-spring-bouquet.png";
-
-const flowerImages: { [key: string]: string } = {
-  'flower-bouquet-1': flowerBouquet1,
-  'flower-bouquet-2': flowerBouquet2,
-  'flower-bouquet-3': flowerBouquet3,
-  'flower-bouquet-4': flowerBouquet4,
-  'flower-bouquet-5': flowerBouquet5,
-  'flower-bouquet-6': flowerBouquet6,
-  'flower-bouquet-7': flowerBouquet7,
-  'single-red-rose': singleRedRose,
-  'pink-heart-box': pinkHeartBox,
-  'red-rose-wrap': redRoseWrap,
-  'pink-purple-bouquet': pinkPurpleBouquet,
-  'hot-pink-rose-bouquet': hotPinkRoseBouquet,
-  'colorful-spring-bouquet': colorfulSpringBouquet,
-};
+import { giftImages } from "@/lib/giftImages";
 
 interface ReceivedGift {
   id: string;
@@ -159,9 +131,9 @@ const GiftCollections = () => {
                 className="overflow-hidden hover:shadow-lg transition-all duration-300"
               >
                 <div className="aspect-square bg-accent/20 relative overflow-hidden">
-                  {flowerImages[gift.gift_image] ? (
+                  {giftImages[gift.gift_image] ? (
                     <img
-                      src={flowerImages[gift.gift_image]}
+                      src={giftImages[gift.gift_image]}
                       alt={gift.gift_name}
                       className="w-full h-full object-contain p-4"
                     />
