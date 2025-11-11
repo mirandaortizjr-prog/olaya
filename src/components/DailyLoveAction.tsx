@@ -112,26 +112,6 @@ export const DailyLoveAction = ({ userId, partnerUserId }: DailyLoveActionProps)
     return null;
   }
 
-  // Premium users need partner's love language data
-  if (isPremium && !todayAction) {
-    return (
-      <div className="w-full p-4 bg-gradient-to-r from-purple-900/50 to-pink-900/50 rounded-lg border border-border/50">
-        <div className="flex flex-col items-center gap-2 text-center">
-          <Heart className="w-5 h-5 text-white" />
-          <div>
-            <p className="font-semibold text-white">Daily Love Action</p>
-            <p className="text-sm text-white/70">Your partner needs to complete the Love Language Quiz in Games first</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Free users should always see a basic action
-  if (!isPremium && !basicAction) {
-    return null;
-  }
-
   return (
     <div className="w-full">
       {!isOpen ? (
@@ -172,58 +152,78 @@ export const DailyLoveAction = ({ userId, partnerUserId }: DailyLoveActionProps)
             </Button>
           </div>
 
-          <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-            <p className="text-base leading-relaxed">
-              {isPremium && todayAction 
-                ? todayAction.action[language as 'en' | 'es']
-                : basicAction?.action[language as 'en' | 'es']
-              }
-            </p>
-          </div>
-
-          <div className="text-sm text-muted-foreground">
-            Day {currentDay} of 365 • {isPremium && todayAction ? todayAction.timeRequired : basicAction?.timeRequired}
-          </div>
-
-          {/* Upgrade prompt for free users */}
-          {!isPremium && (
-            <div className="p-4 bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-lg border border-amber-500/20">
-              <div className="flex items-start gap-3">
-                <Sparkles className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
-                <div className="flex-1 space-y-2">
-                  <p className="text-sm font-medium text-foreground">
-                    Get Tailored Love Actions
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Upgrade to Premium for personalized daily actions based on your partner's unique love languages
-                  </p>
-                  <Button
-                    onClick={() => navigate('/premium-plans')}
-                    size="sm"
-                    className="w-full mt-2"
-                  >
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Upgrade to Premium
-                  </Button>
-                </div>
+          {/* Premium user without partner's quiz data */}
+          {isPremium && !todayAction ? (
+            <div className="space-y-4">
+              <div className="p-4 bg-muted/50 rounded-lg border border-border">
+                <p className="text-sm text-muted-foreground text-center">
+                  Your partner needs to complete the Love Language Quiz in Games to unlock personalized actions
+                </p>
               </div>
+              <Button
+                onClick={() => navigate('/couple-games')}
+                className="w-full"
+                variant="outline"
+              >
+                Go to Games
+              </Button>
             </div>
-          )}
-
-          {!isCompleted ? (
-            <Button
-              onClick={markAsComplete}
-              className="w-full"
-              size="lg"
-            >
-              <CheckCircle2 className="w-5 h-5 mr-2" />
-              Mark as Fulfilled
-            </Button>
           ) : (
-            <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400 py-2">
-              <CheckCircle2 className="w-5 h-5" />
-              <span className="font-semibold">Completed for today!</span>
-            </div>
+            <>
+              <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+                <p className="text-base leading-relaxed">
+                  {isPremium && todayAction 
+                    ? todayAction.action[language as 'en' | 'es']
+                    : basicAction?.action[language as 'en' | 'es']
+                  }
+                </p>
+              </div>
+
+              <div className="text-sm text-muted-foreground">
+                Day {currentDay} of 365 • {isPremium && todayAction ? todayAction.timeRequired : basicAction?.timeRequired}
+              </div>
+
+              {/* Upgrade prompt for free users */}
+              {!isPremium && (
+                <div className="p-4 bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-lg border border-amber-500/20">
+                  <div className="flex items-start gap-3">
+                    <Sparkles className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1 space-y-2">
+                      <p className="text-sm font-medium text-foreground">
+                        Get Tailored Love Actions
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Upgrade to Premium for personalized daily actions based on your partner's unique love languages
+                      </p>
+                      <Button
+                        onClick={() => navigate('/premium-plans')}
+                        size="sm"
+                        className="w-full mt-2"
+                      >
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Upgrade to Premium
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {!isCompleted ? (
+                <Button
+                  onClick={markAsComplete}
+                  className="w-full"
+                  size="lg"
+                >
+                  <CheckCircle2 className="w-5 h-5 mr-2" />
+                  Mark as Fulfilled
+                </Button>
+              ) : (
+                <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400 py-2">
+                  <CheckCircle2 className="w-5 h-5" />
+                  <span className="font-semibold">Completed for today!</span>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
