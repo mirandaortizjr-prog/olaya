@@ -28,7 +28,7 @@ export const BottomNavigation = ({
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40" style={{ background: 'var(--nav-gradient)' }}>
+    <div className="fixed bottom-0 left-0 right-0 z-40 pb-8" style={{ background: 'var(--nav-gradient)' }}>
       <div className="flex justify-around items-center h-20 max-w-lg mx-auto px-4">
         {navItems.map((item) => (
           <Button
