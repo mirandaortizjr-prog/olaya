@@ -122,18 +122,20 @@ export const DailyLoveAction = ({ userId, partnerUserId }: DailyLoveActionProps)
       {!isOpen ? (
         <button
           onClick={() => setIsOpen(true)}
-          className="w-full p-4 bg-gradient-to-r from-primary/20 to-primary/10 rounded-lg border border-primary/30 hover:border-primary/50 transition-all flex items-center justify-between group"
+          className="w-full p-4 bg-gradient-to-r from-purple-900/50 to-pink-900/50 rounded-lg border border-border/50 hover:border-purple-500/50 transition-all group"
         >
-          <div className="flex items-center gap-3">
-            <Heart className="w-5 h-5 text-primary" />
-            <span className="font-semibold text-foreground">Daily Love Action</span>
+          <div className="flex items-center justify-center gap-3">
+            <Heart className="w-5 h-5 text-white" />
+            <span className="font-semibold text-white">Daily Love Action</span>
             {isCompleted && (
-              <CheckCircle2 className="w-5 h-5 text-green-500" />
+              <CheckCircle2 className="w-5 h-5 text-green-400" />
             )}
           </div>
-          <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-            Day {currentDay}/365
-          </span>
+          <div className="text-center mt-1">
+            <span className="text-xs text-white/70">
+              Day {currentDay}/365
+            </span>
+          </div>
         </button>
       ) : (
         <div className="w-full bg-card rounded-lg border border-border p-6 space-y-4 animate-scale-in">
