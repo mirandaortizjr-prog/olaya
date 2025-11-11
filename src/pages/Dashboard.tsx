@@ -48,6 +48,7 @@ import FloatingGifts from "@/components/FloatingGifts";
 import { ActiveGiftDisplay } from "@/components/ActiveGiftDisplay";
 import { giftImages } from "@/lib/giftImages";
 import { FirstTimeUserExperience } from "@/components/FirstTimeUserExperience";
+import { LoveLanguageSelector } from "@/components/LoveLanguageSelector";
 
 interface CoupleData {
   coupleId: string;
@@ -901,6 +902,13 @@ const Dashboard = () => {
       
       {/* Visual Effects Overlay */}
       <VisualEffectsRenderer coupleId={coupleData.coupleId} />
+
+      {/* Daily Love Action Section */}
+      <div style={{ background: 'var(--info-bg)' }} className="py-6">
+        <div className="max-w-lg mx-auto px-4">
+          <LoveLanguageSelector userId={user!.id} partnerUserId={coupleData.partner?.user_id} />
+        </div>
+      </div>
 
       {/* Feed Section */}
       <div style={{ backgroundColor: '#000000' }} className="pb-4 px-1 relative">
