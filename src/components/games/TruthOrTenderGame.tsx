@@ -131,27 +131,44 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
     setUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${coupleId}/${Date.now()}.${fileExt}`;
+      const unique = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      const objectName = `${unique}.${fileExt}`;
+      const path = `${coupleId}/${objectName}`;
       
       const { error: uploadError } = await supabase.storage
         .from('truth-dare-proofs')
-        .upload(fileName, file);
+        .upload(path, file, {
+          cacheControl: '3600',
+          upsert: true,
+          contentType: file.type || undefined,
+        });
 
       if (uploadError) throw uploadError;
+
+      // Create a signed URL for immediate viewing (bucket is private)
+      const { data: urlData, error: signErr } = await supabase.storage
+        .from('truth-dare-proofs')
+        .createSignedUrl(path, 604800); // 7 days
+      if (signErr) throw signErr;
+
+      const proof: ProofMedia = {
+        id: path,
+        url: urlData?.signedUrl || '',
+        type: isVideo ? 'video' : 'image',
+        created_at: new Date().toISOString(),
+        name: objectName,
+      };
+      setUploadedProofs(prev => [proof, ...prev]);
 
       toast({
         title: "Proof uploaded!",
         description: "Your dare proof has been saved",
       });
-
-      // Trigger re-fetch
-      setUploading(false);
-      setUploading(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading proof:', error);
       toast({
         title: "Upload failed",
-        description: "Please try again",
+        description: error?.message || "Please try again",
         variant: "destructive",
       });
     } finally {
