@@ -1,16 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Heart, MessageSquare, Sparkles, CheckCircle2, Upload, Camera, X } from "lucide-react";
+import { ArrowLeft, Upload, Share2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useCoupleProgress } from "@/hooks/useCoupleProgress";
-import { useTogetherCoins } from "@/hooks/useTogetherCoins";
 import { generateTruthOrDareQuestions } from "@/lib/gameQuestions";
-import { Camera as CapCamera, CameraResultType, CameraSource } from "@capacitor/camera";
-import { videoRecording } from "@/utils/videoRecording";
 
 interface GameProps {
   coupleId: string;
@@ -18,73 +13,63 @@ interface GameProps {
   onBack: () => void;
 }
 
-type GameMode = 'instructions' | 'choose' | 'question' | 'waiting' | 'complete' | 'finished';
-type ChallengeType = 'truth' | 'tender';
+type GameMode = 'choose' | 'truth' | 'dare';
 
-interface Round {
-  playerId: string;
-  type: ChallengeType;
-  question: string;
-  answer?: string;
-  completed: boolean;
-  validated: boolean;
+interface ProofMedia {
+  id: string;
+  url: string;
+  type: string;
+  created_at: string;
 }
 
 export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
   const { t, language } = useLanguage();
   const { toast } = useToast();
-  const { progress } = useCoupleProgress(coupleId);
-  const { addCoins } = useTogetherCoins(userId);
 
-  const [gameMode, setGameMode] = useState<GameMode>('instructions');
-  const [currentRound, setCurrentRound] = useState(0);
-  const [rounds, setRounds] = useState<Round[]>([]);
-  const [currentPlayerId, setCurrentPlayerId] = useState<string>(userId);
-  const [answer, setAnswer] = useState("");
+  const [gameMode, setGameMode] = useState<GameMode>('choose');
+  const [currentQuestion, setCurrentQuestion] = useState<string>("");
   const [questions, setQuestions] = useState<Array<{ truth: string; dare: string }>>([]);
-  const [hasPlayedToday, setHasPlayedToday] = useState(false);
-  const [isValidating, setIsValidating] = useState(false);
-  const [proofFile, setProofFile] = useState<File | null>(null);
-  const [proofPreview, setProofPreview] = useState<string | null>(null);
+  const [uploadedProofs, setUploadedProofs] = useState<ProofMedia[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [showProofActions, setShowProofActions] = useState(false);
-  const [uploadedProofs, setUploadedProofs] = useState<Array<{ name: string; url: string; type: string }>>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load questions based on level
+  // Load questions
   useEffect(() => {
-    const level = progress?.currentLevel || 1;
-    const loadedQuestions = generateTruthOrDareQuestions(level, language);
+    const loadedQuestions = generateTruthOrDareQuestions(1, language);
     setQuestions(loadedQuestions);
-  }, [progress, language]);
+  }, [language]);
 
-  // Fetch uploaded proofs
+  // Fetch uploaded proofs for dares
   useEffect(() => {
     const fetchProofs = async () => {
       try {
         const { data: files, error } = await supabase.storage
           .from('truth-dare-proofs')
-          .list(`${userId}/`, {
+          .list(`${coupleId}/`, {
             limit: 100,
             sortBy: { column: 'created_at', order: 'desc' }
           });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching proofs:', error);
+          return;
+        }
 
-        if (files) {
-          const proofsWithUrls = await Promise.all(
-            files.map(async (file) => {
+        if (files && files.length > 0) {
+          const proofsWithUrls = files
+            .filter(file => file.name !== '.emptyFolderPlaceholder')
+            .map((file) => {
               const { data: urlData } = supabase.storage
                 .from('truth-dare-proofs')
-                .getPublicUrl(`${userId}/${file.name}`);
+                .getPublicUrl(`${coupleId}/${file.name}`);
               
               return {
-                name: file.name,
+                id: file.id,
                 url: urlData.publicUrl,
-                type: file.metadata?.mimetype || 'unknown'
+                type: file.metadata?.mimetype?.startsWith('video') ? 'video' : 'image',
+                created_at: file.created_at || ''
               };
-            })
-          );
+            });
           setUploadedProofs(proofsWithUrls);
         }
       } catch (error) {
@@ -92,330 +77,101 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
       }
     };
 
-    if (userId) {
-      fetchProofs();
-    }
-  }, [userId, uploading]);
+    fetchProofs();
+  }, [coupleId, uploading]);
 
-  // Check if already played today
-  useEffect(() => {
-    const checkPlayedToday = async () => {
-      const today = new Date().toISOString().split('T')[0];
-      const { data, error } = await supabase
-        .from('game_sessions')
-        .select('*')
-        .eq('couple_id', coupleId)
-        .eq('game_type', 'truth_or_tender')
-        .eq('status', 'completed')
-        .gte('created_at', `${today}T00:00:00`)
-        .lte('created_at', `${today}T23:59:59`);
-
-      if (!error && data && data.length > 0) {
-        setHasPlayedToday(true);
-      }
-    };
-
-    checkPlayedToday();
-  }, [coupleId]);
-
-  const startGame = () => {
-    setGameMode('choose');
-    setCurrentRound(1);
-    setRounds([]);
-  };
-
-  const selectChallenge = (type: ChallengeType) => {
+  const selectTruth = () => {
     if (questions.length === 0) return;
-
     const questionIndex = Math.floor(Math.random() * questions.length);
-    const question = type === 'truth' 
-      ? questions[questionIndex].truth 
-      : questions[questionIndex].dare;
-
-    const newRound: Round = {
-      playerId: currentPlayerId,
-      type,
-      question,
-      completed: false,
-      validated: false
-    };
-
-    setRounds([...rounds, newRound]);
-    setGameMode('question');
-    setAnswer("");
+    setCurrentQuestion(questions[questionIndex].truth);
+    setGameMode('truth');
   };
 
-  const submitAnswer = async () => {
-    const currentRoundData = rounds[rounds.length - 1];
-    
-    if (currentRoundData.type === 'truth' && !answer.trim()) {
-      toast({
-        title: t('error'),
-        description: "Please provide an answer",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Require proof for tender (dare) challenges
-    if (currentRoundData.type === 'tender' && !proofFile) {
-      toast({
-        title: t('truthOrDareProofNeeded'),
-        description: t('truthOrDareProofNeedDesc'),
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setUploading(true);
-
-    try {
-      let fileName = null;
-
-      // Upload proof file if provided
-      if (proofFile) {
-        const fileExt = proofFile.name.split('.').pop();
-        fileName = `${userId}/${Date.now()}.${fileExt}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('truth-dare-proofs')
-          .upload(fileName, proofFile);
-
-        if (uploadError) throw uploadError;
-      }
-
-      // Update round with answer and proof
-      const updatedRounds = [...rounds];
-      updatedRounds[updatedRounds.length - 1] = {
-        ...currentRoundData,
-        answer: answer || "Completed",
-        completed: true
-      };
-      setRounds(updatedRounds);
-      
-      // Clean up proof files
-      setProofFile(null);
-      setProofPreview(null);
-      setGameMode('waiting');
-
-      // Wait for partner validation (in real app, this would be real-time)
-      // For now, simulate validation after 2 seconds
-      setTimeout(() => {
-        validateRound(true);
-      }, 2000);
-    } catch (error) {
-      console.error('Error uploading proof:', error);
-      toast({
-        title: t('truthOrDareError'),
-        description: t('truthOrDareFailedUpload'),
-        variant: "destructive",
-      });
-    } finally {
-      setUploading(false);
-    }
+  const selectDare = () => {
+    if (questions.length === 0) return;
+    const questionIndex = Math.floor(Math.random() * questions.length);
+    setCurrentQuestion(questions[questionIndex].dare);
+    setGameMode('dare');
   };
 
-  const validateRound = (isValid: boolean) => {
-    setIsValidating(true);
-    
-    setTimeout(() => {
-      const updatedRounds = [...rounds];
-      updatedRounds[updatedRounds.length - 1] = {
-        ...updatedRounds[updatedRounds.length - 1],
-        validated: isValid
-      };
-      setRounds(updatedRounds);
-      setIsValidating(false);
-
-      if (isValid) {
-        toast({
-          title: t('roundComplete'),
-          description: `${t('roundsCompleted')}: ${currentRound}/5`
-        });
-
-        if (currentRound >= 5) {
-          finishGame();
-        } else {
-          setGameMode('complete');
-        }
-      } else {
-        toast({
-          title: "Try Again",
-          description: "That round wasn't completed. Try another challenge!",
-          variant: "destructive"
-        });
-        setGameMode('choose');
-      }
-    }, 1000);
-  };
-
-  const nextRound = () => {
-    setCurrentRound(currentRound + 1);
+  const handleBack = () => {
     setGameMode('choose');
-    setAnswer("");
-  };
-
-  const finishGame = async () => {
-    setGameMode('finished');
-
-    // Save game session
-    const { error: sessionError } = await supabase
-      .from('game_sessions')
-      .insert({
-        couple_id: coupleId,
-        initiated_by: userId,
-        partner_id: userId, // In real app, get actual partner
-        game_type: 'truth_or_tender',
-        status: 'completed',
-        session_id: `tot_${Date.now()}`
-      });
-
-    if (sessionError) {
-      console.error('Error saving game session:', sessionError);
-    }
-
-    // Award coins if haven't played today
-    if (!hasPlayedToday && rounds.length >= 5) {
-      try {
-        await addCoins(10, 'Truth or Tender game completed', coupleId);
-        toast({
-          title: t('earnedReward'),
-          description: t('earnedReward')
-        });
-        setHasPlayedToday(true);
-      } catch (error) {
-        console.error('Error awarding coins:', error);
-      }
-    }
-  };
-
-  const resetGame = () => {
-    setGameMode('instructions');
-    setCurrentRound(0);
-    setRounds([]);
-    setAnswer("");
-    setProofFile(null);
-    setProofPreview(null);
+    setCurrentQuestion("");
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file size (15MB images, 100MB videos)
     const isVideo = file.type.startsWith('video/');
     const maxSize = isVideo ? 100 * 1024 * 1024 : 15 * 1024 * 1024;
+    
     if (file.size > maxSize) {
       toast({
-        title: t('truthOrDareFileTooLarge'),
-        description: isVideo ? "Please upload videos up to 100MB." : "Please upload photos up to 15MB.",
+        title: "File too large",
+        description: isVideo ? "Videos must be under 100MB" : "Images must be under 15MB",
         variant: "destructive",
       });
       return;
     }
 
-    setProofFile(file);
-    
-    // Create preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setProofPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-    
-    toast({
-      title: "Media uploaded",
-      description: "Review your proof below and choose an action",
-    });
-  };
-
-  const handleConfirmAsProof = async () => {
-    if (!proofFile) return;
-    
     setUploading(true);
     try {
-      const fileExt = proofFile.name.split('.').pop();
-      const fileName = `${userId}/${Date.now()}.${fileExt}`;
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${coupleId}/${Date.now()}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
         .from('truth-dare-proofs')
-        .upload(fileName, proofFile);
+        .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
-      // Update round
-      const currentRoundData = rounds[rounds.length - 1];
-      const updatedRounds = [...rounds];
-      updatedRounds[updatedRounds.length - 1] = {
-        ...currentRoundData,
-        answer: "Completed",
-        completed: true
-      };
-      setRounds(updatedRounds);
-      
-      setProofFile(null);
-      setProofPreview(null);
-      setGameMode('waiting');
-
       toast({
-        title: "Proof confirmed!",
-        description: "Dare completed successfully",
+        title: "Proof uploaded!",
+        description: "Your dare proof has been saved",
       });
 
-      // Auto-validate after upload
-      setTimeout(() => {
-        validateRound(true);
-      }, 2000);
+      // Trigger re-fetch
+      setUploading(false);
+      setUploading(true);
     } catch (error) {
       console.error('Error uploading proof:', error);
       toast({
-        title: "Error",
-        description: "Failed to upload proof",
+        title: "Upload failed",
+        description: "Please try again",
         variant: "destructive",
       });
     } finally {
       setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
-  const handlePostToFeed = async () => {
-    if (!proofFile) return;
-    
+  const handleShareToFeed = async (proofUrl: string, proofType: string) => {
     setUploading(true);
     try {
-      const fileName = `${coupleId}/${Date.now()}-${proofFile.name}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('couple_media')
-        .upload(fileName, proofFile);
-
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage
-        .from('couple_media')
-        .getPublicUrl(fileName);
-
-      // Create post
       const { error: postError } = await supabase
         .from('posts')
         .insert({
           couple_id: coupleId,
           author_id: userId,
-          content: "🎥 Truth or Tender moment",
-          media_urls: [urlData.publicUrl]
+          content: "🎥 Truth or Tender dare completed!",
+          media_urls: [proofUrl]
         });
 
       if (postError) throw postError;
       
       toast({
-        title: "Posted!",
-        description: "Your media has been shared to your feed",
+        title: "Shared to feed!",
+        description: "Your dare proof is now on your main feed",
       });
     } catch (error) {
       console.error('Error posting to feed:', error);
       toast({
-        title: "Error",
-        description: "Failed to post to feed",
+        title: "Share failed",
+        description: "Please try again",
         variant: "destructive",
       });
     } finally {
@@ -423,336 +179,10 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
     }
   };
 
-  // Render instructions
-  if (gameMode === 'instructions') {
-    return (
-      <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
-        <div className="flex items-center gap-2 p-4 border-b flex-shrink-0">
-          <Button variant="ghost" size="icon" onClick={onBack}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h2 className="text-xl font-semibold">{t('truthOrTenderTitle')}</h2>
-        </div>
-
-        <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-4">
-          <Card className="p-6 bg-gradient-to-br from-pink-500/10 to-purple-500/10 border-pink-200 dark:border-pink-800">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-3 rounded-full bg-pink-500/20">
-                <Heart className="w-6 h-6 text-pink-500" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold">{t('truthOrTenderSubtitle')}</h3>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
-              {t('truthOrTenderHow')}
-            </h3>
-            <p className="text-muted-foreground mb-4">
-              {t('truthOrTenderObjective')}
-            </p>
-          </Card>
-
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-3">{t('truthOrTenderRules')}</h3>
-            <ul className="space-y-2 text-muted-foreground">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                <span>{t('truthOrTenderRule1')}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                <span>{t('truthOrTenderRule2')}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                <span>{t('truthOrTenderRule3')}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                <span>{t('truthOrTenderRule4')}</span>
-              </li>
-            </ul>
-          </Card>
-
-          <Card className="p-6 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border-yellow-200 dark:border-yellow-800">
-            <h3 className="text-lg font-semibold mb-3">{t('truthOrTenderRewards')}</h3>
-            <ul className="space-y-2 text-muted-foreground">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
-                <span>{t('truthOrTenderReward1')}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" />
-                <span>{t('truthOrTenderReward2')}</span>
-              </li>
-            </ul>
-          </Card>
-
-          {hasPlayedToday && (
-            <Card className="p-4 bg-blue-500/10 border-blue-200 dark:border-blue-800">
-              <p className="text-sm text-blue-600 dark:text-blue-400 text-center">
-                {t('playAgainTomorrow')}
-              </p>
-            </Card>
-          )}
-        </div>
-
-        <div className="p-4 border-t flex-shrink-0">
-          <Button onClick={startGame} className="w-full" size="lg">
-            {t('startNewGame') || "Start New Game"}
-          </Button>
-        </div>
-        </div>
-    );
-  }
-
-  // Render choose challenge mode
+  // Choose mode - Truth or Dare buttons
   if (gameMode === 'choose') {
     return (
       <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
-        <div className="flex items-center gap-2 p-4 border-b">
-          <Button variant="ghost" size="icon" onClick={onBack}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h2 className="text-xl font-semibold">{t('truthOrTenderTitle')}</h2>
-        </div>
-
-        <div className="flex-1 p-4 flex flex-col items-center justify-center space-y-6">
-          <div className="text-center">
-            <h3 className="text-2xl font-bold mb-2">{t('yourTurn') || "Your Turn!"}</h3>
-            <p className="text-muted-foreground">
-              {t('roundsCompleted')}: {currentRound - 1}/5
-            </p>
-          </div>
-
-          <div className="w-full max-w-md">
-            <h4 className="text-lg font-semibold text-center mb-4">{t('chooseMode') || "Choose Your Challenge"}</h4>
-            
-            <div className="grid gap-4">
-              <Card 
-                className="p-6 cursor-pointer hover:bg-accent transition-colors border-2 hover:border-primary"
-                onClick={() => selectChallenge('truth')}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-full bg-blue-500/20">
-                    <MessageSquare className="w-6 h-6 text-blue-500" />
-                  </div>
-                  <div className="flex-1">
-                    <h5 className="font-semibold text-lg">{t('truthMode')}</h5>
-                    <p className="text-sm text-muted-foreground">{t('truthDescription')}</p>
-                  </div>
-                </div>
-              </Card>
-
-              <Card 
-                className="p-6 cursor-pointer hover:bg-accent transition-colors border-2 hover:border-primary"
-                onClick={() => selectChallenge('tender')}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-full bg-pink-500/20">
-                    <Heart className="w-6 h-6 text-pink-500" />
-                  </div>
-                  <div className="flex-1">
-                    <h5 className="font-semibold text-lg">{t('tenderMode')}</h5>
-                    <p className="text-sm text-muted-foreground">{t('tenderDescription')}</p>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Render question/dare
-  if (gameMode === 'question') {
-    const currentRoundData = rounds[rounds.length - 1];
-    const isTruth = currentRoundData.type === 'truth';
-
-    return (
-      <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
-        <div className="flex items-center gap-2 p-4 border-b">
-          <Button variant="ghost" size="icon" onClick={onBack}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h2 className="text-xl font-semibold">{t('truthOrTenderTitle')}</h2>
-        </div>
-
-        <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-6">
-          <div className="text-center">
-            <p className="text-muted-foreground mb-1">
-              {t('roundsCompleted')}: {currentRound}/5
-            </p>
-          </div>
-
-          <Card className={`p-6 ${isTruth ? 'bg-blue-500/10 border-blue-200 dark:border-blue-800' : 'bg-pink-500/10 border-pink-200 dark:border-pink-800'}`}>
-            <div className="flex items-center gap-3 mb-4">
-              <div className={`p-3 rounded-full ${isTruth ? 'bg-blue-500/20' : 'bg-pink-500/20'}`}>
-                {isTruth ? (
-                  <MessageSquare className="w-6 h-6 text-blue-500" />
-                ) : (
-                  <Heart className="w-6 h-6 text-pink-500" />
-                )}
-              </div>
-              <h3 className="text-lg font-semibold">
-                {isTruth ? t('truthQuestion') : t('tenderDare')}
-              </h3>
-            </div>
-            <p className="text-lg">{currentRoundData.question}</p>
-          </Card>
-
-          {isTruth ? (
-            <div className="space-y-3">
-              <label className="text-sm font-medium">{t('answerQuestion')}</label>
-              <Textarea
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                placeholder={t('typeYourAnswer') || "Type your answer..."}
-                rows={4}
-                className="resize-none"
-              />
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <p className="text-sm text-center text-muted-foreground">
-                📸 {t('truthOrDareProofRequired')}
-              </p>
-
-              {!proofPreview && (
-                <div className="flex justify-center">
-                  <Button
-                    variant="outline"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full"
-                    size="lg"
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    {t('truthOrDareUploadFile')}
-                  </Button>
-                </div>
-              )}
-            
-              {proofPreview && (
-                <Card className="p-4 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-semibold">Proof preview</h4>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => {
-                        setProofFile(null);
-                        setProofPreview(null);
-                      }}
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  
-                  {/* Gallery-style preview */}
-                  <div className="rounded-lg overflow-hidden bg-black">
-                    {proofFile?.type.startsWith('image/') ? (
-                      <img 
-                        src={proofPreview} 
-                        alt="Proof preview" 
-                        className="w-full h-64 object-contain"
-                      />
-                    ) : (
-                      <video 
-                        src={proofPreview} 
-                        controls 
-                        className="w-full h-64 object-contain"
-                      />
-                    )}
-                  </div>
-
-                  <p className="text-xs text-muted-foreground text-center">
-                    {proofFile?.name}
-                  </p>
-
-                  {/* Action buttons */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button
-                      onClick={handleConfirmAsProof}
-                      className="w-full flex flex-col items-center gap-1 h-auto py-3"
-                      disabled={uploading}
-                    >
-                      <CheckCircle2 className="w-5 h-5" />
-                      <span className="text-xs">Confirm Proof</span>
-                    </Button>
-                    <Button
-                      onClick={handlePostToFeed}
-                      variant="secondary"
-                      className="w-full flex flex-col items-center gap-1 h-auto py-3"
-                      disabled={uploading}
-                    >
-                      <Upload className="w-5 h-5" />
-                      <span className="text-xs">Post to Feed</span>
-                    </Button>
-                  </div>
-                </Card>
-              )}
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*,video/*"
-                capture="user"
-                onChange={handleFileSelect}
-                className="hidden"
-              />
-            </div>
-          )}
-        </div>
-
-        {isTruth && (
-          <div className="p-4 border-t flex-shrink-0">
-            <Button 
-              onClick={submitAnswer} 
-              className="w-full" 
-              size="lg"
-              disabled={!answer.trim() || uploading}
-            >
-              {uploading ? t('truthOrDareUploading') : t('submit')}
-            </Button>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // Render waiting for validation
-  if (gameMode === 'waiting') {
-    return (
-      <div className="fixed inset-0 bg-background z-50 flex flex-col">
-        <div className="flex items-center gap-2 p-4 border-b">
-          <Button variant="ghost" size="icon" onClick={onBack}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h2 className="text-xl font-semibold">{t('truthOrTenderTitle')}</h2>
-        </div>
-
-        <div className="flex-1 flex items-center justify-center p-4">
-          <Card className="p-8 text-center max-w-md">
-            <div className="animate-pulse mb-4">
-              <Sparkles className="w-12 h-12 text-primary mx-auto" />
-            </div>
-            <h3 className="text-xl font-semibold mb-2">{t('validating')}</h3>
-            <p className="text-muted-foreground">{t('waitingForPartnerToValidate')}</p>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  // Render round complete
-  if (gameMode === 'complete') {
-    return (
-      <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
         <div className="flex items-center gap-2 p-4 border-b flex-shrink-0">
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="w-5 h-5" />
@@ -761,62 +191,153 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
         </div>
 
         <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-4">
-          <Card className="p-8 text-center bg-gradient-to-br from-pink-500/10 to-purple-500/10 border-pink-200 dark:border-pink-800">
-            <div className="mb-4">
-              <Heart className="w-20 h-20 text-pink-500 mx-auto" />
-            </div>
-            <h3 className="text-3xl font-bold mb-2">{t('gameCompleted') || "Game Completed!"}</h3>
-            <p className="text-muted-foreground mb-6">
-              {t('totalRounds') || "Total Rounds"}: {rounds.length}
-            </p>
-            
-            {!hasPlayedToday && rounds.length >= 5 && (
-              <Card className="p-4 mb-6 bg-yellow-500/10 border-yellow-200 dark:border-yellow-800">
-                <p className="font-semibold text-yellow-600 dark:text-yellow-400">
-                  {t('earnedReward')}
-                </p>
-              </Card>
-            )}
-
-            {hasPlayedToday && (
-              <Card className="p-4 mb-6 bg-blue-500/10 border-blue-200 dark:border-blue-800">
-                <p className="text-sm text-blue-600 dark:text-blue-400">
-                  {t('playAgainTomorrow')}
-                </p>
-              </Card>
-            )}
-            
-            <Button onClick={resetGame} className="w-full" size="lg">
-              {t('backToHome') || "Back to Home"}
+          <div className="grid grid-cols-2 gap-4">
+            <Button
+              size="lg"
+              onClick={selectTruth}
+              className="h-32 text-lg bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+            >
+              Truth
             </Button>
-          </Card>
+            <Button
+              size="lg"
+              onClick={selectDare}
+              className="h-32 text-lg bg-gradient-to-br from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700"
+            >
+              Tender (Dare)
+            </Button>
+          </div>
 
-          {/* Uploaded Proofs Gallery */}
           {uploadedProofs.length > 0 && (
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Camera className="w-5 h-5 text-primary" />
-                {t('truthOrDareYourProofs') || "Your Dare Proofs"}
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
-                {uploadedProofs.map((proof, index) => (
-                  <div key={index} className="relative group">
-                    {proof.type.startsWith('image/') ? (
-                      <img 
-                        src={proof.url} 
-                        alt={`Proof ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg border-2 border-border hover:border-primary transition-colors"
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-3">Dare Proofs Gallery</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {uploadedProofs.map((proof) => (
+                  <Card key={proof.id} className="overflow-hidden relative group">
+                    {proof.type === 'video' ? (
+                      <video
+                        src={proof.url}
+                        className="w-full h-40 object-cover"
+                        controls
                       />
                     ) : (
-                      <div className="w-full h-32 bg-muted rounded-lg border-2 border-border hover:border-primary transition-colors flex flex-col items-center justify-center">
-                        <Camera className="w-8 h-8 text-muted-foreground mb-2" />
-                        <p className="text-xs text-muted-foreground">Video Proof</p>
-                      </div>
+                      <img
+                        src={proof.url}
+                        alt="Dare proof"
+                        className="w-full h-40 object-cover"
+                      />
                     )}
-                  </div>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => handleShareToFeed(proof.url, proof.type)}
+                      disabled={uploading}
+                    >
+                      <Share2 className="w-4 h-4 mr-1" />
+                      Share
+                    </Button>
+                  </Card>
                 ))}
               </div>
-            </Card>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Truth question mode
+  if (gameMode === 'truth') {
+    return (
+      <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
+        <div className="flex items-center gap-2 p-4 border-b flex-shrink-0">
+          <Button variant="ghost" size="icon" onClick={handleBack}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <h2 className="text-xl font-semibold">Truth</h2>
+        </div>
+
+        <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-4">
+          <Card className="p-6">
+            <p className="text-lg text-center">{currentQuestion}</p>
+          </Card>
+          <p className="text-sm text-muted-foreground text-center">
+            Answer this honestly with your partner!
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Dare mode
+  if (gameMode === 'dare') {
+    return (
+      <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
+        <div className="flex items-center gap-2 p-4 border-b flex-shrink-0">
+          <Button variant="ghost" size="icon" onClick={handleBack}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <h2 className="text-xl font-semibold">Tender (Dare)</h2>
+        </div>
+
+        <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-4">
+          <Card className="p-6">
+            <p className="text-lg text-center mb-4">{currentQuestion}</p>
+          </Card>
+
+          <div className="space-y-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,video/*"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <Button
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full"
+              size="lg"
+              disabled={uploading}
+            >
+              <Upload className="w-5 h-5 mr-2" />
+              {uploading ? "Uploading..." : "Upload Photo/Video Proof"}
+            </Button>
+          </div>
+
+          {uploadedProofs.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-3">Your Dare Proofs</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {uploadedProofs.map((proof) => (
+                  <Card key={proof.id} className="overflow-hidden relative group">
+                    {proof.type === 'video' ? (
+                      <video
+                        src={proof.url}
+                        className="w-full h-40 object-cover"
+                        controls
+                      />
+                    ) : (
+                      <img
+                        src={proof.url}
+                        alt="Dare proof"
+                        className="w-full h-40 object-cover"
+                      />
+                    )}
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => handleShareToFeed(proof.url, proof.type)}
+                      disabled={uploading}
+                    >
+                      <Share2 className="w-4 h-4 mr-1" />
+                      Share to Feed
+                    </Button>
+                  </Card>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       </div>
