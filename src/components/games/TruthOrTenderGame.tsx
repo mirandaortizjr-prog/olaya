@@ -48,6 +48,7 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
   const [proofPreview, setProofPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [uploadedProofs, setUploadedProofs] = useState<Array<{ name: string; url: string; type: string }>>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load questions based on level
@@ -56,6 +57,45 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
     const loadedQuestions = generateTruthOrDareQuestions(level, language);
     setQuestions(loadedQuestions);
   }, [progress, language]);
+
+  // Fetch uploaded proofs
+  useEffect(() => {
+    const fetchProofs = async () => {
+      try {
+        const { data: files, error } = await supabase.storage
+          .from('truth-dare-proofs')
+          .list(`${userId}/`, {
+            limit: 100,
+            sortBy: { column: 'created_at', order: 'desc' }
+          });
+
+        if (error) throw error;
+
+        if (files) {
+          const proofsWithUrls = await Promise.all(
+            files.map(async (file) => {
+              const { data: urlData } = supabase.storage
+                .from('truth-dare-proofs')
+                .getPublicUrl(`${userId}/${file.name}`);
+              
+              return {
+                name: file.name,
+                url: urlData.publicUrl,
+                type: file.metadata?.mimetype || 'unknown'
+              };
+            })
+          );
+          setUploadedProofs(proofsWithUrls);
+        }
+      } catch (error) {
+        console.error('Error fetching proofs:', error);
+      }
+    };
+
+    if (userId) {
+      fetchProofs();
+    }
+  }, [userId, uploading]);
 
   // Check if already played today
   useEffect(() => {
@@ -715,16 +755,16 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
   // Render game finished
   if (gameMode === 'finished') {
     return (
-      <div className="fixed inset-0 bg-background z-50 flex flex-col">
-        <div className="flex items-center gap-2 p-4 border-b">
+      <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
+        <div className="flex items-center gap-2 p-4 border-b flex-shrink-0">
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h2 className="text-xl font-semibold">{t('truthOrTenderTitle')}</h2>
         </div>
 
-        <div className="flex-1 flex items-center justify-center p-4">
-          <Card className="p-8 text-center max-w-md bg-gradient-to-br from-pink-500/10 to-purple-500/10 border-pink-200 dark:border-pink-800">
+        <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-4">
+          <Card className="p-8 text-center bg-gradient-to-br from-pink-500/10 to-purple-500/10 border-pink-200 dark:border-pink-800">
             <div className="mb-4">
               <Heart className="w-20 h-20 text-pink-500 mx-auto" />
             </div>
@@ -753,6 +793,34 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
               {t('backToHome') || "Back to Home"}
             </Button>
           </Card>
+
+          {/* Uploaded Proofs Gallery */}
+          {uploadedProofs.length > 0 && (
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Camera className="w-5 h-5 text-primary" />
+                {t('truthOrDareYourProofs') || "Your Dare Proofs"}
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                {uploadedProofs.map((proof, index) => (
+                  <div key={index} className="relative group">
+                    {proof.type.startsWith('image/') ? (
+                      <img 
+                        src={proof.url} 
+                        alt={`Proof ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg border-2 border-border hover:border-primary transition-colors"
+                      />
+                    ) : (
+                      <div className="w-full h-32 bg-muted rounded-lg border-2 border-border hover:border-primary transition-colors flex flex-col items-center justify-center">
+                        <Camera className="w-8 h-8 text-muted-foreground mb-2" />
+                        <p className="text-xs text-muted-foreground">Video Proof</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
         </div>
       </div>
     );
