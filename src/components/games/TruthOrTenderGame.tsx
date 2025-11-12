@@ -315,30 +315,67 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
     }
 
     setProofFile(file);
-    setShowProofActions(true);
     
-    // Create preview for images
-    if (file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProofPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else if (file.type.startsWith('video/')) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProofPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setProofPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    
+    toast({
+      title: "Media uploaded",
+      description: "Review your proof below and choose an action",
+    });
   };
 
-  const handleConfirmAsProof = () => {
-    setShowProofActions(false);
-    toast({
-      title: "Proof ready",
-      description: "Press 'Confirm & Submit' to submit your answer with proof",
-    });
+  const handleConfirmAsProof = async () => {
+    if (!proofFile) return;
+    
+    setUploading(true);
+    try {
+      const fileExt = proofFile.name.split('.').pop();
+      const fileName = `${userId}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('truth-dare-proofs')
+        .upload(fileName, proofFile);
+
+      if (uploadError) throw uploadError;
+
+      // Update round
+      const currentRoundData = rounds[rounds.length - 1];
+      const updatedRounds = [...rounds];
+      updatedRounds[updatedRounds.length - 1] = {
+        ...currentRoundData,
+        answer: "Completed",
+        completed: true
+      };
+      setRounds(updatedRounds);
+      
+      setProofFile(null);
+      setProofPreview(null);
+      setGameMode('waiting');
+
+      toast({
+        title: "Proof confirmed!",
+        description: "Dare completed successfully",
+      });
+
+      // Auto-validate after upload
+      setTimeout(() => {
+        validateRound(true);
+      }, 2000);
+    } catch (error) {
+      console.error('Error uploading proof:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload proof",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handlePostToFeed = async () => {
@@ -369,8 +406,6 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
         });
 
       if (postError) throw postError;
-
-      setShowProofActions(false);
       
       toast({
         title: "Posted!",
@@ -391,68 +426,7 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
   // Render instructions
   if (gameMode === 'instructions') {
     return (
-      <>
-        {/* Proof Actions Modal */}
-        {showProofActions && proofFile && (
-          <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
-            <Card className="w-full max-w-md p-6 space-y-4">
-              <h3 className="text-xl font-bold text-center">Media Selected</h3>
-              
-              {/* Preview */}
-              {proofPreview && (
-                <div className="rounded-lg overflow-hidden bg-black max-h-64">
-                  {proofFile.type.startsWith('image/') ? (
-                    <img src={proofPreview} alt="Preview" className="w-full h-full object-contain" />
-                  ) : (
-                    <video src={proofPreview} controls className="w-full h-full object-contain" />
-                  )}
-                </div>
-              )}
-              
-              <p className="text-center text-sm text-muted-foreground">{proofFile.name}</p>
-              
-              <div className="space-y-3">
-                <Button
-                  onClick={handleConfirmAsProof}
-                  className="w-full h-auto py-4 flex flex-col items-center gap-2"
-                  disabled={uploading}
-                >
-                  <CheckCircle2 className="w-6 h-6" />
-                  <div>
-                    <div className="font-semibold">Confirm as Proof</div>
-                    <div className="text-xs opacity-80">Use for this dare challenge</div>
-                  </div>
-                </Button>
-                <Button
-                  onClick={handlePostToFeed}
-                  variant="secondary"
-                  className="w-full h-auto py-4 flex flex-col items-center gap-2"
-                  disabled={uploading}
-                >
-                  <Upload className="w-6 h-6" />
-                  <div>
-                    <div className="font-semibold">Post to Feed</div>
-                    <div className="text-xs opacity-80">Share on your dashboard</div>
-                  </div>
-                </Button>
-                <Button
-                  onClick={() => {
-                    setShowProofActions(false);
-                    setProofFile(null);
-                    setProofPreview(null);
-                  }}
-                  variant="ghost"
-                  className="w-full"
-                  disabled={uploading}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </Card>
-          </div>
-        )}
-
-        <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
+      <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
         <div className="flex items-center gap-2 p-4 border-b flex-shrink-0">
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="w-5 h-5" />
@@ -533,7 +507,6 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
           </Button>
         </div>
         </div>
-      </>
     );
   }
 
@@ -645,50 +618,84 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
               />
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <p className="text-sm text-center text-muted-foreground">
                 📸 {t('truthOrDareProofRequired')}
               </p>
-            
-              {proofPreview && (
-                <div className="relative">
-                  <img 
-                    src={proofPreview} 
-                    alt="Proof preview" 
-                    className="w-full h-48 object-cover rounded-lg"
-                  />
+
+              {!proofPreview && (
+                <div className="flex justify-center">
                   <Button
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-2 right-2"
-                    onClick={() => {
-                      setProofFile(null);
-                      setProofPreview(null);
-                    }}
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full"
+                    size="lg"
                   >
-                    <X className="w-4 h-4" />
+                    <Upload className="w-4 h-4 mr-2" />
+                    {t('truthOrDareUploadFile')}
                   </Button>
                 </div>
               )}
+            
+              {proofPreview && (
+                <Card className="p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-semibold">Proof preview</h4>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setProofFile(null);
+                        setProofPreview(null);
+                      }}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  
+                  {/* Gallery-style preview */}
+                  <div className="rounded-lg overflow-hidden bg-black">
+                    {proofFile?.type.startsWith('image/') ? (
+                      <img 
+                        src={proofPreview} 
+                        alt="Proof preview" 
+                        className="w-full h-64 object-contain"
+                      />
+                    ) : (
+                      <video 
+                        src={proofPreview} 
+                        controls 
+                        className="w-full h-64 object-contain"
+                      />
+                    )}
+                  </div>
 
-              {proofFile && !proofPreview && (
-                <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
-                  <p className="text-sm text-green-400 text-center">
-                    ✓ {t('truthOrDareVideoSelected')} {proofFile.name}
+                  <p className="text-xs text-muted-foreground text-center">
+                    {proofFile?.name}
                   </p>
-                </div>
-              )}
 
-              <div className="flex justify-center">
-                <Button
-                  variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full max-w-sm"
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  {t('truthOrDareUploadFile')}
-                </Button>
-              </div>
+                  {/* Action buttons */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      onClick={handleConfirmAsProof}
+                      className="w-full flex flex-col items-center gap-1 h-auto py-3"
+                      disabled={uploading}
+                    >
+                      <CheckCircle2 className="w-5 h-5" />
+                      <span className="text-xs">Confirm Proof</span>
+                    </Button>
+                    <Button
+                      onClick={handlePostToFeed}
+                      variant="secondary"
+                      className="w-full flex flex-col items-center gap-1 h-auto py-3"
+                      disabled={uploading}
+                    >
+                      <Upload className="w-5 h-5" />
+                      <span className="text-xs">Post to Feed</span>
+                    </Button>
+                  </div>
+                </Card>
+              )}
 
               <input
                 ref={fileInputRef}
@@ -702,16 +709,18 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
           )}
         </div>
 
-        <div className="p-4 border-t flex-shrink-0">
-          <Button 
-            onClick={submitAnswer} 
-            className="w-full" 
-            size="lg"
-            disabled={(isTruth && !answer.trim()) || (!isTruth && !proofFile) || uploading}
-          >
-            {uploading ? t('truthOrDareUploading') : (isTruth ? t('submit') : t('confirmCompleted'))}
-          </Button>
-        </div>
+        {isTruth && (
+          <div className="p-4 border-t flex-shrink-0">
+            <Button 
+              onClick={submitAnswer} 
+              className="w-full" 
+              size="lg"
+              disabled={!answer.trim() || uploading}
+            >
+              {uploading ? t('truthOrDareUploading') : t('submit')}
+            </Button>
+          </div>
+        )}
       </div>
     );
   }
