@@ -20,6 +20,13 @@ interface ProofMedia {
   url: string;
   type: string;
   created_at: string;
+  name: string;
+}
+
+interface ViewerState {
+  isOpen: boolean;
+  url: string;
+  type: string;
 }
 
 export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
@@ -31,6 +38,7 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
   const [questions, setQuestions] = useState<Array<{ truth: string; dare: string }>>([]);
   const [uploadedProofs, setUploadedProofs] = useState<ProofMedia[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [viewer, setViewer] = useState<ViewerState>({ isOpen: false, url: '', type: '' });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load questions
@@ -56,21 +64,26 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
         }
 
         if (files && files.length > 0) {
-          const proofsWithUrls = files
-            .filter(file => file.name !== '.emptyFolderPlaceholder')
-            .map((file) => {
-              const { data: urlData } = supabase.storage
-                .from('truth-dare-proofs')
-                .getPublicUrl(`${coupleId}/${file.name}`);
-              
-              return {
-                id: file.id,
-                url: urlData.publicUrl,
-                type: file.metadata?.mimetype?.startsWith('video') ? 'video' : 'image',
-                created_at: file.created_at || ''
-              };
-            });
-          setUploadedProofs(proofsWithUrls);
+          const proofsWithUrls = await Promise.all(
+            files
+              .filter(file => file.name !== '.emptyFolderPlaceholder')
+              .map(async (file) => {
+                const { data: urlData } = await supabase.storage
+                  .from('truth-dare-proofs')
+                  .createSignedUrl(`${coupleId}/${file.name}`, 604800); // 7 days
+                
+                const isVideo = file.name.toLowerCase().match(/\.(mp4|mov|avi|webm)$/);
+                
+                return {
+                  id: file.id,
+                  url: urlData?.signedUrl || '',
+                  type: isVideo ? 'video' : 'image',
+                  created_at: file.created_at || '',
+                  name: file.name
+                };
+              })
+          );
+          setUploadedProofs(proofsWithUrls.filter(p => p.url));
         }
       } catch (error) {
         console.error('Error fetching proofs:', error);
@@ -213,13 +226,22 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
               <h3 className="text-lg font-semibold mb-3">Dare Proofs Gallery</h3>
               <div className="grid grid-cols-2 gap-2">
                 {uploadedProofs.map((proof) => (
-                  <Card key={proof.id} className="overflow-hidden relative group">
+                  <Card 
+                    key={proof.id} 
+                    className="overflow-hidden relative group cursor-pointer"
+                    onClick={() => setViewer({ isOpen: true, url: proof.url, type: proof.type })}
+                  >
                     {proof.type === 'video' ? (
-                      <video
-                        src={proof.url}
-                        className="w-full h-40 object-cover"
-                        controls
-                      />
+                      <div className="w-full h-40 bg-muted flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-primary/20 flex items-center justify-center">
+                            <svg className="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+                            </svg>
+                          </div>
+                          <p className="text-sm text-muted-foreground">Video Proof</p>
+                        </div>
+                      </div>
                     ) : (
                       <img
                         src={proof.url}
@@ -231,7 +253,10 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
                       size="sm"
                       variant="secondary"
                       className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => handleShareToFeed(proof.url, proof.type)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleShareToFeed(proof.url, proof.type);
+                      }}
                       disabled={uploading}
                     >
                       <Share2 className="w-4 h-4 mr-1" />
@@ -239,6 +264,38 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
                     </Button>
                   </Card>
                 ))}
+              </div>
+            </div>
+          )}
+          
+          {viewer.isOpen && (
+            <div 
+              className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4"
+              onClick={() => setViewer({ isOpen: false, url: '', type: '' })}
+            >
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-4 right-4 text-white hover:bg-white/20"
+                onClick={() => setViewer({ isOpen: false, url: '', type: '' })}
+              >
+                <ArrowLeft className="w-6 h-6" />
+              </Button>
+              <div className="max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
+                {viewer.type === 'video' ? (
+                  <video
+                    src={viewer.url}
+                    className="w-full rounded-lg"
+                    controls
+                    autoPlay
+                  />
+                ) : (
+                  <img
+                    src={viewer.url}
+                    alt="Proof"
+                    className="w-full rounded-lg"
+                  />
+                )}
               </div>
             </div>
           )}
