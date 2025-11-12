@@ -48,8 +48,10 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
   const [proofPreview, setProofPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [showCameraPreview, setShowCameraPreview] = useState(false);
   const [uploadedProofs, setUploadedProofs] = useState<Array<{ name: string; url: string; type: string }>>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoPreviewRef = useRef<HTMLVideoElement>(null);
 
   // Load questions based on level
   useEffect(() => {
@@ -351,6 +353,14 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
     try {
       await videoRecording.recorder.startRecording();
       setIsRecording(true);
+      setShowCameraPreview(true);
+      
+      // Set video preview stream
+      const stream = videoRecording.recorder.getStream();
+      if (videoPreviewRef.current && stream) {
+        videoPreviewRef.current.srcObject = stream;
+      }
+      
       toast({
         title: t('truthOrDareRecordingStarted'),
         description: t('truthOrDareRecordingDesc'),
@@ -369,6 +379,12 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
     try {
       const recording = await videoRecording.recorder.stopRecording();
       setIsRecording(false);
+      setShowCameraPreview(false);
+      
+      // Clear video preview
+      if (videoPreviewRef.current) {
+        videoPreviewRef.current.srcObject = null;
+      }
       
       // Convert data URL to blob
       const response = await fetch(recording.dataUrl);
@@ -385,6 +401,10 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
     } catch (error) {
       console.error('Error stopping video recording:', error);
       setIsRecording(false);
+      setShowCameraPreview(false);
+      if (videoPreviewRef.current) {
+        videoPreviewRef.current.srcObject = null;
+      }
       toast({
         title: t('truthOrDareError'),
         description: t('truthOrDareRecordingFailed'),
@@ -396,7 +416,30 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
   // Render instructions
   if (gameMode === 'instructions') {
     return (
-      <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
+      <>
+        {/* Camera Preview Modal */}
+        {showCameraPreview && (
+          <div className="fixed inset-0 bg-black z-[100] flex flex-col">
+            <div className="flex items-center justify-between p-4 bg-black/50">
+              <p className="text-white font-semibold">{t('truthOrDareRecording') || "Recording..."}</p>
+              <Button
+                onClick={handleStopVideoRecording}
+                className="bg-red-500 hover:bg-red-600"
+              >
+                {t('truthOrDareStopRecording')}
+              </Button>
+            </div>
+            <video
+              ref={videoPreviewRef}
+              autoPlay
+              playsInline
+              muted
+              className="flex-1 w-full h-full object-cover"
+            />
+          </div>
+        )}
+
+        <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
         <div className="flex items-center gap-2 p-4 border-b flex-shrink-0">
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="w-5 h-5" />
@@ -476,14 +519,38 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
             {t('startNewGame') || "Start New Game"}
           </Button>
         </div>
-      </div>
+        </div>
+      </>
     );
   }
 
   // Render choose challenge mode
   if (gameMode === 'choose') {
     return (
-      <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
+      <>
+        {/* Camera Preview Modal */}
+        {showCameraPreview && (
+          <div className="fixed inset-0 bg-black z-[100] flex flex-col">
+            <div className="flex items-center justify-between p-4 bg-black/50">
+              <p className="text-white font-semibold">{t('truthOrDareRecording') || "Recording..."}</p>
+              <Button
+                onClick={handleStopVideoRecording}
+                className="bg-red-500 hover:bg-red-600"
+              >
+                {t('truthOrDareStopRecording')}
+              </Button>
+            </div>
+            <video
+              ref={videoPreviewRef}
+              autoPlay
+              playsInline
+              muted
+              className="flex-1 w-full h-full object-cover"
+            />
+          </div>
+        )}
+
+        <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
         <div className="flex items-center gap-2 p-4 border-b">
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="w-5 h-5" />
@@ -536,6 +603,7 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
           </div>
         </div>
       </div>
+      </>
     );
   }
 
@@ -545,7 +613,30 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
     const isTruth = currentRoundData.type === 'truth';
 
     return (
-      <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
+      <>
+        {/* Camera Preview Modal */}
+        {showCameraPreview && (
+          <div className="fixed inset-0 bg-black z-[100] flex flex-col">
+            <div className="flex items-center justify-between p-4 bg-black/50">
+              <p className="text-white font-semibold">{t('truthOrDareRecording') || "Recording..."}</p>
+              <Button
+                onClick={handleStopVideoRecording}
+                className="bg-red-500 hover:bg-red-600"
+              >
+                {t('truthOrDareStopRecording')}
+              </Button>
+            </div>
+            <video
+              ref={videoPreviewRef}
+              autoPlay
+              playsInline
+              muted
+              className="flex-1 w-full h-full object-cover"
+            />
+          </div>
+        )}
+
+        <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
         <div className="flex items-center gap-2 p-4 border-b">
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="w-5 h-5" />
@@ -688,13 +779,37 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
           </Button>
         </div>
       </div>
+      </>
     );
   }
 
   // Render waiting for validation
   if (gameMode === 'waiting') {
     return (
-      <div className="fixed inset-0 bg-background z-50 flex flex-col">
+      <>
+        {/* Camera Preview Modal */}
+        {showCameraPreview && (
+          <div className="fixed inset-0 bg-black z-[100] flex flex-col">
+            <div className="flex items-center justify-between p-4 bg-black/50">
+              <p className="text-white font-semibold">{t('truthOrDareRecording') || "Recording..."}</p>
+              <Button
+                onClick={handleStopVideoRecording}
+                className="bg-red-500 hover:bg-red-600"
+              >
+                {t('truthOrDareStopRecording')}
+              </Button>
+            </div>
+            <video
+              ref={videoPreviewRef}
+              autoPlay
+              playsInline
+              muted
+              className="flex-1 w-full h-full object-cover"
+            />
+          </div>
+        )}
+
+        <div className="fixed inset-0 bg-background z-50 flex flex-col">
         <div className="flex items-center gap-2 p-4 border-b">
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="w-5 h-5" />
@@ -712,13 +827,37 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
           </Card>
         </div>
       </div>
+      </>
     );
   }
 
   // Render round complete
   if (gameMode === 'complete') {
     return (
-      <div className="fixed inset-0 bg-background z-50 flex flex-col">
+      <>
+        {/* Camera Preview Modal */}
+        {showCameraPreview && (
+          <div className="fixed inset-0 bg-black z-[100] flex flex-col">
+            <div className="flex items-center justify-between p-4 bg-black/50">
+              <p className="text-white font-semibold">{t('truthOrDareRecording') || "Recording..."}</p>
+              <Button
+                onClick={handleStopVideoRecording}
+                className="bg-red-500 hover:bg-red-600"
+              >
+                {t('truthOrDareStopRecording')}
+              </Button>
+            </div>
+            <video
+              ref={videoPreviewRef}
+              autoPlay
+              playsInline
+              muted
+              className="flex-1 w-full h-full object-cover"
+            />
+          </div>
+        )}
+
+        <div className="fixed inset-0 bg-background z-50 flex flex-col">
         <div className="flex items-center gap-2 p-4 border-b">
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="w-5 h-5" />
@@ -749,13 +888,37 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
           </Card>
         </div>
       </div>
+      </>
     );
   }
 
   // Render game finished
   if (gameMode === 'finished') {
     return (
-      <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
+      <>
+        {/* Camera Preview Modal */}
+        {showCameraPreview && (
+          <div className="fixed inset-0 bg-black z-[100] flex flex-col">
+            <div className="flex items-center justify-between p-4 bg-black/50">
+              <p className="text-white font-semibold">{t('truthOrDareRecording') || "Recording..."}</p>
+              <Button
+                onClick={handleStopVideoRecording}
+                className="bg-red-500 hover:bg-red-600"
+              >
+                {t('truthOrDareStopRecording')}
+              </Button>
+            </div>
+            <video
+              ref={videoPreviewRef}
+              autoPlay
+              playsInline
+              muted
+              className="flex-1 w-full h-full object-cover"
+            />
+          </div>
+        )}
+
+        <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
         <div className="flex items-center gap-2 p-4 border-b flex-shrink-0">
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="w-5 h-5" />
@@ -823,6 +986,7 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
           )}
         </div>
       </div>
+      </>
     );
   }
 
