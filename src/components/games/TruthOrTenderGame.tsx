@@ -51,37 +51,54 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
   useEffect(() => {
     const fetchProofs = async () => {
       try {
-        const { data: files, error } = await supabase.storage
-          .from('truth-dare-proofs')
-          .list(`${coupleId}/`, {
-            limit: 100,
-            sortBy: { column: 'created_at', order: 'desc' }
-          });
+        // Fetch both partners' proofs: each user stores under their user_id folder
+        const { data: members, error: membersError } = await supabase
+          .from('couple_members')
+          .select('user_id')
+          .eq('couple_id', coupleId);
 
-        if (error) {
-          console.error('Error fetching proofs:', error);
-          return;
+        if (membersError) {
+          console.error('Error fetching couple members:', membersError);
         }
 
-        if (files && files.length > 0) {
+        const memberIds = (members?.map(m => m.user_id) || []).length > 0
+          ? members!.map(m => m.user_id)
+          : [userId];
+
+        const allFiles: Array<{ file: any; ownerId: string }> = [];
+        for (const ownerId of memberIds) {
+          const { data: files, error } = await supabase.storage
+            .from('truth-dare-proofs')
+            .list(`${ownerId}/`, {
+              limit: 100,
+              sortBy: { column: 'created_at', order: 'desc' }
+            });
+          if (error) {
+            console.error('Error listing proofs for', ownerId, error);
+            continue;
+          }
+          (files || [])
+            .filter(file => file.name !== '.emptyFolderPlaceholder')
+            .forEach(file => allFiles.push({ file, ownerId }));
+        }
+
+        if (allFiles.length > 0) {
           const proofsWithUrls = await Promise.all(
-            files
-              .filter(file => file.name !== '.emptyFolderPlaceholder')
-              .map(async (file) => {
-                const { data: urlData } = await supabase.storage
-                  .from('truth-dare-proofs')
-                  .createSignedUrl(`${coupleId}/${file.name}`, 604800); // 7 days
-                
-                const isVideo = file.name.toLowerCase().match(/\.(mp4|mov|avi|webm)$/);
-                
-                return {
-                  id: file.id,
-                  url: urlData?.signedUrl || '',
-                  type: isVideo ? 'video' : 'image',
-                  created_at: file.created_at || '',
-                  name: file.name
-                };
-              })
+            allFiles.map(async ({ file, ownerId }) => {
+              const { data: urlData } = await supabase.storage
+                .from('truth-dare-proofs')
+                .createSignedUrl(`${ownerId}/${file.name}`, 604800); // 7 days
+
+              const isVideo = /\.(mp4|mov|avi|webm)$/i.test(file.name);
+
+              return {
+                id: file.id || `${ownerId}/${file.name}`,
+                url: urlData?.signedUrl || '',
+                type: isVideo ? 'video' : 'image',
+                created_at: file.created_at || '',
+                name: file.name
+              } as ProofMedia;
+            })
           );
           setUploadedProofs(proofsWithUrls.filter(p => p.url));
         }
@@ -133,7 +150,7 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
       const fileExt = file.name.split('.').pop();
       const unique = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       const objectName = `${unique}.${fileExt}`;
-      const path = `${coupleId}/${objectName}`;
+      const path = `${userId}/${objectName}`;
       
       const { error: uploadError } = await supabase.storage
         .from('truth-dare-proofs')
