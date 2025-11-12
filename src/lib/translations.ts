@@ -879,6 +879,13 @@ export const translations = {
     truthOrDareError: "Error",
     truthOrDareFailedStart: "Failed to start challenge",
     truthOrDareFailedUpload: "Failed to upload proof. Please try again.",
+    truthOrDareRecordVideo: "Record Video",
+    truthOrDareStopRecording: "Stop Recording",
+    truthOrDareRecordingStarted: "Recording Started",
+    truthOrDareRecordingDesc: "Recording video proof...",
+    truthOrDareRecordingSaved: "Video Saved!",
+    truthOrDareRecordingSavedDesc: "Your video proof has been saved",
+    truthOrDareRecordingFailed: "Failed to record video. Please try again.",
   },
   es: {
     // Shop
@@ -1723,6 +1730,13 @@ export const translations = {
     truthOrDareError: "Error",
     truthOrDareFailedStart: "Fallo al iniciar desafío",
     truthOrDareFailedUpload: "Fallo al subir prueba. Por favor intenta de nuevo.",
+    truthOrDareRecordVideo: "Grabar Video",
+    truthOrDareStopRecording: "Detener Grabación",
+    truthOrDareRecordingStarted: "Grabación Iniciada",
+    truthOrDareRecordingDesc: "Grabando video de prueba...",
+    truthOrDareRecordingSaved: "¡Video Guardado!",
+    truthOrDareRecordingSavedDesc: "Tu video de prueba ha sido guardado",
+    truthOrDareRecordingFailed: "Fallo al grabar video. Por favor intenta de nuevo.",
     
     // Game: Truth or Tender - New keys only (others already exist)
     truthOrTenderTitle: "Verdad o Ternura",

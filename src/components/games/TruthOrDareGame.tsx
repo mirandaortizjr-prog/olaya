@@ -10,6 +10,7 @@ import { useCoupleProgress } from "@/hooks/useCoupleProgress";
 import { Camera as CapCamera } from "@capacitor/camera";
 import { CameraResultType, CameraSource } from "@capacitor/camera";
 import { generateTruthOrDareQuestions } from "@/lib/gameQuestions";
+import { videoRecording } from "@/utils/videoRecording";
 
 interface GameProps {
   coupleId: string;
@@ -38,6 +39,7 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [proofPreview, setProofPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -286,6 +288,52 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
     }
   };
 
+  const handleStartVideoRecording = async () => {
+    try {
+      await videoRecording.recorder.startRecording();
+      setIsRecording(true);
+      toast({
+        title: t('truthOrDareRecordingStarted'),
+        description: t('truthOrDareRecordingDesc'),
+      });
+    } catch (error) {
+      console.error('Error starting video recording:', error);
+      toast({
+        title: t('truthOrDareError'),
+        description: t('truthOrDareRecordingFailed'),
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleStopVideoRecording = async () => {
+    try {
+      const recording = await videoRecording.recorder.stopRecording();
+      setIsRecording(false);
+      
+      // Convert data URL to blob
+      const response = await fetch(recording.dataUrl);
+      const blob = await response.blob();
+      const file = new File([blob], `proof-${Date.now()}.webm`, { type: recording.mimeType });
+      
+      setProofFile(file);
+      setProofPreview(null); // No preview for videos
+      
+      toast({
+        title: t('truthOrDareRecordingSaved'),
+        description: t('truthOrDareRecordingSavedDesc'),
+      });
+    } catch (error) {
+      console.error('Error stopping video recording:', error);
+      setIsRecording(false);
+      toast({
+        title: t('truthOrDareError'),
+        description: t('truthOrDareRecordingFailed'),
+        variant: "destructive",
+      });
+    }
+  };
+
   const formatTime = (ms: number) => {
     const minutes = Math.floor(ms / 60000);
     const seconds = Math.floor((ms % 60000) / 1000);
@@ -371,6 +419,7 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
                     variant="outline"
                     onClick={handleTakePhoto}
                     className="w-full"
+                    disabled={isRecording}
                   >
                     <Camera className="w-4 h-4 mr-2" />
                     {t('truthOrDareTakePhoto')}
@@ -380,10 +429,33 @@ export const TruthOrDareGame = ({ coupleId, userId, onBack }: GameProps) => {
                     variant="outline"
                     onClick={() => fileInputRef.current?.click()}
                     className="w-full"
+                    disabled={isRecording}
                   >
                     <Upload className="w-4 h-4 mr-2" />
                     {t('truthOrDareUploadFile')}
                   </Button>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2">
+                  {!isRecording ? (
+                    <Button
+                      variant="outline"
+                      onClick={handleStartVideoRecording}
+                      className="w-full bg-red-500/10 hover:bg-red-500/20 border-red-500/30"
+                    >
+                      <Camera className="w-4 h-4 mr-2" />
+                      {t('truthOrDareRecordVideo')}
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="destructive"
+                      onClick={handleStopVideoRecording}
+                      className="w-full animate-pulse"
+                    >
+                      <Camera className="w-4 h-4 mr-2" />
+                      {t('truthOrDareStopRecording')}
+                    </Button>
+                  )}
                 </div>
 
                 <input
