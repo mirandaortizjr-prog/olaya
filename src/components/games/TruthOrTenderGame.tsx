@@ -50,6 +50,8 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [showCameraPreview, setShowCameraPreview] = useState(false);
   const [uploadedProofs, setUploadedProofs] = useState<Array<{ name: string; url: string; type: string }>>([]);
+  const [showUploadOptions, setShowUploadOptions] = useState(false);
+  const [recordedVideoBlob, setRecordedVideoBlob] = useState<Blob | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoPreviewRef = useRef<HTMLVideoElement>(null);
 
@@ -353,24 +355,27 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
 
   const handleStartVideoRecording = async () => {
     try {
-      await videoRecording.recorder.startRecording();
-      setIsRecording(true);
       setShowCameraPreview(true);
+      setIsRecording(true);
       
-      // Set video preview stream and ensure playback (iOS/Safari requires explicit play())
+      // Small delay to ensure DOM is ready
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      await videoRecording.recorder.startRecording();
+      
+      // Set video preview stream immediately after starting
       const stream = videoRecording.recorder.getStream();
       if (videoPreviewRef.current && stream) {
         const videoEl = videoPreviewRef.current;
         videoEl.srcObject = stream;
         videoEl.muted = true;
         videoEl.playsInline = true;
-        try {
-          await videoEl.play();
-        } catch {
-          setTimeout(() => {
-            videoEl.play().catch(() => {});
-          }, 50);
-        }
+        videoEl.autoplay = true;
+        
+        // Force play on mobile browsers
+        videoEl.onloadedmetadata = () => {
+          videoEl.play().catch(err => console.error('Play error:', err));
+        };
       }
       
       toast({
@@ -379,6 +384,8 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
       });
     } catch (error) {
       console.error('Error starting video recording:', error);
+      setShowCameraPreview(false);
+      setIsRecording(false);
       toast({
         title: t('truthOrDareError'),
         description: t('truthOrDareRecordingFailed'),
@@ -401,10 +408,9 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
       // Convert data URL to blob
       const response = await fetch(recording.dataUrl);
       const blob = await response.blob();
-      const file = new File([blob], `proof-${Date.now()}.webm`, { type: recording.mimeType });
       
       // Validate size for recorded video (max 100MB)
-      if (file.size > 100 * 1024 * 1024) {
+      if (blob.size > 100 * 1024 * 1024) {
         toast({
           title: t('truthOrDareFileTooLarge'),
           description: "Recorded video is over 100MB. Please record a shorter clip.",
@@ -413,12 +419,12 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
         return;
       }
       
-      setProofFile(file);
-      setProofPreview(null); // No preview for videos
+      setRecordedVideoBlob(blob);
+      setShowUploadOptions(true);
       
       toast({
         title: t('truthOrDareRecordingSaved'),
-        description: t('truthOrDareRecordingSavedDesc'),
+        description: "Choose where to upload your video",
       });
     } catch (error) {
       console.error('Error stopping video recording:', error);
@@ -435,6 +441,70 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
     }
   };
 
+  const handleUploadAsProof = async () => {
+    if (!recordedVideoBlob) return;
+    
+    const file = new File([recordedVideoBlob], `proof-${Date.now()}.webm`, { type: 'video/webm' });
+    setProofFile(file);
+    setProofPreview(null);
+    setShowUploadOptions(false);
+    setRecordedVideoBlob(null);
+    
+    toast({
+      title: "Video ready",
+      description: "Video set as proof. Press confirm to submit.",
+    });
+  };
+
+  const handlePostToDashboard = async () => {
+    if (!recordedVideoBlob) return;
+    
+    setUploading(true);
+    try {
+      const file = new File([recordedVideoBlob], `${Date.now()}.webm`, { type: 'video/webm' });
+      const fileName = `${coupleId}/${Date.now()}-${file.name}`;
+      
+      const { error: uploadError, data } = await supabase.storage
+        .from('couple_media')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('couple_media')
+        .getPublicUrl(fileName);
+
+      // Create post
+      const { error: postError } = await supabase
+        .from('posts')
+        .insert({
+          couple_id: coupleId,
+          author_id: userId,
+          content: "🎥 Truth or Tender moment",
+          media_urls: [urlData.publicUrl]
+        });
+
+      if (postError) throw postError;
+
+      setShowUploadOptions(false);
+      setRecordedVideoBlob(null);
+      
+      toast({
+        title: "Posted!",
+        description: "Your video has been shared to your feed",
+      });
+    } catch (error) {
+      console.error('Error posting video:', error);
+      toast({
+        title: "Error",
+        description: "Failed to post video to feed",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   // Render instructions
   if (gameMode === 'instructions') {
     return (
@@ -442,13 +512,14 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
         {/* Camera Preview Modal */}
         {showCameraPreview && (
           <div className="fixed inset-0 bg-black z-[100] flex flex-col">
-            <div className="flex items-center justify-between p-4 bg-black/50">
-              <p className="text-white font-semibold">{t('truthOrDareRecording') || "Recording..."}</p>
+            <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4 bg-gradient-to-b from-black/70 to-transparent z-10">
+              <p className="text-white font-semibold text-lg">{isRecording ? "Recording..." : "Starting camera..."}</p>
               <Button
                 onClick={handleStopVideoRecording}
-                className="bg-red-500 hover:bg-red-600"
+                disabled={!isRecording}
+                className="bg-red-500 hover:bg-red-600 text-white font-semibold px-6"
               >
-                {t('truthOrDareStopRecording')}
+                Stop Recording
               </Button>
             </div>
             <video
@@ -456,8 +527,54 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
               autoPlay
               playsInline
               muted
-              className="flex-1 w-full h-full object-cover"
+              className="w-full h-full object-cover"
             />
+          </div>
+        )}
+
+        {/* Upload Options Modal */}
+        {showUploadOptions && (
+          <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
+            <Card className="w-full max-w-md p-6 space-y-4">
+              <h3 className="text-xl font-bold text-center">Upload Video</h3>
+              <p className="text-center text-muted-foreground">Where would you like to share this video?</p>
+              <div className="space-y-3">
+                <Button
+                  onClick={handleUploadAsProof}
+                  className="w-full h-auto py-4 flex flex-col items-center gap-2"
+                  disabled={uploading}
+                >
+                  <CheckCircle2 className="w-6 h-6" />
+                  <div>
+                    <div className="font-semibold">Use as Proof</div>
+                    <div className="text-xs opacity-80">Upload for this dare challenge</div>
+                  </div>
+                </Button>
+                <Button
+                  onClick={handlePostToDashboard}
+                  variant="secondary"
+                  className="w-full h-auto py-4 flex flex-col items-center gap-2"
+                  disabled={uploading}
+                >
+                  <Upload className="w-6 h-6" />
+                  <div>
+                    <div className="font-semibold">Post to Feed</div>
+                    <div className="text-xs opacity-80">Share on your dashboard</div>
+                  </div>
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowUploadOptions(false);
+                    setRecordedVideoBlob(null);
+                  }}
+                  variant="ghost"
+                  className="w-full"
+                  disabled={uploading}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </Card>
           </div>
         )}
 
