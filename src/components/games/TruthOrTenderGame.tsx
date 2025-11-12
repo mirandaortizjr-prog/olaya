@@ -47,13 +47,9 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [proofPreview, setProofPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [showCameraPreview, setShowCameraPreview] = useState(false);
+  const [showProofActions, setShowProofActions] = useState(false);
   const [uploadedProofs, setUploadedProofs] = useState<Array<{ name: string; url: string; type: string }>>([]);
-  const [showUploadOptions, setShowUploadOptions] = useState(false);
-  const [recordedVideoBlob, setRecordedVideoBlob] = useState<Blob | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const videoPreviewRef = useRef<HTMLVideoElement>(null);
 
   // Load questions based on level
   useEffect(() => {
@@ -319,6 +315,7 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
     }
 
     setProofFile(file);
+    setShowProofActions(true);
     
     // Create preview for images
     if (file.type.startsWith('image/')) {
@@ -327,146 +324,33 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
         setProofPreview(reader.result as string);
       };
       reader.readAsDataURL(file);
-    } else {
-      setProofPreview(null);
+    } else if (file.type.startsWith('video/')) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProofPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleTakePhoto = async () => {
-    try {
-      const image = await CapCamera.getPhoto({
-        resultType: CameraResultType.Uri,
-        source: CameraSource.Camera,
-        quality: 80,
-      });
-
-      if (image.webPath) {
-        const response = await fetch(image.webPath);
-        const blob = await response.blob();
-        const file = new File([blob], `proof-${Date.now()}.jpg`, { type: 'image/jpeg' });
-        
-        setProofFile(file);
-        setProofPreview(image.webPath);
-      }
-    } catch (error) {
-      console.error('Camera error:', error);
-    }
-  };
-
-  const handleStartVideoRecording = async () => {
-    try {
-      setShowCameraPreview(true);
-      setIsRecording(true);
-      
-      // Small delay to ensure DOM is ready
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      await videoRecording.recorder.startRecording();
-      
-      // Set video preview stream immediately after starting
-      const stream = videoRecording.recorder.getStream();
-      if (videoPreviewRef.current && stream) {
-        const videoEl = videoPreviewRef.current;
-        videoEl.srcObject = stream;
-        videoEl.muted = true;
-        videoEl.playsInline = true;
-        videoEl.autoplay = true;
-        
-        // Force play on mobile browsers
-        videoEl.onloadedmetadata = () => {
-          videoEl.play().catch(err => console.error('Play error:', err));
-        };
-      }
-      
-      toast({
-        title: t('truthOrDareRecordingStarted'),
-        description: t('truthOrDareRecordingDesc'),
-      });
-    } catch (error) {
-      console.error('Error starting video recording:', error);
-      setShowCameraPreview(false);
-      setIsRecording(false);
-      toast({
-        title: t('truthOrDareError'),
-        description: t('truthOrDareRecordingFailed'),
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleStopVideoRecording = async () => {
-    try {
-      const recording = await videoRecording.recorder.stopRecording();
-      setIsRecording(false);
-      setShowCameraPreview(false);
-      
-      // Clear video preview
-      if (videoPreviewRef.current) {
-        videoPreviewRef.current.srcObject = null;
-      }
-      
-      // Convert data URL to blob
-      const response = await fetch(recording.dataUrl);
-      const blob = await response.blob();
-      
-      // Validate size for recorded video (max 100MB)
-      if (blob.size > 100 * 1024 * 1024) {
-        toast({
-          title: t('truthOrDareFileTooLarge'),
-          description: "Recorded video is over 100MB. Please record a shorter clip.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      setRecordedVideoBlob(blob);
-      setShowUploadOptions(true);
-      
-      toast({
-        title: t('truthOrDareRecordingSaved'),
-        description: "Choose where to upload your video",
-      });
-    } catch (error) {
-      console.error('Error stopping video recording:', error);
-      setIsRecording(false);
-      setShowCameraPreview(false);
-      if (videoPreviewRef.current) {
-        videoPreviewRef.current.srcObject = null;
-      }
-      toast({
-        title: t('truthOrDareError'),
-        description: t('truthOrDareRecordingFailed'),
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleUploadAsProof = async () => {
-    if (!recordedVideoBlob) return;
-    
-    const file = new File([recordedVideoBlob], `proof-${Date.now()}.webm`, { type: 'video/webm' });
-    setProofFile(file);
-    setProofPreview(null);
-    setShowUploadOptions(false);
-    setRecordedVideoBlob(null);
-    
+  const handleConfirmAsProof = () => {
+    setShowProofActions(false);
     toast({
-      title: "Video ready",
-      description: "Video set as proof. Press confirm to submit.",
+      title: "Proof ready",
+      description: "Press 'Confirm & Submit' to submit your answer with proof",
     });
   };
 
-  const handlePostToDashboard = async () => {
-    if (!recordedVideoBlob) return;
+  const handlePostToFeed = async () => {
+    if (!proofFile) return;
     
     setUploading(true);
     try {
-      const file = new File([recordedVideoBlob], `${Date.now()}.webm`, { type: 'video/webm' });
-      const fileName = `${coupleId}/${Date.now()}-${file.name}`;
+      const fileName = `${coupleId}/${Date.now()}-${proofFile.name}`;
       
-      const { error: uploadError, data } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('couple_media')
-        .upload(fileName, file);
+        .upload(fileName, proofFile);
 
       if (uploadError) throw uploadError;
 
@@ -486,18 +370,17 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
 
       if (postError) throw postError;
 
-      setShowUploadOptions(false);
-      setRecordedVideoBlob(null);
+      setShowProofActions(false);
       
       toast({
         title: "Posted!",
-        description: "Your video has been shared to your feed",
+        description: "Your media has been shared to your feed",
       });
     } catch (error) {
-      console.error('Error posting video:', error);
+      console.error('Error posting to feed:', error);
       toast({
         title: "Error",
-        description: "Failed to post video to feed",
+        description: "Failed to post to feed",
         variant: "destructive",
       });
     } finally {
@@ -509,49 +392,39 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
   if (gameMode === 'instructions') {
     return (
       <>
-        {/* Camera Preview Modal */}
-        {showCameraPreview && (
-          <div className="fixed inset-0 bg-black z-[100] flex flex-col">
-            <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4 bg-gradient-to-b from-black/70 to-transparent z-10">
-              <p className="text-white font-semibold text-lg">{isRecording ? "Recording..." : "Starting camera..."}</p>
-              <Button
-                onClick={handleStopVideoRecording}
-                disabled={!isRecording}
-                className="bg-red-500 hover:bg-red-600 text-white font-semibold px-6"
-              >
-                Stop Recording
-              </Button>
-            </div>
-            <video
-              ref={videoPreviewRef}
-              autoPlay
-              playsInline
-              muted
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
-
-        {/* Upload Options Modal */}
-        {showUploadOptions && (
+        {/* Proof Actions Modal */}
+        {showProofActions && proofFile && (
           <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
             <Card className="w-full max-w-md p-6 space-y-4">
-              <h3 className="text-xl font-bold text-center">Upload Video</h3>
-              <p className="text-center text-muted-foreground">Where would you like to share this video?</p>
+              <h3 className="text-xl font-bold text-center">Media Selected</h3>
+              
+              {/* Preview */}
+              {proofPreview && (
+                <div className="rounded-lg overflow-hidden bg-black max-h-64">
+                  {proofFile.type.startsWith('image/') ? (
+                    <img src={proofPreview} alt="Preview" className="w-full h-full object-contain" />
+                  ) : (
+                    <video src={proofPreview} controls className="w-full h-full object-contain" />
+                  )}
+                </div>
+              )}
+              
+              <p className="text-center text-sm text-muted-foreground">{proofFile.name}</p>
+              
               <div className="space-y-3">
                 <Button
-                  onClick={handleUploadAsProof}
+                  onClick={handleConfirmAsProof}
                   className="w-full h-auto py-4 flex flex-col items-center gap-2"
                   disabled={uploading}
                 >
                   <CheckCircle2 className="w-6 h-6" />
                   <div>
-                    <div className="font-semibold">Use as Proof</div>
-                    <div className="text-xs opacity-80">Upload for this dare challenge</div>
+                    <div className="font-semibold">Confirm as Proof</div>
+                    <div className="text-xs opacity-80">Use for this dare challenge</div>
                   </div>
                 </Button>
                 <Button
-                  onClick={handlePostToDashboard}
+                  onClick={handlePostToFeed}
                   variant="secondary"
                   className="w-full h-auto py-4 flex flex-col items-center gap-2"
                   disabled={uploading}
@@ -564,8 +437,9 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
                 </Button>
                 <Button
                   onClick={() => {
-                    setShowUploadOptions(false);
-                    setRecordedVideoBlob(null);
+                    setShowProofActions(false);
+                    setProofFile(null);
+                    setProofPreview(null);
                   }}
                   variant="ghost"
                   className="w-full"
@@ -666,30 +540,7 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
   // Render choose challenge mode
   if (gameMode === 'choose') {
     return (
-      <>
-        {/* Camera Preview Modal */}
-        {showCameraPreview && (
-          <div className="fixed inset-0 bg-black z-[100] flex flex-col">
-            <div className="flex items-center justify-between p-4 bg-black/50">
-              <p className="text-white font-semibold">{t('truthOrDareRecording') || "Recording..."}</p>
-              <Button
-                onClick={handleStopVideoRecording}
-                className="bg-red-500 hover:bg-red-600"
-              >
-                {t('truthOrDareStopRecording')}
-              </Button>
-            </div>
-            <video
-              ref={videoPreviewRef}
-              autoPlay
-              playsInline
-              muted
-              className="flex-1 w-full h-full object-cover"
-            />
-          </div>
-        )}
-
-        <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
+      <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
         <div className="flex items-center gap-2 p-4 border-b">
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="w-5 h-5" />
@@ -742,7 +593,6 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
           </div>
         </div>
       </div>
-      </>
     );
   }
 
@@ -752,30 +602,7 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
     const isTruth = currentRoundData.type === 'truth';
 
     return (
-      <>
-        {/* Camera Preview Modal */}
-        {showCameraPreview && (
-          <div className="fixed inset-0 bg-black z-[100] flex flex-col">
-            <div className="flex items-center justify-between p-4 bg-black/50">
-              <p className="text-white font-semibold">{t('truthOrDareRecording') || "Recording..."}</p>
-              <Button
-                onClick={handleStopVideoRecording}
-                className="bg-red-500 hover:bg-red-600"
-              >
-                {t('truthOrDareStopRecording')}
-              </Button>
-            </div>
-            <video
-              ref={videoPreviewRef}
-              autoPlay
-              playsInline
-              muted
-              className="flex-1 w-full h-full object-cover"
-            />
-          </div>
-        )}
-
-        <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
+      <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
         <div className="flex items-center gap-2 p-4 border-b">
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="w-5 h-5" />
@@ -852,48 +679,15 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="outline"
-                  onClick={handleTakePhoto}
-                  className="w-full"
-                  disabled={isRecording}
-                >
-                  <Camera className="w-4 h-4 mr-2" />
-                  {t('truthOrDareTakePhoto')}
-                </Button>
-                
+              <div className="flex justify-center">
                 <Button
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full"
-                  disabled={isRecording}
+                  className="w-full max-w-sm"
                 >
                   <Upload className="w-4 h-4 mr-2" />
                   {t('truthOrDareUploadFile')}
                 </Button>
-              </div>
-
-              <div className="grid grid-cols-1 gap-2">
-                {!isRecording ? (
-                  <Button
-                    variant="outline"
-                    onClick={handleStartVideoRecording}
-                    className="w-full bg-red-500/10 hover:bg-red-500/20 border-red-500/30"
-                  >
-                    <Camera className="w-4 h-4 mr-2" />
-                    {t('truthOrDareRecordVideo')}
-                  </Button>
-                ) : (
-                  <Button
-                    variant="destructive"
-                    onClick={handleStopVideoRecording}
-                    className="w-full animate-pulse"
-                  >
-                    <Camera className="w-4 h-4 mr-2" />
-                    {t('truthOrDareStopRecording')}
-                  </Button>
-                )}
               </div>
 
               <input
@@ -919,37 +713,13 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
           </Button>
         </div>
       </div>
-      </>
     );
   }
 
   // Render waiting for validation
   if (gameMode === 'waiting') {
     return (
-      <>
-        {/* Camera Preview Modal */}
-        {showCameraPreview && (
-          <div className="fixed inset-0 bg-black z-[100] flex flex-col">
-            <div className="flex items-center justify-between p-4 bg-black/50">
-              <p className="text-white font-semibold">{t('truthOrDareRecording') || "Recording..."}</p>
-              <Button
-                onClick={handleStopVideoRecording}
-                className="bg-red-500 hover:bg-red-600"
-              >
-                {t('truthOrDareStopRecording')}
-              </Button>
-            </div>
-            <video
-              ref={videoPreviewRef}
-              autoPlay
-              playsInline
-              muted
-              className="flex-1 w-full h-full object-cover"
-            />
-          </div>
-        )}
-
-        <div className="fixed inset-0 bg-background z-50 flex flex-col">
+      <div className="fixed inset-0 bg-background z-50 flex flex-col">
         <div className="flex items-center gap-2 p-4 border-b">
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="w-5 h-5" />
@@ -967,98 +737,13 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
           </Card>
         </div>
       </div>
-      </>
     );
   }
 
   // Render round complete
   if (gameMode === 'complete') {
     return (
-      <>
-        {/* Camera Preview Modal */}
-        {showCameraPreview && (
-          <div className="fixed inset-0 bg-black z-[100] flex flex-col">
-            <div className="flex items-center justify-between p-4 bg-black/50">
-              <p className="text-white font-semibold">{t('truthOrDareRecording') || "Recording..."}</p>
-              <Button
-                onClick={handleStopVideoRecording}
-                className="bg-red-500 hover:bg-red-600"
-              >
-                {t('truthOrDareStopRecording')}
-              </Button>
-            </div>
-            <video
-              ref={videoPreviewRef}
-              autoPlay
-              playsInline
-              muted
-              className="flex-1 w-full h-full object-cover"
-            />
-          </div>
-        )}
-
-        <div className="fixed inset-0 bg-background z-50 flex flex-col">
-        <div className="flex items-center gap-2 p-4 border-b">
-          <Button variant="ghost" size="icon" onClick={onBack}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h2 className="text-xl font-semibold">{t('truthOrTenderTitle')}</h2>
-        </div>
-
-        <div className="flex-1 flex items-center justify-center p-4">
-          <Card className="p-8 text-center max-w-md">
-            <div className="mb-4">
-              <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
-            </div>
-            <h3 className="text-2xl font-bold mb-2">{t('roundComplete')}</h3>
-            <p className="text-muted-foreground mb-6">
-              {t('roundsCompleted')}: {currentRound}/5
-            </p>
-            
-            <div className="space-y-3">
-              <Button onClick={nextRound} className="w-full" size="lg">
-                {currentRound >= 5 ? t('finishGame') || "Finish Game" : t('nextRound') || "Next Round"}
-              </Button>
-              {currentRound >= 5 && (
-                <Button onClick={finishGame} variant="outline" className="w-full">
-                  {t('finishGame') || "Finish Game"}
-                </Button>
-              )}
-            </div>
-          </Card>
-        </div>
-      </div>
-      </>
-    );
-  }
-
-  // Render game finished
-  if (gameMode === 'finished') {
-    return (
-      <>
-        {/* Camera Preview Modal */}
-        {showCameraPreview && (
-          <div className="fixed inset-0 bg-black z-[100] flex flex-col">
-            <div className="flex items-center justify-between p-4 bg-black/50">
-              <p className="text-white font-semibold">{t('truthOrDareRecording') || "Recording..."}</p>
-              <Button
-                onClick={handleStopVideoRecording}
-                className="bg-red-500 hover:bg-red-600"
-              >
-                {t('truthOrDareStopRecording')}
-              </Button>
-            </div>
-            <video
-              ref={videoPreviewRef}
-              autoPlay
-              playsInline
-              muted
-              className="flex-1 w-full h-full object-cover"
-            />
-          </div>
-        )}
-
-        <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
+      <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
         <div className="flex items-center gap-2 p-4 border-b flex-shrink-0">
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="w-5 h-5" />
@@ -1126,7 +811,6 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
           )}
         </div>
       </div>
-      </>
     );
   }
 
