@@ -1,14 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Heart, MessageSquare, Sparkles, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Heart, MessageSquare, Sparkles, CheckCircle2, Upload, Camera, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useCoupleProgress } from "@/hooks/useCoupleProgress";
 import { useTogetherCoins } from "@/hooks/useTogetherCoins";
 import { generateTruthOrDareQuestions } from "@/lib/gameQuestions";
+import { Camera as CapCamera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { videoRecording } from "@/utils/videoRecording";
 
 interface GameProps {
   coupleId: string;
@@ -42,6 +44,11 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
   const [questions, setQuestions] = useState<Array<{ truth: string; dare: string }>>([]);
   const [hasPlayedToday, setHasPlayedToday] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [proofPreview, setProofPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load questions based on level
   useEffect(() => {
@@ -110,21 +117,62 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
       return;
     }
 
-    // Update round with answer
-    const updatedRounds = [...rounds];
-    updatedRounds[updatedRounds.length - 1] = {
-      ...currentRoundData,
-      answer: answer || "Completed",
-      completed: true
-    };
-    setRounds(updatedRounds);
-    setGameMode('waiting');
+    // Require proof for tender (dare) challenges
+    if (currentRoundData.type === 'tender' && !proofFile) {
+      toast({
+        title: t('truthOrDareProofNeeded'),
+        description: t('truthOrDareProofNeedDesc'),
+        variant: "destructive",
+      });
+      return;
+    }
 
-    // Wait for partner validation (in real app, this would be real-time)
-    // For now, simulate validation after 2 seconds
-    setTimeout(() => {
-      validateRound(true);
-    }, 2000);
+    setUploading(true);
+
+    try {
+      let fileName = null;
+
+      // Upload proof file if provided
+      if (proofFile) {
+        const fileExt = proofFile.name.split('.').pop();
+        fileName = `${userId}/${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('truth-dare-proofs')
+          .upload(fileName, proofFile);
+
+        if (uploadError) throw uploadError;
+      }
+
+      // Update round with answer and proof
+      const updatedRounds = [...rounds];
+      updatedRounds[updatedRounds.length - 1] = {
+        ...currentRoundData,
+        answer: answer || "Completed",
+        completed: true
+      };
+      setRounds(updatedRounds);
+      
+      // Clean up proof files
+      setProofFile(null);
+      setProofPreview(null);
+      setGameMode('waiting');
+
+      // Wait for partner validation (in real app, this would be real-time)
+      // For now, simulate validation after 2 seconds
+      setTimeout(() => {
+        validateRound(true);
+      }, 2000);
+    } catch (error) {
+      console.error('Error uploading proof:', error);
+      toast({
+        title: t('truthOrDareError'),
+        description: t('truthOrDareFailedUpload'),
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const validateRound = (isValid: boolean) => {
@@ -206,6 +254,103 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
     setCurrentRound(0);
     setRounds([]);
     setAnswer("");
+    setProofFile(null);
+    setProofPreview(null);
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: t('truthOrDareFileTooLarge'),
+        description: t('truthOrDareFileSizeLimit'),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setProofFile(file);
+    
+    // Create preview for images
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProofPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setProofPreview(null);
+    }
+  };
+
+  const handleTakePhoto = async () => {
+    try {
+      const image = await CapCamera.getPhoto({
+        resultType: CameraResultType.Uri,
+        source: CameraSource.Camera,
+        quality: 80,
+      });
+
+      if (image.webPath) {
+        const response = await fetch(image.webPath);
+        const blob = await response.blob();
+        const file = new File([blob], `proof-${Date.now()}.jpg`, { type: 'image/jpeg' });
+        
+        setProofFile(file);
+        setProofPreview(image.webPath);
+      }
+    } catch (error) {
+      console.error('Camera error:', error);
+    }
+  };
+
+  const handleStartVideoRecording = async () => {
+    try {
+      await videoRecording.recorder.startRecording();
+      setIsRecording(true);
+      toast({
+        title: t('truthOrDareRecordingStarted'),
+        description: t('truthOrDareRecordingDesc'),
+      });
+    } catch (error) {
+      console.error('Error starting video recording:', error);
+      toast({
+        title: t('truthOrDareError'),
+        description: t('truthOrDareRecordingFailed'),
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleStopVideoRecording = async () => {
+    try {
+      const recording = await videoRecording.recorder.stopRecording();
+      setIsRecording(false);
+      
+      // Convert data URL to blob
+      const response = await fetch(recording.dataUrl);
+      const blob = await response.blob();
+      const file = new File([blob], `proof-${Date.now()}.webm`, { type: recording.mimeType });
+      
+      setProofFile(file);
+      setProofPreview(null); // No preview for videos
+      
+      toast({
+        title: t('truthOrDareRecordingSaved'),
+        description: t('truthOrDareRecordingSavedDesc'),
+      });
+    } catch (error) {
+      console.error('Error stopping video recording:', error);
+      setIsRecording(false);
+      toast({
+        title: t('truthOrDareError'),
+        description: t('truthOrDareRecordingFailed'),
+        variant: "destructive",
+      });
+    }
   };
 
   // Render instructions
@@ -403,11 +548,92 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
               />
             </div>
           ) : (
-            <Card className="p-4 bg-muted/50">
-              <p className="text-sm text-muted-foreground text-center">
-                {t('confirmCompleted')}
+            <div className="space-y-3">
+              <p className="text-sm text-center text-muted-foreground">
+                📸 {t('truthOrDareProofRequired')}
               </p>
-            </Card>
+            
+              {proofPreview && (
+                <div className="relative">
+                  <img 
+                    src={proofPreview} 
+                    alt="Proof preview" 
+                    className="w-full h-48 object-cover rounded-lg"
+                  />
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2"
+                    onClick={() => {
+                      setProofFile(null);
+                      setProofPreview(null);
+                    }}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+
+              {proofFile && !proofPreview && (
+                <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+                  <p className="text-sm text-green-400 text-center">
+                    ✓ {t('truthOrDareVideoSelected')} {proofFile.name}
+                  </p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  onClick={handleTakePhoto}
+                  className="w-full"
+                  disabled={isRecording}
+                >
+                  <Camera className="w-4 h-4 mr-2" />
+                  {t('truthOrDareTakePhoto')}
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full"
+                  disabled={isRecording}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  {t('truthOrDareUploadFile')}
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 gap-2">
+                {!isRecording ? (
+                  <Button
+                    variant="outline"
+                    onClick={handleStartVideoRecording}
+                    className="w-full bg-red-500/10 hover:bg-red-500/20 border-red-500/30"
+                  >
+                    <Camera className="w-4 h-4 mr-2" />
+                    {t('truthOrDareRecordVideo')}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="destructive"
+                    onClick={handleStopVideoRecording}
+                    className="w-full animate-pulse"
+                  >
+                    <Camera className="w-4 h-4 mr-2" />
+                    {t('truthOrDareStopRecording')}
+                  </Button>
+                )}
+              </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*,video/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+            </div>
           )}
         </div>
 
@@ -416,9 +642,9 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
             onClick={submitAnswer} 
             className="w-full" 
             size="lg"
-            disabled={isTruth && !answer.trim()}
+            disabled={(isTruth && !answer.trim()) || (!isTruth && !proofFile) || uploading}
           >
-            {isTruth ? t('submit') : t('confirmCompleted')}
+            {uploading ? t('truthOrDareUploading') : (isTruth ? t('submit') : t('confirmCompleted'))}
           </Button>
         </div>
       </div>
