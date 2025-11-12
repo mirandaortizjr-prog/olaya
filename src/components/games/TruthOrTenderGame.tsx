@@ -304,11 +304,13 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file size (10MB)
-    if (file.size > 10 * 1024 * 1024) {
+    // Validate file size (15MB images, 100MB videos)
+    const isVideo = file.type.startsWith('video/');
+    const maxSize = isVideo ? 100 * 1024 * 1024 : 15 * 1024 * 1024;
+    if (file.size > maxSize) {
       toast({
         title: t('truthOrDareFileTooLarge'),
-        description: t('truthOrDareFileSizeLimit'),
+        description: isVideo ? "Please upload videos up to 100MB." : "Please upload photos up to 15MB.",
         variant: "destructive",
       });
       return;
@@ -355,10 +357,20 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
       setIsRecording(true);
       setShowCameraPreview(true);
       
-      // Set video preview stream
+      // Set video preview stream and ensure playback (iOS/Safari requires explicit play())
       const stream = videoRecording.recorder.getStream();
       if (videoPreviewRef.current && stream) {
-        videoPreviewRef.current.srcObject = stream;
+        const videoEl = videoPreviewRef.current;
+        videoEl.srcObject = stream;
+        videoEl.muted = true;
+        videoEl.playsInline = true;
+        try {
+          await videoEl.play();
+        } catch {
+          setTimeout(() => {
+            videoEl.play().catch(() => {});
+          }, 50);
+        }
       }
       
       toast({
@@ -390,6 +402,16 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
       const response = await fetch(recording.dataUrl);
       const blob = await response.blob();
       const file = new File([blob], `proof-${Date.now()}.webm`, { type: recording.mimeType });
+      
+      // Validate size for recorded video (max 100MB)
+      if (file.size > 100 * 1024 * 1024) {
+        toast({
+          title: t('truthOrDareFileTooLarge'),
+          description: "Recorded video is over 100MB. Please record a shorter clip.",
+          variant: "destructive",
+        });
+        return;
+      }
       
       setProofFile(file);
       setProofPreview(null); // No preview for videos
@@ -761,6 +783,7 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
                 ref={fileInputRef}
                 type="file"
                 accept="image/*,video/*"
+                capture="user"
                 onChange={handleFileSelect}
                 className="hidden"
               />
