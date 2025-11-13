@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Upload, Share2, Check } from "lucide-react";
+import { ArrowLeft, Upload, Share2, Check, Trash2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -333,6 +333,45 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
     }
   };
 
+  const handleDeleteProof = async (proof: ProofMedia) => {
+    try {
+      // Extract the file path from the proof id (format: userId/filename)
+      const filePath = proof.id;
+      
+      // Only allow deletion if it's the user's own proof
+      if (!filePath.startsWith(userId)) {
+        toast({
+          title: "Cannot delete",
+          description: "You can only delete your own proofs",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Delete from storage
+      const { error: deleteError } = await supabase.storage
+        .from('truth-dare-proofs')
+        .remove([filePath]);
+
+      if (deleteError) throw deleteError;
+
+      // Update local state
+      setUploadedProofs(prev => prev.filter(p => p.id !== proof.id));
+
+      toast({
+        title: "Proof deleted",
+        description: "Your dare proof has been removed",
+      });
+    } catch (error) {
+      console.error('Error deleting proof:', error);
+      toast({
+        title: "Delete failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Choose mode - Truth or Dare buttons
   if (gameMode === 'choose') {
     return (
@@ -584,16 +623,26 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
                         className="w-full h-40 object-cover"
                       />
                     )}
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => handleShareToFeed(proof.url, proof.type)}
-                      disabled={uploading}
-                    >
-                      <Share2 className="w-4 h-4 mr-1" />
-                      Share to Feed
-                    </Button>
+                    <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => handleShareToFeed(proof.url, proof.type)}
+                        disabled={uploading}
+                      >
+                        <Share2 className="w-4 h-4 mr-1" />
+                        Share
+                      </Button>
+                      {proof.id.startsWith(userId) && (
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleDeleteProof(proof)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
                   </Card>
                 ))}
               </div>
