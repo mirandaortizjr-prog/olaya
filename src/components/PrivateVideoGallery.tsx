@@ -118,7 +118,8 @@ export const PrivateVideoGallery = ({ coupleId, userId }: PrivateVideoGalleryPro
   };
 
   const getVideoUrl = async (path: string) => {
-    const { data } = await supabase.storage.from('couple_media').createSignedUrl(path, 3600);
+    // 7-day expiration for better caching
+    const { data } = await supabase.storage.from('couple_media').createSignedUrl(path, 604800);
     return data?.signedUrl;
   };
 
@@ -278,7 +279,8 @@ export const PrivateVideoGallery = ({ coupleId, userId }: PrivateVideoGalleryPro
                 <video
                   src={video.file_path}
                   className="w-full h-full object-cover"
-                  preload="metadata"
+                  preload="none"
+                  playsInline
                 />
                 <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/50 transition-colors">
                   <Play className="w-12 h-12 text-white" fill="white" />
@@ -318,6 +320,7 @@ export const PrivateVideoGallery = ({ coupleId, userId }: PrivateVideoGalleryPro
               style={{
                 transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
               }}
+              preload="metadata"
               autoPlay
               controls={false}
               onPlay={() => setIsPlaying(true)}

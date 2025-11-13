@@ -467,6 +467,8 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
                     className="w-full rounded-lg"
                     controls
                     autoPlay
+                    preload="metadata"
+                    playsInline
                   />
                 ) : (
                   <img
@@ -572,6 +574,8 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
                         src={proof.url}
                         className="w-full h-40 object-cover"
                         controls
+                        preload="none"
+                        playsInline
                       />
                     ) : (
                       <img

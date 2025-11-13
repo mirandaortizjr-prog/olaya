@@ -192,9 +192,10 @@ export const MediaSharing = ({ coupleId, userId, partnerName }: MediaSharingProp
   };
 
   const viewMedia = async (mediaItem: SharedMedia) => {
+    // 7-day expiration for better caching
     const { data } = await supabase.storage
       .from('couple_media')
-      .createSignedUrl(mediaItem.file_path, 3600);
+      .createSignedUrl(mediaItem.file_path, 604800);
 
     if (data?.signedUrl) {
       setViewingMedia(mediaItem);
@@ -255,7 +256,7 @@ export const MediaSharing = ({ coupleId, userId, partnerName }: MediaSharingProp
                       {selectedFile.type.startsWith('image/') ? (
                         <img src={previewUrl} alt="Preview" className="rounded-lg w-full" />
                       ) : (
-                        <video src={previewUrl} className="rounded-lg w-full" controls />
+                        <video src={previewUrl} className="rounded-lg w-full" controls preload="metadata" playsInline />
                       )}
                       <Button
                         size="sm"
@@ -318,7 +319,7 @@ export const MediaSharing = ({ coupleId, userId, partnerName }: MediaSharingProp
               {viewingMedia.file_type === 'image' ? (
                 <img src={viewingUrl} alt="Shared media" className="w-full rounded-lg" />
               ) : (
-                <video src={viewingUrl} className="w-full rounded-lg" controls />
+                <video src={viewingUrl} className="w-full rounded-lg" controls preload="metadata" playsInline />
               )}
               {viewingMedia.caption && (
                 <p className="text-sm text-muted-foreground">{viewingMedia.caption}</p>
@@ -346,9 +347,10 @@ const MediaThumbnail = ({ item, userId, partnerName, onView, onDelete, getTimeSi
 
   useEffect(() => {
     const loadThumbnail = async () => {
+      // 7-day expiration for better caching
       const { data } = await supabase.storage
         .from('couple_media')
-        .createSignedUrl(item.file_path, 3600);
+        .createSignedUrl(item.file_path, 604800);
 
       if (data?.signedUrl) {
         setThumbnailUrl(data.signedUrl);
@@ -366,7 +368,7 @@ const MediaThumbnail = ({ item, userId, partnerName, onView, onDelete, getTimeSi
             <img src={thumbnailUrl} alt="Thumbnail" className="w-full h-full object-cover" />
           ) : (
             <div className="relative w-full h-full">
-              <video src={thumbnailUrl} className="w-full h-full object-cover" />
+              <video src={thumbnailUrl} className="w-full h-full object-cover" preload="none" playsInline />
               <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                 <Video className="h-8 w-8 text-white" />
               </div>
