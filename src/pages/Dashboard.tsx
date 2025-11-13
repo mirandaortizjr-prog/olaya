@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MessageCircle, Settings, LogOut, Users, Link2, Calendar, Flame, Home, Lock, Clock, ThumbsUp, ThumbsDown, Heart, Bookmark, Gamepad2, Music, X, RefreshCw } from "lucide-react";
+import { MessageCircle, Settings, LogOut, Users, Link2, Calendar, Flame, Home, Lock, Clock, ThumbsUp, ThumbsDown, Heart, Bookmark, Gamepad2, Music, X, RefreshCw, Type } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
@@ -49,6 +49,7 @@ import { ActiveGiftDisplay } from "@/components/ActiveGiftDisplay";
 import { giftImages } from "@/lib/giftImages";
 import { FirstTimeUserExperience } from "@/components/FirstTimeUserExperience";
 import { DailyLoveAction } from "@/components/DailyLoveAction";
+import { FontSelector } from "@/components/FontSelector";
 
 interface CoupleData {
   coupleId: string;
@@ -88,6 +89,7 @@ const Dashboard = () => {
   }, [coupleSongs]);
   const [activeView, setActiveView] = useState("home");
   const [showSettings, setShowSettings] = useState(false);
+  const [showFontSelector, setShowFontSelector] = useState(false);
   const [showSongSettings, setShowSongSettings] = useState(false);
   const [showFlirt, setShowFlirt] = useState(false);
   const [editingSpaceName, setEditingSpaceName] = useState(false);
@@ -367,6 +369,15 @@ const Dashboard = () => {
 
     if (data) {
       setUserProfile(data);
+      
+      // Apply saved font preference
+      if (data.font_preference) {
+        document.documentElement.className = document.documentElement.className
+          .split(' ')
+          .filter(c => !c.startsWith('font-'))
+          .concat(`font-${data.font_preference}`)
+          .join(' ');
+      }
     }
   };
 
@@ -1071,6 +1082,18 @@ const Dashboard = () => {
               variant="outline" 
               className="w-full" 
               onClick={() => {
+                setShowSettings(false);
+                setShowFontSelector(true);
+              }}
+            >
+              <Type className="w-4 h-4 mr-2" />
+              Customize Font
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              className="w-full" 
+              onClick={() => {
                 window.location.reload();
               }}
             >
@@ -1098,6 +1121,24 @@ const Dashboard = () => {
         songs={coupleSongs}
         onUpdate={setCoupleSongs}
       />
+      
+      {/* Font Selector Dialog */}
+      <Dialog open={showFontSelector} onOpenChange={setShowFontSelector}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto overscroll-contain">
+          <DialogHeader>
+            <DialogTitle>Font Customization</DialogTitle>
+          </DialogHeader>
+          <div className="pr-2">
+            <FontSelector 
+              userId={user!.id} 
+              currentFont={userProfile?.font_preference || 'default'}
+              onFontChange={(font) => {
+                setUserProfile({ ...userProfile, font_preference: font });
+              }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Active Gift Display - Shows gifts received in last 24 hours */}
       {user && coupleData.coupleId && (

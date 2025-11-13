@@ -13,6 +13,16 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        'default': ['Inter', 'system-ui', 'sans-serif'],
+        'elegant': ['Playfair Display', 'serif'],
+        'modern': ['Montserrat', 'sans-serif'],
+        'romantic': ['Dancing Script', 'cursive'],
+        'classic': ['Cinzel', 'serif'],
+        'sophisticated': ['Crimson Text', 'serif'],
+        'playful': ['Satisfy', 'cursive'],
+        'casual': ['Pacifico', 'cursive'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

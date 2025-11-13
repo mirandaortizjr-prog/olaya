@@ -1297,6 +1297,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           email: string
+          font_preference: string | null
           ftue_completed: boolean | null
           ftue_progress: Json | null
           full_name: string | null
@@ -1314,6 +1315,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email: string
+          font_preference?: string | null
           ftue_completed?: boolean | null
           ftue_progress?: Json | null
           full_name?: string | null
@@ -1331,6 +1333,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string
+          font_preference?: string | null
           ftue_completed?: boolean | null
           ftue_progress?: Json | null
           full_name?: string | null
