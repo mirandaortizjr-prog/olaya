@@ -110,7 +110,7 @@ export const FutureForecastGame = ({ coupleId, userId, partnerId, onBack }: Game
 
     // Save answer to database
     try {
-      await supabase.from('game_answers').insert({
+      const { error } = await supabase.from('game_answers').insert({
         session_id: `future_forecast_${selectedCategory}_${Date.now()}`,
         couple_id: coupleId,
         user_id: userId,
@@ -119,7 +119,17 @@ export const FutureForecastGame = ({ coupleId, userId, partnerId, onBack }: Game
         game_type: 'future_forecast'
       });
 
-      // Move to next question without waiting for partner
+      if (error) {
+        console.error('Error saving answer:', error);
+        toast({
+          title: language === 'es' ? 'Error' : 'Error',
+          description: language === 'es' ? 'No se pudo guardar la respuesta' : 'Failed to save answer',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      // Move to next question
       nextQuestion();
     } catch (error) {
       console.error('Error saving answer:', error);
