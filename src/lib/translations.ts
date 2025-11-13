@@ -886,6 +886,24 @@ export const translations = {
     truthOrDareRecordingSaved: "Video Saved!",
     truthOrDareRecordingSavedDesc: "Your video proof has been saved",
     truthOrDareRecordingFailed: "Failed to record video. Please try again.",
+    
+    // Daily Love Action
+    dailyLoveTitle: "Daily Love Action",
+    dailyLoveDay: "Day",
+    dailyLoveOf: "of",
+    dailyLoveTodayAction: "Today's Love Action",
+    dailyLoveBasic: "Basic",
+    dailyLovePartnerQuizNeeded: "Your partner needs to complete the Love Language Quiz in Games to unlock personalized actions",
+    dailyLoveGoToGames: "Go to Games",
+    dailyLoveGetTailored: "Get Tailored Love Actions",
+    dailyLoveUpgradeDesc: "Upgrade to Premium for personalized daily actions based on your partner's unique love languages",
+    dailyLoveUpgradePremium: "Upgrade to Premium",
+    dailyLoveMarkFulfilled: "Mark as Fulfilled",
+    dailyLoveCompletedToday: "Completed for today!",
+    dailyLoveError: "Error",
+    dailyLoveFailedComplete: "Failed to mark action as complete",
+    dailyLoveCompleted: "💝 Action Completed!",
+    dailyLoveCompletedDesc: "Day {day}/365 complete! Come back tomorrow for your next action.",
   },
   es: {
     // Shop
@@ -1737,6 +1755,24 @@ export const translations = {
     truthOrDareRecordingSaved: "¡Video Guardado!",
     truthOrDareRecordingSavedDesc: "Tu video de prueba ha sido guardado",
     truthOrDareRecordingFailed: "Fallo al grabar video. Por favor intenta de nuevo.",
+    
+    // Daily Love Action
+    dailyLoveTitle: "Acción de Amor Diaria",
+    dailyLoveDay: "Día",
+    dailyLoveOf: "de",
+    dailyLoveTodayAction: "Acción de Amor de Hoy",
+    dailyLoveBasic: "Básico",
+    dailyLovePartnerQuizNeeded: "Tu pareja necesita completar el Quiz de Lenguaje del Amor en Juegos para desbloquear acciones personalizadas",
+    dailyLoveGoToGames: "Ir a Juegos",
+    dailyLoveGetTailored: "Obtener Acciones de Amor Personalizadas",
+    dailyLoveUpgradeDesc: "Actualiza a Premium para acciones diarias personalizadas basadas en los lenguajes de amor únicos de tu pareja",
+    dailyLoveUpgradePremium: "Actualizar a Premium",
+    dailyLoveMarkFulfilled: "Marcar como Cumplida",
+    dailyLoveCompletedToday: "¡Completada por hoy!",
+    dailyLoveError: "Error",
+    dailyLoveFailedComplete: "Error al marcar acción como completada",
+    dailyLoveCompleted: "💝 ¡Acción Completada!",
+    dailyLoveCompletedDesc: "¡Día {day}/365 completado! Vuelve mañana para tu próxima acción.",
     
     // Game: Truth or Tender - New keys only (others already exist)
     truthOrTenderTitle: "Verdad o Ternura",

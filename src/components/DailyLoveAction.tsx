@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useNavigate } from 'react-router-dom';
+import { translations } from '@/lib/translations';
 
 interface DailyLoveActionProps {
   userId: string;
@@ -21,6 +22,7 @@ export const DailyLoveAction = ({ userId, partnerUserId, onOpenGames }: DailyLov
   const { toast } = useToast();
   const navigate = useNavigate();
   const { isPremium, isLoading: isPremiumLoading } = useSubscription(userId);
+  const t = translations[language as 'en' | 'es'];
   const [isOpen, setIsOpen] = useState(false);
   const [currentDay, setCurrentDay] = useState(1);
   const [todayAction, setTodayAction] = useState<DailyAction | null>(null);
@@ -94,8 +96,8 @@ export const DailyLoveAction = ({ userId, partnerUserId, onOpenGames }: DailyLov
 
     if (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to mark action as complete',
+        title: t.dailyLoveError || 'Error',
+        description: t.dailyLoveFailedComplete || 'Failed to mark action as complete',
         variant: 'destructive'
       });
       return;
@@ -104,8 +106,8 @@ export const DailyLoveAction = ({ userId, partnerUserId, onOpenGames }: DailyLov
     setIsCompleted(true);
     setIsOpen(false);
     toast({
-      title: '💝 Action Completed!',
-      description: `Day ${currentDay}/365 complete! Come back tomorrow for your next action.`
+      title: t.dailyLoveCompleted || '💝 Action Completed!',
+      description: t.dailyLoveCompletedDesc?.replace('{day}', currentDay.toString()) || `Day ${currentDay}/365 complete! Come back tomorrow for your next action.`
     });
   };
 
@@ -122,14 +124,14 @@ export const DailyLoveAction = ({ userId, partnerUserId, onOpenGames }: DailyLov
         >
           <div className="flex items-center justify-center gap-3">
             <Heart className="w-5 h-5 text-white" />
-            <span className="font-semibold text-white">Daily Love Action</span>
+            <span className="font-semibold text-white">{t.dailyLoveTitle || 'Daily Love Action'}</span>
             {isCompleted && (
               <CheckCircle2 className="w-5 h-5 text-green-400" />
             )}
           </div>
           <div className="text-center mt-1">
             <span className="text-xs text-white/70">
-              Day {currentDay}/365
+              {t.dailyLoveDay || 'Day'} {currentDay}/365
             </span>
           </div>
         </button>
@@ -138,9 +140,9 @@ export const DailyLoveAction = ({ userId, partnerUserId, onOpenGames }: DailyLov
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Heart className="w-5 h-5 text-primary" />
-              <h3 className="font-semibold text-lg">Today's Love Action</h3>
+              <h3 className="font-semibold text-lg">{t.dailyLoveTodayAction || "Today's Love Action"}</h3>
               {!isPremium && (
-                <span className="text-xs bg-muted px-2 py-1 rounded-full">Basic</span>
+                <span className="text-xs bg-muted px-2 py-1 rounded-full">{t.dailyLoveBasic || 'Basic'}</span>
               )}
             </div>
             <Button
@@ -158,7 +160,7 @@ export const DailyLoveAction = ({ userId, partnerUserId, onOpenGames }: DailyLov
             <div className="space-y-4">
               <div className="p-4 bg-muted/50 rounded-lg border border-border">
                 <p className="text-sm text-muted-foreground text-center">
-                  Your partner needs to complete the Love Language Quiz in Games to unlock personalized actions
+                  {t.dailyLovePartnerQuizNeeded || 'Your partner needs to complete the Love Language Quiz in Games to unlock personalized actions'}
                 </p>
               </div>
               <Button
@@ -169,7 +171,7 @@ export const DailyLoveAction = ({ userId, partnerUserId, onOpenGames }: DailyLov
                 className="w-full"
                 variant="outline"
               >
-                Go to Games
+                {t.dailyLoveGoToGames || 'Go to Games'}
               </Button>
             </div>
           ) : (
@@ -184,7 +186,7 @@ export const DailyLoveAction = ({ userId, partnerUserId, onOpenGames }: DailyLov
               </div>
 
               <div className="text-sm text-muted-foreground">
-                Day {currentDay} of 365 • {isPremium && todayAction ? todayAction.timeRequired : basicAction?.timeRequired}
+                {t.dailyLoveDay || 'Day'} {currentDay} {t.dailyLoveOf || 'of'} 365 • {isPremium && todayAction ? todayAction.timeRequired : basicAction?.timeRequired}
               </div>
 
               {/* Upgrade prompt for free users */}
@@ -194,10 +196,10 @@ export const DailyLoveAction = ({ userId, partnerUserId, onOpenGames }: DailyLov
                     <Sparkles className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
                     <div className="flex-1 space-y-2">
                       <p className="text-sm font-medium text-foreground">
-                        Get Tailored Love Actions
+                        {t.dailyLoveGetTailored || 'Get Tailored Love Actions'}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Upgrade to Premium for personalized daily actions based on your partner's unique love languages
+                        {t.dailyLoveUpgradeDesc || "Upgrade to Premium for personalized daily actions based on your partner's unique love languages"}
                       </p>
                       <Button
                         onClick={() => navigate('/premium-plans')}
@@ -205,7 +207,7 @@ export const DailyLoveAction = ({ userId, partnerUserId, onOpenGames }: DailyLov
                         className="w-full mt-2"
                       >
                         <Sparkles className="w-4 h-4 mr-2" />
-                        Upgrade to Premium
+                        {t.dailyLoveUpgradePremium || 'Upgrade to Premium'}
                       </Button>
                     </div>
                   </div>
@@ -219,12 +221,12 @@ export const DailyLoveAction = ({ userId, partnerUserId, onOpenGames }: DailyLov
                   size="lg"
                 >
                   <CheckCircle2 className="w-5 h-5 mr-2" />
-                  Mark as Fulfilled
+                  {t.dailyLoveMarkFulfilled || 'Mark as Fulfilled'}
                 </Button>
               ) : (
                 <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400 py-2">
                   <CheckCircle2 className="w-5 h-5" />
-                  <span className="font-semibold">Completed for today!</span>
+                  <span className="font-semibold">{t.dailyLoveCompletedToday || 'Completed for today!'}</span>
                 </div>
               )}
             </>
