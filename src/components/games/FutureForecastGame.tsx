@@ -100,7 +100,7 @@ export const FutureForecastGame = ({ coupleId, userId, partnerId, onBack }: Game
     setGameMode('question');
   };
 
-  const submitAnswer = () => {
+  const submitAnswer = async () => {
     if (!currentQuestion) return;
 
     const answer: Answer = {
@@ -110,40 +110,33 @@ export const FutureForecastGame = ({ coupleId, userId, partnerId, onBack }: Game
     };
 
     setUserAnswers([...userAnswers, answer]);
-    setGameMode('waiting');
 
-    setTimeout(() => {
-      const partnerAnswer: Answer = {
-        questionId: currentQuestion.id,
-        value: typeof currentAnswer === 'number' 
-          ? Math.floor(Math.random() * 101)
-          : currentQuestion.options?.[language]?.[Math.floor(Math.random() * (currentQuestion.options[language]?.length || 1))] || '',
-        userId: partnerId || 'partner'
-      };
-      setPartnerAnswers([...partnerAnswers, partnerAnswer]);
-      setGameMode('reveal');
-    }, 2000);
+    // Save answer to database
+    try {
+      await supabase.from('game_answers').insert({
+        session_id: `future_forecast_${selectedCategory}_${Date.now()}`,
+        couple_id: coupleId,
+        user_id: userId,
+        question_id: currentQuestion.id,
+        answer_value: typeof currentAnswer === 'number' ? currentAnswer.toString() : currentAnswer,
+        game_type: 'future_forecast'
+      });
+
+      // Move to next question without waiting for partner
+      nextQuestion();
+    } catch (error) {
+      console.error('Error saving answer:', error);
+      toast({
+        title: language === 'es' ? 'Error' : 'Error',
+        description: language === 'es' ? 'No se pudo guardar la respuesta' : 'Failed to save answer',
+        variant: 'destructive'
+      });
+    }
   };
 
   const nextQuestion = () => {
     const newCompleted = questionsCompleted + 1;
     setQuestionsCompleted(newCompleted);
-
-    if (currentQuestion && userAnswers.length > 0 && partnerAnswers.length > 0) {
-      const userAns = userAnswers[userAnswers.length - 1];
-      const partnerAns = partnerAnswers[partnerAnswers.length - 1];
-      
-      let score = 0;
-      if (typeof userAns.value === 'number' && typeof partnerAns.value === 'number') {
-        const diff = Math.abs(userAns.value - partnerAns.value);
-        score = Math.round(100 - diff);
-      } else if (userAns.value === partnerAns.value) {
-        score = 100;
-      }
-      
-      const avgScore = Math.round((alignmentScore * (newCompleted - 1) + score) / newCompleted);
-      setAlignmentScore(avgScore);
-    }
 
     if (newCompleted >= 5) {
       setGameMode('summary');
