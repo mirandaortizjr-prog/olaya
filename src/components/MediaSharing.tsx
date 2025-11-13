@@ -99,11 +99,13 @@ export const MediaSharing = ({ coupleId, userId, partnerName }: MediaSharingProp
       return;
     }
 
-    // Validate file size (20MB max)
-    if (file.size > 20 * 1024 * 1024) {
+    // Validate file size (50MB for videos, 10MB for images)
+    const isVideo = file.type.startsWith('video/');
+    const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+    if (file.size > maxSize) {
       toast({
         title: t('error'),
-        description: t('fileTooLarge'),
+        description: isVideo ? 'Videos must be under 50MB' : 'Images must be under 10MB',
         variant: "destructive"
       });
       return;

@@ -40,10 +40,11 @@ export const GalleryUploadButton = ({ coupleId, userId }: GalleryUploadButtonPro
         return;
       }
 
-      if (file.size > 20 * 1024 * 1024) {
+      const maxSize = fileType === 'video' ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+      if (file.size > maxSize) {
         toast({
           title: t('error'),
-          description: t('fileTooLarge'),
+          description: fileType === 'video' ? 'Videos must be under 50MB' : 'Images must be under 10MB',
           variant: "destructive",
         });
         return;
