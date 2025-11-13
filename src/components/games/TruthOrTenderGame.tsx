@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Upload, Share2, Check, X } from "lucide-react";
+import { ArrowLeft, Upload, Share2, Check } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -37,6 +37,7 @@ interface TruthAnswer {
   answer: string;
   approved: boolean;
   approved_by: string | null;
+  approved_at: string | null;
   created_at: string;
 }
 
@@ -52,9 +53,8 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
   const [viewer, setViewer] = useState<ViewerState>({ isOpen: false, url: '', type: '' });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [truthAnswer, setTruthAnswer] = useState("");
-  const [submittingAnswer, setSubmittingAnswer] = useState(false);
   const [truthAnswers, setTruthAnswers] = useState<TruthAnswer[]>([]);
-  const [partnerUserId, setPartnerUserId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   // Load questions
   useEffect(() => {
@@ -62,40 +62,25 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
     setQuestions(loadedQuestions);
   }, [language]);
 
-  // Fetch partner user ID
-  useEffect(() => {
-    const fetchPartner = async () => {
-      const { data } = await supabase
-        .from('couple_members')
-        .select('user_id')
-        .eq('couple_id', coupleId)
-        .neq('user_id', userId)
-        .single();
-      
-      if (data) {
-        setPartnerUserId(data.user_id);
-      }
-    };
-    fetchPartner();
-  }, [coupleId, userId]);
-
   // Fetch truth answers
   useEffect(() => {
     const fetchTruthAnswers = async () => {
-      const { data, error } = await supabase
-        .from('truth_answers')
-        .select('*')
-        .eq('couple_id', coupleId)
-        .order('created_at', { ascending: false });
-      
-      if (error) {
+      try {
+        const { data, error } = await supabase
+          .from('truth_answers')
+          .select('*')
+          .eq('couple_id', coupleId)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setTruthAnswers(data || []);
+      } catch (error) {
         console.error('Error fetching truth answers:', error);
-      } else if (data) {
-        setTruthAnswers(data);
       }
     };
+
     fetchTruthAnswers();
-  }, [coupleId, submittingAnswer]);
+  }, [coupleId, submitting]);
 
   // Fetch uploaded proofs for dares
   useEffect(() => {
@@ -183,14 +168,14 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
   const handleSubmitTruthAnswer = async () => {
     if (!truthAnswer.trim()) {
       toast({
-        title: "Answer required",
-        description: "Please write your answer to the truth question",
+        title: "Please enter an answer",
+        description: "You need to write your truth answer",
         variant: "destructive",
       });
       return;
     }
 
-    setSubmittingAnswer(true);
+    setSubmitting(true);
     try {
       const { error } = await supabase
         .from('truth_answers')
@@ -198,7 +183,7 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
           couple_id: coupleId,
           user_id: userId,
           question: currentQuestion,
-          answer: truthAnswer.trim()
+          answer: truthAnswer.trim(),
         });
 
       if (error) throw error;
@@ -211,25 +196,25 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
       setTruthAnswer("");
       handleBack();
     } catch (error) {
-      console.error('Error submitting answer:', error);
+      console.error('Error submitting truth answer:', error);
       toast({
         title: "Submission failed",
         description: "Please try again",
         variant: "destructive",
       });
     } finally {
-      setSubmittingAnswer(false);
+      setSubmitting(false);
     }
   };
 
-  const handleApproveAnswer = async (answerId: string) => {
+  const handleApproveTruthAnswer = async (answerId: string) => {
     try {
       const { error } = await supabase
         .from('truth_answers')
         .update({
           approved: true,
           approved_by: userId,
-          approved_at: new Date().toISOString()
+          approved_at: new Date().toISOString(),
         })
         .eq('id', answerId);
 
@@ -237,10 +222,10 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
 
       toast({
         title: "Answer approved!",
-        description: "Your partner's truth answer has been approved",
+        description: "You confirmed your partner's truth answer",
       });
 
-      setSubmittingAnswer(!submittingAnswer); // Toggle to refetch
+      setSubmitting(!submitting); // Trigger refresh
     } catch (error) {
       console.error('Error approving answer:', error);
       toast({
@@ -377,6 +362,44 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
             </Button>
           </div>
 
+          {truthAnswers.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold mb-3">Truth Answers</h3>
+              <div className="space-y-3">
+                {truthAnswers.map((ta) => (
+                  <Card key={ta.id} className="p-4">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-muted-foreground">Q: {ta.question}</p>
+                      <p className="text-base">A: {ta.answer}</p>
+                      <div className="flex items-center justify-between pt-2">
+                        <div className="flex items-center gap-2">
+                          {ta.approved ? (
+                            <div className="flex items-center gap-1 text-green-600">
+                              <Check className="w-4 h-4" />
+                              <span className="text-sm">Approved</span>
+                            </div>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">Pending approval</span>
+                          )}
+                        </div>
+                        {!ta.approved && ta.user_id !== userId && (
+                          <Button
+                            size="sm"
+                            onClick={() => handleApproveTruthAnswer(ta.id)}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            <Check className="w-4 h-4 mr-1" />
+                            Approve
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
           {uploadedProofs.length > 0 && (
             <div className="mt-6">
               <h3 className="text-lg font-semibold mb-3">Dare Proofs Gallery</h3>
@@ -472,68 +495,32 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
         </div>
 
         <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-4">
-          <Card className="p-6 bg-gradient-to-br from-blue-500/10 to-blue-600/10">
-            <p className="text-lg text-center mb-4">{currentQuestion}</p>
+          <Card className="p-6">
+            <p className="text-lg text-center mb-6">{currentQuestion}</p>
+            
+            <div className="space-y-3">
+              <Textarea
+                value={truthAnswer}
+                onChange={(e) => setTruthAnswer(e.target.value)}
+                placeholder="Type your honest answer here..."
+                className="min-h-32"
+                disabled={submitting}
+              />
+              
+              <Button
+                onClick={handleSubmitTruthAnswer}
+                className="w-full"
+                size="lg"
+                disabled={submitting || !truthAnswer.trim()}
+              >
+                {submitting ? "Submitting..." : "Submit Answer"}
+              </Button>
+            </div>
           </Card>
           
-          <div className="space-y-3">
-            <label className="text-sm font-medium">Your Answer:</label>
-            <Textarea
-              value={truthAnswer}
-              onChange={(e) => setTruthAnswer(e.target.value)}
-              placeholder="Type your honest answer here..."
-              className="min-h-32"
-              disabled={submittingAnswer}
-            />
-            <Button
-              onClick={handleSubmitTruthAnswer}
-              className="w-full"
-              size="lg"
-              disabled={submittingAnswer || !truthAnswer.trim()}
-            >
-              {submittingAnswer ? "Submitting..." : "Submit Answer"}
-            </Button>
-          </div>
-
-          {truthAnswers.length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-lg font-semibold mb-3">Previous Truth Answers</h3>
-              <div className="space-y-3">
-                {truthAnswers.map((answer) => (
-                  <Card key={answer.id} className="p-4">
-                    <p className="text-sm font-medium mb-2 text-muted-foreground">
-                      {answer.question}
-                    </p>
-                    <p className="mb-3">{answer.answer}</p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {answer.approved ? (
-                          <span className="text-sm text-green-600 flex items-center gap-1">
-                            <Check className="w-4 h-4" />
-                            Approved
-                          </span>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">
-                            Waiting for approval
-                          </span>
-                        )}
-                      </div>
-                      {!answer.approved && answer.user_id !== userId && (
-                        <Button
-                          size="sm"
-                          onClick={() => handleApproveAnswer(answer.id)}
-                          className="bg-green-600 hover:bg-green-700"
-                        >
-                          <Check className="w-4 h-4 mr-1" />
-                          Approve
-                        </Button>
-                      )}
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
+          <p className="text-sm text-muted-foreground text-center">
+            Your partner will be able to see and approve your answer
+          </p>
         </div>
       </div>
     );
