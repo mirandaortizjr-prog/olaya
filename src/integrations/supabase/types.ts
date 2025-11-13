@@ -559,6 +559,39 @@ export type Database = {
         }
         Relationships: []
       }
+      game_answers: {
+        Row: {
+          answer_value: string
+          couple_id: string
+          created_at: string
+          game_type: string
+          id: string
+          question_id: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          answer_value: string
+          couple_id: string
+          created_at?: string
+          game_type: string
+          id?: string
+          question_id: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          answer_value?: string
+          couple_id?: string
+          created_at?: string
+          game_type?: string
+          id?: string
+          question_id?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       game_completions: {
         Row: {
           coins_earned: number

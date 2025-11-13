@@ -18,7 +18,7 @@ interface GameProps {
   onBack: () => void;
 }
 
-type GameMode = 'instructions' | 'category' | 'question' | 'waiting' | 'reveal' | 'summary';
+type GameMode = 'instructions' | 'category' | 'question' | 'summary';
 type Category = 'romance' | 'family' | 'career' | 'adventure' | 'life' | 'dreams';
 
 interface Question {
@@ -47,10 +47,8 @@ export const FutureForecastGame = ({ coupleId, userId, partnerId, onBack }: Game
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Answer[]>([]);
-  const [partnerAnswers, setPartnerAnswers] = useState<Answer[]>([]);
   const [currentAnswer, setCurrentAnswer] = useState<number | string>(50);
   const [questionsCompleted, setQuestionsCompleted] = useState(0);
-  const [alignmentScore, setAlignmentScore] = useState(0);
   const [hasPlayedToday, setHasPlayedToday] = useState(false);
 
   const categories = [
@@ -94,7 +92,6 @@ export const FutureForecastGame = ({ coupleId, userId, partnerId, onBack }: Game
     setSelectedCategory(category);
     setCurrentQuestionIndex(0);
     setUserAnswers([]);
-    setPartnerAnswers([]);
     setQuestionsCompleted(0);
     setCurrentAnswer(50);
     setGameMode('question');
@@ -180,9 +177,7 @@ export const FutureForecastGame = ({ coupleId, userId, partnerId, onBack }: Game
     setSelectedCategory(null);
     setCurrentQuestionIndex(0);
     setUserAnswers([]);
-    setPartnerAnswers([]);
     setQuestionsCompleted(0);
-    setAlignmentScore(0);
     setCurrentAnswer(50);
   };
 
@@ -390,101 +385,6 @@ export const FutureForecastGame = ({ coupleId, userId, partnerId, onBack }: Game
     );
   }
 
-  if (gameMode === 'waiting') {
-    return (
-      <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
-        <div className="flex items-center gap-2 p-4 border-b flex-shrink-0">
-          <h2 className="text-xl font-semibold">{t('futureForecast') || 'Future Forecast'}</h2>
-        </div>
-        
-        <div className="flex-1 flex items-center justify-center p-4">
-          <Card className="p-8 text-center max-w-md">
-            <div className="animate-pulse mb-4">
-              <Clock className="w-16 h-16 mx-auto text-primary" />
-            </div>
-            <h3 className="text-xl font-bold mb-2">
-              {language === 'es' ? 'Esperando respuesta...' : 'Waiting for response...'}
-            </h3>
-            <p className="text-muted-foreground">
-              {language === 'es' 
-                ? 'Tu pareja está compartiendo su visión del futuro'
-                : 'Your partner is sharing their vision of the future'}
-            </p>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  if (gameMode === 'reveal' && currentQuestion) {
-    const userAns = userAnswers[userAnswers.length - 1];
-    const partnerAns = partnerAnswers[partnerAnswers.length - 1];
-    
-    let matchScore = 0;
-    if (typeof userAns.value === 'number' && typeof partnerAns.value === 'number') {
-      const diff = Math.abs(userAns.value - partnerAns.value);
-      matchScore = Math.round(100 - diff);
-    } else if (userAns.value === partnerAns.value) {
-      matchScore = 100;
-    }
-
-    return (
-      <div className="fixed inset-0 bg-background z-50 flex flex-col overflow-hidden">
-        <div className="flex items-center gap-2 p-4 border-b flex-shrink-0">
-          <h2 className="text-xl font-semibold">{language === 'es' ? 'Resultados' : 'Results'}</h2>
-        </div>
-        
-        <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-4">
-          <Card className="p-6 bg-gradient-to-br from-primary/10 to-primary/20">
-            <div className="text-center mb-6">
-              <div className="text-6xl font-bold text-primary mb-2">{matchScore}%</div>
-              <p className="text-lg font-semibold">
-                {language === 'es' ? 'Alineación' : 'Alignment'}
-              </p>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="p-4 bg-background/50 rounded-lg">
-                <p className="text-sm text-muted-foreground mb-1">{language === 'es' ? 'Tu respuesta' : 'Your answer'}</p>
-                <p className="font-semibold text-lg">{userAns.value}</p>
-              </div>
-              
-              <div className="p-4 bg-background/50 rounded-lg">
-                <p className="text-sm text-muted-foreground mb-1">
-                  {language === 'es' ? 'Respuesta de tu pareja' : 'Partner\'s answer'}
-                </p>
-                <p className="font-semibold text-lg">{partnerAns.value}</p>
-              </div>
-            </div>
-
-            {matchScore >= 80 && (
-              <p className="text-center mt-4 text-green-600 dark:text-green-400 font-medium">
-                {language === 'es' ? '¡Increíble alineación! 🎯' : 'Amazing alignment! 🎯'}
-              </p>
-            )}
-            {matchScore >= 50 && matchScore < 80 && (
-              <p className="text-center mt-4 text-amber-600 dark:text-amber-400 font-medium">
-                {language === 'es' ? '¡Buena sincronización! 👍' : 'Good sync! 👍'}
-              </p>
-            )}
-            {matchScore < 50 && (
-              <p className="text-center mt-4 text-blue-600 dark:text-blue-400 font-medium">
-                {language === 'es' ? 'Interesantes perspectivas diferentes 💭' : 'Interesting different perspectives 💭'}
-              </p>
-            )}
-          </Card>
-        </div>
-
-        <div className="p-4 border-t flex-shrink-0">
-          <Button onClick={nextQuestion} className="w-full" size="lg">
-            {questionsCompleted >= 4 
-              ? (language === 'es' ? 'Ver Resumen' : 'View Summary')
-              : (language === 'es' ? 'Siguiente Pregunta' : 'Next Question')}
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   if (gameMode === 'summary') {
     return (
@@ -500,9 +400,8 @@ export const FutureForecastGame = ({ coupleId, userId, partnerId, onBack }: Game
           <Card className="p-8 bg-gradient-to-br from-violet-500/10 to-fuchsia-500/10 text-center">
             <Sparkles className="w-16 h-16 mx-auto text-primary mb-4" />
             <h3 className="text-3xl font-bold mb-2">{language === 'es' ? '¡Juego Completo!' : 'Game Complete!'}</h3>
-            <div className="text-6xl font-bold text-primary my-4">{alignmentScore}%</div>
-            <p className="text-lg font-semibold mb-2">
-              {language === 'es' ? 'Alineación General del Futuro' : 'Overall Future Alignment'}
+            <p className="text-lg font-semibold mb-4">
+              {language === 'es' ? 'Respuestas Guardadas' : 'Answers Saved'}
             </p>
             <p className="text-muted-foreground">
               {language === 'es' 
