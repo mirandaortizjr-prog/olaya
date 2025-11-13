@@ -100,32 +100,44 @@ export const LoveLanguageSelector = ({ userId, partnerUserId }: LoveLanguageSele
   };
 
   const handleQuizComplete = async (completedProfile: LoveLanguageProfile) => {
-    const { error } = await supabase.from('love_languages').upsert([{
-      user_id: userId,
-      primary_language: completedProfile.primaryLanguage,
-      secondary_language: completedProfile.secondaryLanguage,
-      all_scores: completedProfile.scores as any,
-      profile_title: completedProfile.profileTitle,
-      quiz_completed_at: new Date().toISOString(),
-      current_day: 1
-    }]);
+    try {
+      const { error } = await supabase.from('love_languages').upsert([{
+        user_id: userId,
+        primary_language: completedProfile.primaryLanguage,
+        secondary_language: completedProfile.secondaryLanguage,
+        all_scores: completedProfile.scores as any,
+        profile_title: completedProfile.profileTitle,
+        quiz_completed_at: new Date().toISOString(),
+        current_day: 1
+      }], {
+        onConflict: 'user_id'
+      });
 
-    if (error) {
+      if (error) {
+        console.error('Quiz save error:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to save quiz results',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      setProfile(completedProfile);
+      setView('profile');
+      
+      toast({
+        title: '🎉 Quiz Complete!',
+        description: `You are ${completedProfile.profileTitle}!`
+      });
+    } catch (err) {
+      console.error('Quiz save exception:', err);
       toast({
         title: 'Error',
         description: 'Failed to save quiz results',
         variant: 'destructive'
       });
-      return;
     }
-
-    setProfile(completedProfile);
-    setView('profile');
-    
-    toast({
-      title: '🎉 Quiz Complete!',
-      description: `You are ${completedProfile.profileTitle}!`
-    });
   };
 
   if (loading) {

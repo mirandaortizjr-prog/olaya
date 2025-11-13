@@ -41,12 +41,14 @@ export const LoveLanguageQuiz = ({ onComplete, onBack }: LoveLanguageQuizProps) 
         className="mb-4"
       >
         <ArrowLeft className="w-4 h-4 mr-2" />
-        Back
+        {language === 'es' ? 'Atrás' : 'Back'}
       </Button>
 
       <div className="space-y-2">
         <div className="flex justify-between text-sm text-muted-foreground">
-          <span>Question {currentQuestion + 1} of {loveLanguageQuiz.length}</span>
+          <span>
+            {language === 'es' ? 'Pregunta' : 'Question'} {currentQuestion + 1} {language === 'es' ? 'de' : 'of'} {loveLanguageQuiz.length}
+          </span>
           <span>{Math.round(progress)}%</span>
         </div>
         <Progress value={progress} className="h-2" />
