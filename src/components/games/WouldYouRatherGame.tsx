@@ -545,21 +545,21 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
               
               <div className="space-y-4">
                 <Button
-                  className="w-full h-auto py-6 text-lg"
+                  className="w-full h-auto min-h-[4rem] py-4 px-6 text-base whitespace-normal text-left"
                   variant="outline"
                   onClick={() => handleMyAnswer('A')}
                 >
-                  <span className="mr-3 font-bold text-primary">A</span>
-                  {currentQuestion.optionA}
+                  <span className="mr-3 font-bold text-primary flex-shrink-0">A</span>
+                  <span className="flex-1">{currentQuestion.optionA}</span>
                 </Button>
                 
                 <Button
-                  className="w-full h-auto py-6 text-lg"
+                  className="w-full h-auto min-h-[4rem] py-4 px-6 text-base whitespace-normal text-left"
                   variant="outline"
                   onClick={() => handleMyAnswer('B')}
                 >
-                  <span className="mr-3 font-bold text-primary">B</span>
-                  {currentQuestion.optionB}
+                  <span className="mr-3 font-bold text-primary flex-shrink-0">B</span>
+                  <span className="flex-1">{currentQuestion.optionB}</span>
                 </Button>
               </div>
             </Card>
@@ -606,21 +606,21 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
               
               <div className="space-y-4">
                 <Button
-                  className="w-full h-auto py-6 text-lg"
+                  className="w-full h-auto min-h-[4rem] py-4 px-6 text-base whitespace-normal text-left"
                   variant="outline"
                   onClick={() => handleMyGuess('A')}
                 >
-                  <span className="mr-3 font-bold text-primary">A</span>
-                  {currentQuestion.optionA}
+                  <span className="mr-3 font-bold text-primary flex-shrink-0">A</span>
+                  <span className="flex-1">{currentQuestion.optionA}</span>
                 </Button>
                 
                 <Button
-                  className="w-full h-auto py-6 text-lg"
+                  className="w-full h-auto min-h-[4rem] py-4 px-6 text-base whitespace-normal text-left"
                   variant="outline"
                   onClick={() => handleMyGuess('B')}
                 >
-                  <span className="mr-3 font-bold text-primary">B</span>
-                  {currentQuestion.optionB}
+                  <span className="mr-3 font-bold text-primary flex-shrink-0">B</span>
+                  <span className="flex-1">{currentQuestion.optionB}</span>
                 </Button>
               </div>
             </Card>
