@@ -446,7 +446,7 @@ const MessageMedia = ({ mediaUrl, mediaType }: { mediaUrl: string; mediaType?: s
   if (!url) return null;
 
   if (mediaType === 'video') {
-    return <video src={url} controls className="rounded-lg max-w-full mb-2" />;
+    return <video src={url} controls className="rounded-lg max-w-full mb-2" preload="metadata" playsInline />;
   }
 
   return <img src={url} alt="Shared media" className="rounded-lg max-w-full mb-2" />;
