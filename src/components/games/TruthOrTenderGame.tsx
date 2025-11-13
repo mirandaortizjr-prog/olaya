@@ -241,12 +241,12 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
     if (!file) return;
 
     const isVideo = file.type.startsWith('video/');
-    const maxSize = isVideo ? 100 * 1024 * 1024 : 15 * 1024 * 1024;
+    const maxSize = isVideo ? 500 * 1024 * 1024 : 15 * 1024 * 1024;
     
     if (file.size > maxSize) {
       toast({
         title: "File too large",
-        description: isVideo ? "Videos must be under 100MB" : "Images must be under 15MB",
+        description: isVideo ? "Videos must be under 500MB" : "Images must be under 15MB",
         variant: "destructive",
       });
       return;
