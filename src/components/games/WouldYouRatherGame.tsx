@@ -141,7 +141,7 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
   const checkPartnerReadiness = async () => {
     if (!partnerId) return;
 
-    // Check if partner has completed their session
+    // Check if partner has completed their session recently
     const { data } = await supabase
       .from('game_completions')
       .select('*')
@@ -155,7 +155,14 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
     if (data) {
       const lastCompleted = new Date(data.completed_at);
       const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-      setPartnerReady(lastCompleted > fiveMinutesAgo);
+      const isReady = lastCompleted > fiveMinutesAgo;
+      setPartnerReady(isReady);
+      
+      // If we're in waiting mode and partner just completed, switch to compare
+      if (isReady && gameMode === 'waiting') {
+        await loadPartnerAnswers();
+        setTimeout(() => prepareComparison(myAnswers), 500);
+      }
     }
   };
 
@@ -652,8 +659,13 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
             </div>
 
             <Card className="p-6">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground mb-3">
                 {t('wyrYouFinishedFirst')}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {language === 'es' 
+                  ? 'Cuando tu pareja termine, podrás ver la comparación de respuestas y sus predicciones.'
+                  : 'When your partner finishes, you\'ll be able to see the comparison of answers and their predictions.'}
               </p>
             </Card>
 
@@ -670,6 +682,7 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
     const myCorrectGuesses = comparisonData.filter(c => c.didIGuessRight).length;
     const partnerCorrectGuesses = comparisonData.filter(c => c.didPartnerGuessRight).length;
     const matchingChoices = comparisonData.filter(c => c.myChoice === c.partnerChoice).length;
+    const matchPercentage = Math.round((matchingChoices / gameQuestions.length) * 100);
     
     return (
       <div className="fixed inset-0 bg-background z-50 flex flex-col">
@@ -677,19 +690,40 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
           <Button variant="ghost" size="icon" onClick={() => setGameMode("menu")}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h2 className="text-xl font-semibold">{t('wyrCompareAnswers')}</h2>
+          <h2 className="text-xl font-semibold">
+            {language === 'es' ? 'Resultados y Comparación' : 'Results & Comparison'}
+          </h2>
         </div>
 
         <div className="flex-1 overflow-auto p-4">
           <div className="max-w-2xl mx-auto space-y-4">
+            {/* Main Match Percentage */}
+            <Card className="p-6 bg-gradient-to-r from-pink-500/20 to-purple-500/20 border-2 border-primary/30">
+              <div className="text-center">
+                <h3 className="text-lg font-bold mb-2">
+                  {language === 'es' ? '¡Porcentaje de Coincidencia!' : 'Match Percentage!'}
+                </h3>
+                <div className="text-6xl font-bold text-primary mb-2">{matchPercentage}%</div>
+                <p className="text-sm text-muted-foreground">
+                  {language === 'es' 
+                    ? `Coincidieron en ${matchingChoices} de ${gameQuestions.length} respuestas`
+                    : `You matched on ${matchingChoices} out of ${gameQuestions.length} answers`}
+                </p>
+              </div>
+            </Card>
+
             {/* Score Summary Cards */}
             <div className="grid grid-cols-2 gap-3">
               <Card className="p-4 bg-gradient-to-br from-primary/10 to-accent/10">
                 <div className="text-center">
                   <Trophy className="w-8 h-8 mx-auto text-primary mb-2" />
                   <div className="text-3xl font-bold text-primary">{myCorrectGuesses}</div>
-                  <p className="text-xs text-muted-foreground">{t('wyrYourPredictionScore')}</p>
-                  <p className="text-xs font-medium mt-1">{Math.round((myCorrectGuesses/gameQuestions.length)*100)}% {t('accuracy')}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {language === 'es' ? 'Tus Predicciones' : 'Your Predictions'}
+                  </p>
+                  <p className="text-xs font-medium mt-1">
+                    {Math.round((myCorrectGuesses/gameQuestions.length)*100)}% {language === 'es' ? 'Precisión' : 'Accuracy'}
+                  </p>
                 </div>
               </Card>
               
@@ -697,136 +731,21 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
                 <div className="text-center">
                   <Trophy className="w-8 h-8 mx-auto text-accent mb-2" />
                   <div className="text-3xl font-bold text-accent">{partnerCorrectGuesses}</div>
-                  <p className="text-xs text-muted-foreground">{t('wyrPredictionScores')}</p>
-                  <p className="text-xs font-medium mt-1">{Math.round((partnerCorrectGuesses/gameQuestions.length)*100)}% {t('accuracy')}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {language === 'es' ? 'Predicciones de tu Pareja' : 'Partner\'s Predictions'}
+                  </p>
+                  <p className="text-xs font-medium mt-1">
+                    {Math.round((partnerCorrectGuesses/gameQuestions.length)*100)}% {language === 'es' ? 'Precisión' : 'Accuracy'}
+                  </p>
                 </div>
               </Card>
             </div>
-
-            <Card className="p-4 bg-gradient-to-r from-pink-500/10 to-purple-500/10">
-              <div className="text-center">
-                <h3 className="text-lg font-bold mb-1">{t('wyrMatchingChoices')}</h3>
-                <div className="text-4xl font-bold text-primary mb-1">{matchingChoices}/{gameQuestions.length}</div>
-                <p className="text-sm text-muted-foreground">{t('wyrYouBothChose')}</p>
-              </div>
-            </Card>
-
-            {/* Question by Question Breakdown */}
-            <div className="space-y-3">
-              <h3 className="font-semibold text-lg">{t('wyrQuestionBreakdown')}</h3>
-              {comparisonData.map((item, idx) => (
-                <Card key={idx} className="p-4">
-                  <div className="mb-3">
-                    <p className="font-medium mb-2">{item.question.question}</p>
-                  </div>
-                  
-                  {/* Choices Grid */}
-                  <div className="grid grid-cols-2 gap-3 mb-3">
-                    <div className="space-y-2">
-                      <p className="text-xs font-semibold text-muted-foreground">You Chose:</p>
-                      <div className={`p-2 rounded text-sm ${item.myChoice === 'A' ? 'bg-primary/20 border border-primary' : 'bg-muted'}`}>
-                        <p className="font-medium">{item.myChoice}: {item.myChoice === 'A' ? item.question.optionA : item.question.optionB}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <p className="text-xs font-semibold text-muted-foreground">Partner Chose:</p>
-                      <div className={`p-2 rounded text-sm ${item.partnerChoice === 'A' ? 'bg-accent/20 border border-accent' : 'bg-muted'}`}>
-                        <p className="font-medium">{item.partnerChoice}: {item.partnerChoice === 'A' ? item.question.optionA : item.question.optionB}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Predictions */}
-                  <div className="grid grid-cols-2 gap-3 pt-3 border-t">
-                    <div className="flex items-center gap-2">
-                      {item.didIGuessRight ? (
-                        <CheckCircle2 className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <XCircle className="w-4 h-4 text-orange-500" />
-                      )}
-                       <p className="text-xs">
-                         {t('wyrYouGuessed')}: <strong>{item.myGuess}</strong>
-                       </p>
-                     </div>
-                     
-                     <div className="flex items-center gap-2">
-                       {item.didPartnerGuessRight ? (
-                         <CheckCircle2 className="w-4 h-4 text-green-500" />
-                       ) : (
-                         <XCircle className="w-4 h-4 text-orange-500" />
-                       )}
-                       <p className="text-xs">
-                         {t('wyrTheyGuessed')}: <strong>{item.partnerGuess}</strong>
-                       </p>
-                     </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-
-            <div className="space-y-3 pt-4">
-              <Button className="w-full" onClick={startGame}>
-                {t('playAgain')}
-              </Button>
-              <Button className="w-full" variant="outline" onClick={() => setGameMode("menu")}>
-                {t('wyrBackToMenu')}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (gameMode === "compare") {
-    const myCorrectGuesses = comparisonData.filter(c => c.didIGuessRight).length;
-    const partnerCorrectGuesses = comparisonData.filter(c => c.didPartnerGuessRight).length;
-    const matchingChoices = comparisonData.filter(c => c.myChoice === c.partnerChoice).length;
-    
-    return (
-      <div className="fixed inset-0 bg-background z-50 flex flex-col">
-        <div className="flex items-center gap-2 p-4 border-b">
-          <Button variant="ghost" size="icon" onClick={() => setGameMode("menu")}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <h2 className="text-xl font-semibold">Results & Comparison</h2>
-        </div>
-
-        <div className="flex-1 overflow-auto p-4">
-          <div className="max-w-2xl mx-auto space-y-4">
-            {/* Score Summary Cards */}
-            <div className="grid grid-cols-2 gap-3">
-              <Card className="p-4 bg-gradient-to-br from-primary/10 to-accent/10">
-                <div className="text-center">
-                  <Trophy className="w-8 h-8 mx-auto text-primary mb-2" />
-                  <div className="text-3xl font-bold text-primary">{myCorrectGuesses}</div>
-                  <p className="text-xs text-muted-foreground">Your Predictions</p>
-                  <p className="text-xs font-medium mt-1">{Math.round((myCorrectGuesses/gameQuestions.length)*100)}% Accuracy</p>
-                </div>
-              </Card>
-              
-              <Card className="p-4 bg-gradient-to-br from-accent/10 to-secondary/10">
-                <div className="text-center">
-                  <Trophy className="w-8 h-8 mx-auto text-accent mb-2" />
-                  <div className="text-3xl font-bold text-accent">{partnerCorrectGuesses}</div>
-                  <p className="text-xs text-muted-foreground">Partner's Predictions</p>
-                  <p className="text-xs font-medium mt-1">{Math.round((partnerCorrectGuesses/gameQuestions.length)*100)}% Accuracy</p>
-                </div>
-              </Card>
-            </div>
-
-            <Card className="p-4 bg-gradient-to-r from-pink-500/10 to-purple-500/10">
-              <div className="text-center">
-                <h3 className="text-lg font-bold mb-1">Matching Choices</h3>
-                <div className="text-4xl font-bold text-primary mb-1">{matchingChoices}/{gameQuestions.length}</div>
-                <p className="text-sm text-muted-foreground">You both chose the same {matchingChoices} times</p>
-              </div>
-            </Card>
 
             {/* Question by Question Comparison */}
             <div className="space-y-3">
-              <h3 className="font-semibold text-lg">Question Breakdown</h3>
+              <h3 className="font-semibold text-lg">
+                {language === 'es' ? 'Desglose por Pregunta' : 'Question Breakdown'}
+              </h3>
               {comparisonData.map((item, idx) => (
                 <Card key={idx} className={`p-4 ${item.myChoice === item.partnerChoice ? 'border-green-500/50 bg-green-500/5' : 'border-muted'}`}>
                   <div className="flex items-start gap-3 mb-3">
@@ -838,15 +757,19 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
                     <div className="flex-1">
                       <p className="font-medium mb-2">{item.question.question}</p>
                       <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div className={`p-2 rounded ${item.myChoice === 'A' ? 'bg-primary/20 border border-primary' : 'bg-muted'}`}>
+                        <div className={`p-2 rounded ${item.myChoice === 'A' || item.partnerChoice === 'A' ? 'bg-primary/10 border border-primary/30' : 'bg-muted'}`}>
                           <p className="text-xs text-muted-foreground mb-1">A: {item.question.optionA}</p>
-                          {item.myChoice === 'A' && <Badge variant="secondary" className="text-xs">You</Badge>}
-                          {item.partnerChoice === 'A' && <Badge variant="outline" className="text-xs ml-1">Partner</Badge>}
+                          <div className="flex gap-1 flex-wrap">
+                            {item.myChoice === 'A' && <Badge variant="secondary" className="text-xs">{language === 'es' ? 'Tú' : 'You'}</Badge>}
+                            {item.partnerChoice === 'A' && <Badge variant="outline" className="text-xs">{language === 'es' ? 'Pareja' : 'Partner'}</Badge>}
+                          </div>
                         </div>
-                        <div className={`p-2 rounded ${item.myChoice === 'B' ? 'bg-primary/20 border border-primary' : 'bg-muted'}`}>
+                        <div className={`p-2 rounded ${item.myChoice === 'B' || item.partnerChoice === 'B' ? 'bg-primary/10 border border-primary/30' : 'bg-muted'}`}>
                           <p className="text-xs text-muted-foreground mb-1">B: {item.question.optionB}</p>
-                          {item.myChoice === 'B' && <Badge variant="secondary" className="text-xs">You</Badge>}
-                          {item.partnerChoice === 'B' && <Badge variant="outline" className="text-xs ml-1">Partner</Badge>}
+                          <div className="flex gap-1 flex-wrap">
+                            {item.myChoice === 'B' && <Badge variant="secondary" className="text-xs">{language === 'es' ? 'Tú' : 'You'}</Badge>}
+                            {item.partnerChoice === 'B' && <Badge variant="outline" className="text-xs">{language === 'es' ? 'Pareja' : 'Partner'}</Badge>}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -857,10 +780,10 @@ export const WouldYouRatherGame = ({ coupleId, userId, partnerId, onBack }: Game
 
             <div className="space-y-3 pt-4">
               <Button className="w-full" onClick={startGame}>
-                Play Again
+                {language === 'es' ? 'Jugar de Nuevo' : 'Play Again'}
               </Button>
               <Button className="w-full" variant="outline" onClick={() => setGameMode("menu")}>
-                Back to Menu
+                {language === 'es' ? 'Volver al Menú' : 'Back to Menu'}
               </Button>
             </div>
           </div>
