@@ -32,51 +32,56 @@ export const DailyLoveAction = ({ userId, partnerUserId, onOpenGames }: DailyLov
 
   useEffect(() => {
     if (partnerUserId) {
-      loadPartnerLanguages();
-      loadDailyProgress();
+      loadData();
     }
   }, [userId, partnerUserId]);
 
-  const loadPartnerLanguages = async () => {
+  const loadData = async () => {
     if (!partnerUserId) return;
 
-    const { data } = await supabase
+    // Load partner's quiz data first
+    const { data: partnerData } = await supabase
       .from('love_languages')
       .select('all_scores')
       .eq('user_id', partnerUserId)
       .maybeSingle();
 
-    if (data?.all_scores) {
-      setPartnerLanguages(data.all_scores as unknown as LoveLanguageScore[]);
+    let loadedPartnerLanguages: LoveLanguageScore[] | null = null;
+    if (partnerData?.all_scores) {
+      loadedPartnerLanguages = partnerData.all_scores as unknown as LoveLanguageScore[];
+      setPartnerLanguages(loadedPartnerLanguages);
     }
-  };
 
-  const loadDailyProgress = async () => {
-    const { data } = await supabase
+    // Then load user's daily progress
+    const { data: progressData } = await supabase
       .from('love_languages')
       .select('current_day, last_action_date')
       .eq('user_id', userId)
       .maybeSingle();
 
-    if (data) {
-      const day = data.current_day || 1;
+    if (progressData) {
+      const day = progressData.current_day || 1;
       setCurrentDay(day);
 
       const today = new Date().toISOString().split('T')[0];
-      setIsCompleted(data.last_action_date === today);
+      setIsCompleted(progressData.last_action_date === today);
 
-      if (partnerLanguages) {
-        const action = getDailyAction(day, partnerLanguages);
+      // Set the action only after we have the partner's data
+      if (isPremium && loadedPartnerLanguages) {
+        const action = getDailyAction(day, loadedPartnerLanguages);
         setTodayAction(action);
+      } else if (!isPremium) {
+        const action = getBasicDailyAction(day);
+        setBasicAction(action);
       }
     }
   };
 
   useEffect(() => {
-    if (isPremium && partnerLanguages) {
+    if (isPremium && partnerLanguages && currentDay) {
       const action = getDailyAction(currentDay, partnerLanguages);
       setTodayAction(action);
-    } else if (!isPremium) {
+    } else if (!isPremium && currentDay) {
       const action = getBasicDailyAction(currentDay);
       setBasicAction(action);
     }
