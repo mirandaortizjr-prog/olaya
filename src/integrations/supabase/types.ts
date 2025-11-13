@@ -1658,6 +1658,45 @@ export type Database = {
         }
         Relationships: []
       }
+      truth_answers: {
+        Row: {
+          answer: string
+          approved: boolean | null
+          approved_at: string | null
+          approved_by: string | null
+          couple_id: string
+          created_at: string
+          id: string
+          question: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          approved?: boolean | null
+          approved_at?: string | null
+          approved_by?: string | null
+          couple_id: string
+          created_at?: string
+          id?: string
+          question: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          approved?: boolean | null
+          approved_at?: string | null
+          approved_by?: string | null
+          couple_id?: string
+          created_at?: string
+          id?: string
+          question?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_gradient_purchases: {
         Row: {
           couple_id: string
