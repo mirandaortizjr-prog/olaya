@@ -1,7 +1,8 @@
 import { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Gamepad2, Heart, MessageCircle, Sparkles, Calendar, TrendingUp, Zap } from "lucide-react";
+import { Gamepad2, Heart, MessageCircle, Sparkles, Calendar, TrendingUp, Zap, Feather } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/lib/translations";
 import { HowWellGame } from "./games/HowWellGame";
@@ -23,6 +24,7 @@ export const CoupleGames = ({ coupleId, userId, partnerId, onClose, pendingGameS
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
   const { language } = useLanguage();
   const t = translations[language];
+  const navigate = useNavigate();
 
   // Helper function to check if a game has pending invitations
   const hasPendingGame = (gameId: string) => {
@@ -68,6 +70,13 @@ export const CoupleGames = ({ coupleId, userId, partnerId, onClose, pendingGameS
       description: t.truthOrTenderDesc,
       icon: Heart,
       color: "text-red-500"
+    },
+    {
+      id: "poems",
+      name: language === 'en' ? 'Collaborative Poems' : 'Poemas Colaborativos',
+      description: language === 'en' ? 'Write beautiful poems together, one line at a time' : 'Escriban hermosos poemas juntos, un verso a la vez',
+      icon: Feather,
+      color: "text-purple-500"
     }
   ];
 
@@ -85,6 +94,10 @@ export const CoupleGames = ({ coupleId, userId, partnerId, onClose, pendingGameS
   }
   if (selectedGame === "truth-or-tender") {
     return <TruthOrTenderGame coupleId={coupleId} userId={userId} onBack={() => setSelectedGame(null)} />;
+  }
+  if (selectedGame === "poems") {
+    navigate('/poems');
+    return null;
   }
 
   return (
