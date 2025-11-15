@@ -701,7 +701,11 @@ const GiftsPage = () => {
                         <img
                           src={giftImages[gift.image_url]}
                           alt={gift.name}
-                          className="w-full h-full object-contain p-4 animate-float hover:animate-flutter transition-transform duration-200 hover:scale-105"
+                          className="w-full h-full object-contain p-4 animate-float hover:animate-wiggle hover:scale-110 transition-all duration-300"
+                          style={{
+                            animationDelay: `${Math.random() * 2}s`,
+                            animationDuration: `${3 + Math.random() * 2}s`
+                          }}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-5xl">
