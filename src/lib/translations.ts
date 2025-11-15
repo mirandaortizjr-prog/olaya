@@ -872,6 +872,11 @@ export const translations = {
     truthOrDareDoneGood: "Great job! (Daily coins already earned)",
     truthOrDareTimesUp: "Time's Up!",
     truthOrDareStillEarned: "But you still earned 5 coins for trying!",
+    pleaseEnterAnswer: "Please enter an answer",
+    needWriteTruthAnswer: "You need to write your truth answer",
+    submitting: "Submitting...",
+    submitAnswer: "Submit Answer",
+    uploadProof: "Upload Photo/Video Proof",
     truthOrDareBetterLuck: "Better luck next time!",
     truthOrDareFileTooLarge: "File Too Large",
     truthOrDareFileSizeLimit: "Please choose a file smaller than 10MB",
@@ -1741,6 +1746,11 @@ export const translations = {
     truthOrDareDoneGood: "¡Buen trabajo! (Monedas diarias ya ganadas)",
     truthOrDareTimesUp: "¡Se Acabó el Tiempo!",
     truthOrDareStillEarned: "¡Pero aún ganaste 5 monedas por intentar!",
+    pleaseEnterAnswer: "Por favor ingresa una respuesta",
+    needWriteTruthAnswer: "Necesitas escribir tu respuesta de verdad",
+    submitting: "Enviando...",
+    submitAnswer: "Enviar Respuesta",
+    uploadProof: "Subir Foto/Video de Prueba",
     truthOrDareBetterLuck: "¡Mejor suerte la próxima vez!",
     truthOrDareFileTooLarge: "Archivo Muy Grande",
     truthOrDareFileSizeLimit: "Por favor elige un archivo menor a 10MB",
@@ -1811,6 +1821,8 @@ export const translations = {
 
 export type Language = keyof typeof translations;
 export type TranslationKey = keyof typeof translations.en;
+
+// Helper function for gendered moods in Spanish
 
 // Function to get gendered mood translation for Spanish
 export const getGenderedMood = (moodKey: string, gender: string | null | undefined, language: Language): string => {

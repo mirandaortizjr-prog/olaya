@@ -168,8 +168,8 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
   const handleSubmitTruthAnswer = async () => {
     if (!truthAnswer.trim()) {
       toast({
-        title: "Please enter an answer",
-        description: "You need to write your truth answer",
+        title: t('pleaseEnterAnswer') || "Please enter an answer",
+        description: t('needWriteTruthAnswer') || "You need to write your truth answer",
         variant: "destructive",
       });
       return;
@@ -554,7 +554,7 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
                 size="lg"
                 disabled={submitting || !truthAnswer.trim()}
               >
-                {submitting ? "Submitting..." : "Submit Answer"}
+                {submitting ? t('submitting') || "Submitting..." : t('submitAnswer') || "Submit Answer"}
               </Button>
             </div>
           </Card>
@@ -598,7 +598,7 @@ export const TruthOrTenderGame = ({ coupleId, userId, onBack }: GameProps) => {
               disabled={uploading}
             >
               <Upload className="w-5 h-5 mr-2" />
-              {uploading ? "Uploading..." : "Upload Photo/Video Proof"}
+              {uploading ? t('uploading') || "Uploading..." : t('uploadProof') || "Upload Photo/Video Proof"}
             </Button>
           </div>
 
