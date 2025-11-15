@@ -22,13 +22,13 @@ interface HowWellGameProps {
 
 export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGameProps) => {
   const [gameMode, setGameMode] = useState<"menu" | "answer" | "guess" | "results">("menu");
-  const [questions, setQuestions] = useState<string[]>([]);
+  const [questions, setQuestions] = useState<Array<{ id: string; text: string }>>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [myAnswer, setMyAnswer] = useState("");
   const [myGuess, setMyGuess] = useState("");
   const [sessionId] = useState(() => `hw-${Date.now()}`);
   const [score, setScore] = useState(0);
-  const [partnerAnswers, setPartnerAnswers] = useState<Record<string, string>>({});
+  const [partnerAnswers, setPartnerAnswers] = useState<Array<{ questionId: string; questionText: string; answer: string }>>([]);
   const [pendingInvitation, setPendingInvitation] = useState<any>(null);
   const [partnerScores, setPartnerScores] = useState<Array<{ score: number; total: number; date: string }>>([]);
   const [canPlayToday, setCanPlayToday] = useState(true);
@@ -41,7 +41,12 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
   useEffect(() => {
     // Generate questions based on current level
     const levelQuestions = generateHowWellQuestions(progress.currentLevel, language);
-    setQuestions(levelQuestions);
+    // Map to include both id and text
+    const formattedQuestions = levelQuestions.map((q, idx) => ({
+      id: `q${idx + 1}`,
+      text: q
+    }));
+    setQuestions(formattedQuestions);
     checkDailyLimit();
     checkWeeklyCoins();
   }, [progress.currentLevel, language]);
@@ -90,19 +95,20 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
       .limit(10);
 
     if (data && data.length > 0) {
-      // Extract the actual questions from the question_id field and regenerate the questions array
-      const partnerQuestions: string[] = [];
-      const answers: Record<string, string> = {};
+      const partnerQuestionAnswers = data.reverse().map((r, idx) => ({
+        questionId: r.question_id,
+        questionText: r.question_id, // The question text is stored in question_id
+        answer: r.answer
+      }));
       
-      data.forEach(r => {
-        // question_id is stored as the actual question text
-        partnerQuestions.push(r.question_id);
-        answers[r.question_id] = r.answer;
-      });
+      setPartnerAnswers(partnerQuestionAnswers);
       
-      // Update questions array to match partner's questions
-      setQuestions(partnerQuestions.reverse()); // reverse because we fetched in desc order
-      setPartnerAnswers(answers);
+      // Also update questions array to show partner's questions
+      const formattedQuestions = partnerQuestionAnswers.map((qa, idx) => ({
+        id: `q${idx + 1}`,
+        text: qa.questionText
+      }));
+      setQuestions(formattedQuestions);
     }
   };
 
@@ -234,12 +240,14 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
   const saveAnswer = async () => {
     if (!myAnswer.trim()) return;
 
+    const currentQuestion = questions[currentQuestionIndex];
+    
     // Store the actual question text as the question_id to ensure matching works
     await supabase.from('game_responses').insert({
       couple_id: coupleId,
       user_id: userId,
       game_type: 'how-well',
-      question_id: questions[currentQuestionIndex],
+      question_id: currentQuestion.text,
       answer: myAnswer.trim(),
       session_id: sessionId
     });
@@ -270,9 +278,9 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
   const checkGuess = async () => {
     if (!myGuess.trim() || !partnerId) return;
 
-    // Use the actual question text to find the partner's answer
-    const currentQuestion = questions[currentQuestionIndex];
-    const partnerAnswer = partnerAnswers[currentQuestion];
+    // Use the current index to find the partner's answer
+    const currentPartnerAnswer = partnerAnswers[currentQuestionIndex];
+    const partnerAnswer = currentPartnerAnswer?.answer;
     const isCorrect = myGuess.trim().toLowerCase() === partnerAnswer?.toLowerCase();
 
     if (isCorrect) {
@@ -520,7 +528,7 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
         <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
           <div className="max-w-md w-full">
             <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">{questions[currentQuestionIndex]}</h3>
+              <h3 className="text-lg font-semibold mb-4">{questions[currentQuestionIndex]?.text}</h3>
               <div className="space-y-4">
                 <div>
                   <Label>{t('yourAnswer')}</Label>
@@ -558,7 +566,7 @@ export const HowWellGame = ({ coupleId, userId, partnerId, onBack }: HowWellGame
               <div className="text-center mb-4">
                 <p className="text-sm text-muted-foreground mb-2">{t('score')}: {score}/{currentQuestionIndex}</p>
               </div>
-              <h3 className="text-lg font-semibold mb-4">{questions[currentQuestionIndex]}</h3>
+              <h3 className="text-lg font-semibold mb-4">{questions[currentQuestionIndex]?.text}</h3>
               <div className="space-y-4">
                 <div>
                   <Label>{t('yourGuess')}</Label>
