@@ -37,6 +37,7 @@ interface Effect {
   left: number;
   delay: number;
   duration: number;
+  effectIndex: number;
 }
 
 interface Props {
@@ -92,12 +93,22 @@ export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
     const effectsToRender = previewEffect ? [previewEffect] : activeEffects;
     
     if (effectsToRender.length > 0) {
-      const newParticles = Array.from({ length: 20 }, (_, i) => ({
-        id: i,
-        left: Math.random() * 100,
-        delay: Math.random() * 5,
-        duration: 8 + Math.random() * 4,
-      }));
+      // Create evenly distributed particles across the screen
+      const particlesPerEffect = Math.ceil(15 / effectsToRender.length);
+      const newParticles = effectsToRender.flatMap((effect, effectIndex) =>
+        Array.from({ length: particlesPerEffect }, (_, i) => {
+          const totalIndex = effectIndex * particlesPerEffect + i;
+          return {
+            id: totalIndex,
+            // Distribute evenly across width with some randomness
+            left: (totalIndex * (100 / (effectsToRender.length * particlesPerEffect))) + (Math.random() * 10 - 5),
+            // Stagger delays to prevent all starting together
+            delay: totalIndex * 0.5 + Math.random() * 2,
+            duration: 8 + Math.random() * 4,
+            effectIndex, // Track which effect this particle belongs to
+          };
+        })
+      );
       setParticles(newParticles);
     } else {
       setParticles([]);
@@ -185,53 +196,55 @@ export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
 
   return (
     <div className="pointer-events-none fixed inset-0 overflow-hidden">
-      {effectsToRender.map((effect) =>
-        particles.map((particle) => {
-          const imageSrc = effect.visual_effects.effect_type === 'image' 
-            ? getEffectImage(effect.visual_effects.name) 
-            : null;
+      {effectsToRender.map((effect, effectIndex) =>
+        particles
+          .filter(p => p.effectIndex === effectIndex)
+          .map((particle) => {
+            const imageSrc = effect.visual_effects.effect_type === 'image' 
+              ? getEffectImage(effect.visual_effects.name) 
+              : null;
 
-          return (
-            <div
-              key={`${effect.id}-${particle.id}`}
-              className={`absolute -top-10 ${getAnimation(effect.visual_effects.animation)}`}
-              style={{
-                left: `${particle.left}%`,
-                animationDelay: `${particle.delay}s`,
-                animationDuration: `${particle.duration}s`,
-              }}
-            >
-              {imageSrc ? (
-                <img
-                  src={imageSrc}
-                  alt={effect.visual_effects.name}
-                  className={`w-12 h-12 object-contain ${getAdditionalAnimation(effect.visual_effects.behavior)}`}
-                  style={{
-                    filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.5))',
-                  }}
-                />
-              ) : (
-                <span
-                  className={`
-                    ${effect.visual_effects.effect_type === 'phrase' ? 'text-base font-bold' : 'text-3xl'}
-                    text-foreground opacity-90 drop-shadow-lg
-                    ${getAdditionalAnimation(effect.visual_effects.behavior)}
-                  `}
-                  style={{
-                    color: effect.visual_effects.effect_type === 'phrase' 
-                      ? getNeonColor(effect.visual_effects.behavior)
-                      : 'inherit',
-                    textShadow: effect.visual_effects.effect_type === 'phrase'
-                      ? `0 0 20px ${getNeonColor(effect.visual_effects.behavior)}, 0 0 30px ${getNeonColor(effect.visual_effects.behavior)}`
-                      : '0 0 10px rgba(255, 255, 255, 0.5)',
-                  }}
-                >
-                  {getEmoji(effect.visual_effects.name, effect.visual_effects.effect_type)}
-                </span>
-              )}
-            </div>
-          );
-        })
+            return (
+              <div
+                key={`${effect.id}-${particle.id}`}
+                className={`absolute -top-10 ${getAnimation(effect.visual_effects.animation)}`}
+                style={{
+                  left: `${Math.max(5, Math.min(95, particle.left))}%`,
+                  animationDelay: `${particle.delay}s`,
+                  animationDuration: `${particle.duration}s`,
+                }}
+              >
+                {imageSrc ? (
+                  <img
+                    src={imageSrc}
+                    alt={effect.visual_effects.name}
+                    className={`w-12 h-12 object-contain ${getAdditionalAnimation(effect.visual_effects.behavior)}`}
+                    style={{
+                      filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.5))',
+                    }}
+                  />
+                ) : (
+                  <span
+                    className={`
+                      ${effect.visual_effects.effect_type === 'phrase' ? 'text-base font-bold' : 'text-3xl'}
+                      text-foreground opacity-90 drop-shadow-lg
+                      ${getAdditionalAnimation(effect.visual_effects.behavior)}
+                    `}
+                    style={{
+                      color: effect.visual_effects.effect_type === 'phrase' 
+                        ? getNeonColor(effect.visual_effects.behavior)
+                        : 'inherit',
+                      textShadow: effect.visual_effects.effect_type === 'phrase'
+                        ? `0 0 20px ${getNeonColor(effect.visual_effects.behavior)}, 0 0 30px ${getNeonColor(effect.visual_effects.behavior)}`
+                        : '0 0 10px rgba(255, 255, 255, 0.5)',
+                    }}
+                  >
+                    {getEmoji(effect.visual_effects.name, effect.visual_effects.effect_type)}
+                  </span>
+                )}
+              </div>
+            );
+          })
       )}
     </div>
   );
