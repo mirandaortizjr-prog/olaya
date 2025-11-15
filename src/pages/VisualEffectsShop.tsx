@@ -11,6 +11,15 @@ import togetherCoinsIcon from '@/assets/together-coins-icon.png';
 import { VisualEffectsRenderer } from '@/components/VisualEffectsRenderer';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { translations } from '@/lib/translations';
+import cyanSnowflake from '@/assets/effects/cyan-snowflake.png';
+import pinkSnowflake from '@/assets/effects/pink-snowflake.png';
+import roseHeart from '@/assets/effects/rose-heart.png';
+import glowingHeart from '@/assets/effects/glowing-heart.png';
+import loveCupcake from '@/assets/effects/love-cupcake.png';
+import voodooDoll from '@/assets/effects/voodoo-doll.png';
+import neonRose from '@/assets/effects/neon-rose.png';
+import pinkButterfly from '@/assets/effects/pink-butterfly.png';
+import angelWings from '@/assets/effects/angel-wings.png';
 
 interface VisualEffect {
   id: string;
@@ -60,7 +69,7 @@ export default function VisualEffectsShop() {
         .order('name');
 
       if (data) {
-        setObjectEffects(data.filter(e => e.category === 'objects'));
+        setObjectEffects(data.filter(e => e.category === 'objects' || e.category === 'romantic'));
         setPhraseEffects(data.filter(e => e.category === 'phrases'));
       }
       setLoading(false);
@@ -171,6 +180,21 @@ export default function VisualEffectsShop() {
     }, 10000);
   };
 
+  const getEffectImage = (name: string) => {
+    const imageMap: Record<string, string> = {
+      'Cyan Snowflake': cyanSnowflake,
+      'Pink Snowflake': pinkSnowflake,
+      'Rose Heart': roseHeart,
+      'Glowing Heart': glowingHeart,
+      'Love Cupcake': loveCupcake,
+      'Voodoo Doll': voodooDoll,
+      'Neon Rose': neonRose,
+      'Pink Butterfly': pinkButterfly,
+      'Angel Wings': angelWings,
+    };
+    return imageMap[name];
+  };
+
   const getEffectEmoji = (name: string, type: string) => {
     if (type === 'phrase') return name;
     
@@ -262,14 +286,25 @@ export default function VisualEffectsShop() {
                   >
                     <div className="flex flex-col gap-2 h-full">
                       <div className="flex items-center justify-center h-14">
-                        <span 
-                          className={`text-3xl ${getAnimationClass(effect.behavior)}`}
-                          style={{
-                            textShadow: '0 0 10px rgba(255, 255, 255, 0.5)',
-                          }}
-                        >
-                          {getEffectEmoji(effect.name, effect.effect_type)}
-                        </span>
+                        {effect.effect_type === 'image' && getEffectImage(effect.name) ? (
+                          <img
+                            src={getEffectImage(effect.name)}
+                            alt={effect.name}
+                            className={`w-12 h-12 object-contain ${getAnimationClass(effect.behavior)}`}
+                            style={{
+                              filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.5))',
+                            }}
+                          />
+                        ) : (
+                          <span 
+                            className={`text-3xl ${getAnimationClass(effect.behavior)}`}
+                            style={{
+                              textShadow: '0 0 10px rgba(255, 255, 255, 0.5)',
+                            }}
+                          >
+                            {getEffectEmoji(effect.name, effect.effect_type)}
+                          </span>
+                        )}
                       </div>
                       <div className="text-center min-h-[2.5rem] flex flex-col justify-center px-1">
                         <p className="font-medium text-foreground text-xs mb-0.5 line-clamp-1">{effect.name}</p>
