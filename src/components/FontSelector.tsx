@@ -39,8 +39,8 @@ export const FontSelector = ({ userId, currentFont = 'default', onFontChange }: 
 
       if (error) throw error;
 
-      // Apply font to document root
-      document.documentElement.className = document.documentElement.className
+      // Apply font to body element
+      document.body.className = document.body.className
         .split(' ')
         .filter(c => !c.startsWith('font-'))
         .concat(`font-${fontId}`)

@@ -372,7 +372,7 @@ const Dashboard = () => {
       
       // Apply saved font preference
       if (data.font_preference) {
-        document.documentElement.className = document.documentElement.className
+        document.body.className = document.body.className
           .split(' ')
           .filter(c => !c.startsWith('font-'))
           .concat(`font-${data.font_preference}`)
