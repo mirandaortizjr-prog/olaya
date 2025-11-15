@@ -9,6 +9,16 @@ import voodooDoll from '@/assets/effects/voodoo-doll.png';
 import neonRose from '@/assets/effects/neon-rose.png';
 import pinkButterfly from '@/assets/effects/pink-butterfly.png';
 import angelWings from '@/assets/effects/angel-wings.png';
+import neonCrown from '@/assets/effects/neon-crown.png';
+import neonLemonade from '@/assets/effects/neon-lemonade.png';
+import neonCocktail from '@/assets/effects/neon-cocktail.png';
+import lotusHeart from '@/assets/effects/lotus-heart.png';
+import lotusFlame from '@/assets/effects/lotus-flame.png';
+import loveNotes from '@/assets/effects/love-notes.png';
+import pinkCrown from '@/assets/effects/pink-crown.png';
+import devilHorns from '@/assets/effects/devil-horns.png';
+import heartBalloons from '@/assets/effects/heart-balloons.png';
+import gameController from '@/assets/effects/game-controller.png';
 
 interface ActiveEffect {
   id: string;
@@ -131,6 +141,16 @@ export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
       'Neon Rose': neonRose,
       'Pink Butterfly': pinkButterfly,
       'Angel Wings': angelWings,
+      'Neon Crown': neonCrown,
+      'Neon Lemonade': neonLemonade,
+      'Neon Cocktail': neonCocktail,
+      'Lotus Heart': lotusHeart,
+      'Lotus Flame': lotusFlame,
+      'Love Notes': loveNotes,
+      'Pink Crown': pinkCrown,
+      'Devil Horns': devilHorns,
+      'Heart Balloons': heartBalloons,
+      'Game Controller': gameController,
     };
     return imageMap[name];
   };
