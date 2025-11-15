@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, Heart, Flame, Sparkles, Mail, Brain } from "lucide-react";
+import { Eye, Heart, Flame, Sparkles, Mail, Brain, Feather } from "lucide-react";
 
 interface QuickActionsProps {
   coupleId: string;
@@ -24,6 +25,7 @@ export const QuickActions = ({ coupleId, userId }: QuickActionsProps) => {
   const [sending, setSending] = useState<string | null>(null);
   const { toast } = useToast();
   const { language } = useLanguage();
+  const navigate = useNavigate();
 
   const sendQuickMessage = async (messageType: string) => {
     setSending(messageType);
@@ -101,6 +103,14 @@ export const QuickActions = ({ coupleId, userId }: QuickActionsProps) => {
             <span className="text-xs font-medium">{label[language]}</span>
           </Button>
         ))}
+        <Button
+          variant="outline"
+          className="flex flex-col items-center justify-center h-24 gap-2 bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 hover:scale-105 transition-transform"
+          onClick={() => navigate('/poems')}
+        >
+          <Feather className="w-6 h-6" />
+          <span className="text-xs font-medium">{language === 'en' ? 'Write Poem' : 'Escribir Poema'}</span>
+        </Button>
       </div>
     </Card>
   );
