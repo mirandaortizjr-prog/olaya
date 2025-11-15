@@ -701,7 +701,7 @@ const GiftsPage = () => {
                         <img
                           src={giftImages[gift.image_url]}
                           alt={gift.name}
-                          className="w-full h-full object-contain p-4"
+                          className="w-full h-full object-contain p-4 animate-float hover:animate-flutter transition-transform duration-200 hover:scale-105"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-5xl">
