@@ -141,7 +141,6 @@ export default function AccessoriesPage() {
       'Coral Red': 'coral-red',
       'Silver Gray': 'silver-gray',
       'Bright Cyan': 'cyan-bright',
-      'Dusty Rose': 'dusty-rose',
       'Lime Green': 'lime-green',
       'Green to Yellow': 'green-yellow',
       'Slate Blue': 'slate-blue',
@@ -153,6 +152,12 @@ export default function AccessoriesPage() {
       'Fresh Activation': 'fresh-activation',
       'Growth to Joy': 'growth-joy',
       'Emotional Weight': 'emotional-weight',
+      'Electric Blue': 'electric-blue',
+      'Neon Dream': 'neon-dream',
+      'Rose Gold': 'rose-blush',
+      'Ocean Deep': 'ocean-depths',
+      'Midnight Ocean': 'midnight-waters',
+      'Dusty Rose': 'pink-champagne',
     };
     return mapping[name] || 'default';
   };
