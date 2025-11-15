@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,6 +28,7 @@ export default function PoemsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   useEffect(() => {
     fetchUserAndCouple();
@@ -124,39 +126,28 @@ export default function PoemsPage() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Sparkles className="w-8 h-8 text-primary" />
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-              Our Poems
-            </h1>
+            <h1 className="text-3xl font-bold">{t('poemsTitle')}</h1>
           </div>
           <Button onClick={() => setShowStartDialog(true)} className="gap-2">
             <Plus className="w-4 h-4" />
-            New Poem
+            {t('poemsStartNew')}
           </Button>
         </div>
 
         <Tabs defaultValue="active" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="active">
-              Active ({activePoems.length})
-            </TabsTrigger>
-            <TabsTrigger value="gallery">
-              Gallery ({completedPoems.length})
-            </TabsTrigger>
+            <TabsTrigger value="active">{t('poemsActivePoems')} ({activePoems.length})</TabsTrigger>
+            <TabsTrigger value="completed">{t('poemsCompletedPoems')} ({completedPoems.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="active" className="space-y-4">
             {activePoems.length === 0 ? (
               <Card className="p-12 text-center">
                 <Heart className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
-                <p className="text-lg font-medium text-muted-foreground mb-2">
-                  No active poems
-                </p>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Start writing a poem together with your partner
-                </p>
+                <p className="text-muted-foreground mb-4">{t('poemsNoActive')}</p>
                 <Button onClick={() => setShowStartDialog(true)} className="gap-2">
                   <Plus className="w-4 h-4" />
-                  Start Your First Poem
+                  {t('poemsStartNew')}
                 </Button>
               </Card>
             ) : (
@@ -171,12 +162,13 @@ export default function PoemsPage() {
             )}
           </TabsContent>
 
-          <TabsContent value="gallery" className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          <TabsContent value="completed" className="space-y-4">
+            <div className="flex gap-2 mb-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by title or tags..."
+                  type="text"
+                  placeholder={t('poemsSearchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -185,27 +177,25 @@ export default function PoemsPage() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-2 rounded-md border border-input bg-background text-sm"
+                className="px-4 py-2 rounded-md border border-input bg-background"
               >
-                <option value="all">All Categories</option>
-                <option value="Funny">Funny</option>
-                <option value="Romantic">Romantic</option>
-                <option value="Kinky">Kinky</option>
-                <option value="Deep">Deep</option>
-                <option value="Wildcard">Wildcard</option>
-                <option value="FreePlay">FreePlay</option>
+                <option value="all">{t('poemsAllCategories')}</option>
+                <option value="Funny">{t('poemCategoryFunny')}</option>
+                <option value="Romantic">{t('poemCategoryRomantic')}</option>
+                <option value="Kinky">{t('poemCategoryKinky')}</option>
+                <option value="Deep">{t('poemCategoryDeep')}</option>
+                <option value="Wildcard">{t('poemCategoryWildcard')}</option>
+                <option value="FreePlay">{t('poemCategoryFreePlay')}</option>
               </select>
             </div>
 
             {filteredCompletedPoems.length === 0 ? (
-              <Card className="p-12 text-center">
-                <Sparkles className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
-                <p className="text-lg font-medium text-muted-foreground">
-                  No completed poems yet
-                </p>
+              <Card className="p-8 text-center">
+                <Heart className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">{t('poemsNoCompleted')}</p>
               </Card>
             ) : (
-              <div className="grid gap-4">
+              <div className="space-y-4">
                 {filteredCompletedPoems.map((poem) => (
                   <CompletedPoemCard
                     key={poem.id}

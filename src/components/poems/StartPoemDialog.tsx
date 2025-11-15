@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 import type { Database } from "@/integrations/supabase/types";
 
 type PoemInsert = Database["public"]["Tables"]["poems"]["Insert"];
@@ -18,10 +19,10 @@ interface StartPoemDialogProps {
 }
 
 const POEM_TYPES = [
-  { value: "Haiku", label: "Haiku (3 lines)", maxLines: 3 },
-  { value: "Sonnet", label: "Sonnet (14 lines)", maxLines: 14 },
-  { value: "EightVerse", label: "Eight Verse (8 lines)", maxLines: 8 },
-  { value: "FreePlay", label: "FreePlay (unlimited)", maxLines: null },
+  { value: "Haiku", maxLines: 3 },
+  { value: "Sonnet", maxLines: 14 },
+  { value: "EightVerse", maxLines: 8 },
+  { value: "FreePlay", maxLines: null },
 ];
 
 const CATEGORIES = [
@@ -45,12 +46,13 @@ export function StartPoemDialog({
   const [firstLine, setFirstLine] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const handleStart = async () => {
     if (!firstLine.trim()) {
       toast({
-        title: "First line required",
-        description: "Please write the first line of your poem",
+        title: t('poemsFirstLineRequired'),
+        description: t('poemsFirstLineRequiredDesc'),
         variant: "destructive",
       });
       return;
@@ -79,14 +81,14 @@ export function StartPoemDialog({
 
     if (error) {
       toast({
-        title: "Error creating poem",
+        title: t('poemsErrorCreating'),
         description: error.message,
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Poem started!",
-        description: "Your partner can now add the next line",
+        title: t('poemsStarted'),
+        description: t('poemsStartedDesc'),
       });
       setFirstLine("");
       onOpenChange(false);
@@ -98,12 +100,12 @@ export function StartPoemDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Start a New Poem</DialogTitle>
+          <DialogTitle>{t('poemsStartPoem')}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div>
-            <Label>Poem Type</Label>
+            <Label>{t('poemsPoemType')}</Label>
             <select
               value={poemType}
               onChange={(e) => setPoemType(e.target.value)}
@@ -111,14 +113,14 @@ export function StartPoemDialog({
             >
               {POEM_TYPES.map((type) => (
                 <option key={type.value} value={type.value}>
-                  {type.label}
+                  {t(`poemType${type.value}` as any)}
                 </option>
               ))}
             </select>
           </div>
 
           <div>
-            <Label>Category</Label>
+            <Label>{t('poemsCategory')}</Label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -126,16 +128,16 @@ export function StartPoemDialog({
             >
               {CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
-                  {cat}
+                  {t(`poemCategory${cat}` as any)}
                 </option>
               ))}
             </select>
           </div>
 
           <div>
-            <Label>First Line</Label>
+            <Label>{t('poemsFirstLine')}</Label>
             <Textarea
-              placeholder="Write the first line of your poem..."
+              placeholder={t('poemsFirstLinePlaceholder')}
               value={firstLine}
               onChange={(e) => setFirstLine(e.target.value)}
               className="mt-1"
@@ -144,7 +146,7 @@ export function StartPoemDialog({
           </div>
 
           <Button onClick={handleStart} disabled={loading} className="w-full">
-            {loading ? "Starting..." : "Start Poem"}
+            {loading ? t('poemsStarting') : t('poemsStartPoem')}
           </Button>
         </div>
       </DialogContent>
