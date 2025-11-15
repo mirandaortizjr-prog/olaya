@@ -98,24 +98,8 @@ export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
   
   if (effectsToRender.length === 0) return null;
 
-  const getImage = (name: string) => {
-    const imageMap: Record<string, string> = {
-      'Cyan Snowflake': cyanSnowflake,
-      'Pink Snowflake': pinkSnowflake,
-      'Rose Heart': roseHeart,
-      'Glowing Heart': glowingHeart,
-      'Love Cupcake': loveCupcake,
-      'Voodoo Doll': voodooDoll,
-      'Neon Rose': neonRose,
-      'Pink Butterfly': pinkButterfly,
-      'Angel Wings': angelWings,
-    };
-    return imageMap[name];
-  };
-
   const getEmoji = (name: string, type: string) => {
     if (type === 'phrase') return name;
-    if (type === 'image') return null; // Images are handled separately
     
     const emojiMap: Record<string, string> = {
       'Falling Hearts': '💗',
@@ -134,6 +118,21 @@ export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
       'Mirrored Hearts': '💕',
     };
     return emojiMap[name] || '💖';
+  };
+
+  const getEffectImage = (name: string) => {
+    const imageMap: Record<string, string> = {
+      'Cyan Snowflake': cyanSnowflake,
+      'Pink Snowflake': pinkSnowflake,
+      'Rose Heart': roseHeart,
+      'Glowing Heart': glowingHeart,
+      'Love Cupcake': loveCupcake,
+      'Voodoo Doll': voodooDoll,
+      'Neon Rose': neonRose,
+      'Pink Butterfly': pinkButterfly,
+      'Angel Wings': angelWings,
+    };
+    return imageMap[name];
   };
 
   const getNeonColor = (behavior: string) => {
@@ -163,14 +162,14 @@ export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
     }
     return '';
   };
+
   return (
     <div className="pointer-events-none fixed inset-0 overflow-hidden">
       {effectsToRender.map((effect) =>
         particles.map((particle) => {
           const imageSrc = effect.visual_effects.effect_type === 'image' 
-            ? getImage(effect.visual_effects.name) 
+            ? getEffectImage(effect.visual_effects.name) 
             : null;
-          const emoji = getEmoji(effect.visual_effects.name, effect.visual_effects.effect_type);
 
           return (
             <div
@@ -186,7 +185,10 @@ export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
                 <img
                   src={imageSrc}
                   alt={effect.visual_effects.name}
-                  className={`w-12 h-12 opacity-90 drop-shadow-2xl ${getAdditionalAnimation(effect.visual_effects.behavior)}`}
+                  className={`w-12 h-12 object-contain ${getAdditionalAnimation(effect.visual_effects.behavior)}`}
+                  style={{
+                    filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.5))',
+                  }}
                 />
               ) : (
                 <span
@@ -204,7 +206,7 @@ export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
                       : '0 0 10px rgba(255, 255, 255, 0.5)',
                   }}
                 >
-                  {emoji}
+                  {getEmoji(effect.visual_effects.name, effect.visual_effects.effect_type)}
                 </span>
               )}
             </div>
