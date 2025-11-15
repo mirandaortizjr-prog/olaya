@@ -107,9 +107,13 @@ export const useGradients = (coupleId: string | null, userId: string | null) => 
     const root = document.documentElement;
     root.style.transition = 'all 0.8s ease-in-out';
     
-    // Update CSS variables
+    // Update CSS variables for gradients
     root.style.setProperty('--video-gradient', gradient.css);
     root.style.setProperty('--nav-gradient', gradient.css);
+    
+    // Update foreground color for icons and text that need to contrast with the gradient
+    const foregroundColor = 'foregroundColor' in gradient ? gradient.foregroundColor : 'hsl(var(--foreground))';
+    root.style.setProperty('--gradient-foreground', foregroundColor);
     
     // Remove transition after animation completes
     setTimeout(() => {

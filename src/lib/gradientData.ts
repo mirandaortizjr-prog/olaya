@@ -6,6 +6,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(277 88% 36%), hsl(16 100% 66%))',
     startColor: 'hsl(277 88% 36%)',
     endColor: 'hsl(16 100% 66%)',
+    foregroundColor: 'hsl(0 0% 100%)', // White for dark backgrounds
   },
   'gold-pink': {
     id: 'gold-pink',
@@ -13,6 +14,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(51 100% 50%), hsl(330 100% 71%))',
     startColor: 'hsl(51 100% 50%)',
     endColor: 'hsl(330 100% 71%)',
+    foregroundColor: 'hsl(0 0% 0%)', // Black for bright backgrounds
   },
   'pink-gold': {
     id: 'pink-gold',
@@ -20,6 +22,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(330 100% 71%), hsl(51 100% 50%))',
     startColor: 'hsl(330 100% 71%)',
     endColor: 'hsl(51 100% 50%)',
+    foregroundColor: 'hsl(0 0% 0%)', // Black for bright backgrounds
   },
   'cyan-gold': {
     id: 'cyan-gold',
@@ -27,6 +30,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(180 100% 50%), hsl(51 100% 50%))',
     startColor: 'hsl(180 100% 50%)',
     endColor: 'hsl(51 100% 50%)',
+    foregroundColor: 'hsl(0 0% 0%)', // Black for bright backgrounds
   },
   'teal-lime': {
     id: 'teal-lime',
@@ -34,6 +38,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(180 100% 25%), hsl(120 61% 50%))',
     startColor: 'hsl(180 100% 25%)',
     endColor: 'hsl(120 61% 50%)',
+    foregroundColor: 'hsl(0 0% 100%)', // White for dark to medium backgrounds
   },
   'purple-lime': {
     id: 'purple-lime',
@@ -41,6 +46,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(300 100% 25%), hsl(120 61% 50%))',
     startColor: 'hsl(300 100% 25%)',
     endColor: 'hsl(120 61% 50%)',
+    foregroundColor: 'hsl(0 0% 100%)', // White for dark to medium backgrounds
   },
   'purple-cyan': {
     id: 'purple-cyan',
@@ -48,6 +54,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(300 100% 25%), hsl(180 100% 50%))',
     startColor: 'hsl(300 100% 25%)',
     endColor: 'hsl(180 100% 50%)',
+    foregroundColor: 'hsl(0 0% 100%)', // White for dark to medium backgrounds
   },
   'blue-cyan': {
     id: 'blue-cyan',
@@ -55,6 +62,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(240 100% 50%), hsl(180 100% 50%))',
     startColor: 'hsl(240 100% 50%)',
     endColor: 'hsl(180 100% 50%)',
+    foregroundColor: 'hsl(0 0% 100%)', // White for bright blue backgrounds
   },
   'cyan-darkblue': {
     id: 'cyan-darkblue',
@@ -167,6 +175,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(210 14% 53%), hsl(199 18% 67%))',
     startColor: 'hsl(210 14% 53%)',
     endColor: 'hsl(199 18% 67%)',
+    foregroundColor: 'hsl(0 0% 100%)', // White for muted blue
   },
   'gentle-mystery': {
     id: 'gentle-mystery',
@@ -174,6 +183,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(300 24% 81%), hsl(300 24% 81%))',
     startColor: 'hsl(300 24% 81%)',
     endColor: 'hsl(300 24% 81%)',
+    foregroundColor: 'hsl(0 0% 0%)', // Black for light lavender
   },
   'raw-desire': {
     id: 'raw-desire',
@@ -181,6 +191,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(0 100% 50%), hsl(0 100% 50%))',
     startColor: 'hsl(0 100% 50%)',
     endColor: 'hsl(0 100% 50%)',
+    foregroundColor: 'hsl(0 0% 100%)', // White for bright red
   },
   'neutral-ambiguity': {
     id: 'neutral-ambiguity',
@@ -188,6 +199,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(0 0% 50%), hsl(0 0% 50%))',
     startColor: 'hsl(0 0% 50%)',
     endColor: 'hsl(0 0% 50%)',
+    foregroundColor: 'hsl(0 0% 100%)', // White for medium gray
   },
   'clarity-surge': {
     id: 'clarity-surge',
@@ -195,6 +207,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(180 100% 50%), hsl(180 100% 50%))',
     startColor: 'hsl(180 100% 50%)',
     endColor: 'hsl(180 100% 50%)',
+    foregroundColor: 'hsl(0 0% 0%)', // Black for bright cyan
   },
   'emotional-depth': {
     id: 'emotional-depth',
@@ -202,6 +215,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(330 50% 40%), hsl(330 50% 40%))',
     startColor: 'hsl(330 50% 40%)',
     endColor: 'hsl(330 50% 40%)',
+    foregroundColor: 'hsl(0 0% 100%)', // White for dark pink
   },
   'fresh-activation': {
     id: 'fresh-activation',
@@ -209,6 +223,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(120 100% 50%), hsl(120 100% 50%))',
     startColor: 'hsl(120 100% 50%)',
     endColor: 'hsl(120 100% 50%)',
+    foregroundColor: 'hsl(0 0% 0%)', // Black for bright green
   },
   'growth-joy': {
     id: 'growth-joy',
@@ -216,6 +231,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(120 100% 50%), hsl(60 100% 50%))',
     startColor: 'hsl(120 100% 50%)',
     endColor: 'hsl(60 100% 50%)',
+    foregroundColor: 'hsl(0 0% 0%)', // Black for bright yellow/green
   },
   'emotional-weight': {
     id: 'emotional-weight',
@@ -223,6 +239,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(180 25% 25%), hsl(180 25% 25%))',
     startColor: 'hsl(180 25% 25%)',
     endColor: 'hsl(180 25% 25%)',
+    foregroundColor: 'hsl(0 0% 100%)', // White for dark teal
   },
   'default': {
     id: 'default',
@@ -230,6 +247,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(280 60% 35%), hsl(280 60% 15%))',
     startColor: 'hsl(280 60% 35%)',
     endColor: 'hsl(280 60% 15%)',
+    foregroundColor: 'hsl(0 0% 100%)', // White for purple
   },
   'electric-blue': {
     id: 'electric-blue',
@@ -237,6 +255,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(218 100% 50%), hsl(0 0% 0%))',
     startColor: 'hsl(218 100% 50%)',
     endColor: 'hsl(0 0% 0%)',
+    foregroundColor: 'hsl(0 0% 100%)', // White for blue to black
   },
   'neon-dream': {
     id: 'neon-dream',
@@ -244,6 +263,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(268 79% 52%), hsl(195 100% 62%), hsl(111 99% 61%))',
     startColor: 'hsl(268 79% 52%)',
     endColor: 'hsl(111 99% 61%)',
+    foregroundColor: 'hsl(0 0% 0%)', // Black for bright neon colors
   },
   'rose-blush': {
     id: 'rose-blush',
@@ -251,6 +271,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(329 100% 56%), hsl(35 100% 90%))',
     startColor: 'hsl(329 100% 56%)',
     endColor: 'hsl(35 100% 90%)',
+    foregroundColor: 'hsl(0 0% 0%)', // Black for light pink/gold
   },
   'ocean-depths': {
     id: 'ocean-depths',
@@ -258,6 +279,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(183 82% 62%), hsl(215 100% 34%))',
     startColor: 'hsl(183 82% 62%)',
     endColor: 'hsl(215 100% 34%)',
+    foregroundColor: 'hsl(0 0% 100%)', // White for ocean blue
   },
   'midnight-waters': {
     id: 'midnight-waters',
@@ -265,6 +287,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(203 99% 21%), hsl(195 100% 63%), hsl(203 99% 21%), hsl(202 97% 43%), hsl(232 99% 21%))',
     startColor: 'hsl(203 99% 21%)',
     endColor: 'hsl(232 99% 21%)',
+    foregroundColor: 'hsl(0 0% 100%)', // White for dark midnight blues
   },
   'pink-champagne': {
     id: 'pink-champagne',
@@ -272,6 +295,7 @@ export const GRADIENTS = {
     css: 'linear-gradient(180deg, hsl(346 29% 58%), hsl(21 100% 82%), hsl(346 29% 58%), hsl(43 75% 88%), hsl(346 29% 58%))',
     startColor: 'hsl(346 29% 58%)',
     endColor: 'hsl(346 29% 58%)',
+    foregroundColor: 'hsl(0 0% 0%)', // Black for light pink tones
   },
 };
 
