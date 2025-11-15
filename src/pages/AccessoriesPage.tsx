@@ -285,8 +285,11 @@ export default function AccessoriesPage() {
                   <Card key={item.id} className="overflow-hidden transition-all duration-300 hover:shadow-lg">
                     {isImageSkin && skinId ? (
                       <div
-                        className="h-32 w-full bg-contain bg-center bg-no-repeat transition-all duration-500"
-                        style={{ backgroundImage: `url(${SKINS[skinId].image})` }}
+                        className="h-32 w-full bg-center bg-no-repeat transition-all duration-500"
+                        style={{ 
+                          backgroundImage: `url(${SKINS[skinId].image})`,
+                          backgroundSize: '70%'
+                        }}
                       />
                     ) : (
                       <div
