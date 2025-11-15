@@ -454,7 +454,7 @@ const GiftsPage = () => {
                       <img
                         src={giftImages[gift.image_url]}
                         alt={gift.name}
-                        className="w-full h-full object-contain p-4"
+                        className="w-full h-full object-contain p-4 hover:animate-[wiggle_1s_ease-in-out] transition-transform"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
