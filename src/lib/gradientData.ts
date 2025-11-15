@@ -231,6 +231,48 @@ export const GRADIENTS = {
     startColor: 'hsl(280 60% 35%)',
     endColor: 'hsl(280 60% 15%)',
   },
+  'electric-blue': {
+    id: 'electric-blue',
+    name: 'Electric Blue',
+    css: 'linear-gradient(180deg, hsl(218 100% 50%), hsl(0 0% 0%))',
+    startColor: 'hsl(218 100% 50%)',
+    endColor: 'hsl(0 0% 0%)',
+  },
+  'neon-dream': {
+    id: 'neon-dream',
+    name: 'Neon Dream',
+    css: 'linear-gradient(180deg, hsl(268 79% 52%), hsl(195 100% 62%), hsl(111 99% 61%))',
+    startColor: 'hsl(268 79% 52%)',
+    endColor: 'hsl(111 99% 61%)',
+  },
+  'rose-blush': {
+    id: 'rose-blush',
+    name: 'Rose Gold',
+    css: 'linear-gradient(180deg, hsl(329 100% 56%), hsl(35 100% 90%))',
+    startColor: 'hsl(329 100% 56%)',
+    endColor: 'hsl(35 100% 90%)',
+  },
+  'ocean-depths': {
+    id: 'ocean-depths',
+    name: 'Ocean Deep',
+    css: 'linear-gradient(180deg, hsl(183 82% 62%), hsl(215 100% 34%))',
+    startColor: 'hsl(183 82% 62%)',
+    endColor: 'hsl(215 100% 34%)',
+  },
+  'midnight-waters': {
+    id: 'midnight-waters',
+    name: 'Midnight Ocean',
+    css: 'linear-gradient(180deg, hsl(203 99% 21%), hsl(195 100% 63%), hsl(203 99% 21%), hsl(202 97% 43%), hsl(232 99% 21%))',
+    startColor: 'hsl(203 99% 21%)',
+    endColor: 'hsl(232 99% 21%)',
+  },
+  'pink-champagne': {
+    id: 'pink-champagne',
+    name: 'Dusty Rose',
+    css: 'linear-gradient(180deg, hsl(346 29% 58%), hsl(21 100% 82%), hsl(346 29% 58%), hsl(43 75% 88%), hsl(346 29% 58%))',
+    startColor: 'hsl(346 29% 58%)',
+    endColor: 'hsl(346 29% 58%)',
+  },
 };
 
 export type GradientId = keyof typeof GRADIENTS;
