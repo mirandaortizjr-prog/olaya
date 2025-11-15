@@ -1097,6 +1097,51 @@ export type Database = {
         }
         Relationships: []
       }
+      poems: {
+        Row: {
+          category: Database["public"]["Enums"]["poem_category"]
+          couple_id: string
+          created_at: string | null
+          created_by: string
+          id: string
+          lines: Json | null
+          poem_type: Database["public"]["Enums"]["poem_type"]
+          published_to_feed: boolean | null
+          saved_at: string | null
+          status: Database["public"]["Enums"]["poem_status"] | null
+          tags: Json | null
+          title: string | null
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["poem_category"]
+          couple_id: string
+          created_at?: string | null
+          created_by: string
+          id?: string
+          lines?: Json | null
+          poem_type: Database["public"]["Enums"]["poem_type"]
+          published_to_feed?: boolean | null
+          saved_at?: string | null
+          status?: Database["public"]["Enums"]["poem_status"] | null
+          tags?: Json | null
+          title?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["poem_category"]
+          couple_id?: string
+          created_at?: string | null
+          created_by?: string
+          id?: string
+          lines?: Json | null
+          poem_type?: Database["public"]["Enums"]["poem_type"]
+          published_to_feed?: boolean | null
+          saved_at?: string | null
+          status?: Database["public"]["Enums"]["poem_status"] | null
+          tags?: Json | null
+          title?: string | null
+        }
+        Relationships: []
+      }
       post_comments: {
         Row: {
           comment: string
@@ -1981,6 +2026,15 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      poem_category:
+        | "Funny"
+        | "Romantic"
+        | "Kinky"
+        | "Deep"
+        | "Wildcard"
+        | "FreePlay"
+      poem_status: "Active" | "Completed"
+      poem_type: "Haiku" | "Sonnet" | "EightVerse" | "FreePlay"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2109,6 +2163,16 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      poem_category: [
+        "Funny",
+        "Romantic",
+        "Kinky",
+        "Deep",
+        "Wildcard",
+        "FreePlay",
+      ],
+      poem_status: ["Active", "Completed"],
+      poem_type: ["Haiku", "Sonnet", "EightVerse", "FreePlay"],
     },
   },
 } as const
