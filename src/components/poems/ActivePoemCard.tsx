@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Sparkles, Send, Check } from "lucide-react";
 import { CompletePoemDialog } from "./CompletePoemDialog";
 import { format } from "date-fns";
@@ -33,6 +34,7 @@ export function ActivePoemCard({ poem, userId, onUpdate }: ActivePoemCardProps) 
   const [loading, setLoading] = useState(false);
   const [showComplete, setShowComplete] = useState(false);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const maxLines = POEM_TYPE_LIMITS[poem.poem_type];
   const canAddLine = !maxLines || poem.lines.length < maxLines;
@@ -62,7 +64,7 @@ export function ActivePoemCard({ poem, userId, onUpdate }: ActivePoemCardProps) 
 
     if (error) {
       toast({
-        title: "Error adding line",
+        title: t('poemsErrorAdding'),
         description: error.message,
         variant: "destructive",
       });
@@ -71,8 +73,8 @@ export function ActivePoemCard({ poem, userId, onUpdate }: ActivePoemCardProps) 
       await supabase.functions.invoke("send-push-notification", {
         body: {
           userId: lastLine.user_id,
-          title: "New Poem Line",
-          body: `Your partner added a line to your ${poem.category} poem.`,
+          title: t('poemsLineAdded'),
+          body: t('poemsLineAddedDesc').replace('{category}', t(`poemCategory${poem.category}` as any)),
           data: { type: "poem_line", poemId: poem.id },
         },
       });
@@ -89,15 +91,15 @@ export function ActivePoemCard({ poem, userId, onUpdate }: ActivePoemCardProps) 
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-primary" />
             <div>
-              <Badge variant="secondary">{poem.category}</Badge>
+              <Badge variant="secondary">{t(`poemCategory${poem.category}` as any)}</Badge>
               <Badge variant="outline" className="ml-2">
-                {poem.poem_type}
+                {t(`poemType${poem.poem_type}` as any)}
               </Badge>
             </div>
           </div>
           {maxLines && (
             <span className="text-sm text-muted-foreground">
-              {poem.lines.length}/{maxLines} lines
+              {poem.lines.length}/{maxLines} {t('poemsLineCount')}
             </span>
           )}
         </div>
@@ -123,7 +125,7 @@ export function ActivePoemCard({ poem, userId, onUpdate }: ActivePoemCardProps) 
         {canAddLine && isMyTurn ? (
           <div className="space-y-2">
             <Textarea
-              placeholder="Add your line..."
+              placeholder={t('poemsAddLine')}
               value={newLine}
               onChange={(e) => setNewLine(e.target.value)}
               rows={2}
@@ -134,18 +136,18 @@ export function ActivePoemCard({ poem, userId, onUpdate }: ActivePoemCardProps) 
               className="w-full gap-2"
             >
               <Send className="w-4 h-4" />
-              {loading ? "Adding..." : "Add Line"}
+              {loading ? t('poemsAdding') : t('poemsAddLineButton')}
             </Button>
           </div>
         ) : !canAddLine ? (
           <Button onClick={() => setShowComplete(true)} className="w-full gap-2">
             <Check className="w-4 h-4" />
-            Complete Poem
+            {t('poemsCompletePoem')}
           </Button>
         ) : (
           <div className="text-center p-4 bg-muted/50 rounded-lg">
             <p className="text-sm text-muted-foreground">
-              Waiting for your partner to add the next line...
+              {t('poemsWaitingForPartner')}
             </p>
           </div>
         )}

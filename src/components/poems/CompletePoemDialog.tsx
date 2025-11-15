@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { X } from "lucide-react";
 
 interface CompletePoemDialogProps {
@@ -27,6 +28,7 @@ export function CompletePoemDialog({
   const [publishToFeed, setPublishToFeed] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const handleAddTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
@@ -42,8 +44,8 @@ export function CompletePoemDialog({
   const handleComplete = async () => {
     if (!title.trim()) {
       toast({
-        title: "Title required",
-        description: "Please give your poem a title",
+        title: t('poemsTitleRequired'),
+        description: t('poemsTitleRequiredDesc'),
         variant: "destructive",
       });
       return;
@@ -66,16 +68,16 @@ export function CompletePoemDialog({
 
     if (error) {
       toast({
-        title: "Error completing poem",
+        title: t('poemsErrorCompleting'),
         description: error.message,
         variant: "destructive",
       });
     } else {
       toast({
-        title: "Poem completed!",
+        title: t('poemsCompleted'),
         description: publishToFeed
-          ? "Your poem has been saved and published to the feed"
-          : "Your poem has been saved",
+          ? t('poemsCompletedPublished')
+          : t('poemsCompletedDesc'),
       });
       setTitle("");
       setTags([]);
@@ -89,14 +91,14 @@ export function CompletePoemDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Complete Your Poem</DialogTitle>
+          <DialogTitle>{t('poemsCompletePoemTitle')}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           <div>
-            <Label>Poem Title *</Label>
+            <Label>{t('poemsPoemTitle')}</Label>
             <Input
-              placeholder="Give your poem a title..."
+              placeholder={t('poemsTitlePlaceholder')}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="mt-1"
@@ -104,16 +106,16 @@ export function CompletePoemDialog({
           </div>
 
           <div>
-            <Label>Tags (optional)</Label>
+            <Label>{t('poemsTags')}</Label>
             <div className="flex gap-2 mt-1">
               <Input
-                placeholder="Add a tag..."
+                placeholder={t('poemsAddTag')}
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleAddTag()}
               />
               <Button onClick={handleAddTag} variant="secondary" size="sm">
-                Add
+                {t('poemsAddTagButton')}
               </Button>
             </div>
             {tags.length > 0 && (
@@ -140,12 +142,12 @@ export function CompletePoemDialog({
               className="w-4 h-4 rounded border-input"
             />
             <Label htmlFor="publish" className="cursor-pointer">
-              Publish to Feed
+              {t('poemsPublishToFeed')}
             </Label>
           </div>
 
           <Button onClick={handleComplete} disabled={loading} className="w-full">
-            {loading ? "Saving..." : "Complete Poem"}
+            {loading ? t('poemsSaving') : t('poemsCompletePoem')}
           </Button>
         </div>
       </DialogContent>

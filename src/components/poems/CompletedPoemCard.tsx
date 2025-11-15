@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Globe, GlobeLock, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -24,6 +25,7 @@ interface CompletedPoemCardProps {
 
 export function CompletedPoemCard({ poem, userId, onUpdate }: CompletedPoemCardProps) {
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this poem?")) return;
@@ -32,12 +34,12 @@ export function CompletedPoemCard({ poem, userId, onUpdate }: CompletedPoemCardP
 
     if (error) {
       toast({
-        title: "Error deleting poem",
+        title: t('poemsErrorDeleting'),
         description: error.message,
         variant: "destructive",
       });
     } else {
-      toast({ title: "Poem deleted" });
+      toast({ title: t('poemsDeleted') });
       onUpdate();
     }
   };
@@ -56,7 +58,7 @@ export function CompletedPoemCard({ poem, userId, onUpdate }: CompletedPoemCardP
       });
     } else {
       toast({
-        title: poem.published_to_feed ? "Unpublished from feed" : "Published to feed",
+        title: poem.published_to_feed ? t('poemsUnpublishedSuccess') : t('poemsPublishedSuccess'),
       });
       onUpdate();
     }
@@ -68,8 +70,8 @@ export function CompletedPoemCard({ poem, userId, onUpdate }: CompletedPoemCardP
         <div className="flex-1">
           <h3 className="text-xl font-semibold mb-2">{poem.title || "Untitled"}</h3>
           <div className="flex flex-wrap gap-2 mb-2">
-            <Badge variant="secondary">{poem.category}</Badge>
-            <Badge variant="outline">{poem.poem_type}</Badge>
+            <Badge variant="secondary">{t(`poemCategory${poem.category}` as any)}</Badge>
+            <Badge variant="outline">{t(`poemType${poem.poem_type}` as any)}</Badge>
             {poem.tags.map((tag) => (
               <Badge key={tag} variant="outline">
                 #{tag}
@@ -87,7 +89,7 @@ export function CompletedPoemCard({ poem, userId, onUpdate }: CompletedPoemCardP
             variant="ghost"
             size="icon"
             onClick={togglePublish}
-            title={poem.published_to_feed ? "Unpublish" : "Publish to feed"}
+            title={poem.published_to_feed ? t('poemsUnpublish') : t('poemsPublish')}
           >
             {poem.published_to_feed ? (
               <Globe className="w-4 h-4" />
