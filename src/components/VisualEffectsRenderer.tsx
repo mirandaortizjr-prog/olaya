@@ -94,17 +94,17 @@ export const VisualEffectsRenderer = ({ coupleId, previewEffect }: Props) => {
     
     if (effectsToRender.length > 0) {
       // Create evenly distributed particles across the screen
-      const particlesPerEffect = Math.ceil(15 / effectsToRender.length);
+      const particlesPerEffect = Math.ceil(50 / effectsToRender.length);
       const newParticles = effectsToRender.flatMap((effect, effectIndex) =>
         Array.from({ length: particlesPerEffect }, (_, i) => {
           const totalIndex = effectIndex * particlesPerEffect + i;
           return {
             id: totalIndex,
             // Distribute evenly across width with some randomness
-            left: (totalIndex * (100 / (effectsToRender.length * particlesPerEffect))) + (Math.random() * 10 - 5),
+            left: (totalIndex * (100 / (effectsToRender.length * particlesPerEffect))) + (Math.random() * 8 - 4),
             // Stagger delays to prevent all starting together
-            delay: totalIndex * 0.5 + Math.random() * 2,
-            duration: 8 + Math.random() * 4,
+            delay: totalIndex * 0.3 + Math.random() * 1.5,
+            duration: 6 + Math.random() * 3,
             effectIndex, // Track which effect this particle belongs to
           };
         })
