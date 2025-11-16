@@ -109,6 +109,9 @@ const FloatingGifts = ({ coupleId, userId, receiverGender = 'female' }: Floating
   const currentGift = activeGifts[currentGiftIndex];
   const giftImage = flowerImages[currentGift.gift_image];
   
+  // Check if this is a stuffed animal
+  const isStuffedAnimal = currentGift.gift_name.toLowerCase().includes('stuffed');
+  
   // Gender-based neon color
   const neonColor = receiverGender === 'male' 
     ? 'rgba(59, 130, 246, 0.8)' // Blue for males
@@ -133,8 +136,19 @@ const FloatingGifts = ({ coupleId, userId, receiverGender = 'female' }: Floating
               filter: blur(18px);
             }
           }
+          @keyframes headBob {
+            0%, 100% {
+              transform: rotate(-3deg) translateY(0px);
+            }
+            50% {
+              transform: rotate(3deg) translateY(-4px);
+            }
+          }
           .deep-pulse-glow {
             animation: deepPulse 3s ease-in-out infinite;
+          }
+          .head-bob {
+            animation: headBob 2s ease-in-out infinite;
           }
         `}</style>
         <div 
@@ -148,7 +162,7 @@ const FloatingGifts = ({ coupleId, userId, receiverGender = 'female' }: Floating
           <img
             src={giftImage}
             alt={currentGift.gift_name}
-            className="relative w-24 h-24 object-contain"
+            className={`relative w-24 h-24 object-contain ${isStuffedAnimal ? 'head-bob' : ''}`}
             style={{
               filter: `drop-shadow(0 0 8px ${neonColor})`,
             }}
