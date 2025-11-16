@@ -1382,6 +1382,7 @@ export type Database = {
           gender: string | null
           id: string
           location: string | null
+          onesignal_player_id: string | null
           privacy_password_hash: string | null
           together_coins: number
           updated_at: string
@@ -1400,6 +1401,7 @@ export type Database = {
           gender?: string | null
           id: string
           location?: string | null
+          onesignal_player_id?: string | null
           privacy_password_hash?: string | null
           together_coins?: number
           updated_at?: string
@@ -1418,6 +1420,7 @@ export type Database = {
           gender?: string | null
           id?: string
           location?: string | null
+          onesignal_player_id?: string | null
           privacy_password_hash?: string | null
           together_coins?: number
           updated_at?: string
