@@ -35,7 +35,7 @@ export const useOneSignal = () => {
 
       const { error } = await supabase
         .from('profiles')
-        .update({ onesignal_player_id: playerIdFromDespia })
+        .update({ onesignal_player_id: playerIdFromDespia } as any)
         .eq('id', user.id);
 
       if (error) {

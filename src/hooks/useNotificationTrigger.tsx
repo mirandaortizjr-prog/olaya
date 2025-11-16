@@ -198,12 +198,12 @@ async function sendNotification({
       return;
     }
 
-    // Send push notification via edge function
-    await supabase.functions.invoke('send-push-notification', {
+    // Send push notification via OneSignal edge function
+    await supabase.functions.invoke('send-onesignal-notification', {
       body: {
         userId,
         title,
-        body,
+        message: body,
         data,
       },
     });
