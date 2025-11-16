@@ -12,6 +12,7 @@ import { GlobalMusicPlayer } from "@/components/GlobalMusicPlayer";
 import { SplashScreen } from "@/components/SplashScreen";
 import { supabase } from "@/integrations/supabase/client";
 import { initializeNativePushListeners, subscribeToPushNotifications } from "@/utils/notifications";
+import { OneSignalProvider } from "@/components/OneSignalProvider";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import DailyNotesPage from "./pages/DailyNotesPage";
@@ -132,19 +133,21 @@ const AppRouter = () => {
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <VideoPlayerProvider>
-          <MusicPlayerProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <AppRouter />
-              </BrowserRouter>
-            </TooltipProvider>
-          </MusicPlayerProvider>
-        </VideoPlayerProvider>
-      </ThemeProvider>
+      <OneSignalProvider>
+        <ThemeProvider>
+          <VideoPlayerProvider>
+            <MusicPlayerProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <AppRouter />
+                </BrowserRouter>
+              </TooltipProvider>
+            </MusicPlayerProvider>
+          </VideoPlayerProvider>
+        </ThemeProvider>
+      </OneSignalProvider>
     </QueryClientProvider>
   );
 };
