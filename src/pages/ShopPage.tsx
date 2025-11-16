@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Gift, Sparkles, Palette, Badge, Calendar } from 'lucide-react';
+import { ArrowLeft, Gift, Sparkles, Palette, Badge, Calendar, Sparkle } from 'lucide-react';
 import { useTogetherCoins } from '@/hooks/useTogetherCoins';
 import togetherCoinsIcon from '@/assets/together-coins-icon.png';
 import CoinPurchaseSheet from '@/components/CoinPurchaseSheet';
@@ -30,6 +30,7 @@ export default function ShopPage() {
 
   const shopCategories: ShopCategory[] = [
     { id: 'gifts', nameKey: 'shopGifts', icon: Gift, comingSoon: false, path: '/shop/gifts' },
+    { id: 'potions', nameKey: 'shopPotions', icon: Sparkle, comingSoon: false, path: '/shop/potions' },
     { id: 'visual-effects', nameKey: 'shopVisualEffects', icon: Sparkles, comingSoon: false, path: '/shop/visual-effects' },
     { id: 'accessories', nameKey: 'shopAccessories', icon: Palette, comingSoon: false, path: '/shop/accessories' },
     { id: 'badges', nameKey: 'shopBadges', icon: Badge, comingSoon: true, path: null },

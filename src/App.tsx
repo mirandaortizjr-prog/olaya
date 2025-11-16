@@ -29,6 +29,7 @@ import GiftsPage from "./pages/GiftsPage";
 import GiftCollections from "./pages/GiftCollections";
 import VisualEffectsShop from "./pages/VisualEffectsShop";
 import AccessoriesPage from "./pages/AccessoriesPage";
+import PotionsPage from "./pages/PotionsPage";
 import PremiumPlansPage from "./pages/PremiumPlansPage";
 import InAppPurchasePage from "./pages/InAppPurchasePage";
 import PoemsPage from "./pages/PoemsPage";
@@ -114,6 +115,7 @@ const AppRouter = () => {
         <Route path="/flirt-customization" element={<FlirtCustomization />} />
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/shop/gifts" element={<GiftsPage />} />
+        <Route path="/shop/potions" element={<PotionsPage />} />
         <Route path="/gift-collections" element={<GiftCollections />} />
         <Route path="/shop/visual-effects" element={<VisualEffectsShop />} />
         <Route path="/shop/accessories" element={<AccessoriesPage />} />
