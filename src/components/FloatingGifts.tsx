@@ -109,8 +109,11 @@ const FloatingGifts = ({ coupleId, userId, receiverGender = 'female' }: Floating
   const currentGift = activeGifts[currentGiftIndex];
   const giftImage = flowerImages[currentGift.gift_image];
   
-  // Check if this is a stuffed animal
-  const isStuffedAnimal = currentGift.gift_name.toLowerCase().includes('stuffed');
+  // Check if this is a stuffed animal, pet, or balloon by the image ID
+  const isStuffedAnimal = currentGift.gift_image.startsWith('stuffed-');
+  const isPet = currentGift.gift_image.startsWith('pet-');
+  const isBalloon = currentGift.gift_image.startsWith('balloon-');
+  const shouldBob = isStuffedAnimal || isPet || isBalloon;
   
   // Gender-based neon color
   const neonColor = receiverGender === 'male' 
@@ -162,7 +165,7 @@ const FloatingGifts = ({ coupleId, userId, receiverGender = 'female' }: Floating
           <img
             src={giftImage}
             alt={currentGift.gift_name}
-            className={`relative w-24 h-24 object-contain ${isStuffedAnimal ? 'head-bob' : ''}`}
+            className={`relative w-24 h-24 object-contain ${shouldBob ? 'head-bob' : ''}`}
             style={{
               filter: `drop-shadow(0 0 8px ${neonColor})`,
             }}
