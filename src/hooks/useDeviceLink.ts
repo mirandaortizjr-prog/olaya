@@ -17,45 +17,54 @@ export function useDeviceLink(userId: string | undefined) {
     const linkDevice = async () => {
       try {
         // Check if we're in Despia environment
-        const isDespia = /despia/.test(navigator.userAgent);
+        const isDespia = /despia/.test(navigator.userAgent.toLowerCase());
 
         if (!isDespia) {
-          console.log('[DeviceLink] Not in Despia environment');
+          console.log('[DeviceLink] Not in Despia environment, skipping device linking');
           return;
         }
 
-        // Get device UUID from Despia
-        const deviceUuid = despia.deviceuuid;
-        
-        // Get OneSignal Player ID from Despia
-        const oneSignalPlayerId = despia.onesignalplayerid;
+        // Get OneSignal Player ID from Despia SDK
+        const playerIdRaw = despia.onesignalplayerid;
+        const deviceUuidRaw = despia.uuid;
 
-        if (!deviceUuid || !oneSignalPlayerId) {
-          console.log('[DeviceLink] Missing device UUID or OneSignal Player ID');
+        console.log('[DeviceLink] Raw values:', { playerIdRaw, deviceUuidRaw });
+
+        // Handle both string values and undefined/null
+        const onesignalPlayerId = typeof playerIdRaw === 'string' ? playerIdRaw : undefined;
+        const deviceUuid = typeof deviceUuidRaw === 'string' ? deviceUuidRaw : undefined;
+
+        console.log('[DeviceLink] Parsed values:', { onesignalPlayerId, deviceUuid });
+
+        if (!onesignalPlayerId || !deviceUuid) {
+          console.log('[DeviceLink] No device identifiers available yet');
           return;
         }
 
-        console.log('[DeviceLink] Linking device:', { deviceUuid, oneSignalPlayerId });
+        // Update profile with OneSignal Player ID
+        if (onesignalPlayerId) {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update({ 
+              onesignal_player_id: onesignalPlayerId 
+            } as any)
+            .eq('id', userId);
 
-        // Save to user profile
-        const { error } = await supabase
-          .from('profiles')
-          .update({ 
-            onesignal_player_id: oneSignalPlayerId 
-          } as any)
-          .eq('id', userId);
+          if (profileError) {
+            console.error('[DeviceLink] Error updating profile:', profileError);
+            toast({
+              title: "Device Link Error",
+              description: "Failed to link device for notifications",
+              variant: "destructive",
+            });
+            return;
+          }
 
-        if (error) {
-          console.error('[DeviceLink] Error linking device:', error);
-          toast({
-            title: "Device Link Error",
-            description: "Failed to link device for notifications",
-            variant: "destructive",
+          console.log('[DeviceLink] Device linked successfully:', { 
+            deviceUuid, 
+            onesignalPlayerId 
           });
-          return;
         }
-
-        console.log('[DeviceLink] Device linked successfully');
         
       } catch (error) {
         console.error('[DeviceLink] Error in linkDevice:', error);
