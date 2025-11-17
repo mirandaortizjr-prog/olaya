@@ -34,6 +34,7 @@ import PotionsPage from "./pages/PotionsPage";
 import PremiumPlansPage from "./pages/PremiumPlansPage";
 import InAppPurchasePage from "./pages/InAppPurchasePage";
 import PoemsPage from "./pages/PoemsPage";
+import Notifications from "./pages/Notifications";
 
 const queryClient = new QueryClient();
 
@@ -122,6 +123,7 @@ const AppRouter = () => {
         <Route path="/shop/accessories" element={<AccessoriesPage />} />
         <Route path="/premium-plans" element={<PremiumPlansPage />} />
         <Route path="/poems" element={<PoemsPage />} />
+        <Route path="/notifications" element={<Notifications />} />
         <Route path="/purchase" element={<InAppPurchasePage />} />
         <Route path="/404" element={<NotFound />} />
         <Route path="*" element={<Navigate to="/404" replace />} />
