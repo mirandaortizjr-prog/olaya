@@ -37,12 +37,13 @@ export const GlobalMusicPlayer = () => {
   const currentVideoId = extractVideoId(playlist[currentIndex]);
 
   return (
-    <div className="hidden">
+    <div className="fixed -left-[9999px] -top-[9999px] w-0 h-0 overflow-hidden opacity-0 pointer-events-none">
       <iframe
         ref={iframeRef}
         src={`https://www.youtube.com/embed/${currentVideoId}?autoplay=${isPlaying ? 1 : 0}&enablejsapi=1&loop=1&playlist=${currentVideoId}`}
         title="Background music player"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        className="w-full h-full"
       />
     </div>
   );
