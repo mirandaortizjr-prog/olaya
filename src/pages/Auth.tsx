@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Chrome } from "lucide-react";
+import { Chrome, Facebook, Apple } from "lucide-react";
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -120,6 +120,52 @@ const Auth = () => {
       const creatorMode = new URLSearchParams(window.location.search).get('creator') === 'true';
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}${creatorMode ? '/dashboard?creator=true' : '/dashboard'}`,
+        },
+      });
+
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: t("error"),
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFacebookAuth = async () => {
+    try {
+      setLoading(true);
+      const creatorMode = new URLSearchParams(window.location.search).get('creator') === 'true';
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "facebook",
+        options: {
+          redirectTo: `${window.location.origin}${creatorMode ? '/dashboard?creator=true' : '/dashboard'}`,
+        },
+      });
+
+      if (error) throw error;
+    } catch (error: any) {
+      toast({
+        title: t("error"),
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAppleAuth = async () => {
+    try {
+      setLoading(true);
+      const creatorMode = new URLSearchParams(window.location.search).get('creator') === 'true';
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "apple",
         options: {
           redirectTo: `${window.location.origin}${creatorMode ? '/dashboard?creator=true' : '/dashboard'}`,
         },
@@ -348,15 +394,37 @@ const Auth = () => {
                 </div>
               </div>
 
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={handleGoogleAuth}
-                disabled={loading}
-              >
-                <Chrome className="w-4 h-4 mr-2" />
-                {t("google")}
-              </Button>
+              <div className="grid grid-cols-1 gap-3">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleGoogleAuth}
+                  disabled={loading}
+                >
+                  <Chrome className="w-4 h-4 mr-2" />
+                  {t("google")}
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleFacebookAuth}
+                  disabled={loading}
+                >
+                  <Facebook className="w-4 h-4 mr-2" />
+                  Continue with Facebook
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleAppleAuth}
+                  disabled={loading}
+                >
+                  <Apple className="w-4 h-4 mr-2" />
+                  Continue with Apple
+                </Button>
+              </div>
 
               <div className="mt-6 text-center space-y-2">
                 {!isSignUp && (
