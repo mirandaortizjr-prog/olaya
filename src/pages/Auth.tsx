@@ -24,6 +24,8 @@ const Auth = () => {
   const { t } = useLanguage();
 
   useEffect(() => {
+    const creatorMode = new URLSearchParams(window.location.search).get('creator') === 'true';
+    
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
@@ -32,7 +34,7 @@ const Auth = () => {
         if (type === 'recovery') {
           setIsPasswordReset(true);
         } else {
-          navigate("/dashboard");
+          navigate(creatorMode ? "/dashboard?creator=true" : "/dashboard");
         }
       }
     });
@@ -47,7 +49,7 @@ const Auth = () => {
         if (type === 'recovery') {
           setIsPasswordReset(true);
         } else {
-          navigate("/dashboard");
+          navigate(creatorMode ? "/dashboard?creator=true" : "/dashboard");
         }
       }
     });
@@ -115,10 +117,11 @@ const Auth = () => {
   const handleGoogleAuth = async () => {
     try {
       setLoading(true);
+      const creatorMode = new URLSearchParams(window.location.search).get('creator') === 'true';
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: `${window.location.origin}${creatorMode ? '/dashboard?creator=true' : '/dashboard'}`,
         },
       });
 
@@ -193,7 +196,8 @@ const Auth = () => {
         description: "Your password has been successfully updated",
       });
       
-      navigate("/dashboard");
+      const creatorMode = new URLSearchParams(window.location.search).get('creator') === 'true';
+      navigate(creatorMode ? "/dashboard?creator=true" : "/dashboard");
     } catch (error: any) {
       toast({
         title: t("error"),

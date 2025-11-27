@@ -57,7 +57,8 @@ const PremiumPlansPage = () => {
   const handleStartLite = async () => {
     setIsLoading(true);
     try {
-      navigate('/auth');
+      const creatorMode = new URLSearchParams(window.location.search).get('creator');
+      navigate(creatorMode === 'true' ? '/auth?creator=true' : '/auth');
     } catch (error) {
       console.error('Error:', error);
       toast({
@@ -84,8 +85,9 @@ const PremiumPlansPage = () => {
           description: 'Please sign up or log in to continue',
         });
         
+        const creatorMode = new URLSearchParams(window.location.search).get('creator');
         setTimeout(() => {
-          navigate('/auth');
+          navigate(creatorMode === 'true' ? '/auth?creator=true' : '/auth');
         }, 1500);
       }
     } catch (error) {

@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import giftBoxAnniversary from "@/assets/gift-box-anniversary.png";
 import shopIcon from "@/assets/shop-icon.png";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
@@ -110,10 +110,14 @@ const Dashboard = () => {
   const [lastViewedMessages, setLastViewedMessages] = useState<Date>(new Date());
   const [journalRefreshTrigger, setJournalRefreshTrigger] = useState(0);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { t } = useLanguage();
   const { progress } = useCoupleProgress(coupleData?.coupleId || null);
   const { setCoupleId: setMusicCoupleId } = useMusicPlayer();
+  
+  // Check for creator mode
+  const isCreatorMode = new URLSearchParams(location.search).get('creator') === 'true';
 
   // Enable auto-notifications
   useNotificationTrigger({
@@ -784,7 +788,11 @@ const Dashboard = () => {
   return (
     <>
       {/* First Time User Experience */}
-      <FirstTimeUserExperience userId={user!.id} coupleId={coupleData.coupleId} />
+      <FirstTimeUserExperience 
+        userId={user!.id} 
+        coupleId={coupleData.coupleId}
+        forceShow={isCreatorMode}
+      />
       
     <div className="min-h-screen pb-20" style={{ background: 'var(--hero-bg)' }}>
       {/* Hero Section - Dark gradient background with full background images */}
