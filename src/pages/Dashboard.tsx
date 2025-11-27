@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { MessageCircle, Settings, LogOut, Users, Link2, Calendar, Flame, Home, Lock, Clock, ThumbsUp, ThumbsDown, Heart, Bookmark, Gamepad2, Music, X, RefreshCw, Type } from "lucide-react";
+import { MessageCircle, Settings, LogOut, Users, Link2, Calendar, Flame, Home, Lock, Clock, ThumbsUp, ThumbsDown, Heart, Bookmark, Gamepad2, Music, X, RefreshCw, Type, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ProfilePictureUpload } from "@/components/ProfilePictureUpload";
@@ -94,6 +94,7 @@ const Dashboard = () => {
   const [showSongSettings, setShowSongSettings] = useState(false);
   const [showFlirt, setShowFlirt] = useState(false);
   const [editingSpaceName, setEditingSpaceName] = useState(false);
+  const [replayWalkthrough, setReplayWalkthrough] = useState(false);
   const [spaceName, setSpaceName] = useState("");
   const [pendingGamesCount, setPendingGamesCount] = useState(0);
   const [pendingGameSessions, setPendingGameSessions] = useState<any[]>([]);
@@ -799,6 +800,9 @@ const Dashboard = () => {
       <OnboardingWalkthrough
         userId={user!.id}
         coupleId={coupleData.coupleId}
+        creatorMode={isCreatorMode}
+        triggerReplay={replayWalkthrough}
+        onComplete={() => setReplayWalkthrough(false)}
       />
       
     <div className="min-h-screen pb-20" style={{ background: 'var(--hero-bg)' }}>
@@ -1115,6 +1119,21 @@ const Dashboard = () => {
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh App
             </Button>
+            
+            <div className="space-y-2">
+              <h3 className="font-semibold text-sm text-muted-foreground">Help & Support</h3>
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => {
+                  setShowSettings(false);
+                  setReplayWalkthrough(true);
+                }}
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Replay Onboarding Walkthrough
+              </Button>
+            </div>
             
             <Button variant="outline" className="w-full" onClick={() => navigate('/couple-profiles')}>
               <Users className="w-4 h-4 mr-2" />
