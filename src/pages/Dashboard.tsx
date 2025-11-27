@@ -48,6 +48,7 @@ import FloatingGifts from "@/components/FloatingGifts";
 import { ActiveGiftDisplay } from "@/components/ActiveGiftDisplay";
 import { giftImages } from "@/lib/giftImages";
 import { FirstTimeUserExperience } from "@/components/FirstTimeUserExperience";
+import { OnboardingWalkthrough } from "@/components/OnboardingWalkthrough";
 import { DailyLoveAction } from "@/components/DailyLoveAction";
 import { FontSelector } from "@/components/FontSelector";
 
@@ -792,6 +793,12 @@ const Dashboard = () => {
         userId={user!.id} 
         coupleId={coupleData.coupleId}
         forceShow={isCreatorMode}
+      />
+      
+      {/* Onboarding Walkthrough */}
+      <OnboardingWalkthrough
+        userId={user!.id}
+        coupleId={coupleData.coupleId}
       />
       
     <div className="min-h-screen pb-20" style={{ background: 'var(--hero-bg)' }}>
