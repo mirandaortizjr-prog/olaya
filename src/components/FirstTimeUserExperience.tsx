@@ -140,9 +140,10 @@ const FTUE_STEPS: FTUEStep[] = [
 interface FirstTimeUserExperienceProps {
   userId: string;
   coupleId: string | null;
+  forceShow?: boolean;
 }
 
-export const FirstTimeUserExperience = ({ userId, coupleId }: FirstTimeUserExperienceProps) => {
+export const FirstTimeUserExperience = ({ userId, coupleId, forceShow = false }: FirstTimeUserExperienceProps) => {
   const [isActive, setIsActive] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
@@ -153,9 +154,19 @@ export const FirstTimeUserExperience = ({ userId, coupleId }: FirstTimeUserExper
 
   useEffect(() => {
     loadFTUEStatus();
-  }, [userId]);
+  }, [userId, forceShow]);
 
   const loadFTUEStatus = async () => {
+    // Creator mode: Always show FTUE
+    if (forceShow) {
+      setIsActive(true);
+      setShowCompactView(false);
+      setShowFullGuide(true);
+      setCurrentStep(0);
+      setCompletedSteps([]);
+      return;
+    }
+
     const { data, error } = await supabase
       .from("profiles")
       .select("ftue_completed, ftue_progress")
@@ -192,10 +203,13 @@ export const FirstTimeUserExperience = ({ userId, coupleId }: FirstTimeUserExper
     const newCompleted = [...completedSteps, stepId];
     setCompletedSteps(newCompleted);
 
-    await supabase
-      .from("profiles")
-      .update({ ftue_progress: newCompleted })
-      .eq("id", userId);
+    // Don't save progress in creator mode
+    if (!forceShow) {
+      await supabase
+        .from("profiles")
+        .update({ ftue_progress: newCompleted })
+        .eq("id", userId);
+    }
 
     if (newCompleted.length === FTUE_STEPS.length) {
       completeFTUE();
@@ -205,10 +219,13 @@ export const FirstTimeUserExperience = ({ userId, coupleId }: FirstTimeUserExper
   };
 
   const completeFTUE = async () => {
-    await supabase
-      .from("profiles")
-      .update({ ftue_completed: true })
-      .eq("id", userId);
+    // Don't save completion in creator mode
+    if (!forceShow) {
+      await supabase
+        .from("profiles")
+        .update({ ftue_completed: true })
+        .eq("id", userId);
+    }
 
     setIsActive(false);
     
@@ -220,10 +237,13 @@ export const FirstTimeUserExperience = ({ userId, coupleId }: FirstTimeUserExper
   };
 
   const skipFTUE = async () => {
-    await supabase
-      .from("profiles")
-      .update({ ftue_completed: true })
-      .eq("id", userId);
+    // Don't save skip in creator mode
+    if (!forceShow) {
+      await supabase
+        .from("profiles")
+        .update({ ftue_completed: true })
+        .eq("id", userId);
+    }
 
     setIsActive(false);
     setShowCompactView(false);

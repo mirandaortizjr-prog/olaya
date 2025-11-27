@@ -44,9 +44,26 @@ const AppRouter = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Check for creator mode
+  const isCreatorMode = new URLSearchParams(location.search).get('creator') === 'true';
+
   useEffect(() => {
     const checkAuthAndRedirect = async () => {
       try {
+        // Creator mode: Force full journey
+        if (isCreatorMode) {
+          // Always show splash, then redirect to premium plans
+          setTimeout(() => {
+            setShowSplash(false);
+            setIsCheckingAuth(false);
+            if (location.pathname === '/') {
+              navigate('/premium-plans?creator=true', { replace: true });
+            }
+          }, 1800);
+          return;
+        }
+
+        // Normal mode: Standard auth flow
         const { data: { user } } = await supabase.auth.getUser();
         
         if (user) {
@@ -91,7 +108,7 @@ const AppRouter = () => {
     };
 
     checkAuthAndRedirect();
-  }, [navigate, location.pathname]);
+  }, [navigate, location.pathname, isCreatorMode]);
 
 
   if (showSplash || isCheckingAuth) {
