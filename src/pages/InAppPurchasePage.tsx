@@ -1,25 +1,35 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Check, Coins, Sparkles, ArrowLeft, RefreshCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useInAppPurchase } from '@/hooks/useInAppPurchase';
+import { useSubscription } from '@/hooks/useSubscription';
+import { usePlatform } from '@/hooks/usePlatform';
 import { PRODUCT_IDS } from '@/utils/inAppPurchases';
 import olayaLogo from '@/assets/olaya-logo-v2.png';
 
 const InAppPurchasePage = () => {
   const [userId, setUserId] = useState<string>('');
+  const [userEmail, setUserEmail] = useState<string>('');
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { isInitialized, isPremium, products, isLoading, purchase, restore } = useInAppPurchase(userId);
+  const platform = usePlatform();
+  const { isInitialized, isPremium: iapPremium, products, isLoading: iapLoading, purchase, restore } = useInAppPurchase(userId);
+  const { isPremium: stripePremium, isLoading: stripeLoading, createCheckoutSession } = useSubscription(userId);
+  
+  const isPremium = platform.isDespia ? iapPremium : stripePremium;
+  const isLoading = platform.isDespia ? iapLoading : stripeLoading;
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserId(user.id);
+        setUserEmail(user.email || '');
       }
     };
     checkAuth();
@@ -62,7 +72,11 @@ const InAppPurchasePage = () => {
       return;
     }
 
-    await purchase(productId as any);
+    if (platform.isDespia) {
+      await purchase(productId as any);
+    } else {
+      await createCheckoutSession(userEmail);
+    }
   };
 
   const handleRestore = async () => {
@@ -90,15 +104,17 @@ const InAppPurchasePage = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleRestore}
-            disabled={isLoading}
-          >
-            <RefreshCcw className="w-4 h-4 mr-2" />
-            Restore
-          </Button>
+          {platform.isDespia && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleRestore}
+              disabled={isLoading}
+            >
+              <RefreshCcw className="w-4 h-4 mr-2" />
+              Restore
+            </Button>
+          )}
         </div>
         
         <div className="text-center">
@@ -119,16 +135,23 @@ const InAppPurchasePage = () => {
         </div>
       </div>
 
-      {!isInitialized && (
-        <div className="max-w-7xl mx-auto px-4 mb-4">
-          <Card className="p-4 bg-yellow-500/10 border-yellow-500/50">
-            <p className="text-sm text-yellow-200 text-center">
-              ℹ️ In-app purchases are only available on mobile devices (iOS/Android).
-              For web preview, you can still browse the plans.
-            </p>
-          </Card>
-        </div>
-      )}
+      <div className="max-w-7xl mx-auto px-4 mb-4">
+        {platform.isDespia && (
+          <Alert className="bg-blue-500/10 border-blue-500/50">
+            <AlertDescription className="text-blue-200">
+              🎉 Running in Despia on {platform.isIOS ? 'iOS' : 'Android'} - In-App Purchases enabled
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {platform.isWeb && (
+          <Alert className="bg-purple-500/10 border-purple-500/50">
+            <AlertDescription className="text-purple-200">
+              🌐 Web version - Stripe checkout enabled
+            </AlertDescription>
+          </Alert>
+        )}
+      </div>
 
       {isPremium && (
         <div className="max-w-7xl mx-auto px-4 mb-4">
@@ -205,7 +228,14 @@ const InAppPurchasePage = () => {
               onClick={() => handlePurchase(PRODUCT_IDS.PREMIUM_MONTHLY)}
               disabled={isLoading || isPremium}
             >
-              {isLoading ? 'Processing...' : isPremium ? 'Active' : 'Get Premium Now'}
+              {isLoading 
+                ? 'Processing...' 
+                : isPremium 
+                  ? 'Active' 
+                  : platform.isDespia 
+                    ? 'Get Premium Now' 
+                    : 'Subscribe with Stripe'
+              }
             </Button>
           </div>
         </Card>
@@ -238,7 +268,14 @@ const InAppPurchasePage = () => {
             onClick={() => handlePurchase(PRODUCT_IDS.PREMIUM_TRIAL)}
             disabled={isLoading || isPremium}
           >
-            {isLoading ? 'Processing...' : isPremium ? 'Active' : 'Start Free Trial'}
+            {isLoading 
+              ? 'Processing...' 
+              : isPremium 
+                ? 'Active' 
+                : platform.isDespia 
+                  ? 'Start Free Trial' 
+                  : 'Try with Stripe'
+            }
           </Button>
         </Card>
       </div>

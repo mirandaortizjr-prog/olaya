@@ -4,19 +4,21 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Sparkles } from 'lucide-react';
 import { useTogetherCoins } from '@/hooks/useTogetherCoins';
 import { useToast } from '@/hooks/use-toast';
+import { usePlatform } from '@/hooks/usePlatform';
+import { useInAppPurchase } from '@/hooks/useInAppPurchase';
+import { PRODUCT_IDS } from '@/utils/inAppPurchases';
 import togetherCoinsIcon from '@/assets/together-coins-icon.png';
 
 interface CoinPack {
   coins: number;
   price: string;
+  productId?: string;
 }
 
 const coinPacks: CoinPack[] = [
-  { coins: 50, price: '$1.99' },
-  { coins: 150, price: '$4.99' },
-  { coins: 350, price: '$9.99' },
-  { coins: 800, price: '$19.99' },
-  { coins: 2000, price: '$49.99' },
+  { coins: 100, price: '$1.99', productId: PRODUCT_IDS.COIN_PACK_100 },
+  { coins: 500, price: '$4.99', productId: PRODUCT_IDS.COIN_PACK_500 },
+  { coins: 1000, price: '$9.99', productId: PRODUCT_IDS.COIN_PACK_1000 },
 ];
 
 interface CoinPurchaseSheetProps {
@@ -36,6 +38,8 @@ export default function CoinPurchaseSheet({
 }: CoinPurchaseSheetProps) {
   const { toast } = useToast();
   const { addCoins } = useTogetherCoins(userId);
+  const platform = usePlatform();
+  const { purchase } = useInAppPurchase(userId || '');
 
   const handlePurchase = async (pack: CoinPack) => {
     if (!userId) {
@@ -47,27 +51,24 @@ export default function CoinPurchaseSheet({
       return;
     }
 
-    // TODO: Implement actual payment processing with Stripe or in-app purchases
-    const success = await addCoins(
-      pack.coins,
-      `Purchased ${pack.coins} Together Coins`,
-      coupleId
-    );
-
-    if (success) {
+    if (platform.isDespia && pack.productId) {
+      // Use in-app purchase for Despia
+      await purchase(pack.productId as any);
+    } else {
+      // Use Stripe for web (placeholder - implement Stripe checkout)
       toast({
-        title: "Want to surprise your partner? 💝",
-        description: `You now have ${currentCoins + pack.coins} coins—perfect for sending a gift!`,
+        title: "Coming Soon",
+        description: "Stripe checkout for coins will be available soon",
       });
-      onOpenChange(false);
+      // TODO: Implement Stripe checkout for coin purchases
     }
+    
+    onOpenChange(false);
   };
 
   const getPackDescription = (coins: number) => {
-    if (coins >= 2000) return "Keep the connection going with endless gifts";
-    if (coins >= 800) return "Spoil your partner with special moments";
-    if (coins >= 350) return "Perfect for thoughtful surprises";
-    if (coins >= 150) return "Great for weekly gift exchanges";
+    if (coins >= 1000) return "Perfect for spoiling your partner";
+    if (coins >= 500) return "Great for special surprises";
     return "Just enough to send a sweet gift";
   };
 
