@@ -131,12 +131,16 @@ interface OnboardingWalkthroughProps {
   userId: string;
   coupleId: string;
   onComplete?: () => void;
+  creatorMode?: boolean;
+  triggerReplay?: boolean;
 }
 
 export const OnboardingWalkthrough = ({
   userId,
   coupleId,
   onComplete,
+  creatorMode = false,
+  triggerReplay = false,
 }: OnboardingWalkthroughProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -145,8 +149,21 @@ export const OnboardingWalkthrough = ({
   const { toast } = useToast();
 
   useEffect(() => {
-    checkWalkthroughStatus();
-  }, [userId]);
+    if (creatorMode) {
+      // In creator mode, always show the walkthrough
+      setIsOpen(true);
+    } else {
+      checkWalkthroughStatus();
+    }
+  }, [userId, creatorMode]);
+
+  useEffect(() => {
+    if (triggerReplay) {
+      setCurrentStep(0);
+      setCompletedSteps([]);
+      setIsOpen(true);
+    }
+  }, [triggerReplay]);
 
   const checkWalkthroughStatus = async () => {
     if (!userId) return;
@@ -184,19 +201,24 @@ export const OnboardingWalkthrough = ({
   };
 
   const completeWalkthrough = async () => {
-    await supabase
-      .from("profiles")
-      .update({
-        ftue_progress: {
-          walkthrough_completed: true,
-          completed_steps: completedSteps,
-        },
-      })
-      .eq("id", userId);
+    // Only save to database if not in creator mode
+    if (!creatorMode) {
+      await supabase
+        .from("profiles")
+        .update({
+          ftue_progress: {
+            walkthrough_completed: true,
+            completed_steps: completedSteps,
+          },
+        })
+        .eq("id", userId);
+    }
 
     toast({
-      title: "Walkthrough Complete! 🎉",
-      description: "You're all set to enjoy Olaya Together",
+      title: creatorMode ? "Preview Complete!" : "Walkthrough Complete! 🎉",
+      description: creatorMode 
+        ? "Creator preview mode - progress not saved" 
+        : "You're all set to enjoy Olaya Together",
     });
 
     setIsOpen(false);
