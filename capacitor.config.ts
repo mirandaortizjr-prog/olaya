@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.89fc973ab7d148a28e154f75766194b1',
+  appId: 'com.olaya.together',
   appName: 'Olaya Together',
   webDir: 'dist',
   server: {
