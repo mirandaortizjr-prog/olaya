@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Heart, CheckCircle2, Sparkles, Clock, Star, ArrowLeft, ChevronRight } from 'lucide-react';
+import { Heart, CheckCircle2, Sparkles, Star, ArrowLeft, ChevronRight } from 'lucide-react';
 import { getDailyAction, DailyAction } from '@/lib/loveLanguages/dailyActions';
 import { getBasicDailyAction, BasicDailyAction } from '@/lib/loveLanguages/basicDailyActions';
 import { LoveLanguageScore, scoreLoveLanguageQuiz } from '@/lib/loveLanguages/scoring';
@@ -344,9 +344,28 @@ export const DailyLoveActionBook = ({ userId, partnerUserId, onOpenGames }: Dail
               {texts.takeQuiz}
             </Button>
           </div>
+        ) : !partnerLanguages ? (
+          /* User completed quiz but partner hasn't */
+          <div className="space-y-4">
+            <div className="mb-6">
+              <Button
+                variant="outline"
+                onClick={() => setView('quiz')}
+                className="w-full bg-primary/10 hover:bg-primary/20 border-primary/30 text-foreground"
+              >
+                <Heart className="w-4 h-4 mr-2 text-primary" />
+                {texts.retakeQuiz}
+              </Button>
+            </div>
+            <div className="p-4 bg-secondary/50 rounded-lg border border-border">
+              <p className="text-sm text-muted-foreground text-center">
+                {texts.partnerQuizNeeded}
+              </p>
+            </div>
+          </div>
         ) : (
+          /* Both partners completed quiz - show daily action */
           <>
-            {/* Retake Quiz Button for users who completed */}
             <div className="mb-6">
               <Button
                 variant="outline"
@@ -358,16 +377,6 @@ export const DailyLoveActionBook = ({ userId, partnerUserId, onOpenGames }: Dail
               </Button>
             </div>
 
-            {/* Show partner quiz needed only for premium users who completed quiz but partner hasn't */}
-            {isPremium && !partnerLanguages && partnerUserId ? (
-              <div className="p-4 bg-secondary/50 rounded-lg border border-border mb-6">
-                <p className="text-sm text-muted-foreground text-center">
-                  {texts.partnerQuizNeeded}
-                </p>
-              </div>
-            ) : null}
-
-            {/* Daily Action Content */}
             <div className="bg-background/50 rounded-lg p-5 border border-border/50 mb-6">
               <div className="flex items-start gap-3">
                 <Heart className="w-6 h-6 text-pink-500 flex-shrink-0 mt-1" />
@@ -378,13 +387,6 @@ export const DailyLoveActionBook = ({ userId, partnerUserId, onOpenGames }: Dail
                   }
                 </p>
               </div>
-            </div>
-
-            <div className="flex items-center justify-center gap-2 text-muted-foreground mb-6">
-              <Clock className="w-4 h-4" />
-              <span className="text-sm">
-                {isPremium && todayAction ? todayAction.timeRequired : basicAction?.timeRequired}
-              </span>
             </div>
 
             {!isPremium && (
