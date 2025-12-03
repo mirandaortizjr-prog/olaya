@@ -49,6 +49,7 @@ export const DailyLoveActionBook = ({ userId, partnerUserId, onOpenGames }: Dail
       markFulfilled: "Mark as Fulfilled",
       completedToday: "Completed for today!",
       partnerQuizNeeded: "Your partner needs to complete the Love Language Quiz to unlock personalized actions.",
+      youNeedQuiz: "Complete the Love Language Quiz to unlock your personalized daily actions.",
       goToDailyAction: "Enter Daily Love Action",
       upgradePremium: "Upgrade to Premium",
       upgradeDesc: "Get personalized daily actions based on your partner's love languages",
@@ -70,6 +71,7 @@ export const DailyLoveActionBook = ({ userId, partnerUserId, onOpenGames }: Dail
       markFulfilled: "Marcar como Cumplido",
       completedToday: "¡Completado hoy!",
       partnerQuizNeeded: "Tu pareja necesita completar el Quiz de Lenguaje del Amor.",
+      youNeedQuiz: "Completa el Quiz de Lenguaje del Amor para desbloquear tus acciones diarias personalizadas.",
       goToDailyAction: "Ir a Acción de Amor",
       upgradePremium: "Mejorar a Premium",
       upgradeDesc: "Obtén acciones diarias personalizadas basadas en los lenguajes de amor de tu pareja",
@@ -326,34 +328,46 @@ export const DailyLoveActionBook = ({ userId, partnerUserId, onOpenGames }: Dail
           )}
         </div>
 
-        {/* Quiz Button */}
-        <div className="mb-6">
-          <Button
-            variant="outline"
-            onClick={() => setView('quiz')}
-            className="w-full bg-primary/10 hover:bg-primary/20 border-primary/30 text-foreground"
-          >
-            <Heart className="w-4 h-4 mr-2 text-primary" />
-            {hasCompletedQuiz ? texts.retakeQuiz : texts.takeQuiz}
-          </Button>
-        </div>
-
-        {isPremium && !todayAction && partnerUserId ? (
+        {/* Quiz Button - always show if user hasn't completed quiz */}
+        {!hasCompletedQuiz ? (
           <div className="space-y-4">
-            <div className="p-4 bg-secondary/50 rounded-lg border border-border">
-              <p className="text-sm text-muted-foreground text-center">
-                {texts.partnerQuizNeeded}
+            <div className="p-4 bg-primary/10 rounded-lg border border-primary/30">
+              <p className="text-sm text-foreground text-center">
+                {texts.youNeedQuiz}
               </p>
             </div>
             <Button
-              onClick={() => setView('action')}
+              onClick={() => setView('quiz')}
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
             >
-              {texts.goToDailyAction}
+              <Heart className="w-4 h-4 mr-2" />
+              {texts.takeQuiz}
             </Button>
           </div>
         ) : (
           <>
+            {/* Retake Quiz Button for users who completed */}
+            <div className="mb-6">
+              <Button
+                variant="outline"
+                onClick={() => setView('quiz')}
+                className="w-full bg-primary/10 hover:bg-primary/20 border-primary/30 text-foreground"
+              >
+                <Heart className="w-4 h-4 mr-2 text-primary" />
+                {texts.retakeQuiz}
+              </Button>
+            </div>
+
+            {/* Show partner quiz needed only for premium users who completed quiz but partner hasn't */}
+            {isPremium && !partnerLanguages && partnerUserId ? (
+              <div className="p-4 bg-secondary/50 rounded-lg border border-border mb-6">
+                <p className="text-sm text-muted-foreground text-center">
+                  {texts.partnerQuizNeeded}
+                </p>
+              </div>
+            ) : null}
+
+            {/* Daily Action Content */}
             <div className="bg-background/50 rounded-lg p-5 border border-border/50 mb-6">
               <div className="flex items-start gap-3">
                 <Heart className="w-6 h-6 text-pink-500 flex-shrink-0 mt-1" />
