@@ -49,7 +49,7 @@ export const DailyLoveActionBook = ({ userId, partnerUserId, onOpenGames }: Dail
       markFulfilled: "Mark as Fulfilled",
       completedToday: "Completed for today!",
       partnerQuizNeeded: "Your partner needs to complete the Love Language Quiz to unlock personalized actions.",
-      goToGames: "Go to Games",
+      goToDailyAction: "Enter Daily Love Action",
       upgradePremium: "Upgrade to Premium",
       upgradeDesc: "Get personalized daily actions based on your partner's love languages",
       basic: "Basic",
@@ -70,7 +70,7 @@ export const DailyLoveActionBook = ({ userId, partnerUserId, onOpenGames }: Dail
       markFulfilled: "Marcar como Cumplido",
       completedToday: "¡Completado hoy!",
       partnerQuizNeeded: "Tu pareja necesita completar el Quiz de Lenguaje del Amor.",
-      goToGames: "Ir a Juegos",
+      goToDailyAction: "Ir a Acción de Amor",
       upgradePremium: "Mejorar a Premium",
       upgradeDesc: "Obtén acciones diarias personalizadas basadas en los lenguajes de amor de tu pareja",
       basic: "Básico",
@@ -152,7 +152,8 @@ export const DailyLoveActionBook = ({ userId, partnerUserId, onOpenGames }: Dail
 
   const markAsComplete = async () => {
     const today = new Date().toISOString().split('T')[0];
-    const nextDay = currentDay >= 1825 ? 1 : currentDay + 1;
+    // After 365 days, continue counting but the action selection will use modular arithmetic
+    const nextDay = currentDay + 1;
 
     const { error } = await supabase
       .from('love_languages')
@@ -172,9 +173,11 @@ export const DailyLoveActionBook = ({ userId, partnerUserId, onOpenGames }: Dail
     }
 
     setIsCompleted(true);
+    // Show day within current 365-day cycle
+    const displayDay = ((currentDay - 1) % 365) + 1;
     toast({
       title: '💝 Action Completed!',
-      description: `Day ${currentDay}/1825 complete!`
+      description: `Day ${displayDay}/365 complete!`
     });
   };
 
@@ -309,7 +312,7 @@ export const DailyLoveActionBook = ({ userId, partnerUserId, onOpenGames }: Dail
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 mb-2">
             <Star className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-muted-foreground">{texts.day} {currentDay} {texts.of} 1825</span>
+            <span className="text-sm font-medium text-muted-foreground">{texts.day} {((currentDay - 1) % 365) + 1} {texts.of} 365</span>
             <Star className="w-4 h-4 text-primary" />
           </div>
           <h2 className="text-2xl font-bold text-foreground mb-1">{texts.title}</h2>
@@ -343,10 +346,10 @@ export const DailyLoveActionBook = ({ userId, partnerUserId, onOpenGames }: Dail
               </p>
             </div>
             <Button
-              onClick={onOpenGames}
+              onClick={() => setView('action')}
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
             >
-              {texts.goToGames}
+              {texts.goToDailyAction}
             </Button>
           </div>
         ) : (

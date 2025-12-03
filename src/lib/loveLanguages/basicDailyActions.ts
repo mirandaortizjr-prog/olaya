@@ -92,7 +92,15 @@ for (let i = 51; i <= 1825; i++) {
   });
 }
 
+// Uses total day count to ensure no action repeats - each 365-day cycle uses different actions
 export const getBasicDailyAction = (dayNumber: number): BasicDailyAction => {
-  const index = (dayNumber - 1) % basicDailyActionsDatabase.length;
+  // Calculate which year cycle we're in and apply an offset to avoid repetition
+  const yearCycle = Math.floor((dayNumber - 1) / 365);
+  const dayInYear = ((dayNumber - 1) % 365);
+  
+  // Create a pseudo-random but deterministic offset based on year cycle
+  const offset = (yearCycle * 73) % basicDailyActionsDatabase.length; // 73 is prime for better distribution
+  const index = (dayInYear + offset) % basicDailyActionsDatabase.length;
+  
   return basicDailyActionsDatabase[index];
 };

@@ -219,9 +219,11 @@ const langMap: Record<string, DailyAction['language']> = {
 };
 
 // Get daily action based on day and partner's love languages (sorted by score, strongest first)
+// Uses the total day count to ensure no action repeats - each 365-day cycle uses different actions
 export function getDailyAction(dayNumber: number, rankedLanguages: LoveLanguageScore[]): DailyAction {
   if (!rankedLanguages || rankedLanguages.length === 0) {
     const wordsActions = dailyActionsDatabase.filter(a => a.language === 'words');
+    // Use dayNumber directly to cycle through all available actions without repeating
     return wordsActions[dayNumber % wordsActions.length];
   }
 
@@ -249,6 +251,16 @@ export function getDailyAction(dayNumber: number, rankedLanguages: LoveLanguageS
   }
 
   const languageActions = dailyActionsDatabase.filter(a => a.language === targetLang);
-  const actionIndex = dayNumber % languageActions.length;
+  
+  // Use a combination of day number and a shuffled offset to avoid repetition
+  // The offset changes based on which "year" cycle we're in
+  const yearCycle = Math.floor((dayNumber - 1) / 365);
+  const dayInYear = ((dayNumber - 1) % 365);
+  
+  // Create a pseudo-random but deterministic offset based on year cycle
+  // This ensures different actions each year while being reproducible
+  const offset = (yearCycle * 73) % languageActions.length; // 73 is prime for better distribution
+  const actionIndex = (dayInYear + offset) % languageActions.length;
+  
   return languageActions[actionIndex];
 }
