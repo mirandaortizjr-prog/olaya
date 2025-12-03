@@ -2,11 +2,10 @@ import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Gamepad2, Heart, MessageCircle, Sparkles, Calendar, TrendingUp, Zap, Feather } from "lucide-react";
+import { Gamepad2, Heart, TrendingUp, Zap, Feather } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translations } from "@/lib/translations";
 import { HowWellGame } from "./games/HowWellGame";
-import { LoveLanguageGame } from "./games/LoveLanguageGame";
 import { WouldYouRatherGame } from "./games/WouldYouRatherGame";
 import { FutureForecastGame } from "./games/FutureForecastGame";
 import { TruthOrTenderGame } from "./games/TruthOrTenderGame";
@@ -44,13 +43,6 @@ export const CoupleGames = ({ coupleId, userId, partnerId, onClose, pendingGameS
       color: "text-pink-500"
     },
     {
-      id: "love-language",
-      name: t.loveLanguageDecoder,
-      description: t.loveLanguageDesc,
-      icon: Sparkles,
-      color: "text-yellow-500"
-    },
-    {
       id: "would-you-rather",
       name: t.wouldYouRather,
       description: t.wouldYouRatherDesc,
@@ -82,9 +74,6 @@ export const CoupleGames = ({ coupleId, userId, partnerId, onClose, pendingGameS
 
   if (selectedGame === "how-well") {
     return <HowWellGame coupleId={coupleId} userId={userId} partnerId={partnerId} onBack={() => setSelectedGame(null)} />;
-  }
-  if (selectedGame === "love-language") {
-    return <LoveLanguageGame coupleId={coupleId} userId={userId} partnerId={partnerId} onBack={() => setSelectedGame(null)} />;
   }
   if (selectedGame === "would-you-rather") {
     return <WouldYouRatherGame coupleId={coupleId} userId={userId} partnerId={partnerId} onBack={() => setSelectedGame(null)} />;
