@@ -31,9 +31,9 @@ export const CouplesDevotional = ({ userId, coupleId }: CouplesDevotionalProps) 
       category: "Category",
       reflectionQuestions: "Reflection Questions",
       practiceBox: "Practice Box",
-      copyAll: "Copy Devotional",
+      copyAll: "Copy",
       copied: "Copied!",
-      archive: "View Archive",
+      archive: "Archive",
       backToToday: "Back to Today",
       locked: "Unlocks in",
       days: "days",
@@ -47,9 +47,9 @@ export const CouplesDevotional = ({ userId, coupleId }: CouplesDevotionalProps) 
       category: "Categoría",
       reflectionQuestions: "Preguntas de Reflexión",
       practiceBox: "Práctica",
-      copyAll: "Copiar Devocional",
+      copyAll: "Copiar",
       copied: "¡Copiado!",
-      archive: "Ver Archivo",
+      archive: "Archivo",
       backToToday: "Volver a Hoy",
       locked: "Desbloquea en",
       days: "días",
@@ -154,7 +154,7 @@ ${entry.practiceBox.map((p, i) => `• ${p}`).join('\n')}`;
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <Book className="w-8 h-8 text-amber-500 animate-pulse mx-auto mb-4" />
+          <Book className="w-8 h-8 text-pink-500 animate-pulse mx-auto mb-4" />
           <p className="text-muted-foreground">{texts.loading}</p>
         </div>
       </div>
@@ -166,9 +166,9 @@ ${entry.practiceBox.map((p, i) => `• ${p}`).join('\n')}`;
   // Archive View
   if (showArchive) {
     return (
-      <div className="px-4 py-4 max-w-lg mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-foreground">{texts.archive}</h2>
+      <div className="px-2 py-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-foreground">{texts.archive}</h2>
           <Button
             variant="outline"
             size="sm"
@@ -178,8 +178,8 @@ ${entry.practiceBox.map((p, i) => `• ${p}`).join('\n')}`;
           </Button>
         </div>
         
-        <ScrollArea className="h-[500px]">
-          <div className="space-y-2">
+        <ScrollArea className="h-[450px]">
+          <div className="space-y-2 pr-2">
             {Array.from({ length: 365 }, (_, i) => i + 1).map(day => {
               const isUnlocked = day <= maxUnlockedDay;
               const dayEntry = getDevotional(day);
@@ -196,11 +196,11 @@ ${entry.practiceBox.map((p, i) => `• ${p}`).join('\n')}`;
                   } ${day === currentDay ? 'ring-2 ring-primary' : ''}`}
                 >
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <span className="text-xs text-muted-foreground">
                         {texts.day} {day}
                       </span>
-                      <p className="font-medium text-foreground text-sm">
+                      <p className="font-medium text-foreground text-sm truncate">
                         {dayEntry.title}
                       </p>
                       <span className="text-xs text-primary/70">
@@ -208,7 +208,7 @@ ${entry.practiceBox.map((p, i) => `• ${p}`).join('\n')}`;
                       </span>
                     </div>
                     {!isUnlocked && (
-                      <div className="flex items-center gap-1 text-muted-foreground">
+                      <div className="flex items-center gap-1 text-muted-foreground ml-2">
                         <Lock className="w-4 h-4" />
                         <span className="text-xs">{getDaysUntilUnlock(day)}d</span>
                       </div>
@@ -225,28 +225,28 @@ ${entry.practiceBox.map((p, i) => `• ${p}`).join('\n')}`;
 
   // Main Devotional View
   return (
-    <div className="px-4 py-4 max-w-lg mx-auto">
-      <ScrollArea className="h-[calc(100vh-180px)]">
+    <div className="px-2 py-2">
+      <ScrollArea className="h-[calc(100vh-200px)]">
         <div className="bg-card/80 backdrop-blur-sm rounded-xl border border-border/50 overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-amber-600/20 to-orange-600/20 p-4 border-b border-border/30">
+          <div className="bg-gradient-to-r from-pink-600/20 to-purple-600/20 p-4 border-b border-border/30">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-amber-400 uppercase tracking-wide">
+              <span className="text-xs font-medium text-pink-400 uppercase tracking-wide">
                 {entry.category}
               </span>
               <span className="text-xs text-muted-foreground">
                 {texts.day} {currentDay} {texts.of} 365
               </span>
             </div>
-            <h2 className="text-xl font-bold text-foreground">{entry.title}</h2>
+            <h2 className="text-lg font-bold text-foreground">{entry.title}</h2>
           </div>
 
           {/* Quote */}
           <div className="p-4 bg-background/30 border-b border-border/30">
-            <blockquote className="italic text-foreground/90">
+            <blockquote className="italic text-foreground/90 text-sm">
               "{entry.quote}"
             </blockquote>
-            <p className="text-sm text-muted-foreground mt-1">— {entry.author}</p>
+            <p className="text-xs text-muted-foreground mt-1">— {entry.author}</p>
           </div>
 
           {/* Devotional Content */}
@@ -269,66 +269,70 @@ ${entry.practiceBox.map((p, i) => `• ${p}`).join('\n')}`;
               {entry.reflectionQuestions.map((question, i) => (
                 <li key={i} className="flex gap-2 text-sm text-foreground/90">
                   <span className="text-primary font-medium">{i + 1}.</span>
-                  {question}
+                  <span>{question}</span>
                 </li>
               ))}
             </ul>
           </div>
 
           {/* Practice Box */}
-          <div className="p-4 bg-amber-500/10">
-            <h3 className="text-sm font-semibold text-amber-400 mb-3">
+          <div className="p-4 bg-pink-500/10">
+            <h3 className="text-sm font-semibold text-pink-400 mb-3">
               {texts.practiceBox}
             </h3>
             <ul className="space-y-2">
               {entry.practiceBox.map((practice, i) => (
                 <li key={i} className="flex gap-2 text-sm text-foreground/90">
-                  <span className="text-amber-400">•</span>
-                  {practice}
+                  <span className="text-pink-400">•</span>
+                  <span>{practice}</span>
                 </li>
               ))}
             </ul>
           </div>
 
           {/* Actions */}
-          <div className="p-4 flex items-center justify-between border-t border-border/30">
-            <div className="flex items-center gap-2">
+          <div className="p-3 flex items-center justify-between border-t border-border/30">
+            <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="icon"
+                className="h-8 w-8"
                 onClick={() => navigateDay('prev')}
                 disabled={currentDay <= 1}
               >
-                <ChevronLeft className="w-5 h-5" />
+                <ChevronLeft className="w-4 h-4" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
+                className="h-8 w-8"
                 onClick={() => navigateDay('next')}
                 disabled={currentDay >= maxUnlockedDay}
               >
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
+                className="h-8 px-2 text-xs"
                 onClick={() => setShowArchive(true)}
               >
-                <Book className="w-4 h-4 mr-2" />
+                <Book className="w-3 h-3 mr-1" />
                 {texts.archive}
               </Button>
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
+                className="h-8 px-2 text-xs"
                 onClick={() => copyDevotional(entry)}
               >
                 {copied ? (
-                  <Check className="w-4 h-4 mr-2 text-green-500" />
+                  <Check className="w-3 h-3 mr-1 text-green-500" />
                 ) : (
-                  <Copy className="w-4 h-4 mr-2" />
+                  <Copy className="w-3 h-3 mr-1" />
                 )}
                 {copied ? texts.copied : texts.copyAll}
               </Button>
