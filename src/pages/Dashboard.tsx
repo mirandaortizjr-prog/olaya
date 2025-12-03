@@ -936,7 +936,8 @@ const Dashboard = () => {
       {/* Couple's Library Section */}
       <div className="py-4 px-4">
         <CouplesLibrary 
-          userId={user!.id} 
+          userId={user!.id}
+          coupleId={coupleData.coupleId}
           partnerUserId={coupleData.partner?.user_id || null}
           onOpenGames={() => setActiveView("games")}
         />
