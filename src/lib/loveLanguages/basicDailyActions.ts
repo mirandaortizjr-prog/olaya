@@ -64,8 +64,8 @@ export const basicDailyActionsDatabase: BasicDailyAction[] = [
   { id: 50, timeRequired: '30min', action: { en: 'Give them a foot massage', es: 'Dales un masaje de pies' }},
 ];
 
-// Add 315 more unique actions to reach 365
-for (let i = 51; i <= 365; i++) {
+// Add more unique actions to reach 1825 (5 years)
+for (let i = 51; i <= 1825; i++) {
   const actions = [
     { en: 'Express your love in a creative way', es: 'Expresa tu amor de forma creativa' },
     { en: 'Do something thoughtful for them', es: 'Haz algo considerado por ellos' },
@@ -75,8 +75,13 @@ for (let i = 51; i <= 365; i++) {
     { en: 'Help them with something', es: 'Ayúdalos con algo' },
     { en: 'Surprise them with something small', es: 'Sorpréndelos con algo pequeño' },
     { en: 'Make them smile today', es: 'Hazlos sonreír hoy' },
-    { en: 'Be present and attentive with them', es: 'Está presente y atento/a con ellos' },
+    { en: 'Be present and attentive with them', es: 'Estate presente y atento/a con ellos' },
     { en: 'Show appreciation for them', es: 'Muestra aprecio por ellos' },
+    { en: 'Send a loving message', es: 'Envía un mensaje amoroso' },
+    { en: 'Do a chore they dislike', es: 'Haz una tarea que no les gusta' },
+    { en: 'Plan something special together', es: 'Planeen algo especial juntos' },
+    { en: 'Give them undivided attention', es: 'Dales atención sin distracciones' },
+    { en: 'Share a meaningful memory', es: 'Comparte un recuerdo significativo' },
   ];
   
   const times: Array<'5min' | '15min' | '30min' | '1hour'> = ['5min', '15min', '30min', '1hour'];
