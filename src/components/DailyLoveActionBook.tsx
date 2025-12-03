@@ -216,14 +216,22 @@ export const DailyLoveActionBook = ({ userId, partnerUserId, onOpenGames }: Dail
     }
 
     setHasCompletedQuiz(true);
+    
+    // Format the language name for display
+    const languageDisplay = profile.primaryLanguage
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, c => c.toUpperCase());
+    
     toast({
       title: '🎉 Quiz Complete!',
-      description: `Your primary love language is ${profile.primaryLanguage.replace(/_/g, ' ')}!`
+      description: `Your primary love language is ${languageDisplay}!`
     });
     setView('action');
     setCurrentQuestionIndex(0);
     setAnswers([]);
-    loadData();
+    
+    // Reload data to get updated partner info if they also completed
+    await loadData();
   };
 
   if (loading || isPremiumLoading) {

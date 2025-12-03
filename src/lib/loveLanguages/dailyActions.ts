@@ -202,32 +202,51 @@ for (let i = 0; i < 365; i++) {
   dailyActionsDatabase.push(createAction(2100 + i, 'touch', intensities[i % 3], difficulties[i % 3], times[i % 3], template.en, template.es));
 }
 
-// Map language names to action language keys
+// Map language names to action language keys (handles both full names and keys)
 const langMap: Record<string, DailyAction['language']> = {
+  // Full names
   'Words of Affirmation': 'words',
   'Quality Time': 'quality_time',
   'Receiving Gifts': 'gifts',
   'Acts of Service': 'acts',
   'Physical Touch': 'touch',
+  // Keys (already in correct format)
+  'words': 'words',
+  'quality_time': 'quality_time',
+  'gifts': 'gifts',
+  'acts': 'acts',
+  'touch': 'touch',
 };
 
-// Get daily action based on day and partner's love languages
+// Get daily action based on day and partner's love languages (sorted by score, strongest first)
 export function getDailyAction(dayNumber: number, rankedLanguages: LoveLanguageScore[]): DailyAction {
   if (!rankedLanguages || rankedLanguages.length === 0) {
     const wordsActions = dailyActionsDatabase.filter(a => a.language === 'words');
     return wordsActions[dayNumber % wordsActions.length];
   }
 
+  // Sort by score descending to get strongest language first
   const sorted = [...rankedLanguages].sort((a, b) => b.score - a.score);
-  const primaryLang = sorted[0]?.language || 'Words of Affirmation';
-  const secondaryLang = sorted[1]?.language || 'Quality Time';
+  const primaryLang = sorted[0]?.language || 'words';
+  const secondaryLang = sorted[1]?.language || 'quality_time';
+  const tertiaryLang = sorted[2]?.language || 'gifts';
 
+  // Convert to action keys (handles both full names and short keys)
   const primaryKey = langMap[primaryLang] || 'words';
   const secondaryKey = langMap[secondaryLang] || 'quality_time';
+  const tertiaryKey = langMap[tertiaryLang] || 'gifts';
 
-  // 70% primary language, 30% secondary
-  const useSecondary = dayNumber % 10 >= 7;
-  const targetLang = useSecondary ? secondaryKey : primaryKey;
+  // Distribution: 60% primary, 30% secondary, 10% tertiary (for variety)
+  const dayMod = dayNumber % 10;
+  let targetLang: DailyAction['language'];
+  
+  if (dayMod < 6) {
+    targetLang = primaryKey; // Days 0-5: Primary (60%)
+  } else if (dayMod < 9) {
+    targetLang = secondaryKey; // Days 6-8: Secondary (30%)
+  } else {
+    targetLang = tertiaryKey; // Day 9: Tertiary (10%)
+  }
 
   const languageActions = dailyActionsDatabase.filter(a => a.language === targetLang);
   const actionIndex = dayNumber % languageActions.length;
