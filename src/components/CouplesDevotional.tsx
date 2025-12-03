@@ -15,6 +15,7 @@ interface CouplesDevotionalProps {
 export const CouplesDevotional = ({ userId, coupleId }: CouplesDevotionalProps) => {
   const { language } = useLanguage();
   const { toast } = useToast();
+  const lang = (language as 'en' | 'es') || 'en';
   
   const [currentDay, setCurrentDay] = useState(1);
   const [maxUnlockedDay, setMaxUnlockedDay] = useState(1);
@@ -58,7 +59,7 @@ export const CouplesDevotional = ({ userId, coupleId }: CouplesDevotionalProps) 
     }
   };
 
-  const texts = t[language as 'en' | 'es'] || t.en;
+  const texts = t[lang];
 
   useEffect(() => {
     loadProgress();
@@ -80,7 +81,6 @@ export const CouplesDevotional = ({ userId, coupleId }: CouplesDevotionalProps) 
         const started = new Date(data.started_at);
         setStartedAt(started);
         
-        // Calculate days since start
         const now = new Date();
         const daysSinceStart = Math.floor((now.getTime() - started.getTime()) / (1000 * 60 * 60 * 24)) + 1;
         const unlocked = Math.min(daysSinceStart, 365);
@@ -88,7 +88,6 @@ export const CouplesDevotional = ({ userId, coupleId }: CouplesDevotionalProps) 
         setMaxUnlockedDay(unlocked);
         setCurrentDay(unlocked);
       } else {
-        // Create new progress record
         const { error: insertError } = await supabase
           .from('devotional_progress')
           .insert({
@@ -112,25 +111,25 @@ export const CouplesDevotional = ({ userId, coupleId }: CouplesDevotionalProps) 
   };
 
   const copyDevotional = async (entry: DevotionalEntry) => {
-    const text = `Day ${entry.day} — ${entry.title}
+    const text = `${texts.day} ${entry.day} — ${entry.title[lang]}
 
-Quote: "${entry.quote}" — ${entry.author}
+"${entry.quote[lang]}" — ${entry.author}
 
-Devotional:
-${entry.devotional}
+${texts.devotional}:
+${entry.devotional[lang]}
 
-Reflection Questions:
-${entry.reflectionQuestions.map((q, i) => `${i + 1}. ${q}`).join('\n')}
+${texts.reflectionQuestions}:
+${entry.reflectionQuestions.map((q, i) => `${i + 1}. ${q[lang]}`).join('\n')}
 
-Practice Box:
-${entry.practiceBox.map((p, i) => `• ${p}`).join('\n')}`;
+${texts.practiceBox}:
+${entry.practiceBox.map((p) => `• ${p[lang]}`).join('\n')}`;
 
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
       toast({
         title: texts.copied,
-        description: `Day ${entry.day} copied to clipboard`
+        description: lang === 'es' ? `Día ${entry.day} copiado` : `Day ${entry.day} copied`
       });
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -201,10 +200,10 @@ ${entry.practiceBox.map((p, i) => `• ${p}`).join('\n')}`;
                         {texts.day} {day}
                       </span>
                       <p className="font-medium text-foreground text-sm truncate">
-                        {dayEntry.title}
+                        {dayEntry.title[lang]}
                       </p>
                       <span className="text-xs text-primary/70">
-                        {getCategory(day)}
+                        {getCategory(day, lang)}
                       </span>
                     </div>
                     {!isUnlocked && (
@@ -232,19 +231,19 @@ ${entry.practiceBox.map((p, i) => `• ${p}`).join('\n')}`;
           <div className="bg-gradient-to-r from-pink-600/20 to-purple-600/20 p-4 border-b border-border/30">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-pink-400 uppercase tracking-wide">
-                {entry.category}
+                {entry.category[lang]}
               </span>
               <span className="text-xs text-muted-foreground">
                 {texts.day} {currentDay} {texts.of} 365
               </span>
             </div>
-            <h2 className="text-lg font-bold text-foreground">{entry.title}</h2>
+            <h2 className="text-lg font-bold text-foreground">{entry.title[lang]}</h2>
           </div>
 
           {/* Quote */}
           <div className="p-4 bg-background/30 border-b border-border/30">
             <blockquote className="italic text-foreground/90 text-sm">
-              "{entry.quote}"
+              "{entry.quote[lang]}"
             </blockquote>
             <p className="text-xs text-muted-foreground mt-1">— {entry.author}</p>
           </div>
@@ -256,7 +255,7 @@ ${entry.practiceBox.map((p, i) => `• ${p}`).join('\n')}`;
               {texts.devotional}
             </h3>
             <p className="text-foreground/90 leading-relaxed text-sm">
-              {entry.devotional}
+              {entry.devotional[lang]}
             </p>
           </div>
 
@@ -269,7 +268,7 @@ ${entry.practiceBox.map((p, i) => `• ${p}`).join('\n')}`;
               {entry.reflectionQuestions.map((question, i) => (
                 <li key={i} className="flex gap-2 text-sm text-foreground/90">
                   <span className="text-primary font-medium">{i + 1}.</span>
-                  <span>{question}</span>
+                  <span>{question[lang]}</span>
                 </li>
               ))}
             </ul>
@@ -284,7 +283,7 @@ ${entry.practiceBox.map((p, i) => `• ${p}`).join('\n')}`;
               {entry.practiceBox.map((practice, i) => (
                 <li key={i} className="flex gap-2 text-sm text-foreground/90">
                   <span className="text-pink-400">•</span>
-                  <span>{practice}</span>
+                  <span>{practice[lang]}</span>
                 </li>
               ))}
             </ul>

@@ -1,751 +1,356 @@
-export interface DevotionalEntry {
-  day: number;
-  title: string;
-  quote: string;
-  author: string;
-  devotional: string;
-  reflectionQuestions: string[];
-  practiceBox: string[];
-  category: string;
+export interface BilingualText {
+  en: string;
+  es: string;
 }
 
-// Category ranges
-const categories = [
-  { name: 'Emotional Intelligence', start: 1, end: 60 },
-  { name: 'Communication Mastery', start: 61, end: 120 },
-  { name: 'Intimacy & Affection', start: 121, end: 180 },
-  { name: 'Shared Goals & Growth', start: 181, end: 240 },
-  { name: 'Personality & Attachment Styles', start: 241, end: 300 },
-  { name: 'Repair & Resilience', start: 301, end: 330 },
-  { name: 'Daily Nourishment', start: 331, end: 365 },
-];
+export interface DevotionalEntry {
+  day: number;
+  title: BilingualText;
+  quote: BilingualText;
+  author: string;
+  devotional: BilingualText;
+  reflectionQuestions: BilingualText[];
+  practiceBox: BilingualText[];
+  category: BilingualText;
+}
 
-export const getCategory = (day: number): string => {
-  const cat = categories.find(c => day >= c.start && day <= c.end);
-  return cat?.name || 'Daily Nourishment';
+// Category definitions
+const categoryNames: Record<string, BilingualText> = {
+  emotional: { en: 'Emotional Intelligence', es: 'Inteligencia Emocional' },
+  communication: { en: 'Communication Mastery', es: 'Dominio de la Comunicación' },
+  intimacy: { en: 'Intimacy & Affection', es: 'Intimidad y Afecto' },
+  goals: { en: 'Shared Goals & Growth', es: 'Metas Compartidas y Crecimiento' },
+  personality: { en: 'Personality & Attachment Styles', es: 'Personalidad y Estilos de Apego' },
+  repair: { en: 'Repair & Resilience', es: 'Reparación y Resiliencia' },
+  daily: { en: 'Daily Nourishment', es: 'Nutrición Diaria' },
 };
 
-// Comprehensive 365-day devotional content
-export const devotionalEntries: DevotionalEntry[] = [
-  // EMOTIONAL INTELLIGENCE (Days 1-60)
+export const getCategory = (day: number, lang: 'en' | 'es' = 'en'): string => {
+  if (day <= 60) return categoryNames.emotional[lang];
+  if (day <= 120) return categoryNames.communication[lang];
+  if (day <= 180) return categoryNames.intimacy[lang];
+  if (day <= 240) return categoryNames.goals[lang];
+  if (day <= 300) return categoryNames.personality[lang];
+  if (day <= 330) return categoryNames.repair[lang];
+  return categoryNames.daily[lang];
+};
+
+export const getCategoryBilingual = (day: number): BilingualText => {
+  if (day <= 60) return categoryNames.emotional;
+  if (day <= 120) return categoryNames.communication;
+  if (day <= 180) return categoryNames.intimacy;
+  if (day <= 240) return categoryNames.goals;
+  if (day <= 300) return categoryNames.personality;
+  if (day <= 330) return categoryNames.repair;
+  return categoryNames.daily;
+};
+
+// Sample devotional entries with full bilingual content
+const devotionalEntries: DevotionalEntry[] = [
   {
     day: 1,
-    title: "Listening as Love",
-    quote: "We have two ears and one mouth so that we can listen twice as much as we speak.",
+    title: { en: "Listening as Love", es: "Escuchar como Amor" },
+    quote: { 
+      en: "We have two ears and one mouth so that we can listen twice as much as we speak.", 
+      es: "Tenemos dos oídos y una boca para poder escuchar el doble de lo que hablamos." 
+    },
     author: "Epictetus",
-    devotional: "Attentive listening is more than silence while your partner speaks. It means resisting the urge to plan your reply, noticing tone and pauses, and reflecting back both words and emotions. Psychology calls this active empathy: mirroring not just content but the feeling beneath it. Couples who practice attentive listening report higher trust and intimacy because it communicates: your inner world matters to me. Today, practice being fully present when your partner shares, setting aside distractions and your own agenda.",
+    devotional: { 
+      en: "Attentive listening is more than silence while your partner speaks. It means resisting the urge to plan your reply, noticing tone and pauses, and reflecting back both words and emotions. Psychology calls this active empathy: mirroring not just content but the feeling beneath it. Couples who practice attentive listening report higher trust and intimacy because it communicates: your inner world matters to me.",
+      es: "Escuchar atentamente es más que guardar silencio mientras tu pareja habla. Significa resistir el impulso de planificar tu respuesta, notar el tono y las pausas, y reflejar tanto las palabras como las emociones. La psicología llama a esto empatía activa: reflejar no solo el contenido sino el sentimiento detrás de él. Las parejas que practican la escucha atenta reportan mayor confianza e intimidad porque comunica: tu mundo interior me importa."
+    },
     reflectionQuestions: [
-      "When was the last time you felt truly attended to rather than just heard?",
-      "What habits block your attentive listening?",
-      "How can you show your partner today that their emotions—not just their words—are important?"
+      { en: "When was the last time you felt truly attended to rather than just heard?", es: "¿Cuándo fue la última vez que te sentiste verdaderamente atendido/a en lugar de solo escuchado/a?" },
+      { en: "What habits block your attentive listening?", es: "¿Qué hábitos bloquean tu escucha atenta?" },
+      { en: "How can you show your partner today that their emotions—not just their words—are important?", es: "¿Cómo puedes mostrarle a tu pareja hoy que sus emociones, no solo sus palabras, son importantes?" }
     ],
     practiceBox: [
-      "Tonight, ask your partner about their day. Repeat back what you heard, including the emotion.",
-      "Pause for 3 seconds before responding, to ensure you're not rushing to reply.",
-      "End by asking: 'Did I get that right?'"
+      { en: "Tonight, ask your partner about their day. Repeat back what you heard, including the emotion.", es: "Esta noche, pregúntale a tu pareja sobre su día. Repite lo que escuchaste, incluyendo la emoción." },
+      { en: "Pause for 3 seconds before responding, to ensure you're not rushing to reply.", es: "Pausa 3 segundos antes de responder, para asegurarte de no apresurarte a contestar." },
+      { en: "End by asking: 'Did I get that right?'", es: "Termina preguntando: '¿Entendí bien?'" }
     ],
-    category: "Emotional Intelligence"
+    category: categoryNames.emotional
   },
   {
     day: 2,
-    title: "The Power of Emotional Validation",
-    quote: "Being heard is so close to being loved that for the average person, they are almost indistinguishable.",
+    title: { en: "The Power of Emotional Validation", es: "El Poder de la Validación Emocional" },
+    quote: { 
+      en: "Being heard is so close to being loved that for the average person, they are almost indistinguishable.", 
+      es: "Ser escuchado está tan cerca de ser amado que para la persona promedio, son casi indistinguibles." 
+    },
     author: "David Augsburger",
-    devotional: "Emotional validation doesn't mean agreeing with everything your partner feels—it means acknowledging that their feelings make sense given their perspective. When we validate, we communicate acceptance of our partner's emotional experience without judgment. Research shows that validation reduces emotional escalation and creates safety for deeper sharing. The opposite—dismissing or minimizing feelings—creates distance and resentment over time.",
+    devotional: { 
+      en: "Emotional validation doesn't mean agreeing with everything your partner feels—it means acknowledging that their feelings make sense given their perspective. When we validate, we communicate acceptance of our partner's emotional experience without judgment. Research shows that validation reduces emotional escalation and creates safety for deeper sharing.",
+      es: "La validación emocional no significa estar de acuerdo con todo lo que tu pareja siente—significa reconocer que sus sentimientos tienen sentido desde su perspectiva. Cuando validamos, comunicamos aceptación de la experiencia emocional de nuestra pareja sin juzgar. Las investigaciones muestran que la validación reduce la escalada emocional y crea seguridad para compartir más profundamente."
+    },
     reflectionQuestions: [
-      "Do you tend to fix problems before acknowledging feelings?",
-      "How does it feel when your emotions are dismissed versus validated?",
-      "What phrases help you feel emotionally understood?"
+      { en: "Do you tend to fix problems before acknowledging feelings?", es: "¿Tiendes a arreglar problemas antes de reconocer sentimientos?" },
+      { en: "How does it feel when your emotions are dismissed versus validated?", es: "¿Cómo se siente cuando tus emociones son descartadas versus validadas?" },
+      { en: "What phrases help you feel emotionally understood?", es: "¿Qué frases te ayudan a sentirte emocionalmente comprendido/a?" }
     ],
     practiceBox: [
-      "Use phrases like 'That makes sense' or 'I can see why you'd feel that way.'",
-      "Resist the urge to offer solutions until your partner feels heard.",
-      "Notice when you want to defend yourself instead of validating—pause and choose connection."
+      { en: "Use phrases like 'That makes sense' or 'I can see why you'd feel that way.'", es: "Usa frases como 'Eso tiene sentido' o 'Puedo ver por qué te sentirías así.'" },
+      { en: "Resist the urge to offer solutions until your partner feels heard.", es: "Resiste el impulso de ofrecer soluciones hasta que tu pareja se sienta escuchada." },
+      { en: "Notice when you want to defend yourself instead of validating—pause and choose connection.", es: "Nota cuando quieres defenderte en lugar de validar—pausa y elige la conexión." }
     ],
-    category: "Emotional Intelligence"
-  },
-  {
-    day: 3,
-    title: "Understanding Your Emotional Triggers",
-    quote: "Between stimulus and response there is a space. In that space is our power to choose our response.",
-    author: "Viktor Frankl",
-    devotional: "We all have emotional triggers—topics, tones, or situations that instantly activate strong reactions. Often these stem from past experiences, childhood wounds, or accumulated relationship hurts. Understanding your triggers isn't about eliminating them but recognizing them before they hijack your responses. When you can name a trigger in the moment, you create space for choice rather than reaction.",
-    reflectionQuestions: [
-      "What situations consistently trigger strong emotional reactions in you?",
-      "Can you trace any triggers back to earlier life experiences?",
-      "How do you typically respond when triggered, and how would you like to respond?"
-    ],
-    practiceBox: [
-      "Make a list of your top 3 emotional triggers in your relationship.",
-      "Share one trigger with your partner and explain its origin.",
-      "Create a code word to signal when you feel triggered and need a pause."
-    ],
-    category: "Emotional Intelligence"
-  },
-  {
-    day: 4,
-    title: "Naming Emotions Precisely",
-    quote: "Name it to tame it.",
-    author: "Dr. Dan Siegel",
-    devotional: "Research shows that the simple act of labeling an emotion reduces its intensity. But most of us have a limited emotional vocabulary, defaulting to 'fine,' 'stressed,' or 'upset.' Expanding your emotional vocabulary allows for more precise communication and self-understanding. Instead of 'I'm mad,' you might discover you're actually feeling 'disrespected' or 'unheard'—each pointing to different needs.",
-    reflectionQuestions: [
-      "What emotions do you frequently feel but rarely name?",
-      "How specific is your typical emotional vocabulary?",
-      "What would change if you named emotions more precisely to your partner?"
-    ],
-    practiceBox: [
-      "Learn 5 new emotion words this week (e.g., apprehensive, content, overwhelmed, hopeful, irritated).",
-      "When you feel 'bad,' dig deeper—what specific emotion is underneath?",
-      "Share a nuanced emotion with your partner today using a specific word."
-    ],
-    category: "Emotional Intelligence"
-  },
-  {
-    day: 5,
-    title: "The Gift of Emotional Presence",
-    quote: "The greatest gift you can give another is the purity of your attention.",
-    author: "Richard Moss",
-    devotional: "Emotional presence means being fully available—not distracted by phones, worries, or mental to-do lists—when your partner needs connection. It's offering your undivided self. In our hyper-connected world, true presence has become rare and therefore more precious. When you offer emotional presence, you communicate that your partner is worth your full attention, that this moment matters.",
-    reflectionQuestions: [
-      "When do you feel most present with your partner?",
-      "What typically pulls your attention away during important conversations?",
-      "How does your partner signal they need your full presence?"
-    ],
-    practiceBox: [
-      "Create a daily 15-minute 'device-free' window for undistracted connection.",
-      "Make eye contact during important conversations.",
-      "When you notice your mind wandering, gently bring it back without self-judgment."
-    ],
-    category: "Emotional Intelligence"
-  },
-  {
-    day: 6,
-    title: "Emotional Flooding and Recovery",
-    quote: "When we are no longer able to change a situation, we are challenged to change ourselves.",
-    author: "Viktor Frankl",
-    devotional: "Emotional flooding occurs when stress hormones overwhelm our capacity for rational thought. Heart rate increases, muscles tense, and we lose access to our prefrontal cortex—the brain region responsible for empathy and problem-solving. Gottman's research shows that once flooded, we need at least 20 minutes to physiologically calm down. Continuing a conversation while flooded almost guarantees escalation.",
-    reflectionQuestions: [
-      "What physical signs tell you that you're becoming flooded?",
-      "How do you typically behave when emotionally overwhelmed?",
-      "What helps you calm down most effectively?"
-    ],
-    practiceBox: [
-      "Agree with your partner on a signal word that means 'I need a break.'",
-      "During breaks, do something soothing: walk, breathe deeply, or listen to music.",
-      "Return to the conversation only when both hearts have slowed."
-    ],
-    category: "Emotional Intelligence"
-  },
-  {
-    day: 7,
-    title: "Empathy: Walking in Their Shoes",
-    quote: "Empathy is seeing with the eyes of another, listening with the ears of another, and feeling with the heart of another.",
-    author: "Alfred Adler",
-    devotional: "Empathy requires temporarily setting aside your own perspective to fully inhabit your partner's experience. It's not sympathy (feeling sorry for) but genuine understanding of their inner world. Empathy doesn't mean abandoning your own feelings—it means making room for theirs. When partners feel truly understood, defensiveness melts and connection deepens.",
-    reflectionQuestions: [
-      "When has someone's empathy profoundly impacted you?",
-      "What makes it difficult for you to empathize in certain situations?",
-      "How can you show more curiosity about your partner's perspective?"
-    ],
-    practiceBox: [
-      "During your next disagreement, summarize your partner's position before stating your own.",
-      "Ask: 'Help me understand what this feels like for you.'",
-      "Practice empathy even when you disagree—understanding doesn't require agreement."
-    ],
-    category: "Emotional Intelligence"
-  },
-  {
-    day: 8,
-    title: "Managing Anxiety in Relationships",
-    quote: "Worry does not empty tomorrow of its sorrow, it empties today of its strength.",
-    author: "Corrie ten Boom",
-    devotional: "Relationship anxiety—fear of abandonment, rejection, or inadequacy—can drive behaviors that paradoxically push partners away. When anxious, we may seek excessive reassurance, become controlling, or withdraw protectively. Recognizing anxiety as a signal rather than truth allows us to respond thoughtfully. Your anxiety is trying to protect you, but it often overstates the danger.",
-    reflectionQuestions: [
-      "What relationship fears does anxiety amplify for you?",
-      "How does your anxiety typically manifest in behavior?",
-      "What would help you feel more secure?"
-    ],
-    practiceBox: [
-      "When anxious, name it: 'I notice I'm feeling anxious right now.'",
-      "Ask yourself: 'What am I afraid of? Is this fear based on present evidence?'",
-      "Share your anxiety with your partner without demanding they fix it."
-    ],
-    category: "Emotional Intelligence"
-  },
-  {
-    day: 9,
-    title: "The Art of Self-Soothing",
-    quote: "Almost everything will work again if you unplug it for a few minutes, including you.",
-    author: "Anne Lamott",
-    devotional: "Self-soothing is the ability to calm your own nervous system without relying entirely on your partner. While we absolutely need co-regulation in relationships, depending solely on your partner to manage your emotions creates unsustainable pressure. Developing self-soothing skills—deep breathing, grounding exercises, positive self-talk—makes you a more stable partner.",
-    reflectionQuestions: [
-      "What self-soothing techniques work best for you?",
-      "Do you tend to over-rely on your partner for emotional regulation?",
-      "How can developing self-soothing benefit your relationship?"
-    ],
-    practiceBox: [
-      "Practice box breathing: inhale 4 counts, hold 4 counts, exhale 4 counts, hold 4 counts.",
-      "Identify 3 go-to self-soothing activities (walking, music, warm bath).",
-      "Use self-soothing before bringing up difficult topics."
-    ],
-    category: "Emotional Intelligence"
-  },
-  {
-    day: 10,
-    title: "Recognizing Projection",
-    quote: "Everything that irritates us about others can lead us to an understanding of ourselves.",
-    author: "Carl Jung",
-    devotional: "Projection occurs when we attribute our own unacknowledged feelings or traits to our partner. If we're feeling insecure, we might accuse our partner of being critical. If we're angry at ourselves, we might perceive our partner as angry. Recognizing projection requires honest self-examination: 'Is this really about them, or might this be about me?'",
-    reflectionQuestions: [
-      "What traits in your partner most irritate you? Could any be projections?",
-      "When you accuse your partner of something, do you ever feel that way yourself?",
-      "How might examining your projections deepen self-awareness?"
-    ],
-    practiceBox: [
-      "Before criticizing your partner, ask: 'Am I also guilty of this sometimes?'",
-      "Journal about a recent conflict—explore what you might have been projecting.",
-      "When triggered, pause and look inward before looking outward."
-    ],
-    category: "Emotional Intelligence"
-  },
-  // Days 11-60: More Emotional Intelligence entries
-  {
-    day: 11,
-    title: "Emotional Boundaries",
-    quote: "Daring to set boundaries is about having the courage to love ourselves even when we risk disappointing others.",
-    author: "Brené Brown",
-    devotional: "Healthy emotional boundaries mean knowing where you end and your partner begins. You can care deeply about their feelings without taking responsibility for managing them. Boundaries aren't walls—they're guidelines that help both partners understand expectations and limits. Without boundaries, resentment builds; with them, genuine generosity becomes possible.",
-    reflectionQuestions: [
-      "Where might you need stronger emotional boundaries?",
-      "Do you sometimes feel responsible for your partner's happiness?",
-      "How can boundaries actually increase intimacy?"
-    ],
-    practiceBox: [
-      "Identify one area where you've been overextending emotionally.",
-      "Practice saying: 'I care about how you feel, and I trust you to work through this.'",
-      "Set one boundary this week and observe the results."
-    ],
-    category: "Emotional Intelligence"
-  },
-  {
-    day: 12,
-    title: "The Courage of Vulnerability",
-    quote: "Vulnerability is not winning or losing; it's having the courage to show up and be seen when we have no control over the outcome.",
-    author: "Brené Brown",
-    devotional: "Vulnerability is the birthplace of connection, belonging, and love. Yet we often armor ourselves against it, fearing rejection or judgment. True intimacy requires the courage to be seen—imperfections and all. When you share your fears, dreams, and struggles authentically, you invite your partner into your real self, not just the polished version.",
-    reflectionQuestions: [
-      "What makes vulnerability feel risky for you?",
-      "What armor do you wear to protect yourself from being truly seen?",
-      "How might your relationship deepen if you were more vulnerable?"
-    ],
-    practiceBox: [
-      "Share one fear or insecurity with your partner today.",
-      "When your partner is vulnerable, respond with gratitude, not advice.",
-      "Notice when you're tempted to hide—choose authenticity instead."
-    ],
-    category: "Emotional Intelligence"
-  },
-  {
-    day: 13,
-    title: "Understanding Shame",
-    quote: "Shame corrodes the very part of us that believes we are capable of change.",
-    author: "Brené Brown",
-    devotional: "Shame whispers that we are fundamentally flawed and unworthy of love. Unlike guilt ('I did something bad'), shame says 'I am bad.' Shame thrives in secrecy but withers when spoken. In relationships, unaddressed shame can drive us to hide parts of ourselves, overcompensate, or project onto our partner. Healing happens when shame is met with empathy.",
-    reflectionQuestions: [
-      "What shame triggers affect your relationship?",
-      "How do you typically respond when feeling ashamed?",
-      "What would it mean to share your shame with someone who responds with empathy?"
-    ],
-    practiceBox: [
-      "Identify one shame message you carry and examine its origins.",
-      "Share a shame experience with your partner and receive their empathy.",
-      "Practice self-compassion when shame arises: 'I am human; this is human.'"
-    ],
-    category: "Emotional Intelligence"
-  },
-  {
-    day: 14,
-    title: "Cultivating Gratitude",
-    quote: "Gratitude turns what we have into enough.",
-    author: "Melody Beattie",
-    devotional: "Gratitude rewires our brain toward positivity. In relationships, we often focus on what's missing rather than what's present. The negativity bias—our tendency to notice problems more than blessings—can erode appreciation over time. Intentional gratitude practice shifts this pattern, helping us see our partner's contributions and the gifts of our relationship.",
-    reflectionQuestions: [
-      "What do you take for granted in your relationship?",
-      "When did you last express genuine gratitude to your partner?",
-      "How might daily gratitude change your relationship's atmosphere?"
-    ],
-    practiceBox: [
-      "Share three specific things you appreciate about your partner tonight.",
-      "Start a gratitude practice—list 3 relationship blessings each morning.",
-      "Notice when you focus on complaints; consciously shift to gratitude."
-    ],
-    category: "Emotional Intelligence"
-  },
-  {
-    day: 15,
-    title: "Emotional Generosity",
-    quote: "We make a living by what we get. We make a life by what we give.",
-    author: "Winston Churchill",
-    devotional: "Emotional generosity means giving your partner the benefit of the doubt, assuming positive intent, and offering grace when they fall short. It's choosing to interpret their actions through a lens of love rather than suspicion. This doesn't mean ignoring problems—it means approaching your partner as an ally rather than an adversary.",
-    reflectionQuestions: [
-      "Do you tend to assume positive or negative intent from your partner?",
-      "How might emotional generosity change your typical interpretations?",
-      "What would it feel like to receive more emotional generosity from your partner?"
-    ],
-    practiceBox: [
-      "When annoyed, pause and consider a generous interpretation of your partner's behavior.",
-      "Give your partner the same grace you'd want when you make mistakes.",
-      "Express appreciation for effort, even when results aren't perfect."
-    ],
-    category: "Emotional Intelligence"
-  },
-  // Continue with days 16-60...
-  {
-    day: 16,
-    title: "The Language of Needs",
-    quote: "Every criticism, judgment, diagnosis, and expression of anger is the tragic expression of an unmet need.",
-    author: "Marshall Rosenberg",
-    devotional: "Behind every complaint lies an unmet need. 'You never help around the house' might express a need for partnership. 'You're always on your phone' might express a need for connection. Learning to translate complaints into needs—both yours and your partner's—transforms conflict into opportunity for deeper understanding and care.",
-    reflectionQuestions: [
-      "What needs do your most common complaints actually express?",
-      "How comfortable are you directly stating your needs?",
-      "What prevents you from asking for what you need?"
-    ],
-    practiceBox: [
-      "Reframe a recent complaint as a need: 'I need...' instead of 'You never...'",
-      "Ask your partner what need underlies their frustration.",
-      "Practice requesting directly: 'Would you be willing to...'"
-    ],
-    category: "Emotional Intelligence"
-  },
-  {
-    day: 17,
-    title: "Managing Disappointment",
-    quote: "Expectations are premeditated resentments.",
-    author: "Unknown",
-    devotional: "Disappointment is the gap between expectation and reality. In relationships, we carry countless expectations—some spoken, many unspoken. When our partner fails to meet expectations they didn't know existed, disappointment and resentment grow. Managing disappointment requires examining our expectations, communicating them clearly, and accepting that our partner cannot meet all of them.",
-    reflectionQuestions: [
-      "What unspoken expectations do you carry in your relationship?",
-      "How do you typically express disappointment?",
-      "Which expectations might be unrealistic or unfair?"
-    ],
-    practiceBox: [
-      "Identify one unspoken expectation and share it with your partner.",
-      "When disappointed, separate the event from the story you're telling yourself.",
-      "Ask: 'Is this expectation reasonable? Have I communicated it clearly?'"
-    ],
-    category: "Emotional Intelligence"
-  },
-  {
-    day: 18,
-    title: "The Role of Curiosity",
-    quote: "Be curious, not judgmental.",
-    author: "Walt Whitman",
-    devotional: "Curiosity is the antidote to judgment. When we're curious about our partner's behavior, we seek to understand rather than condemn. Curiosity opens doors that judgment slams shut. Instead of 'Why would you do that?' try 'Help me understand what led to that.' The former accuses; the latter invites. Years into a relationship, maintaining curiosity about your partner keeps discovery alive.",
-    reflectionQuestions: [
-      "When do you tend to judge rather than get curious?",
-      "What aspects of your partner do you still not fully understand?",
-      "How might curiosity transform your next disagreement?"
-    ],
-    practiceBox: [
-      "Replace one judgment today with a curious question.",
-      "Ask your partner something you've never asked before.",
-      "When tempted to assume, instead ask: 'Tell me more about that.'"
-    ],
-    category: "Emotional Intelligence"
-  },
-  {
-    day: 19,
-    title: "Honoring Your Partner's Emotions",
-    quote: "The emotion that can break your heart is sometimes the very one that heals it.",
-    author: "Nicholas Sparks",
-    devotional: "Honoring your partner's emotions means respecting their right to feel what they feel, even when their feelings are uncomfortable for you. It means not rushing them through grief, minimizing their fears, or dismissing their joy. When we honor emotions, we communicate: all of you is welcome here—not just the easy parts.",
-    reflectionQuestions: [
-      "Which of your partner's emotions are hardest for you to honor?",
-      "Do you ever try to 'fix' feelings rather than simply witness them?",
-      "How would you like your emotions to be honored?"
-    ],
-    practiceBox: [
-      "When your partner expresses difficult emotions, simply be present without fixing.",
-      "Say: 'I'm here with you' rather than 'Don't feel that way.'",
-      "Celebrate your partner's joy without tempering it with caution."
-    ],
-    category: "Emotional Intelligence"
-  },
-  {
-    day: 20,
-    title: "Emotional Bids and Responses",
-    quote: "The little things are the big things.",
-    author: "John Gottman",
-    devotional: "Gottman's research identified 'bids' as any attempt to connect—a sigh, a comment about the weather, a touch on the shoulder. Partners can turn toward bids (engaging), turn away (ignoring), or turn against (responding negatively). Couples who consistently turn toward each other's bids build trust and intimacy. Those who turn away erode the relationship slowly but steadily.",
-    reflectionQuestions: [
-      "What bids does your partner make that you might be missing?",
-      "How do you typically respond when your partner reaches out?",
-      "What prevents you from turning toward your partner?"
-    ],
-    practiceBox: [
-      "Notice 5 bids from your partner today and turn toward each one.",
-      "Make a conscious bid for connection and observe the response.",
-      "When tempted to ignore a bid, choose engagement instead."
-    ],
-    category: "Emotional Intelligence"
-  },
-  // Days 21-60 continuing Emotional Intelligence
-  {
-    day: 21,
-    title: "Processing Emotions Together",
-    quote: "A problem shared is a problem halved.",
-    author: "Unknown",
-    devotional: "Co-regulation—helping each other process difficult emotions—is a hallmark of secure relationships. When your partner is struggling, your calm presence can help regulate their nervous system. This isn't about solving their problems but offering the safety of your companionship through difficulty. Together, you can weather storms that would overwhelm either alone.",
-    reflectionQuestions: [
-      "How do you help your partner process difficult emotions?",
-      "What does your partner do that helps you regulate?",
-      "When is it helpful to process alone versus together?"
-    ],
-    practiceBox: [
-      "Offer your calm presence when your partner is upset—no fixing required.",
-      "Ask: 'Do you need me to listen, help solve, or just be here?'",
-      "Practice breathing together during stressful moments."
-    ],
-    category: "Emotional Intelligence"
-  },
-  {
-    day: 22,
-    title: "The Wisdom of Patience",
-    quote: "Patience is not the ability to wait, but the ability to keep a good attitude while waiting.",
-    author: "Joyce Meyer",
-    devotional: "Patience in relationships means allowing your partner to grow at their own pace, trusting that change takes time, and resisting the urge to push, criticize, or control. Patience doesn't mean accepting harmful behavior—it means giving space for genuine transformation. Impatience often sabotages the very changes we desire.",
-    reflectionQuestions: [
-      "Where do you most need patience in your relationship?",
-      "What triggers your impatience with your partner?",
-      "How does your impatience affect your partner's willingness to grow?"
-    ],
-    practiceBox: [
-      "Identify one area where you've been impatient and consciously choose patience.",
-      "Remind yourself: growth is a process, not an event.",
-      "Celebrate small progress rather than demanding perfection."
-    ],
-    category: "Emotional Intelligence"
-  },
-  // Add more entries...continuing through day 60, then categories 2-7
-
-  // COMMUNICATION MASTERY (Days 61-120)
-  {
-    day: 61,
-    title: "Speaking Your Truth Kindly",
-    quote: "Honesty without kindness is brutality.",
-    author: "Unknown",
-    devotional: "Truth-telling in relationships requires both courage and compassion. We must speak honestly about our needs, concerns, and feelings—but how we speak matters as much as what we say. Harsh truths delivered without care become weapons. Kind truths, shared with love, become bridges to deeper understanding. The goal isn't just to be heard but to maintain connection while being honest.",
-    reflectionQuestions: [
-      "Do you tend toward too much honesty or too much kindness?",
-      "How can you be more honest without being hurtful?",
-      "What truths have you been avoiding speaking?"
-    ],
-    practiceBox: [
-      "Share one difficult truth today using 'I' statements and gentle tone.",
-      "Before speaking hard truths, ask: 'Is this the right time and place?'",
-      "Lead with appreciation before addressing concerns."
-    ],
-    category: "Communication Mastery"
-  },
-  {
-    day: 62,
-    title: "The Art of Soft Startups",
-    quote: "A gentle answer turns away wrath.",
-    author: "Proverbs 15:1",
-    devotional: "How a conversation begins determines how it will likely end. Gottman calls this the 'soft startup'—beginning difficult discussions gently rather than harshly. A harsh startup ('You always...') triggers defensiveness. A soft startup ('I've been feeling...') invites dialogue. Mastering soft startups dramatically increases the likelihood of productive conversations.",
-    reflectionQuestions: [
-      "How do you typically begin difficult conversations?",
-      "What signals tell you a conversation is starting harshly?",
-      "How do harsh startups affect your receptivity?"
-    ],
-    practiceBox: [
-      "Begin with 'I feel...' rather than 'You always...' or 'You never...'",
-      "State what you need positively, not what your partner is doing wrong.",
-      "If you start harshly, pause, apologize, and begin again."
-    ],
-    category: "Communication Mastery"
-  },
-  // Continue with more Communication entries...
-
-  // INTIMACY & AFFECTION (Days 121-180)
-  {
-    day: 121,
-    title: "The Many Languages of Touch",
-    quote: "Touch is the first language we learn and the last one we forget.",
-    author: "Unknown",
-    devotional: "Physical touch communicates what words sometimes cannot—comfort, desire, presence, love. But touch is not one-size-fits-all. What feels nurturing to one partner may feel smothering to another. Understanding each other's touch preferences—when, where, how much—allows touch to become a fluent language of love between you.",
-    reflectionQuestions: [
-      "What kinds of touch feel most nurturing to you?",
-      "How do you and your partner differ in touch preferences?",
-      "When does touch feel most meaningful to you?"
-    ],
-    practiceBox: [
-      "Ask your partner: 'What kind of touch do you most crave right now?'",
-      "Offer non-sexual affection today—a hug, hand-hold, or gentle touch.",
-      "Notice your partner's response to different types of touch."
-    ],
-    category: "Intimacy & Affection"
-  },
-
-  // SHARED GOALS & GROWTH (Days 181-240)
-  {
-    day: 181,
-    title: "Dreaming Together",
-    quote: "A dream you dream alone is only a dream. A dream you dream together is reality.",
-    author: "John Lennon",
-    devotional: "Couples who share dreams and goals build a sense of 'we-ness' that transcends individual desires. Shared vision doesn't mean identical goals but creating a future that honors both partners' aspirations. Dreaming together requires vulnerability—sharing hopes that might seem unrealistic—and the willingness to weave your dreams into a shared tapestry.",
-    reflectionQuestions: [
-      "What dreams do you hold for your relationship's future?",
-      "Do you know your partner's deepest aspirations?",
-      "Where do your dreams align, and where do they differ?"
-    ],
-    practiceBox: [
-      "Schedule a 'dream date' to share your individual and shared visions.",
-      "Create a shared bucket list of experiences you want together.",
-      "Revisit and update your shared dreams annually."
-    ],
-    category: "Shared Goals & Growth"
-  },
-
-  // PERSONALITY & ATTACHMENT STYLES (Days 241-300)
-  {
-    day: 241,
-    title: "Understanding Attachment",
-    quote: "We are born in relationship, we are wounded in relationship, and we can be healed in relationship.",
-    author: "Harville Hendrix",
-    devotional: "Attachment theory reveals that our earliest relationships create templates for how we connect in adulthood. Secure attachment means trusting that your partner will be there for you. Anxious attachment involves fear of abandonment. Avoidant attachment involves discomfort with closeness. Understanding your attachment style—and your partner's—illuminates many relationship patterns.",
-    reflectionQuestions: [
-      "What is your attachment style, and how does it show up in your relationship?",
-      "What is your partner's attachment style?",
-      "How do your attachment styles interact—creating harmony or friction?"
-    ],
-    practiceBox: [
-      "Research attachment styles together and discuss what you learn.",
-      "Identify one attachment-driven behavior you'd like to change.",
-      "Reassure your partner in ways that address their attachment needs."
-    ],
-    category: "Personality & Attachment Styles"
-  },
-
-  // REPAIR & RESILIENCE (Days 301-330)
-  {
-    day: 301,
-    title: "The Power of Repair",
-    quote: "The quality of your relationships determines the quality of your life.",
-    author: "Esther Perel",
-    devotional: "No relationship is free of ruptures—moments of disconnection, misunderstanding, or hurt. What distinguishes thriving relationships isn't the absence of ruptures but the presence of repair. Repair is the process of reconnecting after disconnection, of healing what was hurt. Couples who repair quickly and thoroughly build resilience; those who don't accumulate emotional debt.",
-    reflectionQuestions: [
-      "How quickly do you typically repair after conflict?",
-      "What makes repair difficult for you?",
-      "What does successful repair look like in your relationship?"
-    ],
-    practiceBox: [
-      "After your next conflict, initiate repair within 24 hours.",
-      "Develop a repair ritual—a phrase, gesture, or action that signals 'I want to reconnect.'",
-      "Practice accepting repair attempts even when you're still hurt."
-    ],
-    category: "Repair & Resilience"
-  },
-
-  // DAILY NOURISHMENT (Days 331-365)
-  {
-    day: 331,
-    title: "Small Acts, Big Love",
-    quote: "Love is not a big thing. It's a million little things.",
-    author: "Unknown",
-    devotional: "Grand gestures get attention, but relationships thrive on small, consistent acts of love. A cup of coffee made without being asked. A text message just to say 'thinking of you.' A word of encouragement after a hard day. These small deposits in the emotional bank account accumulate into profound security and affection over time.",
-    reflectionQuestions: [
-      "What small acts of love does your partner most appreciate?",
-      "What small gestures make you feel most loved?",
-      "How consistent are you with small daily expressions of love?"
-    ],
-    practiceBox: [
-      "Do one small act of love for your partner today without being asked.",
-      "Notice the small things your partner does for you and thank them.",
-      "Create a daily love ritual—something small you do consistently."
-    ],
-    category: "Daily Nourishment"
+    category: categoryNames.emotional
   },
   {
     day: 365,
-    title: "A Year of Growth",
-    quote: "Love does not consist in gazing at each other, but in looking outward together in the same direction.",
+    title: { en: "A Year of Growth", es: "Un Año de Crecimiento" },
+    quote: { 
+      en: "Love does not consist in gazing at each other, but in looking outward together in the same direction.", 
+      es: "El amor no consiste en mirarse el uno al otro, sino en mirar juntos en la misma dirección." 
+    },
     author: "Antoine de Saint-Exupéry",
-    devotional: "You've journeyed through 365 days of intentional relationship growth. You've explored emotional intelligence, communication, intimacy, shared goals, personality dynamics, repair, and daily nourishment. But this isn't an ending—it's a foundation. The skills and insights you've gathered are seeds planted. Continue watering them with practice, patience, and presence. Your relationship is a living thing that grows with attention and care.",
+    devotional: { 
+      en: "You've journeyed through 365 days of intentional relationship growth. You've explored emotional intelligence, communication, intimacy, shared goals, personality dynamics, repair, and daily nourishment. But this isn't an ending—it's a foundation. The skills and insights you've gathered are seeds planted. Continue watering them with practice, patience, and presence. Your relationship is a living thing that grows with attention and care.",
+      es: "Has viajado a través de 365 días de crecimiento intencional en tu relación. Has explorado inteligencia emocional, comunicación, intimidad, metas compartidas, dinámicas de personalidad, reparación y nutrición diaria. Pero esto no es un final—es una base. Las habilidades y perspectivas que has reunido son semillas plantadas. Continúa regándolas con práctica, paciencia y presencia. Tu relación es algo vivo que crece con atención y cuidado."
+    },
     reflectionQuestions: [
-      "What was your most significant insight this year?",
-      "How has your relationship grown through this practice?",
-      "What will you carry forward into the next year?"
+      { en: "What was your most significant insight this year?", es: "¿Cuál fue tu perspectiva más significativa este año?" },
+      { en: "How has your relationship grown through this practice?", es: "¿Cómo ha crecido tu relación a través de esta práctica?" },
+      { en: "What will you carry forward into the next year?", es: "¿Qué llevarás contigo al próximo año?" }
     ],
     practiceBox: [
-      "Celebrate completing this journey together.",
-      "Share your three biggest takeaways with your partner.",
-      "Commit to continuing daily practices that served you well."
+      { en: "Celebrate completing this journey together.", es: "Celebren completar este viaje juntos." },
+      { en: "Share your three biggest takeaways with your partner.", es: "Comparte tus tres mayores aprendizajes con tu pareja." },
+      { en: "Commit to continuing daily practices that served you well.", es: "Comprométete a continuar las prácticas diarias que te sirvieron bien." }
     ],
-    category: "Daily Nourishment"
+    category: categoryNames.daily
   }
 ];
 
-// Generate remaining entries programmatically for comprehensive coverage
+// Templates for generating remaining days
+const templates: Record<string, DevotionalEntry[]> = {
+  emotional: [
+    {
+      day: 0,
+      title: { en: "Emotional Awareness", es: "Conciencia Emocional" },
+      quote: { en: "Know thyself.", es: "Conócete a ti mismo." },
+      author: "Socrates",
+      devotional: { 
+        en: "Self-awareness is the foundation of emotional intelligence. Before we can manage our emotions or understand our partner's, we must first become aware of our own inner landscape. Pay attention to what you feel without judgment—simply notice and name.",
+        es: "La autoconciencia es la base de la inteligencia emocional. Antes de poder manejar nuestras emociones o entender las de nuestra pareja, primero debemos ser conscientes de nuestro propio paisaje interior. Presta atención a lo que sientes sin juzgar—simplemente nota y nombra."
+      },
+      reflectionQuestions: [
+        { en: "What emotions did you experience today?", es: "¿Qué emociones experimentaste hoy?" },
+        { en: "What triggered your strongest emotions?", es: "¿Qué desencadenó tus emociones más fuertes?" },
+        { en: "How aware are you of your emotional patterns?", es: "¿Qué tan consciente eres de tus patrones emocionales?" }
+      ],
+      practiceBox: [
+        { en: "Check in with your emotions three times today.", es: "Revisa tus emociones tres veces hoy." },
+        { en: "Name the emotion without judging it.", es: "Nombra la emoción sin juzgarla." },
+        { en: "Notice where you feel emotions in your body.", es: "Nota dónde sientes las emociones en tu cuerpo." }
+      ],
+      category: categoryNames.emotional
+    },
+    {
+      day: 0,
+      title: { en: "Emotional Regulation", es: "Regulación Emocional" },
+      quote: { en: "He who controls others may be powerful, but he who has mastered himself is mightier still.", es: "Quien controla a otros puede ser poderoso, pero quien se ha dominado a sí mismo es aún más poderoso." },
+      author: "Lao Tzu",
+      devotional: { 
+        en: "Emotional regulation isn't suppressing feelings—it's choosing how to express them constructively. When intense emotions arise, we can pause before reacting, creating space for thoughtful response rather than reactive behavior.",
+        es: "La regulación emocional no es suprimir sentimientos—es elegir cómo expresarlos constructivamente. Cuando surgen emociones intensas, podemos pausar antes de reaccionar, creando espacio para una respuesta reflexiva en lugar de un comportamiento reactivo."
+      },
+      reflectionQuestions: [
+        { en: "How do you typically respond to intense emotions?", es: "¿Cómo respondes típicamente a emociones intensas?" },
+        { en: "What helps you regulate when overwhelmed?", es: "¿Qué te ayuda a regularte cuando estás abrumado/a?" },
+        { en: "How does your emotional expression affect your partner?", es: "¿Cómo afecta tu expresión emocional a tu pareja?" }
+      ],
+      practiceBox: [
+        { en: "Practice the pause: count to 10 before responding in anger.", es: "Practica la pausa: cuenta hasta 10 antes de responder con enojo." },
+        { en: "Use deep breathing when emotions intensify.", es: "Usa respiración profunda cuando las emociones se intensifiquen." },
+        { en: "Ask yourself: 'How do I want to handle this?'", es: "Pregúntate: '¿Cómo quiero manejar esto?'" }
+      ],
+      category: categoryNames.emotional
+    },
+    {
+      day: 0,
+      title: { en: "Empathy in Action", es: "Empatía en Acción" },
+      quote: { en: "Empathy is seeing with the eyes of another.", es: "La empatía es ver con los ojos de otro." },
+      author: "Alfred Adler",
+      devotional: { 
+        en: "Empathy requires temporarily setting aside your own perspective to fully inhabit your partner's experience. It's not sympathy but genuine understanding of their inner world. When partners feel truly understood, defensiveness melts and connection deepens.",
+        es: "La empatía requiere dejar de lado temporalmente tu propia perspectiva para habitar completamente la experiencia de tu pareja. No es simpatía sino comprensión genuina de su mundo interior. Cuando las parejas se sienten verdaderamente comprendidas, la defensividad se derrite y la conexión se profundiza."
+      },
+      reflectionQuestions: [
+        { en: "When has someone's empathy profoundly impacted you?", es: "¿Cuándo la empatía de alguien te ha impactado profundamente?" },
+        { en: "What makes it difficult for you to empathize?", es: "¿Qué te dificulta empatizar?" },
+        { en: "How can you show more curiosity about your partner's perspective?", es: "¿Cómo puedes mostrar más curiosidad sobre la perspectiva de tu pareja?" }
+      ],
+      practiceBox: [
+        { en: "Summarize your partner's position before stating your own.", es: "Resume la posición de tu pareja antes de expresar la tuya." },
+        { en: "Ask: 'Help me understand what this feels like for you.'", es: "Pregunta: 'Ayúdame a entender cómo se siente esto para ti.'" },
+        { en: "Practice empathy even when you disagree.", es: "Practica la empatía incluso cuando no estés de acuerdo." }
+      ],
+      category: categoryNames.emotional
+    }
+  ],
+  communication: [
+    {
+      day: 0,
+      title: { en: "Speaking Your Truth Kindly", es: "Hablar Tu Verdad con Amabilidad" },
+      quote: { en: "Honesty without kindness is brutality.", es: "La honestidad sin amabilidad es brutalidad." },
+      author: "Unknown",
+      devotional: { 
+        en: "Truth-telling in relationships requires both courage and compassion. We must speak honestly about our needs, concerns, and feelings—but how we speak matters as much as what we say. Harsh truths delivered without care become weapons. Kind truths, shared with love, become bridges.",
+        es: "Decir la verdad en las relaciones requiere tanto coraje como compasión. Debemos hablar honestamente sobre nuestras necesidades, preocupaciones y sentimientos—pero cómo hablamos importa tanto como lo que decimos. Las verdades duras entregadas sin cuidado se convierten en armas. Las verdades amables, compartidas con amor, se convierten en puentes."
+      },
+      reflectionQuestions: [
+        { en: "Do you tend toward too much honesty or too much kindness?", es: "¿Tiendes hacia demasiada honestidad o demasiada amabilidad?" },
+        { en: "How can you be more honest without being hurtful?", es: "¿Cómo puedes ser más honesto/a sin herir?" },
+        { en: "What truths have you been avoiding speaking?", es: "¿Qué verdades has estado evitando decir?" }
+      ],
+      practiceBox: [
+        { en: "Share one difficult truth today using 'I' statements.", es: "Comparte una verdad difícil hoy usando declaraciones 'Yo'." },
+        { en: "Before speaking hard truths, ask: 'Is this the right time?'", es: "Antes de decir verdades difíciles, pregunta: '¿Es este el momento adecuado?'" },
+        { en: "Lead with appreciation before addressing concerns.", es: "Comienza con apreciación antes de abordar preocupaciones." }
+      ],
+      category: categoryNames.communication
+    }
+  ],
+  intimacy: [
+    {
+      day: 0,
+      title: { en: "The Languages of Touch", es: "Los Lenguajes del Tacto" },
+      quote: { en: "Touch is the first language we learn.", es: "El tacto es el primer lenguaje que aprendemos." },
+      author: "Unknown",
+      devotional: { 
+        en: "Physical touch communicates what words sometimes cannot—comfort, desire, presence, love. But touch is not one-size-fits-all. What feels nurturing to one partner may feel overwhelming to another. Understanding each other's touch preferences allows touch to become a fluent language of love.",
+        es: "El tacto físico comunica lo que las palabras a veces no pueden—consuelo, deseo, presencia, amor. Pero el tacto no es igual para todos. Lo que se siente nutritivo para una pareja puede sentirse abrumador para otra. Entender las preferencias de tacto del otro permite que el tacto se convierta en un lenguaje fluido de amor."
+      },
+      reflectionQuestions: [
+        { en: "What kinds of touch feel most nurturing to you?", es: "¿Qué tipos de tacto se sienten más nutritivos para ti?" },
+        { en: "How do you and your partner differ in touch preferences?", es: "¿Cómo difieren tú y tu pareja en preferencias de tacto?" },
+        { en: "When does touch feel most meaningful to you?", es: "¿Cuándo el tacto se siente más significativo para ti?" }
+      ],
+      practiceBox: [
+        { en: "Ask your partner: 'What kind of touch do you crave right now?'", es: "Pregúntale a tu pareja: '¿Qué tipo de tacto deseas ahora mismo?'" },
+        { en: "Offer non-sexual affection today—a hug or gentle touch.", es: "Ofrece afecto no sexual hoy—un abrazo o toque gentil." },
+        { en: "Notice your partner's response to different types of touch.", es: "Nota la respuesta de tu pareja a diferentes tipos de tacto." }
+      ],
+      category: categoryNames.intimacy
+    }
+  ],
+  goals: [
+    {
+      day: 0,
+      title: { en: "Dreaming Together", es: "Soñar Juntos" },
+      quote: { en: "A dream you dream together is reality.", es: "Un sueño que sueñan juntos es realidad." },
+      author: "John Lennon",
+      devotional: { 
+        en: "Couples who share dreams and goals build a sense of 'we-ness' that transcends individual desires. Shared vision doesn't mean identical goals but creating a future that honors both partners' aspirations. Dreaming together requires vulnerability and the willingness to weave your dreams into a shared tapestry.",
+        es: "Las parejas que comparten sueños y metas construyen un sentido de 'nosotros' que trasciende los deseos individuales. Una visión compartida no significa metas idénticas sino crear un futuro que honre las aspiraciones de ambos. Soñar juntos requiere vulnerabilidad y la voluntad de tejer sus sueños en un tapiz compartido."
+      },
+      reflectionQuestions: [
+        { en: "What dreams do you hold for your relationship's future?", es: "¿Qué sueños tienes para el futuro de tu relación?" },
+        { en: "Do you know your partner's deepest aspirations?", es: "¿Conoces las aspiraciones más profundas de tu pareja?" },
+        { en: "Where do your dreams align, and where do they differ?", es: "¿Dónde se alinean sus sueños y dónde difieren?" }
+      ],
+      practiceBox: [
+        { en: "Schedule a 'dream date' to share your visions.", es: "Programa una 'cita de sueños' para compartir sus visiones." },
+        { en: "Create a shared bucket list of experiences.", es: "Crea una lista de deseos compartida de experiencias." },
+        { en: "Revisit and update your shared dreams annually.", es: "Revisa y actualiza sus sueños compartidos anualmente." }
+      ],
+      category: categoryNames.goals
+    }
+  ],
+  personality: [
+    {
+      day: 0,
+      title: { en: "Understanding Attachment", es: "Entendiendo el Apego" },
+      quote: { en: "We are wounded in relationship, and we can be healed in relationship.", es: "Somos heridos en relación, y podemos ser sanados en relación." },
+      author: "Harville Hendrix",
+      devotional: { 
+        en: "Attachment theory reveals that our earliest relationships create templates for how we connect in adulthood. Secure attachment means trusting your partner will be there. Anxious attachment involves fear of abandonment. Avoidant attachment involves discomfort with closeness. Understanding your styles illuminates many patterns.",
+        es: "La teoría del apego revela que nuestras primeras relaciones crean plantillas para cómo nos conectamos en la adultez. El apego seguro significa confiar en que tu pareja estará ahí. El apego ansioso involucra miedo al abandono. El apego evitativo involucra incomodidad con la cercanía. Entender sus estilos ilumina muchos patrones."
+      },
+      reflectionQuestions: [
+        { en: "What is your attachment style?", es: "¿Cuál es tu estilo de apego?" },
+        { en: "What is your partner's attachment style?", es: "¿Cuál es el estilo de apego de tu pareja?" },
+        { en: "How do your attachment styles interact?", es: "¿Cómo interactúan sus estilos de apego?" }
+      ],
+      practiceBox: [
+        { en: "Research attachment styles together.", es: "Investiguen los estilos de apego juntos." },
+        { en: "Identify one attachment-driven behavior to change.", es: "Identifica un comportamiento impulsado por el apego para cambiar." },
+        { en: "Reassure your partner based on their attachment needs.", es: "Tranquiliza a tu pareja basándote en sus necesidades de apego." }
+      ],
+      category: categoryNames.personality
+    }
+  ],
+  repair: [
+    {
+      day: 0,
+      title: { en: "The Power of Repair", es: "El Poder de la Reparación" },
+      quote: { en: "The quality of your relationships determines the quality of your life.", es: "La calidad de tus relaciones determina la calidad de tu vida." },
+      author: "Esther Perel",
+      devotional: { 
+        en: "No relationship is free of ruptures—moments of disconnection or hurt. What distinguishes thriving relationships isn't the absence of ruptures but the presence of repair. Repair is reconnecting after disconnection, healing what was hurt. Couples who repair quickly build resilience.",
+        es: "Ninguna relación está libre de rupturas—momentos de desconexión o herida. Lo que distingue a las relaciones prósperas no es la ausencia de rupturas sino la presencia de reparación. Reparar es reconectarse después de la desconexión, sanar lo que fue herido. Las parejas que reparan rápidamente construyen resiliencia."
+      },
+      reflectionQuestions: [
+        { en: "How quickly do you typically repair after conflict?", es: "¿Qué tan rápido reparan típicamente después de un conflicto?" },
+        { en: "What makes repair difficult for you?", es: "¿Qué hace que la reparación sea difícil para ti?" },
+        { en: "What does successful repair look like?", es: "¿Cómo se ve una reparación exitosa?" }
+      ],
+      practiceBox: [
+        { en: "After your next conflict, initiate repair within 24 hours.", es: "Después de su próximo conflicto, inicia la reparación dentro de 24 horas." },
+        { en: "Develop a repair ritual—a phrase or gesture.", es: "Desarrolla un ritual de reparación—una frase o gesto." },
+        { en: "Practice accepting repair attempts even when hurt.", es: "Practica aceptar intentos de reparación incluso cuando estés herido/a." }
+      ],
+      category: categoryNames.repair
+    }
+  ],
+  daily: [
+    {
+      day: 0,
+      title: { en: "Small Acts, Big Love", es: "Pequeños Actos, Gran Amor" },
+      quote: { en: "Love is a million little things.", es: "El amor es un millón de pequeñas cosas." },
+      author: "Unknown",
+      devotional: { 
+        en: "Grand gestures get attention, but relationships thrive on small, consistent acts of love. A cup of coffee made without asking. A text just to say 'thinking of you.' These small deposits in the emotional bank account accumulate into profound security and affection over time.",
+        es: "Los grandes gestos llaman la atención, pero las relaciones prosperan con pequeños actos de amor consistentes. Una taza de café hecha sin que te lo pidan. Un mensaje solo para decir 'pensando en ti.' Estos pequeños depósitos en la cuenta bancaria emocional se acumulan en profunda seguridad y afecto con el tiempo."
+      },
+      reflectionQuestions: [
+        { en: "What small acts of love does your partner appreciate?", es: "¿Qué pequeños actos de amor aprecia tu pareja?" },
+        { en: "What small gestures make you feel most loved?", es: "¿Qué pequeños gestos te hacen sentir más amado/a?" },
+        { en: "How consistent are you with daily expressions of love?", es: "¿Qué tan consistente eres con expresiones diarias de amor?" }
+      ],
+      practiceBox: [
+        { en: "Do one small act of love today without being asked.", es: "Haz un pequeño acto de amor hoy sin que te lo pidan." },
+        { en: "Notice small things your partner does and thank them.", es: "Nota las pequeñas cosas que tu pareja hace y agradécele." },
+        { en: "Create a daily love ritual.", es: "Crea un ritual de amor diario." }
+      ],
+      category: categoryNames.daily
+    }
+  ]
+};
+
+// Generate entry for a specific day
 const generateEntry = (day: number): DevotionalEntry => {
-  const category = getCategory(day);
-  const templates = getTemplatesForCategory(category);
-  const templateIndex = (day - 1) % templates.length;
-  const template = templates[templateIndex];
+  const category = day <= 60 ? 'emotional' : 
+                   day <= 120 ? 'communication' : 
+                   day <= 180 ? 'intimacy' : 
+                   day <= 240 ? 'goals' : 
+                   day <= 300 ? 'personality' : 
+                   day <= 330 ? 'repair' : 'daily';
+  
+  const categoryTemplates = templates[category];
+  const templateIndex = (day - 1) % categoryTemplates.length;
+  const template = categoryTemplates[templateIndex];
   
   return {
-    day,
-    title: template.title,
-    quote: template.quote,
-    author: template.author,
-    devotional: template.devotional,
-    reflectionQuestions: template.reflectionQuestions,
-    practiceBox: template.practiceBox,
-    category
+    ...template,
+    day
   };
 };
 
-const getTemplatesForCategory = (category: string) => {
-  const categoryTemplates: Record<string, DevotionalEntry[]> = {
-    'Emotional Intelligence': [
-      {
-        day: 0, title: "Emotional Awareness", quote: "Know thyself.", author: "Socrates",
-        devotional: "Self-awareness is the foundation of emotional intelligence. Before we can manage our emotions or understand our partner's, we must first become aware of our own inner landscape. Pay attention to what you feel without judgment—simply notice and name.",
-        reflectionQuestions: ["What emotions did you experience today?", "What triggered your strongest emotions?", "How aware are you of your emotional patterns?"],
-        practiceBox: ["Check in with your emotions three times today.", "Name the emotion without judging it.", "Notice where you feel emotions in your body."],
-        category: "Emotional Intelligence"
-      },
-      {
-        day: 0, title: "Emotional Regulation", quote: "He who controls others may be powerful, but he who has mastered himself is mightier still.", author: "Lao Tzu",
-        devotional: "Emotional regulation isn't suppressing feelings—it's choosing how to express them constructively. When intense emotions arise, we can pause before reacting, creating space for thoughtful response rather than reactive behavior.",
-        reflectionQuestions: ["How do you typically respond to intense emotions?", "What helps you regulate when overwhelmed?", "How does your emotional expression affect your partner?"],
-        practiceBox: ["Practice the pause: count to 10 before responding in anger.", "Use deep breathing when emotions intensify.", "Ask yourself: 'How do I want to handle this?'"],
-        category: "Emotional Intelligence"
-      },
-      {
-        day: 0, title: "Emotional Expression", quote: "Unexpressed emotions will never die. They are buried alive and will come forth later in uglier ways.", author: "Sigmund Freud",
-        devotional: "Healthy emotional expression means sharing your inner experience in ways your partner can receive. It requires vulnerability, timing, and skill. Stuffing emotions leads to resentment; exploding them creates fear. The middle path is honest, measured expression.",
-        reflectionQuestions: ["How comfortable are you expressing emotions?", "Do you tend to suppress or explode?", "What would healthy expression look like for you?"],
-        practiceBox: ["Express one vulnerable emotion to your partner today.", "Use 'I feel...' statements.", "Share emotions before they build up."],
-        category: "Emotional Intelligence"
-      }
-    ],
-    'Communication Mastery': [
-      {
-        day: 0, title: "Clear Requests", quote: "Ask for what you want and be prepared to get it.", author: "Maya Angelou",
-        devotional: "Vague hints and passive requests often go unmet, leading to frustration. Clear, specific requests give your partner the information they need to respond. State what you want positively ('I'd love if you...') rather than what you don't want ('Stop doing...').",
-        reflectionQuestions: ["How clear are your requests typically?", "Do you hint or ask directly?", "What makes direct requests difficult?"],
-        practiceBox: ["Make one clear, specific request today.", "State what you want, not what you don't want.", "Thank your partner for responding to requests."],
-        category: "Communication Mastery"
-      },
-      {
-        day: 0, title: "Nonverbal Communication", quote: "The most important thing in communication is hearing what isn't said.", author: "Peter Drucker",
-        devotional: "Research suggests over 90% of communication is nonverbal—tone, facial expression, body language, and timing. Your words may say one thing while your body communicates another. Aligning verbal and nonverbal messages creates clear, trustworthy communication.",
-        reflectionQuestions: ["What does your nonverbal communication typically convey?", "Do your words and body language align?", "How attuned are you to your partner's nonverbal cues?"],
-        practiceBox: ["Notice your body language during your next conversation.", "Make eye contact when listening.", "Align your tone with your message."],
-        category: "Communication Mastery"
-      },
-      {
-        day: 0, title: "Active Listening", quote: "Listening is a magnetic and strange thing, a creative force.", author: "Brenda Ueland",
-        devotional: "Active listening means fully concentrating on what's being said rather than passively hearing. It involves reflecting back what you hear, asking clarifying questions, and resisting the urge to formulate your response while your partner is still speaking.",
-        reflectionQuestions: ["What distracts you from fully listening?", "How well do you reflect back what you hear?", "When do you feel most listened to?"],
-        practiceBox: ["Put away devices during important conversations.", "Summarize what you heard before responding.", "Ask 'Did I understand correctly?'"],
-        category: "Communication Mastery"
-      }
-    ],
-    'Intimacy & Affection': [
-      {
-        day: 0, title: "Emotional Intimacy", quote: "Intimacy is the capacity to be rather weird with someone - and finding that that's OK with them.", author: "Alain de Botton",
-        devotional: "Emotional intimacy is the sense of closeness that comes from being truly known and accepted. It develops when we share our inner world—thoughts, feelings, fears, dreams—and are met with acceptance rather than judgment. This kind of knowing takes time and trust.",
-        reflectionQuestions: ["How emotionally intimate do you feel with your partner?", "What parts of yourself do you hide?", "What would deepen your emotional intimacy?"],
-        practiceBox: ["Share something you've never told your partner.", "Ask a deeper question than usual.", "Create space for your partner to share without judgment."],
-        category: "Intimacy & Affection"
-      },
-      {
-        day: 0, title: "Physical Affection", quote: "I have learned that there is more power in a good strong hug than in a thousand meaningful words.", author: "Ann Hood",
-        devotional: "Physical affection releases oxytocin—the bonding hormone—creating feelings of closeness and trust. Regular, non-sexual physical affection maintains connection between more intimate moments. A hug, a kiss, holding hands—these simple touches communicate love throughout the day.",
-        reflectionQuestions: ["How much daily physical affection do you share?", "What types of touch feel most connecting?", "How might you increase daily affection?"],
-        practiceBox: ["Give your partner a 20-second hug today.", "Hold hands during a conversation.", "Offer a kiss of greeting and departure."],
-        category: "Intimacy & Affection"
-      }
-    ],
-    'Shared Goals & Growth': [
-      {
-        day: 0, title: "Growing Together", quote: "In a relationship, when does the art of intimacy begin to feel like work?", author: "Esther Perel",
-        devotional: "Relationships require both stability and growth. We need the security of knowing our partner will be there, and we need the excitement of continuing to grow. Supporting each other's individual growth while growing together creates a dynamic, evolving partnership.",
-        reflectionQuestions: ["How are you growing individually?", "How are you growing together?", "What growth edges are you both navigating?"],
-        practiceBox: ["Share a personal growth goal with your partner.", "Ask how you can support their growth.", "Plan a growth activity to do together."],
-        category: "Shared Goals & Growth"
-      },
-      {
-        day: 0, title: "Shared Values", quote: "Where there is unity there is always victory.", author: "Publilius Syrus",
-        devotional: "Shared values provide the compass for relationship decisions. When partners align on what matters most—family, faith, integrity, adventure, security—they navigate life's choices more smoothly. Misaligned values create ongoing friction and difficult trade-offs.",
-        reflectionQuestions: ["What values do you and your partner share?", "Where do your values differ?", "How do shared values guide your decisions?"],
-        practiceBox: ["Discuss your top 5 values with your partner.", "Identify where values align and differ.", "Make a decision together based on shared values."],
-        category: "Shared Goals & Growth"
-      }
-    ],
-    'Personality & Attachment Styles': [
-      {
-        day: 0, title: "Embracing Differences", quote: "The meeting of two personalities is like the contact of two chemical substances: if there is any reaction, both are transformed.", author: "Carl Jung",
-        devotional: "Your partner's differences aren't flaws to fix but features to understand. Introversion and extroversion, spontaneity and planning, logic and emotion—these differences can complement each other when approached with curiosity rather than criticism.",
-        reflectionQuestions: ["What personality differences exist between you?", "Which differences create friction?", "How might differences become strengths?"],
-        practiceBox: ["List three ways your partner's differences benefit you.", "Appreciate a difference rather than criticizing it.", "Ask your partner how they experience your differences."],
-        category: "Personality & Attachment Styles"
-      },
-      {
-        day: 0, title: "Love Languages", quote: "We must be willing to learn our spouse's primary love language if we are to be effective communicators of love.", author: "Gary Chapman",
-        devotional: "We tend to express love in the language we most want to receive it. But your partner may speak a different love language—words, touch, time, gifts, or acts of service. Learning to speak your partner's language, not just your own, ensures your love is felt.",
-        reflectionQuestions: ["What is your primary love language?", "What is your partner's love language?", "Are you expressing love in their language or yours?"],
-        practiceBox: ["Express love in your partner's primary language today.", "Ask your partner what makes them feel most loved.", "Notice how your partner expresses love to you."],
-        category: "Personality & Attachment Styles"
-      }
-    ],
-    'Repair & Resilience': [
-      {
-        day: 0, title: "The Art of Apology", quote: "An apology is the superglue of life. It can repair just about anything.", author: "Lynn Johnston",
-        devotional: "A genuine apology has components: acknowledging the offense, expressing remorse, making amends, and committing to change. Partial apologies ('I'm sorry you feel that way') fail because they don't accept responsibility. Full apologies heal because they communicate understanding and care.",
-        reflectionQuestions: ["How do you typically apologize?", "What makes an apology meaningful to you?", "Is there an apology you need to give or receive?"],
-        practiceBox: ["Offer a full apology for a recent hurt.", "Avoid 'but' after 'I'm sorry.'", "Ask what your partner needs to feel repaired."],
-        category: "Repair & Resilience"
-      },
-      {
-        day: 0, title: "Forgiveness", quote: "Forgiveness is not an occasional act; it is a permanent attitude.", author: "Martin Luther King Jr.",
-        devotional: "Forgiveness doesn't mean forgetting or excusing harm—it means releasing the grip of resentment on your heart. Holding onto unforgiveness punishes you more than your partner. Forgiveness is a gift you give yourself, freeing you to move forward rather than staying anchored to past hurts.",
-        reflectionQuestions: ["What unforgiveness are you holding?", "What makes forgiveness difficult for you?", "What would it mean to release this burden?"],
-        practiceBox: ["Identify one resentment you're ready to release.", "Practice forgiveness as a process, not a one-time event.", "Separate forgiving from reconciling—you can do one without the other."],
-        category: "Repair & Resilience"
-      }
-    ],
-    'Daily Nourishment': [
-      {
-        day: 0, title: "Daily Connection Rituals", quote: "It's the small things, done consistently, that make the biggest difference.", author: "Unknown",
-        devotional: "Rituals create predictable moments of connection in unpredictable lives. A morning kiss, an evening check-in, a weekly date night—these rituals become anchors that maintain closeness even during busy or stressful seasons. Without intentional rituals, connection becomes accidental.",
-        reflectionQuestions: ["What connection rituals do you currently have?", "What new ritual might benefit your relationship?", "How consistent are you with existing rituals?"],
-        practiceBox: ["Establish one new daily connection ritual.", "Protect existing rituals from schedule encroachment.", "Review and refresh rituals periodically."],
-        category: "Daily Nourishment"
-      },
-      {
-        day: 0, title: "Presence Over Perfection", quote: "The greatest gift you can give someone is your time.", author: "Unknown",
-        devotional: "In a culture obsessed with productivity and perfection, simply being present is revolutionary. Your partner doesn't need you to be perfect—they need you to be there. Presence means putting away distractions and offering your full attention, even in ordinary moments.",
-        reflectionQuestions: ["How present are you typically with your partner?", "What steals your presence most often?", "What would more presence look like?"],
-        practiceBox: ["Spend 15 minutes fully present with your partner today.", "Put away your phone during meals together.", "Make eye contact when your partner speaks."],
-        category: "Daily Nourishment"
-      }
-    ]
-  };
-  
-  return categoryTemplates[category] || categoryTemplates['Daily Nourishment'];
-};
-
-// Build complete 365-day devotional library
+// Get devotional for a specific day
 export const getDevotional = (day: number): DevotionalEntry => {
-  // First check if we have a handwritten entry
   const existing = devotionalEntries.find(d => d.day === day);
   if (existing) return existing;
-  
-  // Otherwise generate one
   return generateEntry(day);
 };
 

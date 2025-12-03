@@ -27,12 +27,16 @@ export const CouplesLibrary = ({ userId, coupleId, partnerUserId, onOpenGames }:
       subtitle: "Your collection of love guides",
       comingSoon: "Coming Soon",
       backToLibrary: "Back to Library",
+      allYearLoveAlt: "All Year Love",
+      couplesDevotionalAlt: "Couples Devotional",
     },
     es: {
       title: "Biblioteca de Pareja",
       subtitle: "Tu colección de guías de amor",
       comingSoon: "Próximamente",
       backToLibrary: "Volver a Biblioteca",
+      allYearLoveAlt: "Amor Todo el Año",
+      couplesDevotionalAlt: "Devocional de Pareja",
     }
   };
 
@@ -97,7 +101,7 @@ export const CouplesLibrary = ({ userId, coupleId, partnerUserId, onOpenGames }:
                 <div className="relative rounded-lg overflow-hidden shadow-2xl shadow-pink-500/20">
                   <img
                     src={allYearLoveBook}
-                    alt="All Year Love"
+                    alt={texts.allYearLoveAlt}
                     className="w-full h-auto object-cover"
                   />
                 </div>
@@ -110,7 +114,7 @@ export const CouplesLibrary = ({ userId, coupleId, partnerUserId, onOpenGames }:
                 <div className="relative rounded-lg overflow-hidden shadow-2xl shadow-amber-500/20">
                   <img
                     src={couplesDevotionalBook}
-                    alt="Couples Devotional"
+                    alt={texts.couplesDevotionalAlt}
                     className="w-full h-auto object-cover"
                   />
                 </div>
