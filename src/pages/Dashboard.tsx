@@ -49,7 +49,7 @@ import { ActiveGiftDisplay } from "@/components/ActiveGiftDisplay";
 import { giftImages } from "@/lib/giftImages";
 import { FirstTimeUserExperience } from "@/components/FirstTimeUserExperience";
 import { OnboardingWalkthrough } from "@/components/OnboardingWalkthrough";
-import { DailyLoveAction } from "@/components/DailyLoveAction";
+import { CouplesLibrary } from "@/components/CouplesLibrary";
 import { FontSelector } from "@/components/FontSelector";
 
 interface CoupleData {
@@ -933,9 +933,9 @@ const Dashboard = () => {
       {/* Visual Effects Overlay */}
       <VisualEffectsRenderer coupleId={coupleData.coupleId} />
 
-      {/* Daily Love Action Section */}
+      {/* Couple's Library Section */}
       <div className="py-4 px-4">
-        <DailyLoveAction 
+        <CouplesLibrary 
           userId={user!.id} 
           partnerUserId={coupleData.partner?.user_id || null}
           onOpenGames={() => setActiveView("games")}
