@@ -505,6 +505,39 @@ export type Database = {
         }
         Relationships: []
       }
+      devotional_progress: {
+        Row: {
+          couple_id: string
+          created_at: string
+          current_day: number
+          id: string
+          last_read_date: string | null
+          started_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          current_day?: number
+          id?: string
+          last_read_date?: string | null
+          started_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          current_day?: number
+          id?: string
+          last_read_date?: string | null
+          started_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       feeling_status: {
         Row: {
           couple_id: string

@@ -3,18 +3,20 @@ import { Button } from '@/components/ui/button';
 import { X, BookOpen } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { DailyLoveActionBook } from '@/components/DailyLoveActionBook';
+import { CouplesDevotional } from '@/components/CouplesDevotional';
 import allYearLoveBook from '@/assets/books/all-year-love.png';
 import couplesDevotionalBook from '@/assets/books/couples-devotional.png';
 
 interface CouplesLibraryProps {
   userId: string;
+  coupleId: string;
   partnerUserId: string | null;
   onOpenGames?: () => void;
 }
 
 type BookView = 'library' | 'daily-love-actions' | 'devotional';
 
-export const CouplesLibrary = ({ userId, partnerUserId, onOpenGames }: CouplesLibraryProps) => {
+export const CouplesLibrary = ({ userId, coupleId, partnerUserId, onOpenGames }: CouplesLibraryProps) => {
   const { language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [currentBook, setCurrentBook] = useState<BookView>('library');
@@ -101,20 +103,18 @@ export const CouplesLibrary = ({ userId, partnerUserId, onOpenGames }: CouplesLi
                 </div>
               </button>
 
-              <div className="relative w-40 opacity-60">
-                <div className="relative rounded-lg overflow-hidden shadow-2xl">
+              <button
+                onClick={() => setCurrentBook('devotional')}
+                className="group relative w-40 transition-transform hover:scale-105 active:scale-95"
+              >
+                <div className="relative rounded-lg overflow-hidden shadow-2xl shadow-amber-500/20">
                   <img
                     src={couplesDevotionalBook}
                     alt="Couples Devotional"
-                    className="w-full h-auto object-cover grayscale"
+                    className="w-full h-auto object-cover"
                   />
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                    <span className="text-white text-xs font-bold bg-black/60 px-3 py-1 rounded-full">
-                      {texts.comingSoon}
-                    </span>
-                  </div>
                 </div>
-              </div>
+              </button>
             </div>
 
             <div className="mt-6 h-2 bg-gradient-to-r from-transparent via-amber-900/50 to-transparent rounded-full" />
@@ -126,6 +126,13 @@ export const CouplesLibrary = ({ userId, partnerUserId, onOpenGames }: CouplesLi
             userId={userId}
             partnerUserId={partnerUserId}
             onOpenGames={onOpenGames}
+          />
+        )}
+
+        {currentBook === 'devotional' && (
+          <CouplesDevotional
+            userId={userId}
+            coupleId={coupleId}
           />
         )}
       </div>
