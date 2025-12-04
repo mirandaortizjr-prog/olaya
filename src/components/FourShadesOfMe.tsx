@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { temperamentQuiz, scoreTemperamentQuiz, temperamentInfo, TemperamentProfile } from '@/lib/fourShadesQuizData';
 import { temperamentChapters } from '@/lib/fourShadesChaptersData';
-import { ChevronLeft, ChevronRight, Copy, BookOpen } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Copy, BookOpen, User, Users } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface FourShadesOfMeProps {
   userId: string;
@@ -13,6 +14,15 @@ interface FourShadesOfMeProps {
 
 type View = 'home' | 'quiz' | 'results' | 'chapters' | 'chapter-detail';
 
+interface StoredProfile {
+  dominant_temperament: string;
+  secondary_temperament: string;
+  tertiary_temperament: string;
+  rare_temperament: string;
+  scores: any;
+  user_id: string;
+}
+
 export const FourShadesOfMe = ({ userId, coupleId }: FourShadesOfMeProps) => {
   const { language } = useLanguage();
   const lang = language as 'en' | 'es';
@@ -20,18 +30,17 @@ export const FourShadesOfMe = ({ userId, coupleId }: FourShadesOfMeProps) => {
   const [view, setView] = useState<View>('home');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<('sanguine' | 'choleric' | 'melancholic' | 'phlegmatic')[]>([]);
-  const [profile, setProfile] = useState<TemperamentProfile | null>(() => {
-    const saved = localStorage.getItem(`four-shades-profile-${userId}`);
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [profile, setProfile] = useState<TemperamentProfile | null>(null);
+  const [partnerProfile, setPartnerProfile] = useState<TemperamentProfile | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
 
   const t = {
     en: {
       title: "Four Shades of Me",
       subtitle: "Discover your temperament blend",
       takeQuiz: "Take the Quiz",
-      viewResults: "View My Results",
+      viewResults: "View Results",
       readChapters: "Read Chapters",
       quizTitle: "The Four Shades of Me Quiz",
       question: "Question",
@@ -40,6 +49,7 @@ export const FourShadesOfMe = ({ userId, coupleId }: FourShadesOfMeProps) => {
       back: "Back",
       seeResults: "See Results",
       yourProfile: "Your Temperament Profile",
+      partnerProfile: "Partner's Temperament Profile",
       dominant: "Dominant",
       secondary: "Secondary",
       tertiary: "Tertiary",
@@ -53,13 +63,15 @@ export const FourShadesOfMe = ({ userId, coupleId }: FourShadesOfMeProps) => {
       practicalImplications: "Practical Implications",
       closingCharge: "Closing Charge",
       reflectionQuestions: "Reflection Questions",
-      practiceBox: "Practice Box"
+      practiceBox: "Practice Box",
+      partnerNotCompleted: "Your partner hasn't completed the quiz yet",
+      loading: "Loading..."
     },
     es: {
       title: "Cuatro Tonos de Mí",
       subtitle: "Descubre tu mezcla de temperamento",
       takeQuiz: "Tomar el Quiz",
-      viewResults: "Ver Mis Resultados",
+      viewResults: "Ver Resultados",
       readChapters: "Leer Capítulos",
       quizTitle: "El Quiz de Cuatro Tonos de Mí",
       question: "Pregunta",
@@ -68,6 +80,7 @@ export const FourShadesOfMe = ({ userId, coupleId }: FourShadesOfMeProps) => {
       back: "Atrás",
       seeResults: "Ver Resultados",
       yourProfile: "Tu Perfil de Temperamento",
+      partnerProfile: "Perfil de Temperamento de tu Pareja",
       dominant: "Dominante",
       secondary: "Secundario",
       tertiary: "Terciario",
@@ -81,13 +94,103 @@ export const FourShadesOfMe = ({ userId, coupleId }: FourShadesOfMeProps) => {
       practicalImplications: "Implicaciones Prácticas",
       closingCharge: "Llamado Final",
       reflectionQuestions: "Preguntas de Reflexión",
-      practiceBox: "Caja de Práctica"
+      practiceBox: "Caja de Práctica",
+      partnerNotCompleted: "Tu pareja aún no ha completado el quiz",
+      loading: "Cargando..."
     }
   };
 
   const texts = t[lang] || t.en;
 
-  const handleAnswer = (temperament: 'sanguine' | 'choleric' | 'melancholic' | 'phlegmatic') => {
+  useEffect(() => {
+    fetchProfiles();
+  }, [userId, coupleId]);
+
+  const fetchProfiles = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('temperament_profiles')
+        .select('*')
+        .eq('couple_id', coupleId);
+
+      if (error) throw error;
+
+      if (data) {
+        const userProfile = data.find((p: StoredProfile) => p.user_id === userId);
+        const partner = data.find((p: StoredProfile) => p.user_id !== userId);
+
+        if (userProfile) {
+          setProfile({
+            dominant: userProfile.dominant_temperament,
+            secondary: userProfile.secondary_temperament,
+            tertiary: userProfile.tertiary_temperament,
+            rare: userProfile.rare_temperament,
+            scores: userProfile.scores as any
+          });
+        }
+
+        if (partner) {
+          setPartnerProfile({
+            dominant: partner.dominant_temperament,
+            secondary: partner.secondary_temperament,
+            tertiary: partner.tertiary_temperament,
+            rare: partner.rare_temperament,
+            scores: partner.scores as any
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching temperament profiles:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveProfile = async (result: TemperamentProfile) => {
+    try {
+      // Check if profile exists
+      const { data: existing } = await supabase
+        .from('temperament_profiles')
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (existing) {
+        // Update existing
+        const { error } = await supabase
+          .from('temperament_profiles')
+          .update({
+            dominant_temperament: result.dominant,
+            secondary_temperament: result.secondary,
+            tertiary_temperament: result.tertiary,
+            rare_temperament: result.rare,
+            scores: result.scores as any,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', userId);
+        if (error) throw error;
+      } else {
+        // Insert new
+        const { error } = await supabase
+          .from('temperament_profiles')
+          .insert({
+            user_id: userId,
+            couple_id: coupleId,
+            dominant_temperament: result.dominant,
+            secondary_temperament: result.secondary,
+            tertiary_temperament: result.tertiary,
+            rare_temperament: result.rare,
+            scores: result.scores as any
+          });
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error('Error saving temperament profile:', error);
+    }
+  };
+
+  const handleAnswer = async (temperament: 'sanguine' | 'choleric' | 'melancholic' | 'phlegmatic') => {
     const newAnswers = [...answers, temperament];
     setAnswers(newAnswers);
     
@@ -96,7 +199,7 @@ export const FourShadesOfMe = ({ userId, coupleId }: FourShadesOfMeProps) => {
     } else {
       const result = scoreTemperamentQuiz(newAnswers);
       setProfile(result);
-      localStorage.setItem(`four-shades-profile-${userId}`, JSON.stringify(result));
+      await saveProfile(result);
       setView('results');
     }
   };
@@ -122,6 +225,14 @@ export const FourShadesOfMe = ({ userId, coupleId }: FourShadesOfMeProps) => {
     return colors[temp] || 'bg-gray-500';
   };
 
+  if (loading) {
+    return (
+      <div className="px-6 py-8 flex items-center justify-center">
+        <p className="text-white/60">{texts.loading}</p>
+      </div>
+    );
+  }
+
   // Home View
   if (view === 'home') {
     return (
@@ -139,6 +250,7 @@ export const FourShadesOfMe = ({ userId, coupleId }: FourShadesOfMeProps) => {
           {profile && (
             <>
               <Button onClick={() => setView('results')} variant="outline" className="w-full border-white/20 text-white">
+                <Users className="w-4 h-4 mr-2" />
                 {texts.viewResults}
               </Button>
               <Button onClick={() => setView('chapters')} variant="outline" className="w-full border-white/20 text-white">
@@ -198,24 +310,44 @@ export const FourShadesOfMe = ({ userId, coupleId }: FourShadesOfMeProps) => {
   // Results View
   if (view === 'results' && profile) {
     const ranks = [texts.dominant, texts.secondary, texts.tertiary, texts.rare];
-    return (
-      <div className="px-6 py-8">
-        <h2 className="text-xl font-bold text-white text-center mb-6">{texts.yourProfile}</h2>
-        
-        <div className="space-y-4">
-          {profile.scores.map((score, idx) => {
-            const info = temperamentInfo[score.temperament];
+    
+    const renderProfile = (profileData: TemperamentProfile, title: string, icon: React.ReactNode) => (
+      <div className="mb-8">
+        <div className="flex items-center gap-2 mb-4">
+          {icon}
+          <h3 className="text-lg font-semibold text-white">{title}</h3>
+        </div>
+        <div className="space-y-3">
+          {profileData.scores.map((score: any, idx: number) => {
+            const info = temperamentInfo[score.temperament as keyof typeof temperamentInfo];
             return (
-              <div key={score.temperament} className="bg-white/5 rounded-lg p-4">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className={`w-4 h-4 rounded-full ${getTemperamentColor(score.temperament)}`} />
-                  <span className="text-white font-semibold">{ranks[idx]}: {info.role[lang]}</span>
+              <div key={score.temperament} className="bg-white/5 rounded-lg p-3">
+                <div className="flex items-center gap-3 mb-1">
+                  <div className={`w-3 h-3 rounded-full ${getTemperamentColor(score.temperament)}`} />
+                  <span className="text-white font-medium text-sm">{ranks[idx]}: {info.role[lang]}</span>
                 </div>
-                <p className="text-white/70 text-sm">{info.summary[lang]}</p>
+                <p className="text-white/60 text-xs ml-6">{info.summary[lang]}</p>
               </div>
             );
           })}
         </div>
+      </div>
+    );
+
+    return (
+      <div className="px-6 py-8">
+        <h2 className="text-xl font-bold text-white text-center mb-6">{texts.viewResults}</h2>
+        
+        {renderProfile(profile, texts.yourProfile, <User className="w-5 h-5 text-pink-400" />)}
+        
+        {partnerProfile ? (
+          renderProfile(partnerProfile, texts.partnerProfile, <Users className="w-5 h-5 text-purple-400" />)
+        ) : (
+          <div className="bg-white/5 rounded-lg p-4 mb-6 text-center">
+            <Users className="w-8 h-8 text-white/40 mx-auto mb-2" />
+            <p className="text-white/60 text-sm">{texts.partnerNotCompleted}</p>
+          </div>
+        )}
         
         <div className="flex gap-3 mt-6">
           <Button onClick={resetQuiz} variant="outline" className="flex-1 border-white/20 text-white">
