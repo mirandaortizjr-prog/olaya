@@ -59,6 +59,7 @@ export const FourShadesOfMe = ({ userId, coupleId }: FourShadesOfMeProps) => {
       copySuccess: "Content copied!",
       scriptureAnchor: "Scripture Anchor",
       exposition: "Exposition",
+      unlockPartner: "Complete the quiz to unlock your partner's results",
       realityCheck: "Reality Check",
       practicalImplications: "Practical Implications",
       closingCharge: "Closing Charge",
@@ -90,6 +91,7 @@ export const FourShadesOfMe = ({ userId, coupleId }: FourShadesOfMeProps) => {
       copySuccess: "¡Contenido copiado!",
       scriptureAnchor: "Ancla de Escritura",
       exposition: "Exposición",
+      unlockPartner: "Completa el quiz para desbloquear los resultados de tu pareja",
       realityCheck: "Verificación de Realidad",
       practicalImplications: "Implicaciones Prácticas",
       closingCharge: "Llamado Final",
@@ -246,6 +248,13 @@ export const FourShadesOfMe = ({ userId, coupleId }: FourShadesOfMeProps) => {
           <Button onClick={() => setView('quiz')} className="w-full bg-gradient-to-r from-yellow-500 via-red-500 to-blue-500">
             {profile ? texts.retakeQuiz : texts.takeQuiz}
           </Button>
+          
+          {!profile && partnerProfile && (
+            <div className="bg-white/5 rounded-lg p-4 text-center border border-white/10">
+              <Users className="w-8 h-8 text-white/40 mx-auto mb-2" />
+              <p className="text-white/60 text-sm">{texts.unlockPartner}</p>
+            </div>
+          )}
           
           {profile && (
             <>
