@@ -5,9 +5,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { DailyLoveActionBook } from '@/components/DailyLoveActionBook';
 import { CouplesDevotional } from '@/components/CouplesDevotional';
 import { SayingIDoDevotional } from '@/components/SayingIDoDevotional';
+import { FourShadesOfMe } from '@/components/FourShadesOfMe';
 import allYearLoveBook from '@/assets/books/all-year-love.png';
 import couplesDevotionalBook from '@/assets/books/couples-devotional.png';
 import sayingIDoBook from '@/assets/books/saying-i-do.png';
+import fourShadesBook from '@/assets/books/four-shades-of-me.png';
 
 interface CouplesLibraryProps {
   userId: string;
@@ -16,7 +18,7 @@ interface CouplesLibraryProps {
   onOpenGames?: () => void;
 }
 
-type BookView = 'library' | 'daily-love-actions' | 'devotional' | 'saying-i-do';
+type BookView = 'library' | 'daily-love-actions' | 'devotional' | 'saying-i-do' | 'four-shades';
 
 export const CouplesLibrary = ({ userId, coupleId, partnerUserId, onOpenGames }: CouplesLibraryProps) => {
   const { language } = useLanguage();
@@ -32,6 +34,7 @@ export const CouplesLibrary = ({ userId, coupleId, partnerUserId, onOpenGames }:
       allYearLoveAlt: "All Year Love",
       couplesDevotionalAlt: "Couples Devotional",
       sayingIDoAlt: "Saying I Do",
+      fourShadesAlt: "Four Shades of Me",
     },
     es: {
       title: "Biblioteca de Pareja",
@@ -41,6 +44,7 @@ export const CouplesLibrary = ({ userId, coupleId, partnerUserId, onOpenGames }:
       allYearLoveAlt: "Amor Todo el Año",
       couplesDevotionalAlt: "Devocional de Pareja",
       sayingIDoAlt: "Diciendo Sí Acepto",
+      fourShadesAlt: "Cuatro Tonos de Mí",
     }
   };
 
@@ -136,6 +140,19 @@ export const CouplesLibrary = ({ userId, coupleId, partnerUserId, onOpenGames }:
                   />
                 </div>
               </button>
+
+              <button
+                onClick={() => setCurrentBook('four-shades')}
+                className="group relative w-40 transition-transform hover:scale-105 active:scale-95"
+              >
+                <div className="relative rounded-lg overflow-hidden shadow-2xl shadow-green-500/20">
+                  <img
+                    src={fourShadesBook}
+                    alt={texts.fourShadesAlt}
+                    className="w-full h-auto object-cover"
+                  />
+                </div>
+              </button>
             </div>
 
             <div className="mt-6 h-2 bg-gradient-to-r from-transparent via-pink-900/50 to-transparent rounded-full" />
@@ -159,6 +176,13 @@ export const CouplesLibrary = ({ userId, coupleId, partnerUserId, onOpenGames }:
 
         {currentBook === 'saying-i-do' && (
           <SayingIDoDevotional
+            userId={userId}
+            coupleId={coupleId}
+          />
+        )}
+
+        {currentBook === 'four-shades' && (
+          <FourShadesOfMe
             userId={userId}
             coupleId={coupleId}
           />
