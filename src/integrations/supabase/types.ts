@@ -1775,6 +1775,45 @@ export type Database = {
         }
         Relationships: []
       }
+      temperament_profiles: {
+        Row: {
+          couple_id: string
+          created_at: string
+          dominant_temperament: string
+          id: string
+          rare_temperament: string
+          scores: Json
+          secondary_temperament: string
+          tertiary_temperament: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          couple_id: string
+          created_at?: string
+          dominant_temperament: string
+          id?: string
+          rare_temperament: string
+          scores: Json
+          secondary_temperament: string
+          tertiary_temperament: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          couple_id?: string
+          created_at?: string
+          dominant_temperament?: string
+          id?: string
+          rare_temperament?: string
+          scores?: Json
+          secondary_temperament?: string
+          tertiary_temperament?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       truth_answers: {
         Row: {
           answer: string
