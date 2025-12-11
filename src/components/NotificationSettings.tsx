@@ -10,17 +10,29 @@ import despia from "despia-native";
 
 // Check if running in Despia native app
 const isDespiaNative = () => {
-  return typeof navigator !== 'undefined' && 
-         navigator.userAgent.toLowerCase().includes('despia');
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent.toLowerCase();
+  return ua.includes('despia');
+};
+
+// Check if OneSignal player ID is available
+const getOneSignalPlayerId = (): string | null => {
+  try {
+    return despia.onesignalplayerid || null;
+  } catch {
+    return null;
+  }
 };
 
 export const NotificationSettings = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [anniversaryDate, setAnniversaryDate] = useState<Date | undefined>();
+  const [isNative, setIsNative] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
+    setIsNative(isDespiaNative());
     loadAnniversaryDate();
     checkNotificationStatus();
   }, []);
@@ -87,7 +99,8 @@ export const NotificationSettings = () => {
 
       if (isDespiaNative()) {
         // Use OneSignal via Despia native
-        const playerIdFromDespia = despia.onesignalplayerid;
+        const playerIdFromDespia = getOneSignalPlayerId();
+        console.log('Despia native detected, OneSignal Player ID:', playerIdFromDespia);
         
         if (playerIdFromDespia) {
           const { data: { user } } = await supabase.auth.getUser();
@@ -106,21 +119,39 @@ export const NotificationSettings = () => {
             }
           }
         } else {
-          console.log('OneSignal Player ID not available from Despia');
+          console.log('OneSignal Player ID not available from Despia yet');
           toast({
             title: "Notifications Not Available",
-            description: "Please ensure notifications are enabled in your device settings for this app.",
+            description: "Please ensure notifications are enabled in your device settings for this app, then try again.",
             variant: "destructive",
           });
           setLoading(false);
           return;
         }
       } else {
-        // Web push - simplified
-        if ('Notification' in window && Notification.permission !== 'denied') {
-          const permission = await Notification.requestPermission();
-          success = permission === 'granted';
+        // Web push - check permission status first
+        if (!('Notification' in window)) {
+          toast({
+            title: "Notifications Not Supported",
+            description: "Push notifications are only available in the native app.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
         }
+        
+        if (Notification.permission === 'denied') {
+          toast({
+            title: "Notifications Blocked",
+            description: "Please allow notifications in your browser settings, then refresh the page.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+        
+        const permission = await Notification.requestPermission();
+        success = permission === 'granted';
       }
 
       if (success) {
@@ -129,10 +160,10 @@ export const NotificationSettings = () => {
           title: "Notifications Enabled",
           description: "You'll now receive push notifications!",
         });
-      } else {
+      } else if (!isDespiaNative()) {
         toast({
-          title: "Unable to Enable Notifications",
-          description: "Please check your device settings and allow notifications for this app.",
+          title: "Notifications Not Granted",
+          description: "You declined the notification permission. Enable it in browser settings to receive notifications.",
           variant: "destructive",
         });
       }
@@ -177,9 +208,14 @@ export const NotificationSettings = () => {
             You're all set to receive notifications from Olaya!
           </p>
         )}
-        {!notificationsEnabled && isDespiaNative() && (
+        {!notificationsEnabled && isNative && (
           <p className="text-xs text-muted-foreground mt-2">
             Make sure notifications are enabled in your device settings for this app.
+          </p>
+        )}
+        {!notificationsEnabled && !isNative && (
+          <p className="text-xs text-muted-foreground mt-2">
+            Push notifications work best in the native app.
           </p>
         )}
       </div>
