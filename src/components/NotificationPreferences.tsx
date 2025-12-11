@@ -60,12 +60,16 @@ export const NotificationPreferences = () => {
       const newPreferences = { ...preferences, [key]: value };
       setPreferences(newPreferences);
 
+      // Use upsert with onConflict to handle the unique constraint
       const { error } = await supabase
         .from('notification_preferences')
-        .upsert({
-          user_id: user.id,
-          ...newPreferences,
-        });
+        .upsert(
+          {
+            user_id: user.id,
+            ...newPreferences,
+          },
+          { onConflict: 'user_id' }
+        );
 
       if (error) throw error;
 

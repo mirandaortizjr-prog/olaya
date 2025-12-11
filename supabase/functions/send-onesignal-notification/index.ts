@@ -24,15 +24,10 @@ serve(async (req) => {
     
     console.log('Sending OneSignal notification:', { userId, title, message });
 
-    // Initialize Supabase client
+    // Initialize Supabase client with service role to bypass RLS
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
     // Get user's OneSignal Player ID from profiles table
