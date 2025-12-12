@@ -3,6 +3,22 @@ import { CapacitorPurchases } from '@capgo/capacitor-purchases';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
+ * Check if running in Despia native app
+ */
+const isDespiaNative = (): boolean => {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent.toLowerCase();
+  return ua.includes('despia');
+};
+
+/**
+ * Check if on native platform (Capacitor or Despia)
+ */
+const isNativePlatform = (): boolean => {
+  return Capacitor.isNativePlatform() || isDespiaNative();
+};
+
+/**
  * In-App Purchase Product IDs
  * These must match your Google Play Console product IDs
  */
@@ -37,7 +53,7 @@ export interface PurchaseResult {
  * Call this once when the app starts
  */
 export const initializeIAP = async (): Promise<boolean> => {
-  if (!Capacitor.isNativePlatform()) {
+  if (!isNativePlatform()) {
     console.log('IAP: Not on native platform, skipping initialization');
     return false;
   }
@@ -60,7 +76,7 @@ export const initializeIAP = async (): Promise<boolean> => {
  * Note: This is a simplified version. You'll need to configure products in RevenueCat
  */
 export const getProducts = async (productIds: string[]): Promise<Product[]> => {
-  if (!Capacitor.isNativePlatform()) {
+  if (!isNativePlatform()) {
     console.log('IAP: Not on native platform, returning mock products');
     // Return mock products for web preview
     return [
@@ -112,7 +128,7 @@ export const purchaseProduct = async (
   productId: string,
   userId: string
 ): Promise<PurchaseResult> => {
-  if (!Capacitor.isNativePlatform()) {
+  if (!isNativePlatform()) {
     console.log('IAP: Not on native platform, simulating purchase');
     return {
       success: false,
@@ -187,7 +203,7 @@ export const purchaseProduct = async (
  * Restore previous purchases
  */
 export const restorePurchases = async (userId: string): Promise<boolean> => {
-  if (!Capacitor.isNativePlatform()) {
+  if (!isNativePlatform()) {
     return false;
   }
 
