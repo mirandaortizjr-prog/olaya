@@ -25,7 +25,6 @@ Purchase coin packages to send gifts, unlock effects, and surprise your partner:
 Each coin strengthens your connection 💝. 
 
 
-
 🚀 How it works
 1. Download the app from Google Play.
 2. Activate your Premium subscription or purchase coins.
@@ -66,7 +65,6 @@ Compra paquetes de monedas para enviar regalos, desbloquear efectos y sorprender
 - 1000 monedas → $9.99  
 
 Cada moneda fortalece tu conexión 💝.
-
 
 
  🚀 Cómo funciona
