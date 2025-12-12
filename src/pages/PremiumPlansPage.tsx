@@ -71,35 +71,26 @@ const PremiumPlansPage = () => {
     }
   };
 
-  const handleSelectPlan = async (plan: PlanType) => {
+  const handleSelectPlan = (plan: PlanType) => {
     setSelectedPlan(plan);
     setIsLoading(true);
 
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      if (plan === 'premium' || plan === 'trial') {
-        toast({
-          title: plan === 'trial' ? '3-Day Free Trial Selected' : 'Premium Plan Selected',
-          description: 'Please sign up or log in to continue',
-        });
-        
-        const creatorMode = new URLSearchParams(window.location.search).get('creator');
-        setTimeout(() => {
-          navigate(creatorMode === 'true' ? '/auth?creator=true' : '/auth');
-        }, 1500);
-      }
-    } catch (error) {
-      console.error('Error:', error);
+    // For unauthenticated users, direct them to auth page with plan info
+    if (plan === 'premium' || plan === 'trial') {
       toast({
-        title: 'Error',
-        description: 'Failed to process plan selection',
-        variant: 'destructive',
+        title: plan === 'trial' ? '3-Day Free Trial Selected' : 'Premium Plan Selected',
+        description: 'Please sign up or log in to continue',
       });
-    } finally {
-      setIsLoading(false);
+      
+      const creatorMode = new URLSearchParams(window.location.search).get('creator');
+      const planParam = `plan=${plan}`;
+      setTimeout(() => {
+        const baseUrl = creatorMode === 'true' ? '/auth?creator=true' : '/auth';
+        navigate(baseUrl + (baseUrl.includes('?') ? '&' : '?') + planParam);
+      }, 1000);
     }
+    
+    setIsLoading(false);
   };
 
   return (
