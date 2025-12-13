@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon-v3.png" type="image/png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon-v3.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+    
+    <!-- Google Fonts for customization -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Cinzel:wght@400;500;600;700&family=Crimson+Text:wght@400;600;700&family=Satisfy&family=Pacifico&display=swap" rel="stylesheet">
+    <meta name="application-name" content="Olaya Together">
+    <meta name="apple-mobile-web-app-title" content="Olaya Together">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+    <style>
+      body { margin: 0; background-color: #000000; }
+      #root { background-color: #000000; min-height: 100vh; }
+      /* Hide any default loading indicators */
+      body::before, body::after, html::before, html::after { display: none !important; }
+      /* Hide progress bars and loading lines */
+      [role="progressbar"], .nprogress, progress { display: none !important; }
+      
+      /* Minimal instant splash - removed to prevent flash */
+      #initial-splash {
+        display: none;
+      }
+    </style>
+    <title>Olaya Together - Your Sacred Space for Connection</title>
+    <meta name="description" content="A private sanctuary for couples to deepen intimacy, share love notes, and celebrate your journey together" />
+    <meta name="author" content="OLAYA" />
+
+    <meta property="og:title" content="OLAYA - Your Sacred Space for Connection" />
+    <meta property="og:description" content="A private sanctuary for couples to deepen intimacy, share love notes, and celebrate your journey together" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@lovable_dev" />
+    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
