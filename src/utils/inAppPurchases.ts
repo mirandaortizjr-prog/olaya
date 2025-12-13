@@ -52,10 +52,8 @@ export interface PurchaseResult {
  * Initialize the In-App Purchase system
  * Call this once when the app starts
  */
-// RevenueCat API Key - Get this from your RevenueCat dashboard
-// For Google Play: Use the Google Play API key from RevenueCat
-// IMPORTANT: Replace this with your actual RevenueCat API key
-const REVENUECAT_API_KEY = 'goog_YOUR_REVENUECAT_API_KEY';
+// RevenueCat API Key for Google Play
+const REVENUECAT_API_KEY = 'goog_rYbvQkPzbcuUhHbrjETdTDRytRo';
 
 export const initializeIAP = async (userId?: string): Promise<boolean> => {
   if (!isNativePlatform()) {
