@@ -23,10 +23,13 @@ export const useInAppPurchase = (userId: string) => {
   // Initialize IAP on mount
   useEffect(() => {
     const init = async () => {
-      const success = await initializeIAP();
+      if (!userId) return;
+      
+      // Initialize with user ID for RevenueCat user identification
+      const success = await initializeIAP(userId);
       setIsInitialized(success);
       
-      if (success && userId) {
+      if (success) {
         // Load products
         const allProducts = await getProducts([
           PRODUCT_IDS.PREMIUM_MONTHLY,
