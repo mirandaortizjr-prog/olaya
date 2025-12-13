@@ -52,18 +52,29 @@ export interface PurchaseResult {
  * Initialize the In-App Purchase system
  * Call this once when the app starts
  */
-export const initializeIAP = async (): Promise<boolean> => {
+// RevenueCat API Key - Get this from your RevenueCat dashboard
+// For Google Play: Use the Google Play API key from RevenueCat
+// IMPORTANT: Replace this with your actual RevenueCat API key
+const REVENUECAT_API_KEY = 'goog_YOUR_REVENUECAT_API_KEY';
+
+export const initializeIAP = async (userId?: string): Promise<boolean> => {
   if (!isNativePlatform()) {
     console.log('IAP: Not on native platform, skipping initialization');
     return false;
   }
 
   try {
-    // Configure the purchases plugin with your RevenueCat API key
-    // You'll need to set this up at: https://app.revenuecat.com/
+    // Enable debug logs
     await CapacitorPurchases.setDebugLogsEnabled({ enabled: true });
     
-    console.log('IAP: Initialized successfully');
+    // Setup RevenueCat with your API key
+    await CapacitorPurchases.setup({
+      apiKey: REVENUECAT_API_KEY,
+      appUserID: userId, // Link purchases to this user
+      observerMode: false, // Set to true if you have your own IAP implementation
+    });
+    
+    console.log('IAP: Initialized successfully with RevenueCat');
     return true;
   } catch (error) {
     console.error('IAP: Initialization failed:', error);
